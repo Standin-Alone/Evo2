@@ -15,7 +15,7 @@ use App\Http\Controllers\LoginController;
 */
 
 
-Route::get('/vmp', [LoginController::class, 'login'])->name('user.login');
+Route::get('/', [LoginController::class, 'login'])->name('user.login');
 
 // Supplier Registration Route
 Route::group([],function(){
