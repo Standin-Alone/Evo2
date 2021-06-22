@@ -14,7 +14,7 @@ class SupplierRegistrationController extends Controller
     public function index()
     {
         //\
-        return view('supplier_registration/index');
+        return view('pages/supplier_registration/index');
     }
 
     /**
