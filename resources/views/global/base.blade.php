@@ -181,10 +181,10 @@ header('Content-Type: text/html');?>
 				</ul>
 				<!-- end sidebar user -->				
 
-				@if(session('role') == 'admin')
-					@include('sidebar.admin')
+				@if(session('role') == 'supplier')
+					@include('sidebar.supplier')
 				@else
-					@include('sidebar.rfo')
+					@include('sidebar.amas')
 				@endif
 
 				
