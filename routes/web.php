@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,7 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Route::get('/','Controller@login');
+Route::get('/vmp', [LoginController::class, 'login'])->name('user.login');
 
 // Supplier Registration Route
 Route::group([],function(){
