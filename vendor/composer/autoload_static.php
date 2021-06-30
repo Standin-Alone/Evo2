@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit338db484c869996337d963cbd9ef3e95
+class ComposerStaticInit9409fa090047f1bce422783d40bff223
 {
     public static $files = array (
         'ec07570ca5a812141189b1fa81503674' => __DIR__ . '/..' . '/phpunit/phpunit/src/Framework/Assert/Functions.php',
@@ -36,6 +36,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         'b6b991a57620e2fb6b2f66f03fe9ddc2' => __DIR__ . '/..' . '/symfony/string/Resources/functions.php',
         'ed962a97bd972bc82007176b647d4e36' => __DIR__ . '/..' . '/facade/ignition/src/helpers.php',
+        '0b47d6d4a00ca9112ba3953b49e7c9a4' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/helper.php',
     );
 
     public static $prefixLengthsPsr4 = array (
@@ -46,6 +47,10 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'p' => 
         array (
             'phpDocumentor\\Reflection\\' => 25,
+        ),
+        'Y' => 
+        array (
+            'Yajra\\DataTables\\' => 17,
         ),
         'W' => 
         array (
@@ -171,6 +176,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'A' => 
         array (
             'Asm89\\Stack\\' => 12,
+            'ArtemSchander\\L5Modular\\' => 24,
             'App\\' => 4,
         ),
     );
@@ -185,6 +191,10 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
             0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
             1 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
             2 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+        ),
+        'Yajra\\DataTables\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src',
         ),
         'Whoops\\' => 
         array (
@@ -483,6 +493,10 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         array (
             0 => __DIR__ . '/..' . '/asm89/stack-cors/src',
         ),
+        'ArtemSchander\\L5Modular\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/artem-schander/l5-modular/src',
+        ),
         'App\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app',
@@ -502,6 +516,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
     public static $classMap = array (
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
+        'App\\Http\\Controllers\\AccessController' => __DIR__ . '/../..' . '/app/Http/Controllers/AccessController.php',
         'App\\Http\\Controllers\\Controller' => __DIR__ . '/../..' . '/app/Http/Controllers/Controller.php',
         'App\\Http\\Kernel' => __DIR__ . '/../..' . '/app/Http/Kernel.php',
         'App\\Http\\Middleware\\Authenticate' => __DIR__ . '/../..' . '/app/Http/Middleware/Authenticate.php',
@@ -513,11 +528,42 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
+        'App\\Modules\\RolesAndPermissions\\Http\\Controllers\\RolesAndPermissionsController' => __DIR__ . '/../..' . '/app/Modules/RolesAndPermissions/Http/Controllers/RolesAndPermissionsController.php',
+        'App\\Modules\\RolesAndPermissions\\Models\\RolesAndPermissions' => __DIR__ . '/../..' . '/app/Modules/RolesAndPermissions/Models/RolesAndPermissions.php',
+        'App\\Modules\\SupplierRegistration\\Http\\Controllers\\SupplierRegistrationController' => __DIR__ . '/../..' . '/app/Modules/SupplierRegistration/Http/Controllers/SupplierRegistrationController.php',
+        'App\\Modules\\SupplierRegistration\\Models\\SupplierRegistration' => __DIR__ . '/../..' . '/app/Modules/SupplierRegistration/Models/SupplierRegistration.php',
+        'App\\Modules\\UserManagement\\Http\\Controllers\\UserManagementController' => __DIR__ . '/../..' . '/app/Modules/UserManagement/Http/Controllers/UserManagementController.php',
+        'App\\Modules\\UserManagement\\Models\\UserManagement' => __DIR__ . '/../..' . '/app/Modules/UserManagement/Models/UserManagement.php',
         'App\\Providers\\AppServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AppServiceProvider.php',
         'App\\Providers\\AuthServiceProvider' => __DIR__ . '/../..' . '/app/Providers/AuthServiceProvider.php',
         'App\\Providers\\BroadcastServiceProvider' => __DIR__ . '/../..' . '/app/Providers/BroadcastServiceProvider.php',
         'App\\Providers\\EventServiceProvider' => __DIR__ . '/../..' . '/app/Providers/EventServiceProvider.php',
         'App\\Providers\\RouteServiceProvider' => __DIR__ . '/../..' . '/app/Providers/RouteServiceProvider.php',
+        'ArtemSchander\\L5Modular\\Console\\ControllerMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ControllerMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\EventMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/EventMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\FactoryMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/FactoryMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\HelpersMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/HelpersMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\JobMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/JobMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ListenerMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ListenerMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\MailMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/MailMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\MigrateMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/MigrateMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ModelMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ModelMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ModuleListCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ModuleListCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ModuleMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ModuleMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\NotificationMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/NotificationMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ObserverMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ObserverMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\RequestMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/RequestMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ResourceMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ResourceMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\RouteMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/RouteMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\SeederMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/SeederMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\TranslationMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/TranslationMakeCommand.php',
+        'ArtemSchander\\L5Modular\\Console\\ViewMakeCommand' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Console/ViewMakeCommand.php',
+        'ArtemSchander\\L5Modular\\ModuleServiceProvider' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/ModuleServiceProvider.php',
+        'ArtemSchander\\L5Modular\\Traits\\ConfiguresFolder' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Traits/ConfiguresFolder.php',
+        'ArtemSchander\\L5Modular\\Traits\\MakesComponent' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Traits/MakesComponent.php',
+        'ArtemSchander\\L5Modular\\Traits\\MakesMessage' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Traits/MakesMessage.php',
+        'ArtemSchander\\L5Modular\\Traits\\RegisteresCommands' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Traits/RegisteresCommands.php',
+        'ArtemSchander\\L5Modular\\Traits\\ReplacesRelatedDataInStub' => __DIR__ . '/..' . '/artem-schander/l5-modular/src/Traits/ReplacesRelatedDataInStub.php',
         'Asm89\\Stack\\Cors' => __DIR__ . '/..' . '/asm89/stack-cors/src/Cors.php',
         'Asm89\\Stack\\CorsService' => __DIR__ . '/..' . '/asm89/stack-cors/src/CorsService.php',
         'Attribute' => __DIR__ . '/..' . '/symfony/polyfill-php80/Resources/stubs/Attribute.php',
@@ -2147,6 +2193,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'Illuminate\\Hashing\\HashManager' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Hashing/HashManager.php',
         'Illuminate\\Hashing\\HashServiceProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Hashing/HashServiceProvider.php',
         'Illuminate\\Http\\Client\\ConnectionException' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Http/Client/ConnectionException.php',
+        'Illuminate\\Http\\Client\\Events\\ConnectionFailed' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Http/Client/Events/ConnectionFailed.php',
         'Illuminate\\Http\\Client\\Events\\RequestSending' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Http/Client/Events/RequestSending.php',
         'Illuminate\\Http\\Client\\Events\\ResponseReceived' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Http/Client/Events/ResponseReceived.php',
         'Illuminate\\Http\\Client\\Factory' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Http/Client/Factory.php',
@@ -2265,6 +2312,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'Illuminate\\Queue\\Console\\ListFailedCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/ListFailedCommand.php',
         'Illuminate\\Queue\\Console\\ListenCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/ListenCommand.php',
         'Illuminate\\Queue\\Console\\PruneBatchesCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/PruneBatchesCommand.php',
+        'Illuminate\\Queue\\Console\\PruneFailedJobsCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/PruneFailedJobsCommand.php',
         'Illuminate\\Queue\\Console\\RestartCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/RestartCommand.php',
         'Illuminate\\Queue\\Console\\RetryBatchCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/RetryBatchCommand.php',
         'Illuminate\\Queue\\Console\\RetryCommand' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Console/RetryCommand.php',
@@ -2283,6 +2331,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'Illuminate\\Queue\\Failed\\DynamoDbFailedJobProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Failed/DynamoDbFailedJobProvider.php',
         'Illuminate\\Queue\\Failed\\FailedJobProviderInterface' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Failed/FailedJobProviderInterface.php',
         'Illuminate\\Queue\\Failed\\NullFailedJobProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Failed/NullFailedJobProvider.php',
+        'Illuminate\\Queue\\Failed\\PrunableFailedJobProvider' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Failed/PrunableFailedJobProvider.php',
         'Illuminate\\Queue\\InteractsWithQueue' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/InteractsWithQueue.php',
         'Illuminate\\Queue\\InvalidPayloadException' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/InvalidPayloadException.php',
         'Illuminate\\Queue\\Jobs\\BeanstalkdJob' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/Jobs/BeanstalkdJob.php',
@@ -2803,6 +2852,7 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'League\\Flysystem\\ConfigAwareTrait' => __DIR__ . '/..' . '/league/flysystem/src/ConfigAwareTrait.php',
         'League\\Flysystem\\ConnectionErrorException' => __DIR__ . '/..' . '/league/flysystem/src/ConnectionErrorException.php',
         'League\\Flysystem\\ConnectionRuntimeException' => __DIR__ . '/..' . '/league/flysystem/src/ConnectionRuntimeException.php',
+        'League\\Flysystem\\CorruptedPathDetected' => __DIR__ . '/..' . '/league/flysystem/src/CorruptedPathDetected.php',
         'League\\Flysystem\\Directory' => __DIR__ . '/..' . '/league/flysystem/src/Directory.php',
         'League\\Flysystem\\Exception' => __DIR__ . '/..' . '/league/flysystem/src/Exception.php',
         'League\\Flysystem\\File' => __DIR__ . '/..' . '/league/flysystem/src/File.php',
@@ -5163,6 +5213,22 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
         'Whoops\\Util\\Misc' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/Misc.php',
         'Whoops\\Util\\SystemFacade' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/SystemFacade.php',
         'Whoops\\Util\\TemplateHelper' => __DIR__ . '/..' . '/filp/whoops/src/Whoops/Util/TemplateHelper.php',
+        'Yajra\\DataTables\\ApiResourceDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/ApiResourceDataTable.php',
+        'Yajra\\DataTables\\CollectionDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/CollectionDataTable.php',
+        'Yajra\\DataTables\\Contracts\\DataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Contracts/DataTable.php',
+        'Yajra\\DataTables\\Contracts\\Formatter' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Contracts/Formatter.php',
+        'Yajra\\DataTables\\DataTableAbstract' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/DataTableAbstract.php',
+        'Yajra\\DataTables\\DataTables' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/DataTables.php',
+        'Yajra\\DataTables\\DataTablesServiceProvider' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/DataTablesServiceProvider.php',
+        'Yajra\\DataTables\\EloquentDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/EloquentDataTable.php',
+        'Yajra\\DataTables\\Exceptions\\Exception' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Exceptions/Exception.php',
+        'Yajra\\DataTables\\Facades\\DataTables' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Facades/DataTables.php',
+        'Yajra\\DataTables\\Processors\\DataProcessor' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Processors/DataProcessor.php',
+        'Yajra\\DataTables\\Processors\\RowProcessor' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Processors/RowProcessor.php',
+        'Yajra\\DataTables\\QueryDataTable' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/QueryDataTable.php',
+        'Yajra\\DataTables\\Utilities\\Config' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Utilities/Config.php',
+        'Yajra\\DataTables\\Utilities\\Helper' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Utilities/Helper.php',
+        'Yajra\\DataTables\\Utilities\\Request' => __DIR__ . '/..' . '/yajra/laravel-datatables-oracle/src/Utilities/Request.php',
         'phpDocumentor\\Reflection\\DocBlock' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlock.php',
         'phpDocumentor\\Reflection\\DocBlockFactory' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactory.php',
         'phpDocumentor\\Reflection\\DocBlockFactoryInterface' => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src/DocBlockFactoryInterface.php',
@@ -5249,10 +5315,10 @@ class ComposerStaticInit338db484c869996337d963cbd9ef3e95
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit338db484c869996337d963cbd9ef3e95::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit338db484c869996337d963cbd9ef3e95::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit338db484c869996337d963cbd9ef3e95::$prefixesPsr0;
-            $loader->classMap = ComposerStaticInit338db484c869996337d963cbd9ef3e95::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit9409fa090047f1bce422783d40bff223::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit9409fa090047f1bce422783d40bff223::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit9409fa090047f1bce422783d40bff223::$prefixesPsr0;
+            $loader->classMap = ComposerStaticInit9409fa090047f1bce422783d40bff223::$classMap;
 
         }, null, ClassLoader::class);
     }

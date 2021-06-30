@@ -31,6 +31,9 @@ header('Content-Type: text/html');?>
 	<script src="assets/plugins/pace/pace.min.js"></script>
 	<!-- ================== END BASE JS ================== -->
 
+
+	
+
     @section('page-css')
     @show
 
@@ -91,7 +94,7 @@ header('Content-Type: text/html');?>
 						<li class="media">
 							<a href="javascript:;">
 								<div class="media-left">
-									<img src="../assets/img/user/user-2.jpg" class="media-object" alt="" />
+									<img src="assets/img/user/user-2.jpg" class="media-object" alt="" />
 									<i class="fab fa-facebook-messenger text-primary media-object-icon"></i>
 								</div>
 								<div class="media-body">
@@ -131,7 +134,7 @@ header('Content-Type: text/html');?>
 				</li>
 				<li class="dropdown navbar-user">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-						<img src="../assets/img/user/user-13.jpg" alt="" /> 
+						<img src="assets/img/user/user-13.jpg" alt="" /> 
 						<span class="d-none d-md-inline">John Doe</span> <b class="caret"></b>
 					</a>
 					<div class="dropdown-menu dropdown-menu-right">
@@ -158,7 +161,7 @@ header('Content-Type: text/html');?>
 						<a href="javascript:;" data-toggle="nav-profile">
 							<div class="cover with-shadow"></div>
 							<div class="image">
-								<img src="../assets/img/user/user-13.jpg" alt="" />
+								<img src="assets/img/user/user-13.jpg" alt="" />
 							</div>
 							<div class="info">
 								<b class="caret pull-right"></b>
@@ -181,12 +184,9 @@ header('Content-Type: text/html');?>
 				</ul>
 				<!-- end sidebar user -->				
 
-				@if(session('role') == 'supplier')
-					@include('sidebar.supplier')
-				@else
-					@include('sidebar.amas')
+				@if(session('role') == 'Admin')
+					@include('sidebar.sidebar')								
 				@endif
-
 				
 			</div>
 			<!-- end sidebar scrollbar -->
@@ -217,9 +217,9 @@ header('Content-Type: text/html');?>
 	<script src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
 	<script src="assets/plugins/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
 	<!--[if lt IE 9]>
-		<script src="../assets/crossbrowserjs/html5shiv.js"></script>
-		<script src="../assets/crossbrowserjs/respond.min.js"></script>
-		<script src="../assets/crossbrowserjs/excanvas.min.js"></script>
+		<script src="assets/crossbrowserjs/html5shiv.js"></script>
+		<script src="assets/crossbrowserjs/respond.min.js"></script>
+		<script src="assets/crossbrowserjs/excanvas.min.js"></script>
 	<![endif]-->
 	<script src="assets/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 	<script src="assets/plugins/js-cookie/js.cookie.js"></script>
@@ -227,14 +227,20 @@ header('Content-Type: text/html');?>
 	<script src="assets/js/apps.min.js"></script>
 	<!-- ================== END BASE JS ================== -->
         
-    @section('page-js')
+    @section('page-js')	
     @show
     
+	
+
+
+	
 	<script>
 		$(document).ready(function() {
 			App.init();
 			TableManageDefault.init();
 		});
 	</script>
+
+
 </body>
 </html>

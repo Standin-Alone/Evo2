@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\LoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,18 +14,8 @@ use App\Http\Controllers\LoginController;
 */
 
 
-Route::get('/', [LoginController::class, 'login'])->name('user.login');
-
-// Supplier Registration Route
-Route::group([],function(){
-    Route::resource('/supplier','SupplierRegistrationController');
-});
-
-
-
-
-
-
-
+Route::resource('/','AccessController');
+Route::get('/sign-in','AccessController@signIn');
+// Route::get('/login','AccessController@index');
 
 
