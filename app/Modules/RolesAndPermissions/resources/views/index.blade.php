@@ -104,8 +104,8 @@
                                     render: function(data,type,row,meta){                                           
                                     
                                     return  '<div class="checkbox checkbox-css">'+
-                                                '<input type="checkbox" id="checkbox{{$key}}" permission="{{$item->permission}}" class="permission_chk" value="'+row['module']+'" '+ (data == 1 ? 'checked' : 'unchecked') +" />"                                                +
-                                                '<label for="checkbox{{$key}}"></label>'+
+                                                '<input type="checkbox" id="checkbox'+row['module']+'{{$key}}" permission="{{$item->permission}}" class="permission_chk" value="'+row['module']+'" '+ (data == 1 ? 'checked' : '') +" />"                                                +
+                                                '<label for="checkbox'+row['module']+'{{$key}}"></label>'+
                                             '</div>'                                                    
                                                 }
                                 },
@@ -124,15 +124,14 @@
 
 
             // checkbox permissions
-            $("#permission-datatable").on('click','input[type="checkbox"]',function(){
+            $("#permission-datatable").on('change','input[type="checkbox"]',function(){
                 
                 var role_id = $("#role_id").val();
                 var module = $(this).val();
                 var permission = $(this).attr('permission');
-                
-
+                                
                 var data = {};
-                if($(this).is(':checked'))
+                if($(this).attr('checked')  == 'checked')
                     {
                         data  =  {
                             role_id:role_id,
