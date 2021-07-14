@@ -1,0 +1,5 @@
+<?php
+
+/**
+ *	MobileApp Helpers
+ */

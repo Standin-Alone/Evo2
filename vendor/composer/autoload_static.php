@@ -145,6 +145,7 @@ class ComposerStaticInit9409fa090047f1bce422783d40bff223
         array (
             'Fruitcake\\Cors\\' => 15,
             'Fideloper\\Proxy\\' => 16,
+            'Fedeisas\\LaravelMailCssInliner\\' => 31,
             'Faker\\' => 6,
             'Facade\\Ignition\\' => 16,
             'Facade\\IgnitionContracts\\' => 25,
@@ -429,6 +430,10 @@ class ComposerStaticInit9409fa090047f1bce422783d40bff223
         array (
             0 => __DIR__ . '/..' . '/fideloper/proxy/src',
         ),
+        'Fedeisas\\LaravelMailCssInliner\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/fedeisas/laravel-mail-css-inliner/src',
+        ),
         'Faker\\' => 
         array (
             0 => __DIR__ . '/..' . '/fakerphp/faker/src/Faker',
@@ -528,6 +533,10 @@ class ComposerStaticInit9409fa090047f1bce422783d40bff223
         'App\\Http\\Middleware\\TrustProxies' => __DIR__ . '/../..' . '/app/Http/Middleware/TrustProxies.php',
         'App\\Http\\Middleware\\VerifyCsrfToken' => __DIR__ . '/../..' . '/app/Http/Middleware/VerifyCsrfToken.php',
         'App\\Models\\User' => __DIR__ . '/../..' . '/app/Models/User.php',
+        'App\\Modules\\MobileApp\\Http\\Controllers\\MobileAppController' => __DIR__ . '/../..' . '/app/Modules/MobileApp/Http/Controllers/MobileAppController.php',
+        'App\\Modules\\MobileApp\\Models\\MobileApp' => __DIR__ . '/../..' . '/app/Modules/MobileApp/Models/MobileApp.php',
+        'App\\Modules\\ModulesManagement\\Http\\Controllers\\ModulesController' => __DIR__ . '/../..' . '/app/Modules/ModulesManagement/Http/Controllers/ModulesController.php',
+        'App\\Modules\\ModulesManagement\\Models\\ModulesManagement' => __DIR__ . '/../..' . '/app/Modules/ModulesManagement/Models/ModulesManagement.php',
         'App\\Modules\\RolesAndPermissions\\Http\\Controllers\\RolesAndPermissionsController' => __DIR__ . '/../..' . '/app/Modules/RolesAndPermissions/Http/Controllers/RolesAndPermissionsController.php',
         'App\\Modules\\RolesAndPermissions\\Models\\RolesAndPermissions' => __DIR__ . '/../..' . '/app/Modules/RolesAndPermissions/Models/RolesAndPermissions.php',
         'App\\Modules\\SupplierRegistration\\Http\\Controllers\\SupplierRegistrationController' => __DIR__ . '/../..' . '/app/Modules/SupplierRegistration/Http/Controllers/SupplierRegistrationController.php',
@@ -1450,6 +1459,8 @@ class ComposerStaticInit9409fa090047f1bce422783d40bff223
         'Faker\\Provider\\zh_TW\\Text' => __DIR__ . '/..' . '/fakerphp/faker/src/Faker/Provider/zh_TW/Text.php',
         'Faker\\UniqueGenerator' => __DIR__ . '/..' . '/fakerphp/faker/src/Faker/UniqueGenerator.php',
         'Faker\\ValidGenerator' => __DIR__ . '/..' . '/fakerphp/faker/src/Faker/ValidGenerator.php',
+        'Fedeisas\\LaravelMailCssInliner\\CssInlinerPlugin' => __DIR__ . '/..' . '/fedeisas/laravel-mail-css-inliner/src/CssInlinerPlugin.php',
+        'Fedeisas\\LaravelMailCssInliner\\LaravelMailCssInlinerServiceProvider' => __DIR__ . '/..' . '/fedeisas/laravel-mail-css-inliner/src/LaravelMailCssInlinerServiceProvider.php',
         'Fideloper\\Proxy\\TrustProxies' => __DIR__ . '/..' . '/fideloper/proxy/src/TrustProxies.php',
         'Fideloper\\Proxy\\TrustedProxyServiceProvider' => __DIR__ . '/..' . '/fideloper/proxy/src/TrustedProxyServiceProvider.php',
         'Fruitcake\\Cors\\CorsServiceProvider' => __DIR__ . '/..' . '/fruitcake/laravel-cors/src/CorsServiceProvider.php',

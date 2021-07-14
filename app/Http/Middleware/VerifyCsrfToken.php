@@ -13,5 +13,13 @@ class VerifyCsrfToken extends Middleware
      */
     protected $except = [
         //
+        '/api/sign_in',
+        '/api/get_voucher_info',
+        '/api/resend-otp',
+        '/api/submit-voucher',
+        '/api/get-scanned-vouchers',
+        '/api/get-items',
+        '/api/submit-voucher-rrp',
+        'api'
     ];
 }

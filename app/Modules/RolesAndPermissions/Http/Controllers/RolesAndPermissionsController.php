@@ -142,7 +142,7 @@ class RolesAndPermissionsController extends Controller
         $get_permissions = db::table('sys_permission')->where('permission',$permission)->first();
         $get_module = db::table('sys_modules')->where('module',$module)->first();
 
-        if($checked == 'true'){
+        if($checked == true){
             $access_matrix_model
                     ->where('role_id',$role_id)
                     ->where('sys_module_id',$get_module->sys_module_id)
