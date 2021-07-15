@@ -28,17 +28,15 @@ class MobileAppController extends Controller
     public function sign_in(Request $request)
     {
         //
-
         $username = request('username');
         $password = request('password');
+        $random_otp = mt_rand(100000, 999999);
 
         $authenticate = db::table('users')->where('username', $username)->get();
         $get_password = db::table('users')->where('username', $username)->value('password');
 
-        $random_password = mt_rand(100000, 999999);
+        
 
-
-      
         $to_email = "";
         if (!$authenticate->isEmpty()) {
 
@@ -53,7 +51,7 @@ class MobileAppController extends Controller
                 }
 
 
-                Mail::send('MobileApp::otp', ["otp_code" => $random_password], function ($message) use ($to_email, $random_password) {
+                Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($to_email, $random_otp) {
                     $message->to($to_email)
                         ->subject('DA VMP Mobile')
                         ->from("webdeveloper01000@gmail.com");
@@ -61,7 +59,7 @@ class MobileAppController extends Controller
 
                 return json_encode(array([
                     "Message" => "true",
-                    "OTP" => $random_password,
+                    "OTP" => $random_otp,
                     "EMAIL" => $to_email,
                     "supplier_id" => $supplier->supplier_id,
                     "user_id" => $supplier->user_id,
@@ -111,9 +109,10 @@ class MobileAppController extends Controller
 
         $reference_num = request('reference_num');
         $supplier_id = request('supplier_id');
-
-        // $get_info = $this->vouchergen_model->where('reference_no', $reference_num)->get();
-        $get_info = db::table('voucher')->where('reference_no', $reference_num)->get();
+        
+        $get_info = db::table('voucher as v')
+                    ->join('programs as p','p.program_id','v.program_id')
+                    ->where('reference_no', $reference_num)->get();
         
 
 
@@ -149,7 +148,7 @@ class MobileAppController extends Controller
             $get_recent_claiming = $this->get_transactions_history($reference_num);
 
             return json_encode(array(["Message" => 'true', "data" => $get_info, "program_items" => $get_program_items,'history'=>$get_recent_claiming]));
-        } else {
+        }else{
             return json_encode(array(["Message" => 'false']));
         }
     }
@@ -404,15 +403,15 @@ class MobileAppController extends Controller
     {
 
         $email = request('email');
-        $random_password = mt_rand(100000, 999999);
+        $random_otp = mt_rand(100000, 999999);
 
-        Mail::send('MobileApp::otp', ["otp_code" => $random_password], function ($message) use ($email, $random_password) {
+        Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($email, $random_otp) {
             $message->to($email)
                 ->subject('DA VMP Mobile')
                 ->from("webdeveloper01000@gmail.com");
         });
 
-        return json_encode(array(["Message" => 'true', "OTP" => $random_password]));
+        return json_encode(array(["Message" => 'true', "OTP" => $random_otp]));
     }
 
 
@@ -428,6 +427,7 @@ class MobileAppController extends Controller
         foreach ($get_record as $key => $item) {
             $item->base64 = base64_encode(file_get_contents(storage_path('/commodities//' . $item->item_profile)));
         }
+
         return $get_record;
     }
 }
