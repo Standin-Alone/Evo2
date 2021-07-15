@@ -23,6 +23,7 @@
 	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
 	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
+    <script src="{{storage_path('app/modules/modulesmanagement/resources/js/module.js')}}"></script>
 
     <script>
     $(document).ready(function(){
@@ -30,13 +31,13 @@
         $('#load-datatable').DataTable({
             serverSide: true,
             ajax: {
-                "url" : '{{route("modules.show")/2}}',
-                "type" : "POST"
-            }              
+                "url" : '{{route("modules.show",["module" => "0"])}}',
+                "type" : "get"
+            },
             columns:[
                 {data:'module'},
-                {data:'routes',            
-                {data:'role_id',
+                {data:'routes'},            
+                {data:'sys_module_id',
                     render: function(data,type,row){            
                         return "<button type='button' class='btn btn-success setModulesBtn' id='"+data+"' data-toggle='modal' data-target='#SetModulesModal'>"+
                                             "<i class='fa fa-edit'></i> Set Modules and Permissions"+
@@ -57,9 +58,6 @@
 
 
     
-
-
-
 
 
 

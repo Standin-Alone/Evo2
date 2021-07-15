@@ -24,7 +24,7 @@ class ModulesController extends Controller
 
     }
 
-    public function show($role){
+    public function show($id){
         $get_record = db::table('sys_modules')->get();
         return datatables($get_record)->toJson();    
     }

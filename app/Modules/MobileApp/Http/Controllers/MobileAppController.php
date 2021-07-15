@@ -32,40 +32,44 @@ class MobileAppController extends Controller
         $username = request('username');
         $password = request('password');
 
-        $authenticate = db::table('users')->where('username', $username)->where('password', md5($password))->get();
+        $authenticate = db::table('users')->where('username', $username)->get();
+        $get_password = db::table('users')->where('username', $username)->value('password');
 
         $random_password = mt_rand(100000, 999999);
 
 
-
+      
         $to_email = "";
         if (!$authenticate->isEmpty()) {
-            $supplier_id = '';
 
-            foreach ($authenticate as $authenticate) {
-                $to_email = $authenticate->email;
-                $supplier = db::table('program_permissions as pp')
-                    ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
-                    ->join('supplier as s', 's.supplier_id', 'pp.other_info')
-                    ->join('users as u', 'u.user_id', 'pp.user_id')
-                    ->where('u.user_id', $authenticate->user_id)->first();
+            if(password_verify($password,$get_password)){
+                foreach ($authenticate as $authenticate) {
+                    $to_email = $authenticate->email;
+                    $supplier = db::table('program_permissions as pp')
+                        ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
+                        ->join('supplier as s', 's.supplier_id', 'pp.other_info')
+                        ->join('users as u', 'u.user_id', 'pp.user_id')
+                        ->where('u.user_id', $authenticate->user_id)->first();
+                }
+
+
+                Mail::send('MobileApp::otp', ["otp_code" => $random_password], function ($message) use ($to_email, $random_password) {
+                    $message->to($to_email)
+                        ->subject('DA VMP Mobile')
+                        ->from("webdeveloper01000@gmail.com");
+                });
+
+                return json_encode(array([
+                    "Message" => "true",
+                    "OTP" => $random_password,
+                    "EMAIL" => $to_email,
+                    "supplier_id" => $supplier->supplier_id,
+                    "user_id" => $supplier->user_id,
+                    "full_name" => $supplier->full_name
+                ]));
+            }else{
+                return json_encode(array(["Message" => "false"]));
             }
-
-
-            Mail::send('MobileApp::otp', ["otp_code" => $random_password], function ($message) use ($to_email, $random_password) {
-                $message->to($to_email)
-                    ->subject('DA VMP Mobile')
-                    ->from("webdeveloper01000@gmail.com");
-            });
-
-            return json_encode(array([
-                "Message" => "true",
-                "OTP" => $random_password,
-                "EMAIL" => $to_email,
-                "supplier_id" => $supplier->supplier_id,
-                "user_id" => $supplier->user_id,
-                "full_name" => $supplier->full_name
-            ]));
         } else {
             return json_encode(array(["Message" => "false"]));
         }
@@ -264,6 +268,89 @@ class MobileAppController extends Controller
     // }
 
 
+    // insert attachment function
+    public function insertAttachment($item,$uuid,$voucher_info){
+        // insert attachment data to database
+        $attachment_uuid = Uuid::uuid4();
+        $front_attachment_uuid = Uuid::uuid4();
+        $back_attachment_uuid = Uuid::uuid4();
+
+        if ($item->name == 'Valid ID') {
+            $id_front = $item->file[0]->front;
+            $id_back = $item->file[0]->back;
+
+            
+            db::table('voucher_transaction')
+                    ->where(  'voucher_details_id' , $uuid)
+                    ->update(
+                        [
+                            'latitude' =>  $item->latitude,
+                            'longitude' =>  $item->longitude, 
+                        ]);
+
+            // front page of id 
+            $id_front = str_replace('data:image/jpeg;base64,', '', $id_front);
+            $id_front = str_replace(' ', '+', $id_front);
+            $id_front_name = $voucher_info->rsbsa_no . '-' . $item->name . '(front)' . '.jpeg';
+
+            // back page of id
+            $id_back = str_replace('data:image/jpeg;base64,', '', $id_back);
+            $id_back = str_replace(' ', '+', $id_back);
+            $id_back_name = $voucher_info->rsbsa_no . '-' . $item->name . '(back)' . '.jpeg';
+
+            $upload_folder  = storage_path() . '/attachments//' . $voucher_info->rsbsa_no;
+
+            // insert front page of id in database
+            db::table('voucher_attachments')->insert([
+                'attachment_id' => $front_attachment_uuid,
+                'voucher_details_id' => $uuid,
+                'document' => $item->name,
+                'file_name' => $id_front_name,
+            ]);
+
+            // insert back page of id in database
+            db::table('voucher_attachments')->insert([
+                'attachment_id' => $back_attachment_uuid,
+                'voucher_details_id' => $uuid,
+                'document' => $item->name,
+                'file_name' => $id_back_name,
+            ]);
+
+            // Check Folder if exist for farmers attachment;
+            if (!File::isDirectory($upload_folder)) {
+                File::makeDirectory($upload_folder, 0777, true);
+                File::put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
+                File::put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
+            } else {
+                File::put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
+                File::put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
+            }
+        } else {
+
+            $image = $item->file;
+
+            $image = str_replace('data:image/jpeg;base64,', '', $image);
+            $image = str_replace(' ', '+', $image);
+            $imageName = $voucher_info->rsbsa_no . '-' . $item->name . '.jpeg';
+
+            $upload_folder  = storage_path() . '/attachments//' . $voucher_info->rsbsa_no;
+
+            // insert pictures in database
+            db::table('voucher_attachments')->insert([
+                'attachment_id' => $attachment_uuid,
+                'voucher_details_id' => $uuid,
+                'document' => $item->name,
+                'file_name' => $imageName,
+            ]);
+            // Check Folder if exist for farmers attachment;
+            if (!File::isDirectory($upload_folder)) {
+                File::makeDirectory($upload_folder, 0777, true);
+                File::put($upload_folder . '/' . $imageName, base64_decode($image));
+            } else {
+                File::put($upload_folder . '/' . $imageName, base64_decode($image));
+            }
+        }
+    }
 
     //SUBMIT FUNCTION OF CLAIM VOUCHER RRP
     public function submit_voucher_rrp()
@@ -294,87 +381,7 @@ class MobileAppController extends Controller
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
-                // insert attachment data to database
-                $attachment_uuid = Uuid::uuid4();
-                $front_attachment_uuid = Uuid::uuid4();
-                $back_attachment_uuid = Uuid::uuid4();
-
-                if ($item->name == 'Valid ID') {
-                    $id_front = $item->file[0]->front;
-                    $id_back = $item->file[0]->back;
-
-                    
-
-                    db::table('voucher_transaction')
-                            ->where(  'voucher_details_id' , $uuid)
-                            ->update(
-                                [
-                                    'latitude' =>  $item->latitude,
-                                    'longitude' =>  $item->longitude, 
-                                ]);
-
-                    // front page of id 
-                    $id_front = str_replace('data:image/jpeg;base64,', '', $id_front);
-                    $id_front = str_replace(' ', '+', $id_front);
-                    $id_front_name = $voucher_info->rsbsa_no . '-' . $item->name . '(front)' . '.jpeg';
-
-                    // back page of id
-                    $id_back = str_replace('data:image/jpeg;base64,', '', $id_back);
-                    $id_back = str_replace(' ', '+', $id_back);
-                    $id_back_name = $voucher_info->rsbsa_no . '-' . $item->name . '(back)' . '.jpeg';
-
-                    $upload_folder  = storage_path() . '/attachments//' . $voucher_info->rsbsa_no;
-
-                    // insert front page of id in database
-                    db::table('voucher_attachments')->insert([
-                        'attachment_id' => $front_attachment_uuid,
-                        'voucher_details_id' => $uuid,
-                        'document' => $item->name,
-                        'file_name' => $id_front_name,
-                    ]);
-
-                    // insert back page of id in database
-                    db::table('voucher_attachments')->insert([
-                        'attachment_id' => $back_attachment_uuid,
-                        'voucher_details_id' => $uuid,
-                        'document' => $item->name,
-                        'file_name' => $id_back_name,
-                    ]);
-
-                    // Check Folder if exist for farmers attachment;
-                    if (!File::isDirectory($upload_folder)) {
-                        File::makeDirectory($upload_folder, 0777, true);
-                        File::put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
-                        File::put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
-                    } else {
-                        File::put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
-                        File::put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
-                    }
-                } else {
-
-                    $image = $item->file;
-
-                    $image = str_replace('data:image/jpeg;base64,', '', $image);
-                    $image = str_replace(' ', '+', $image);
-                    $imageName = $voucher_info->rsbsa_no . '-' . $item->name . '.jpeg';
-
-                    $upload_folder  = storage_path() . '/attachments//' . $voucher_info->rsbsa_no;
-
-                    // insert pictures in database
-                    db::table('voucher_attachments')->insert([
-                        'attachment_id' => $attachment_uuid,
-                        'voucher_details_id' => $uuid,
-                        'document' => $item->name,
-                        'file_name' => $imageName,
-                    ]);
-                    // Check Folder if exist for farmers attachment;
-                    if (!File::isDirectory($upload_folder)) {
-                        File::makeDirectory($upload_folder, 0777, true);
-                        File::put($upload_folder . '/' . $imageName, base64_decode($image));
-                    } else {
-                        File::put($upload_folder . '/' . $imageName, base64_decode($image));
-                    }
-                }
+                $this->insertAttachment($item,$uuid,$voucher_info);
             }
 
             //  compute remaining balance
