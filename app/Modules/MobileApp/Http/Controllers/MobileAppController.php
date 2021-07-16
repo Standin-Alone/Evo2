@@ -54,13 +54,13 @@ class MobileAppController extends Controller
                 Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($to_email, $random_otp) {
                     $message->to($to_email)
                         ->subject('DA VMP Mobile')
-                        ->from("webdeveloper01000@gmail.com");
+                        ->from("support.sadd@da.gov.ph");
                 });
 
                 return json_encode(array([
                     "Message" => "true",
                     "OTP" => $random_otp,
-                    "EMAIL" => $to_email,
+                    "email" => $to_email,
                     "supplier_id" => $supplier->supplier_id,
                     "user_id" => $supplier->user_id,
                     "full_name" => $supplier->full_name
