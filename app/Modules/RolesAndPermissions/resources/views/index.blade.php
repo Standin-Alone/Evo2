@@ -107,8 +107,8 @@
                                     render: function(data,type,row,meta){                                           
                                     
                                     return  '<div class="checkbox checkbox-css">'+
-                                                '<input type="checkbox" id="checkbox{{$key}}" permission="{{$item->permission}}" class="permission_chk" value="'+row['module']+'" '+ (data == 1 ? 'checked' : 'unchecked') +" />"                                                +
-                                                '<label for="checkbox{{$key}}"></label>'+
+                                                '<input type="checkbox" id="checkbox'+row['module']+'{{$key}}" permission="{{$item->permission}}" class="permission_chk" value="'+row['module']+'" '+ (data == 1 ? 'checked' : 'unchecked') +" />"                                                +
+                                                '<label for="checkbox'+row['module']+'{{$key}}"></label>'+
                                             '</div>'                                                    
                                                 }
                                 },
@@ -117,7 +117,6 @@
                         bDestroy: true 
                     });
                 
-
                 $('#role_id').val(id);
                 $("#role_span").text($(this).closest("tbody tr").find("td:eq(0)").html());
                 e.preventDefault();
@@ -133,8 +132,11 @@
                 var module = $(this).val();
                 var permission = $(this).attr('permission');
                 
-
+                
                 var data = {};
+
+                $(this).is(':checked')
+
                 if($(this).is(':checked'))
                     {
                         data  =  {
@@ -144,7 +146,8 @@
                             checked:true,
                             _token:'{{csrf_token()}}'
                             }   
-
+                        console.warn(data)
+                        // set disable 
                         $.ajax({
                             url:'{{route("roles-set-permissions")}}',
                             type:'post',
@@ -162,7 +165,8 @@
                             checked:false,
                             _token:'{{csrf_token()}}'
                             }   
-
+                            console.warn(data)
+                        // set enable 
                         $.ajax({
                             url:'{{route("roles-set-permissions")}}',
                             type:'post',
@@ -171,9 +175,6 @@
                                 permission_table.ajax.reload()
                             }
                         })
-
-
-
                     }   
             })
 
@@ -226,6 +227,7 @@
         <h4 class="panel-title">Roles and Permissions</h4>
     </div>
     <div class="panel-body">        
+        {{-- table --}}
         <table id="load-datatable" class="table table-hover">            
             <thead>
                 <tr>                    
@@ -278,7 +280,6 @@
                         </div>
 
                         <br><br>
-
 
                         <table id="permission-datatable" class="table table-hover">            
                             <thead>

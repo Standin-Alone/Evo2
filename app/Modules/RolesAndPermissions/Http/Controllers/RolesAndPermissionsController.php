@@ -148,7 +148,7 @@ class RolesAndPermissionsController extends Controller
                     ->where('sys_module_id',$get_module->sys_module_id)
                     ->where('sys_permission_id',$get_permissions->sys_permission_id)
                     ->update([
-                            'status' => '0'
+                            'status' => '1'
                     ]);
         }else{
             db::table('sys_access_matrix')
@@ -156,7 +156,7 @@ class RolesAndPermissionsController extends Controller
                     ->where('sys_module_id',$get_module->sys_module_id)
                     ->where('sys_permission_id',$get_permissions->sys_permission_id)
                     ->update([
-                            'status' => '1'
+                            'status' => '0'
                     ]);
         }
         
