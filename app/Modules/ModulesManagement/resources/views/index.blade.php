@@ -22,13 +22,15 @@
     <script src="assets/plugins/DataTables/media/js/jquery.dataTables.js"></script>
 	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
 	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
-	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
-    <script src="{{storage_path('app/modules/modulesmanagement/resources/js/module.js')}}"></script>
-
+	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>    
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
     <script>
     $(document).ready(function(){
         // load record to datatable
-        $('#load-datatable').DataTable({
+        module_table = $('#load-datatable').DataTable({
             serverSide: true,
             ajax: {
                 "url" : '{{route("modules.show",["module" => "0"])}}',
@@ -38,19 +40,191 @@
                 {data:'module'},
                 {data:'routes'},            
                 {data:'sys_module_id',
-                    render: function(data,type,row){            
-                        return "<button type='button' class='btn btn-success setModulesBtn' id='"+data+"' data-toggle='modal' data-target='#SetModulesModal'>"+
-                                            "<i class='fa fa-edit'></i> Set Modules and Permissions"+
-                                        "</button>";
-                                        
-                                    }
+                    render: function(data,type,row){       
+                      
+                        return  "<button type='button' class='btn btn-warning update-modal-btn' id="+data+" data-toggle='modal' data-target='#UpdateModal'>"+
+                                    "<i class='fa fa-edit'></i> Edit"+
+                                "</button>   "+(
+                                row['status'] == 1 ?
+                                "<button type='button' class='btn btn-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
+                                    "<i class='fa fa-trash'></i> Disable"+
+                                "</button>  " :
+                                "<button type='button' class='btn btn-success set-status-btn' id='"+data+"' status='"+row["status"]+"' >"+
+                                    "<i class='fa fa-undo'></i> Enable"+
+                                "</button> ")
+                    }
                 }
             ]   
         });
+        
+        // edit modal btn
+        $("#load-datatable").on('click','.update-modal-btn',function(){
+            $("#UpdateForm  input[name='id']").val($(this).attr('id'));
+            $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
+            $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+        });
 
+        // set status btn
+        $("#load-datatable").on('click','.set-status-btn',function(){
+            id = $(this).attr('id');
+            status = $(this).attr('status');
+                        
+            swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to "+ (status == 1 ? 'disable' : 'enable')+"?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:'{{route("modules.destroy",["module"=>":id"])}}'.replace(':id',id),
+                            type:'DELETE',
+                            data:{'_token':'{{csrf_token()}}','status':status},
+                            success:function(response){             
+                                //    
+                                swal("Successfully "+(status == 1 ? 'disable' : 'enable')+" the module.", {
+                                    icon: "success",
+                                }).then(()=>{                                
+                                    module_table.ajax.reload();
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+        }); 
+
+
+
+        // Insert Record
+        $("#AddForm").validate({
+            rules:{
+                module_name:"required",
+                route:"required",
+            },
+            messages:{
+                module_name:{
+                    required:'<div class="text-danger">Please enter module name.</div>'
+                },
+                route:{
+                    required:'<div class="text-danger">Please enter route.</div>'
+                }
+            },
+            submitHandler: function() { 
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to add this module?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:'{{route("modules.store")}}',
+                            type:'post',
+                            data:$("#AddForm").serialize(),
+                            success:function(response){             
+                                //    
+                                swal("Successfully created a new module.", {
+                                    icon: "success",
+                                }).then(()=>{
+                                    $("#AddModal").modal('hide')
+                                    module_table.ajax.reload();
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+               
+
+            }
+        })
+
+
+
+        // Update Record
+        $("#UpdateForm").validate({
+            rules:{
+                module_name:"required",
+                route:"required",
+            },
+            messages:{
+                module_name:{
+                    required:'<div class="text-danger">Please enter module name.</div>'
+                },
+                route:{
+                    required:'<div class="text-danger">Please enter route.</div>'
+                }
+            },
+            submitHandler: function() { 
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to update this module?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    id = $('input[name="id"]').val();
+                    
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:"{{route('modules.update',['module' => ':id'])}}".replace(':id', id),
+                            type:'PUT',
+                            data:$("#UpdateForm").serialize(),
+                            success:function(response){             
+                                //    
+                                swal("Successfully updated the module.", {
+                                         icon: "success",
+                                }).then(()=>{
+                                    $("#UpdateModal").modal('hide')
+                                    module_table.ajax.reload();
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+               
+
+            }
+        })
+       
     })
-    
+
+
+
+
     </script>
+
 @endsection
 
 
@@ -85,7 +259,7 @@
         </button>
         <br>
         <br><br>
-        <table id="data-table-default" class="table table-striped table-bordered">            
+        <table id="load-datatable" class="table table-hover">            
             <thead>
                 <tr>                    
                     <th >Module Name</th>
@@ -94,18 +268,6 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>John Edcel Zenarosa</td>
-                    <td>San Jose Del Monte, Bulacan</td>
-                    <td>
-                        <button type='button' class='btn btn-success'data-toggle='modal' data-target='#ViewModal' >
-                            <i class='fa fa-eye'></i> View
-                        </button>
-                        <button type='button' class='btn btn-warning' data-toggle='modal' data-target='#UpdateModal'>
-                            <i class='fa fa-edit'></i> Edit
-                        </button>
-                    </td>
-                </tr>
             </tbody>
         </table>
 
@@ -122,17 +284,22 @@
                         </div>
                         <div class="modal-body">
                             {{--modal body start--}}
+                            
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label>Sample</label> <span id='reqcatnameadd'></span>
-                                    <input style="text-transform: capitalize;" id="AddCatName" name="AddCatName" class="form-control"  placeholder="e.g.: Missing Persons" required="true">
+                                    <label>Module Name</label> <span id='reqcatnameadd' style='color:red'>*</span>
+                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name" required="true">
+                                </div>
+                                <div class="form-group">
+                                    <label>Route </label> <span id='reqcatnameadd' style='color:red'>*</span>
+                                    <input   name="route" class="form-control"  placeholder="module.index" required="true">
                                 </div>
                             </div>
                             {{--modal body end--}}
                         </div>
                         <div class="modal-footer">
                             <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <a id="AddBTN" href="javascript:;" class="btn btn-lime">Add</a>
+                            <button type="submit" class="btn btn-lime">Add</button>
                         </div>
                     </div>
                 </form>
@@ -140,55 +307,37 @@
         </div>
 
 
-         <!-- #modal-view -->
-         <div class="modal fade" id="ViewModal">
-            <div class="modal-dialog" style="max-width: 30%">
-                <div class="modal-content">
-                    <div class="modal-header" style="background-color: #008a8a">
-                        <h4 class="modal-title" style="color: white">View Category</h4>
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
-                    </div>
-                    <div class="modal-body">
-                        {{--modal body start--}}
-                        <h2 id="ViewCategName" align="center"></h2>
-                        <label style="display: block; text-align: center">Sample</label>
 
-                        {{--modal body end--}}
-                    </div>
-                    <div class="modal-footer">
-                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                    </div>
-                </div>
-            </div>
-        </div>
 
 
         <!-- #modal-EDIT -->
         <div class="modal fade" id="UpdateModal">
             <div class="modal-dialog" style="max-width: 30%">
-                <form id="EditForm" method="POST" >
+                <form id="UpdateForm" method="POST" >
                     @csrf
                     <div class="modal-content">
                         <div class="modal-header" style="background-color: #f59c1a">
-                            <h4 class="modal-title" style="color: white">Edit Category</h4>
+                            <h4 class="modal-title" style="color: white">Edit Module</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                         </div>
                         <div class="modal-body">
                             {{--modal body start--}}
                             <label class="form-label hide"> ID</label>
-                            <input id="edit_id" name="edit_id" type="text" class="form-control hide" name="edit_id"/>
+                            <input name="id" type="text" class="form-control hide" />
 
                             <div class="col-lg-12">
                                 <div class="form-group">
-                                    <label>Supplier Name</label>
-                                    <input style="text-transform: capitalize;" id="edit_sup_name" name="edit_sup_name" class="form-control"  placeholder="e.g.: SM" required="true">
+                                    <label>Module Name</label>
+                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">
+                                    <label>Route</label>
+                                    <input   name="route" class="form-control"  placeholder="route" required="true">
                                 </div>
                             </div>
                             {{--modal body end--}}
                         </div>
                         <div class="modal-footer">
                             <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <a id="EditBTN" href="javascript:;" class="btn btn-success">Update</a>
+                            <button type="submit" class="btn btn-warning">Update</button>
                         </div>
                     </div>
                 </form>

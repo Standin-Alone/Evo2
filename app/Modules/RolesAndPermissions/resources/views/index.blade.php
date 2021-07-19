@@ -59,12 +59,29 @@
         $(document).ready(function(){       
 
 
+        let load_modules  = (data)=>{
+            $("#select_module option").remove();
+            $.ajax({
+                        url:"{{route('select-modules')}}",
+                        type:'POST',
+                        data:data,                                    
+                        success:function(data){
+                            data.map((item)=>{
+                                $("#select_module").append('<option value="'+item.module+'">'+item.module+'</option>')
+                            })
+                            
+                        }
+                        
+                    }) 
+        }
 
         var permission_table = '';
+        let data_modules = '';
+
              //open set modules form
         $("#load-datatable").on('click','.setModulesBtn',function(e){
                 var id = $(this).attr('id');
-                var data =  {
+                data_modules =  {
                     role_id:id,
                     _token:'{{csrf_token()}}'
                 }
@@ -77,23 +94,13 @@
                     }
                 });
 
-                $.ajax({
-                        url:"{{route('select-modules')}}",
-                        type:'POST',
-                        data:data,                                    
-                        success:function(data){
-                            data.map((item)=>{
-                                $("#select_module").append('<option value="'+item.module+'">'+item.module+'</option>')
-                            })
-                            
-                        }
-                        
-                    }) 
+                load_modules(data_modules);
+           
                 
                 // Permission table
                 permission_table = $('#permission-datatable').DataTable({
                         serverSide: true,
-                        ajax: {url:"{{route('roles-get-module-permissions')}}",type:'post',data:data},                                                         
+                        ajax: {url:"{{route('roles-get-module-permissions')}}",type:'post',data:data_modules},                                                         
                         columns:[{data:'module'},
                                 @foreach ($get_permissions as $key => $item)
                                     {data:'{{$item->permission}}',
@@ -187,6 +194,7 @@
                             type:'post',
                             data:data,
                             success:function(){
+                                load_modules(data_modules);
                                 permission_table.ajax.reload()
                             }
                         })

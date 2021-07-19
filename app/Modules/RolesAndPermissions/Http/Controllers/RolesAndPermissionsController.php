@@ -70,7 +70,7 @@ class RolesAndPermissionsController extends Controller
         
         foreach($get_module_permission as $key_item => $item){
                 $get_permissions_id = DB::table('roles as r')
-                                ->select('sp.sys_permission_id as sys_permission_id','permission','status')                                                                                                
+                                ->select('sp.sys_permission_id as sys_permission_id','permission','sam.status')                                                                                                
                                 ->join('sys_access_matrix as sam','r.role_id','sam.role_id')                                
                                 ->join('sys_permission as sp','sp.sys_permission_id','sam.sys_permission_id')                                
                                 ->join('sys_modules as sm','sm.sys_module_id','sam.sys_module_id')                                
@@ -143,7 +143,7 @@ class RolesAndPermissionsController extends Controller
         $get_module = db::table('sys_modules')->where('module',$module)->first();
 
         if($checked == true){
-            $access_matrix_model
+            db::table('sys_access_matrix')
                     ->where('role_id',$role_id)
                     ->where('sys_module_id',$get_module->sys_module_id)
                     ->where('sys_permission_id',$get_permissions->sys_permission_id)
@@ -151,7 +151,7 @@ class RolesAndPermissionsController extends Controller
                             'status' => '0'
                     ]);
         }else{
-            $access_matrix_model
+            db::table('sys_access_matrix')
                     ->where('role_id',$role_id)
                     ->where('sys_module_id',$get_module->sys_module_id)
                     ->where('sys_permission_id',$get_permissions->sys_permission_id)

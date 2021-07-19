@@ -76,21 +76,31 @@ class MobileAppController extends Controller
     // get scanned vouchers for home screen
     public function get_scanned_vouchers($supplier_id)
     {
-
+        
 
 
         $get_scanned_vouchers = db::table('voucher as v')
             ->select(
                 'v.reference_no',
-                DB::raw('DATE(transac_date) as CLAIMED_DATE'),
-                DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname")
+                'transac_date',
+                DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
+                'rsbsa_no',
+                'file_name'
             )
-            ->join('voucher_transaction as vt', 'v.reference_no', 'vt.reference_no')
-            ->where('supplier_id', $supplier_id)
-            ->orderBy('transac_date', 'DESC')
+            ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')
+            ->join('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
+            ->where('supplier_id', $supplier_id)  
+            ->where('document', 'Farmer with Commodity')            
+            ->groupBy('v.reference_no')
+            ->orderBy('transac_date', 'DESC')            
             ->get();
 
-
+      
+            foreach ($get_scanned_vouchers as $key => $item) {
+                $item->base64 = base64_encode(file_get_contents(storage_path() . '/attachments//' . $item->rsbsa_no.'/'.$item->file_name));
+            }
+    
+        
 
         // ->orWhere('VOUCHER_STATUS','NOT FULLY CLAIMED')
 
@@ -157,114 +167,6 @@ class MobileAppController extends Controller
 
 
 
-    //  //  SUBMIT FUNCTION OF Claim Voucher OLD
-    //  public function submit_voucher(){
-
-    //     try{
-
-    //             $reference_num = request('reference_num');        
-    //             $supplier_id = request('supplier_id');        
-    //             $images_count = request('images_count');        
-    //             $commodities = json_encode(request('commodities'));
-    //             $decode = json_decode($commodities,true);
-    //             $rsbsa_ctrl_no = $this->vouchergen_model->where('REFERENCE_NO',$reference_num)->first()->RSBSA_CTRL_NO;
-
-    //             $update_voucher_gen = new VoucherGenModel();
-    //             $commodities_total_amount = 0;
-    //             // store commodities
-    //             foreach($decode as $item){
-    //                 $decoded_item = json_decode($item);
-
-    //                 $store_commodities = new CommodityModel();
-
-
-    //                 $commodity = $decoded_item->commodity;
-    //                 $unit = $decoded_item->unit;                        
-    //                 $quantity = $decoded_item->quantity;                        
-    //                 $amount = $decoded_item->amount;                        
-    //                 $total_amount = $decoded_item->total_amount;                        
-
-    //                 $commodities_total_amount += $total_amount;
-
-    //                 $store_commodities->fill([
-    //                     "commodity" =>  $commodity,
-    //                     "quantity" => $quantity,
-    //                     "unit" => $unit,                                            
-    //                     "amount" => $total_amount,
-    //                     "REFERENCE_NO" => $reference_num,
-    //                     "RSBSA_CTRL_NO" => $rsbsa_ctrl_no,
-    //                     "DISTRIBUTOR_ID" => $supplier_id,
-    //                     "SUPPLIER_CODE" => $supplier_id,
-    //                     "SUPPLIER_GROUP" => $supplier_id
-
-    //                 ])->save();
-
-
-    //             }
-
-
-
-
-    //             $compute_balance = 0;
-
-    //             $current_balance =  $this->vouchergen_model->where('REFERENCE_NO',$reference_num)->first()->AMOUNT;
-    //             $compute_balance = $current_balance - $commodities_total_amount  ;
-
-    //             $get_date = Carbon::now();
-    //             $update_voucher_gen->where('REFERENCE_NO',$reference_num)->update(
-    //                 [
-    //                     "AMOUNT" => $compute_balance,
-    //                     "VOUCHER_STATUS" => "CLAIMED",
-    //                     "CLAIMED_DATE" => $get_date->toDateTimeString(),
-    //                     "SUPPLIER_CODE" => $supplier_id,
-    //                 ]);
-
-
-
-    //             $document_type_value = '';
-
-    //             // upload and store 
-    //             for($i = 0 ; $i < $images_count ; $i++){
-    //                 $image = request()->input('image'.$i);
-    //                 $document_type = request('document_type'.$i);
-    //                 $image = str_replace('data:image/jpeg;base64,', '', $image);
-    //                 $image = str_replace(' ', '+', $image);
-    //                 $imageName = $reference_num .'_'.$i. '.jpeg';
-
-    //                 $store_attachments = new  AttachmentModel();
-
-    //                 if($document_type == 3)
-    //                     $document_type_value = 'Picture of other documents or attachments';
-    //                 else if ($document_type == 2)
-    //                     $document_type_value = 'Picture of ID Presented and Signature';
-    //                 else if ($document_type == 1 )
-    //                     $document_type_value = 'Picture of farmer holding interventions';
-
-
-    //                  $store_attachments->fill([
-    //                         "att_file" =>  $imageName,
-    //                         "requirement" => $document_type,
-    //                         "filetitle" => $document_type_value,                                            
-    //                         "REFERENCE_NO" => $reference_num,
-    //                         "RSBSA_CTRL_NO" => $rsbsa_ctrl_no,
-    //                         "imglink" => URL::to('/').'//storage//'. '/uploads//'.$imageName,
-    //                         "SUPPLIER_CODE" => $supplier_id,
-    //                         "DISTRIBUTOR_ID" => $supplier_id
-    //                 ])->save();
-
-
-    //                 File::put(storage_path(). '/uploads//' . $imageName, base64_decode($image));            
-    //             }
-
-
-    //             echo json_encode(array(["Message"=>'true']));
-
-
-    //     }catch(\Exception $e){
-    //         echo json_encode(array(["Message"=>$e->getMessage(),"StatusCode" => $e->getCode()]));
-    //     }
-
-    // }
 
 
     // insert attachment function
@@ -277,15 +179,6 @@ class MobileAppController extends Controller
         if ($item->name == 'Valid ID') {
             $id_front = $item->file[0]->front;
             $id_back = $item->file[0]->back;
-
-            
-            db::table('voucher_transaction')
-                    ->where(  'voucher_details_id' , $uuid)
-                    ->update(
-                        [
-                            'latitude' =>  $item->latitude,
-                            'longitude' =>  $item->longitude, 
-                        ]);
 
             // front page of id 
             $id_front = str_replace('data:image/jpeg;base64,', '', $id_front);
@@ -373,6 +266,8 @@ class MobileAppController extends Controller
                     'quantity' =>  $commodity->quantity,
                     'amount' =>  $commodity->fertilizer_amount,
                     'total_amount' =>  $commodity->total_amount,
+                    'latitude' =>  $voucher_info->latitude,
+                    'longitude' =>  $voucher_info->longitude,
                     'transac_by_id' =>  $voucher_info->supplier_id,
                     'transac_by_fullname' =>  $voucher_info->full_name,
                 ]
@@ -385,6 +280,67 @@ class MobileAppController extends Controller
 
             //  compute remaining balance
             $compute_remaining_bal = $voucher_info->current_balance - $commodity->total_amount;
+
+            // update  voucher gen table amount_val
+            db::table('voucher')
+                ->where('reference_no', $voucher_info->reference_no)
+                ->update([
+                    'amount_val' => $compute_remaining_bal, 
+                    'voucher_status' => 'FULLY CLAIMED',
+                ]);
+        } catch (\Exception $e) {
+            echo json_encode(array(["Message" => $e->getMessage(), "StatusCode" => $e->getCode()]));
+        }
+    }
+
+    //SUBMIT FUNCTION OF CLAIM VOUCHER CFSMFF
+    public function submit_voucher_cfsmff() 
+    {
+
+        try {
+            $uuid = Uuid::uuid4();
+
+            $voucher_info = json_decode(request('voucher_info'));
+            $commodity = json_decode(request('commodity'));
+            $attachments = json_decode(request('attachments'));
+
+            // insert to voucher transaction table
+            
+            $voucher_details_uuid = '';
+            $sum_total_amount = 0;
+            foreach($commodity as $item){
+                $voucher_details_uuid = Uuid::uuid4();
+                db::table('voucher_transaction')->insert(
+                    [
+                        'voucher_details_id' => $voucher_details_uuid,
+                        'reference_no' => $voucher_info->reference_no,
+                        'supplier_id' => $voucher_info->supplier_id,
+                        'sub_program_id' => $item->sub_id,
+                        'fund_id' =>  $voucher_info->fund_id,
+                        'quantity' =>  $item->quantity,
+                        'amount' =>  $item->price,
+                        'total_amount' =>  $item->total_amount,
+                        'latitude' =>  $voucher_info->latitude,
+                        'longitude' =>  $voucher_info->longitude,
+                        'transac_by_id' =>  $voucher_info->supplier_id,
+                        'transac_by_fullname' =>  $voucher_info->full_name,
+                    ]
+                );
+
+                // comp
+                $sum_total_amount += $item->total_amount;
+
+
+            }
+        
+
+            // upload attachments to file server 
+            foreach ($attachments as $item) {
+                $this->insertAttachment($item,$voucher_details_uuid,$voucher_info);
+            }
+
+            //  compute remaining balance
+            $compute_remaining_bal = $voucher_info->current_balance - $sum_total_amount;
 
             // update  voucher gen table amount_val
             db::table('voucher')
@@ -423,10 +379,6 @@ class MobileAppController extends Controller
                         ->join('supplier_programs as sp', 'pi.item_id', 'sp.item_id')
                         ->where('supplier_id', $supplier_id)
                         ->get();
-
-        foreach ($get_record as $key => $item) {
-            $item->base64 = base64_encode(file_get_contents(storage_path('/commodities//' . $item->item_profile)));
-        }
 
         return $get_record;
     }
