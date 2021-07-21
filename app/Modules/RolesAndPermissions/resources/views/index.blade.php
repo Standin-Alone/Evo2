@@ -29,6 +29,7 @@
         // load record to datatable
         $('#load-datatable').DataTable({
             serverSide: true,
+            
             ajax: "{{route('roles.create')}}",               
             columns:[
                 {data:'role'},

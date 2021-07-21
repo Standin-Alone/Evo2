@@ -6,9 +6,13 @@
 
 {{--  import in this section your css files--}}
 @section('page-css')
+
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+    <style>
+       
+    </style>
 @endsection
 
 
@@ -31,7 +35,7 @@
     $(document).ready(function(){
         // load record to datatable
         module_table = $('#load-datatable').DataTable({
-            serverSide: true,
+            serverSide: true,                        
             ajax: {
                 "url" : '{{route("modules.show",["module" => "0"])}}',
                 "type" : "get"
@@ -68,7 +72,7 @@
         $("#load-datatable").on('click','.set-status-btn',function(){
             id = $(this).attr('id');
             status = $(this).attr('status');
-                        
+                                    
             swal({
                     title: "Wait!",
                     text: "Are you sure you want to "+ (status == 1 ? 'disable' : 'enable')+"?",
@@ -213,8 +217,6 @@
                         });
                     }
                 });
-               
-
             }
         })
        
@@ -251,14 +253,15 @@
 <!-- begin panel -->
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">Panel Title here</h4>
+        <h4 class="panel-title">Module Management</h4>
     </div>
     <div class="panel-body">
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
             <i class='fa fa-plus'></i> Add New
         </button>
         <br>
-        <br><br>
+        <br>
+        <br>
         <table id="load-datatable" class="table table-hover">            
             <thead>
                 <tr>                    

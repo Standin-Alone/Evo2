@@ -27,10 +27,11 @@ class RolesAndPermissionsController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    // load roles and permissions to datatable
     public function create()
     {
         //  
-        $record = array();
+        $record    = array();
         $get_roles = DB::table('roles')->where('role','<>','Admin')->get();        
 
         foreach($get_roles as $item){
@@ -114,11 +115,11 @@ class RolesAndPermissionsController extends Controller
     {
         //
         $role_id = request('role_id');
-        $module = request('module');
-        $id = request('id');
+        $module  = request('module');
+        $id      = request('id');
         
         $get_permissions = db::table('sys_permission')->get();
-        $get_module = db::table('sys_modules')->where('module',$module)->first();
+        $get_module      = db::table('sys_modules')->where('module',$module)->first();
         foreach($get_permissions as $item){
             $insert_mod_permissions = db::table('sys_access_matrix')->insert(
                                             [
@@ -135,14 +136,14 @@ class RolesAndPermissionsController extends Controller
     }   
     //set permissions
     public function set_permissions(){
-        $role_id = request('role_id');
-        $module = request('module');
-        $permission = request('permission');
-        $checked = request('checked');
-        
+        $role_id    =  request('role_id');
+        $module     =  request('module');
+        $permission =  request('permission');
+        $checked    =  request('checked');
+         
 
         $get_permissions = db::table('sys_permission')->where('permission',$permission)->first();
-        $get_module = db::table('sys_modules')->where('module',$module)->first();
+        $get_module      = db::table('sys_modules')->where('module',$module)->first();
 
         if($checked == 'true'){
             db::table('sys_access_matrix')
