@@ -184,9 +184,9 @@ header('Content-Type: text/html');?>
 				</ul>
 				<!-- end sidebar user -->				
 
-				@if(session('role') == 'Admin')
+
 					@include('sidebar.sidebar')								
-				@endif
+			
 				
 			</div>
 			<!-- end sidebar scrollbar -->

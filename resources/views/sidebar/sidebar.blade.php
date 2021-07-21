@@ -5,10 +5,10 @@
     @if(session('role') == 'Admin')
 
     @foreach(session('modules') as $item )            
-        <li class="{{Route::currentRouteName() == $item['route'] ? "active" : null}}">
-            <a href="{{ route('user.index') }}">					        
+        <li class="{{Route::currentRouteName() == $item->routes ? "active" : null}}">
+            <a href="{{ route($item->routes) }}">					        
                 <i class="fa fa-th-large"></i>
-                <span>{{$item['module']}}</span>
+                <span>{{$item->module}}</span>
             </a>        
         </li>
     @endforeach

@@ -379,7 +379,11 @@ class MobileAppController extends Controller
                         ->join('supplier_programs as sp', 'pi.item_id', 'sp.item_id')
                         ->where('supplier_id', $supplier_id)
                         ->get();
-
+                        
+        foreach($get_record as $key => $item){
+            $item->base64 = base64_encode(file_get_contents(storage_path('/commodities//' .$item->item_profile)));
+            
+        }
         return $get_record;
     }
 }

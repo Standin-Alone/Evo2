@@ -31,7 +31,7 @@ class RolesAndPermissionsController extends Controller
     {
         //  
         $record = array();
-        $get_roles = DB::table('roles')->get();        
+        $get_roles = DB::table('roles')->where('role','<>','Admin')->get();        
 
         foreach($get_roles as $item){
 
@@ -47,7 +47,7 @@ class RolesAndPermissionsController extends Controller
         return datatables($record)->toJson();
     }
 
-
+    //get permissions
     public function get_permissions(){
         
         $get_permission = DB::table('sys_permission')->get();
@@ -56,7 +56,7 @@ class RolesAndPermissionsController extends Controller
         return $get_permission;
     }
 
-    
+    //get module permissions
     public function get_module_permissions(){
         $id = request('role_id');
         $record = [];
@@ -90,7 +90,7 @@ class RolesAndPermissionsController extends Controller
     }
 
 
-
+    //load modules in select element
     public function select_modules(){
         $id = request('role_id');
         $get_module_matrix = DB::table('roles as r')                                                                
@@ -108,6 +108,8 @@ class RolesAndPermissionsController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+
+    //  insert modules to permissions.
     public function store(Request $request)
     {
         //
@@ -131,18 +133,18 @@ class RolesAndPermissionsController extends Controller
         
 
     }   
-
+    //set permissions
     public function set_permissions(){
         $role_id = request('role_id');
         $module = request('module');
         $permission = request('permission');
         $checked = request('checked');
-        $access_matrix_model = new RolesAndPermissions();
+        
 
         $get_permissions = db::table('sys_permission')->where('permission',$permission)->first();
         $get_module = db::table('sys_modules')->where('module',$module)->first();
 
-        if($checked == true){
+        if($checked == 'true'){
             db::table('sys_access_matrix')
                     ->where('role_id',$role_id)
                     ->where('sys_module_id',$get_module->sys_module_id)

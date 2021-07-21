@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use DB;
 class AccessController extends Controller
 {
     /**
@@ -32,24 +32,11 @@ class AccessController extends Controller
 
 
 
-        $modules = [
-            [
-                "module" => "Supplier Registration",
-                "route" => "supplier.index"
-            ],         
-            [
-                "module" => "User Management",
-                "route" => "user.index"
-            ],                   
-            [
-                "module" => "Roles and Permissions",
-                "route" => "roles.index"
-            ]
-        ];        
+        $get_modules = db::table('sys_modules')->get();
 
 
         session(['role'=>'Admin']);
-        session(['modules'=>$modules]);
+        session(['modules'=>$get_modules]);
 
         
         

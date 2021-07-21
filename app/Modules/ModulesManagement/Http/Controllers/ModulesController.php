@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use DB;
 use Artisan;
-use L5Modular;
+
 class ModulesController extends Controller
 {
 
@@ -55,9 +55,9 @@ class ModulesController extends Controller
 
     public function destroy($id){
         $status = request('status');
-        // if($status == 1){
-        //     L5Modular::disable('RolesAndPermissions');
-        // }
+        // \ArtemSchander\L5Modular::disable('RolesAndPermissions');
+        // // L5Modular::disable('RolesAndPermissions');
+
         db::table('sys_modules')
             ->where('sys_module_id',$id)
             ->update(['status'=>$status == 1 ? '0' : '1']);
