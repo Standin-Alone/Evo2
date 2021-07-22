@@ -25,7 +25,7 @@ class ModulesController extends Controller
     public function store(){
         try{
             $module_name = request('module_name');
-            $route = request('route');
+            $route       = request('route');
 
             Artisan::call("make:module",["name" => $module_name]);
             db::table('sys_modules')
@@ -40,7 +40,7 @@ class ModulesController extends Controller
     // update data
     public function update($id){
         $module_name = request('module_name');
-        $route = request('route');
+        $route       = request('route');
         
         db::table('sys_modules')
             ->where('sys_module_id',$id)

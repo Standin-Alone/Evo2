@@ -152,56 +152,40 @@ header('Content-Type: text/html');?>
 		<!-- end #header -->
 		
 		<!-- begin #sidebar -->
-		<div id="sidebar" class="sidebar">
+		<div id="sidebar" class="sidebar sidebar-transparent gradient-enabled" >
 			<!-- begin sidebar scrollbar -->
 			<div data-scrollbar="true" data-height="100%">
 				<!-- begin sidebar user -->
 				<ul class="nav">
-					<li class="nav-profile">
+					<li class="nav-profile" >
 						<a href="javascript:;" data-toggle="nav-profile">
 							<div class="cover with-shadow"></div>
 							<div class="image">
 								<img src="assets/img/user/user-13.jpg" alt="" />
 							</div>
 							<div class="info">
-								<b class="caret pull-right"></b>
+							
 								John Doe
                                  {{-- {{session('session_name')}} --}}
 								<small>
-                                    Regional Officer
+                                    Admin
                                     {{-- {{session('position')}} --}}
                                 </small>
 							</div>
 						</a>
-					</li>
-					<li>
-						<ul class="nav nav-profile">
-                            <li><a href="javascript:;"><i class="fa fa-cog"></i> Settings</a></li>
-                            <li><a href="javascript:;"><i class="fa fa-pencil-alt"></i> Send Feedback</a></li>
-                            <li><a href="javascript:;"><i class="fa fa-question-circle"></i> Helps</a></li>
-                        </ul>
-					</li>
+					</li>					
 				</ul>
 				<!-- end sidebar user -->				
-
-
 					@include('sidebar.sidebar')								
-			
-				
 			</div>
 			<!-- end sidebar scrollbar -->
 		</div>
-		<div class="sidebar-bg"></div>
+		<div class="sidebar-bg" style="background-image: url('assets/img/cover/farmer.jpg');background-position: center;" ></div>
 		<!-- end #sidebar -->
 		
 		<!-- begin #content -->
 		<div id="content" class="content">
-
-
-            @yield('content')
-            
-
-    
+            @yield('content')            
 		</div>
 		<!-- end #content -->
 		    

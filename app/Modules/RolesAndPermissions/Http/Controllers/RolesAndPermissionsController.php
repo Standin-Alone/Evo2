@@ -42,7 +42,9 @@ class RolesAndPermissionsController extends Controller
                                 ->groupBy('module')
                                 ->where('sam.role_id',$item->role_id)->get();
                                 
-                array_push($record,['role_id'=>$item->role_id,'role'=>$item->role, 'modules'=>$get_modules ]);
+                array_push($record,['role_id' => $item->role_id,
+                                    'role'    => $item->role, 
+                                    'modules' => $get_modules ]);
         }
 
         return datatables($record)->toJson();
@@ -78,7 +80,9 @@ class RolesAndPermissionsController extends Controller
                                 ->where('r.role_id',$id)                                
                                 ->where('module',$item->module)                                
                                 ->get();
+
                 array_push($record,["module"=>$item->module]);
+
             foreach($get_permissions_id as $key_val => $val){
                 $record[$key_item][$val->permission] =  $val->status;
             }
