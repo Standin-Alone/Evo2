@@ -2,7 +2,7 @@
 <ul class="nav">
     <li class="nav-header">Navigation {{session('role')}}</li>
     
-    @if(session('role') == 'Admin')
+  
 
     @foreach(session('modules') as $item )            
         <li class="{{Route::currentRouteName() == $item->routes ? "active" : null}}">
@@ -11,7 +11,7 @@
                 <span>{{$item->module}}</span>
             </a>        
         </li>
-    @endforeach
+
 
     @endif
     

@@ -23,6 +23,8 @@ Route::post('/api/submit-voucher-cfsmff','MobileAppController@submit_voucher_cfs
 Route::post('/api/resend-otp','MobileAppController@resendOTP');
 
 Route::get('/api/get-items','MobileAppController@getProgramItems');
+
+Route::post('/api/validate-otp','MobileAppController@validateOTP');
 //  
 
 Route::get('/otp','MobileAppController@otp');

@@ -11,6 +11,7 @@ use Mail;
 use DB;
 use Ramsey\Uuid\Uuid;
 
+use function PHPUnit\Framework\isEmpty;
 
 class MobileAppController extends Controller
 {
@@ -27,13 +28,14 @@ class MobileAppController extends Controller
         $username   = request('username');
         $password   = request('password');
         $random_otp = mt_rand(100000, 999999);
-
+    
         $authenticate = db::table('users')->where('username', $username)->get();
         $get_password = db::table('users')->where('username', $username)->value('password');
 
         
 
         $to_email = "";
+        $otp_to_send = "";            
         if (!$authenticate->isEmpty()) {
 
             if(password_verify($password,$get_password)){
@@ -44,10 +46,30 @@ class MobileAppController extends Controller
                               ->join('supplier as s', 's.supplier_id', 'pp.other_info')
                               ->join('users as u', 'u.user_id', 'pp.user_id')
                               ->where('u.user_id', $authenticate->user_id)->first();
+                }   
+
+            
+                $check_otp = db::table('user_otp')
+                                ->where('user_id',$supplier->user_id)
+                                ->where('status','1')
+                                ->get();
+
+                if(!$check_otp->isEmpty()){
+                    foreach($check_otp as $item){
+                           $otp_to_send = $item->otp;
+                    }
+                }else{
+                    $otp_to_send = $random_otp;
+                    // insert otp to user_otp table
+                    db::table('user_otp')->insert([
+                        "user_id" => $supplier->user_id,
+                        "otp"     => $otp_to_send                    
+                    ]);
                 }
+              
+                
 
-
-                Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($to_email, $random_otp) {
+                Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send], function ($message) use ($to_email, $otp_to_send) {
                     $message->to($to_email)
                             ->subject('DA VMP Mobile')
                             ->from("support.sadd@da.gov.ph");
@@ -55,7 +77,7 @@ class MobileAppController extends Controller
 
                 return json_encode(array([
                     "Message"     => "true",
-                    "OTP"         => $random_otp,
+                    "OTP"         => $otp_to_send,
                     "email"       => $to_email,
                     "supplier_id" => $supplier->supplier_id,
                     "user_id"     => $supplier->user_id,
@@ -68,6 +90,62 @@ class MobileAppController extends Controller
             return json_encode(array(["Message" => "false"]));
         }
     }
+
+
+      // resend OTP
+      public function resendOTP()
+      {
+  
+        $email      = request('email');
+        $user_id      = request('user_id');
+        $random_otp = mt_rand(100000, 999999);
+        
+        // disable the previous otp
+        db::table('user_otp')
+            ->where('user_id',$user_id)
+            ->update([
+            "status" => '0'
+        ]);
+
+        // insert new otp
+        db::table('user_otp')->insert([
+            "user_id" => $user_id,
+            "otp"     => $random_otp                    
+        ]);
+
+          Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($email, $random_otp) {
+              $message->to($email)
+                      ->subject('DA VMP Mobile')
+                      ->from("webdeveloper01000@gmail.com");
+          });
+  
+          return json_encode(array(["Message" => 'true',
+                                    "OTP"     => $random_otp]));
+      }
+  
+      // validate otp
+      public function validateOTP(){
+          
+          $code = request('code');
+          $user_id = request('user_id');
+  
+          $validate_otp =  db::table('user_otp')
+                              ->where('user_id',$user_id)
+                              ->where('otp',$code)
+                              ->get();
+  
+          if(!$validate_otp->isEmpty()){
+              
+              db::table('user_otp')
+                  ->where('user_id',$user_id)
+                  ->where('otp',$code)
+                  ->update(["status" => '0']);                                
+              return 'true';
+          }else{
+              return 'false';
+          }
+  
+      }
 
     // get scanned vouchers for home screen
     public function get_scanned_vouchers($supplier_id)
@@ -356,22 +434,7 @@ class MobileAppController extends Controller
         }
     }
 
-    // resend OTP
-    public function resendOTP()
-    {
-
-        $email      = request('email');
-        $random_otp = mt_rand(100000, 999999);
-
-        Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($email, $random_otp) {
-            $message->to($email)
-                    ->subject('DA VMP Mobile')
-                    ->from("webdeveloper01000@gmail.com");
-        });
-
-        return json_encode(array(["Message" => 'true',
-                                  "OTP"     => $random_otp]));
-    }
+  
 
 
     // get program items (rice, egg , etc...)
