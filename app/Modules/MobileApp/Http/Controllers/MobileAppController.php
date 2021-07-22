@@ -3,15 +3,10 @@
 namespace App\Modules\MobileApp\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-
 use File;
 use Mail;
-
 use DB;
 use Ramsey\Uuid\Uuid;
-
-use function PHPUnit\Framework\isEmpty;
 
 class MobileAppController extends Controller
 {
