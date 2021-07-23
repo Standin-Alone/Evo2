@@ -13,8 +13,7 @@
         </li>
 
 
-    @endif
-    
+    @endforeach
  
 
     <!-- begin sidebar minify button -->

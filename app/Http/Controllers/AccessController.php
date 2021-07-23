@@ -32,8 +32,13 @@ class AccessController extends Controller
 
 
 
-        $get_modules = db::table('sys_modules')->get();
-
+        $get_modules = db::table('sys_modules as sm')
+                            ->select('module','routes')
+                            ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')
+                            ->where('sm.status', 1)
+                            ->where('role_id',5)                            
+                            ->groupBy('module')
+                            ->get();
 
         session(['role'=>'Admin']);
         session(['modules'=>$get_modules]);

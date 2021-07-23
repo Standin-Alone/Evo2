@@ -123,6 +123,10 @@
                 route:{
                     required:'<div class="text-danger">Please enter route.</div>'
                 }
+                ,
+                sample:{
+                    required:'<div class="text-danger">Please enter route.</div>'
+                }
             },
             submitHandler: function() { 
                 swal({
@@ -297,6 +301,13 @@
                                     <label>Route </label> <span id='reqcatnameadd' style='color:red'>*</span>
                                     <input   name="route" class="form-control"  placeholder="module.index" required="true">
                                 </div>
+                                <div class="form-group">
+                                <select class="form-control" name="sample" required>
+                                    <option value="">select</option>
+                                    <option >select1</option>
+
+                                </select>
+                            </div>
                             </div>
                             {{--modal body end--}}
                         </div>
