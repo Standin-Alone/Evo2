@@ -211,13 +211,6 @@
 
 
 @section('content')
-<!-- begin breadcrumb -->
-<ol class="breadcrumb pull-right">
-    <li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
-    <li class="breadcrumb-item"><a href="javascript:;">Page Options</a></li>
-    <li class="breadcrumb-item active">Blank Page</li>
-</ol>
-<!-- end breadcrumb -->
 <!-- begin page-header -->
 <h1 class="page-header">Roles and Permissions<small> This page is setup of permissions of roles.</small></h1>
 <!-- end page-header -->
