@@ -10,6 +10,8 @@ Route::post('/api/get_voucher_info','MobileAppController@get_voucher_info');
 
 // Home Screen
 Route::get('/api/get-scanned-vouchers/{supplier_id}','MobileAppController@get_scanned_vouchers');
+Route::get('/api/get-transaction-history/{reference_id}','MobileAppController@get_transactions_history');
+Route::get('/api/get-transacted-items/{reference_id}','MobileAppController@getTransactedItems');
 
 // Attachment Screen Claim Voucher (RRP)
 Route::post('/api/submit-voucher-rrp','MobileAppController@submit_voucher_rrp');

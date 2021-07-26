@@ -154,9 +154,11 @@ class MobileAppController extends Controller
                 'transac_date',
                 DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
                 'rsbsa_no',
-                'file_name'
+                'file_name',
+                'v.amount_val',
+                'vt.voucher_details_id',                                
               )
-            ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')
+            ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
             ->join('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
             ->where('supplier_id', $supplier_id)  
             ->where('document', 'Farmer with Commodity')            
@@ -177,7 +179,10 @@ class MobileAppController extends Controller
     }
 
     public function get_transactions_history($reference_num){
-        $get_voucher_transactions = db::table('voucher_transaction')->where('reference_no', $reference_num)->get();
+        $get_voucher_transactions = db::table('voucher_transaction as vt')                                    
+                                    ->join('supplier_programs as sp', 'sp.sub_id', 'vt.sub_program_id')
+                                    ->join('program_items as pi','pi.item_id','sp.item_id')                                            
+                                    ->where('reference_no', $reference_num)->get();
         
         return $get_voucher_transactions; 
     }
@@ -447,5 +452,9 @@ class MobileAppController extends Controller
 
         return $get_record;
     }
+
+
+
+    
 }
 

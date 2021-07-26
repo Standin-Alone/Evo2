@@ -18,6 +18,8 @@ class VerifyCsrfToken extends Middleware
         '/api/resend-otp',
         '/api/submit-voucher',
         '/api/get-scanned-vouchers',
+        '/api/get-transacted-items',
+        '/api/get-transaction-history',
         '/api/get-items',
         '/api/submit-voucher-rrp',
         '/api/submit-voucher-cfsmff',
