@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use DB;
 use Artisan;
-
+use Carbon\Carbon;
 class ModulesController extends Controller
 {
 
@@ -62,4 +62,5 @@ class ModulesController extends Controller
             ->where('sys_module_id',$id)
             ->update(['status'=>$status == 1 ? '0' : '1']);
     }
+
 }

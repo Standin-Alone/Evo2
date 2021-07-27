@@ -7,7 +7,7 @@ use File;
 use Mail;
 use DB;
 use Ramsey\Uuid\Uuid;
-
+use Carbon\Carbon;
 class MobileAppController extends Controller
 {
     /**
@@ -127,15 +127,26 @@ class MobileAppController extends Controller
           $validate_otp =  db::table('user_otp')
                               ->where('user_id',$user_id)
                               ->where('otp',$code)
+                              ->limit(1)                            
                               ->get();
-  
+          
           if(!$validate_otp->isEmpty()){
-              
+            $current_date_time = Carbon::now(); 
+            $otp_date = Carbon::parse($validate_otp[0]->date_created);
+            $check_expiration = $otp_date->diffInDays($current_date_time);
+         
+            if($check_expiration == 0){
+
               db::table('user_otp')
                   ->where('user_id',$user_id)
                   ->where('otp',$code)
                   ->update(["status" => '0']);                                
               return 'true';
+
+            }else{
+                return 'expired';
+            }
+            
           }else{
               return 'false';
           }
@@ -360,6 +371,7 @@ class MobileAppController extends Controller
             $compute_remaining_bal = $voucher_info->current_balance - $commodity->total_amount;
 
             // update  voucher gen table amount_val
+            
             db::table('voucher')
                 ->where('reference_no', $voucher_info->reference_no)
                 ->update([
@@ -426,7 +438,7 @@ class MobileAppController extends Controller
                 ->where('reference_no', $voucher_info->reference_no)
                 ->update([
                     'amount_val'     => $compute_remaining_bal, 
-                    'voucher_status' => 'FULLY CLAIMED',
+                    'voucher_status' => 'PARTIALLY CLAIMED',
                 ]);
         } catch (\Exception $e) {
             echo json_encode(array(["Message"    => $e->getMessage(), 

@@ -40,7 +40,7 @@ class AccessController extends Controller
                             ->groupBy('module')
                             ->get();
 
-        session(['role'=>'Admin']);
+        session(['role'=>'RFO Program Staff']);
         session(['modules'=>$get_modules]);
 
         

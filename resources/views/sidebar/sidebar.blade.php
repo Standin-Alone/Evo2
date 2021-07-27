@@ -1,6 +1,6 @@
 <!-- begin sidebar nav -->
 <ul class="nav">
-    <li class="nav-header">Navigation {{session('role')}}</li>
+    <li class="nav-header">{{session('role')}} Navigation </li>
     
   
 
@@ -11,8 +11,6 @@
                 <span>{{$item->module}}</span>
             </a>        
         </li>
-
-
     @endforeach
  
 
