@@ -23,14 +23,181 @@
 	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
 	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
+
+    <script>
+
+
+    $(document).ready(function(){
+
+        // filter province
+        $("#region").change(function(){
+            let value = $("option:selected", this).val();
+            $.ajax({
+                url:'{{route("filter-province",["region_code" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#province").prop('disabled',false);
+                    $("#province option").remove();
+                    $("#province").append('<option value="" selected disabled>Select Province</option>')
+                    convertToJson.map(item => {
+                        $("#province").append('<option value="'+item.prov_code+'">'+item.prov_name+'</option>')
+                    })
+                }                
+            });
+        })
+
+        // filter municipality
+        $("#province").change(function(){
+            let value = $("option:selected", this).val();
+            $.ajax({
+                url:'{{route("filter-municipality",["province_code" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#municipality").prop('disabled',false);
+                    $("#municipality option").remove();
+                    $("#municipality").append('<option value="" selected disabled>Select Municipality</option>')
+                    convertToJson.map(item => {
+                        $("#municipality").append('<option value="'+item.mun_code+'">'+item.mun_name+'</option>')
+                    })
+                }                
+            });
+        })
+
+
+
+        // filter barangay
+        $("#municipality").change(function(){
+            let value = $("option:selected", this).val();
+            $.ajax({
+                url:'{{route("filter-barangay",["municipality_code" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#barangay").prop('disabled',false);
+                    $("#barangay option").remove();
+                    $("#barangay").append('<option value="" selected disabled>Select Barangay</option>')
+                    convertToJson.map(item => {
+                        $("#barangay").append('<option value="'+item.bgy_code+'">'+item.bgy_name+'</option>')
+                    })
+                }                
+            });
+        })
+
+        $("input[name='agency_loc']").change(function(){
+            let value = $(this).val();
+            $.ajax({
+                url:'{{route("filter-role",["agency_loc" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#role").prop('disabled',false);
+                    $("#role option").remove();
+                    $("#role").append('<option value="" selected disabled>Select Role</option>')
+                    convertToJson.map(item => {
+                        $("#role").append('<option value="'+item.role_id+'">'+item.role+'</option>')
+                    })
+                }                
+            });
+            
+        })
+    })
+
+    </script>
+
+
+
+    <script>
+        $(document).ready(function(){
+
+
+            $("#AddForm").validate({
+                rules:{
+                    first_name:'required',
+                    last_name:'required',
+                    email:{required:true,
+                            email:true,
+                            remote:{
+                                url:"{{route('check-email')}}",
+                                type:'get'
+                            }
+                        },
+                    contact:'required',
+                    agency:'required',
+                    agency_loc:'required',
+                    region:'required',
+                    province:'required',
+                    municipality:'required',
+                    barangay:'required',            
+                },
+                messages:{
+                    first_name  :{required:'<div class="text-danger">Please enter your first name.</div>'},
+                    last_name   :{required:'<div class="text-danger">Please enter your last name.</div>'},
+                    email       :{
+                                    required:'<div class="text-danger">Please enter your email.</div>',
+                                    email:'<div class="text-danger">Please enter a valid email address.</div>', 
+                                    remote:'<div class="text-danger">This email is already exist.</div>'
+                                  },                    
+                    contact     :{required:'<div class="text-danger">Please enter your contact number.</div>'},
+                    agency      :{required:'<div class="text-danger">Please select your agency.</div>'},
+                    agency_loc  :{required:'<div class="text-danger">Please select agency location.</div>'},
+                    region      :{required:'<div class="text-danger">Please select region.</div>'},
+                    province    :{required:'<div class="text-danger">Please select province.</div>'},
+                    municipality:{required:'<div class="text-danger">Please select municipality.</div>'},
+                    barangay    :{required:'<div class="text-danger">Please select barangay.</div>', } 
+                },
+                submitHandler:function(){
+                    swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to add this user?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                    })
+                    .then((confirm) => {
+                        id = $('input[name="id"]').val();
+                        
+                        // check if confirm
+                        if (confirm) {                       
+                            $.ajax({
+                                url:"{{route('user-add')}}",
+                                type:'post',
+                                data:$("#AddForm").serialize(),
+                                success:function(response){             
+                                    //    
+                                    swal("Successfully added new user.", {
+                                            icon: "success",
+                                    }).then(()=>{
+                                        $("#AddModal").modal('hide')
+                                        // module_table.ajax.reload();
+                                    });
+                                },
+                                error:function(response){
+
+                                }
+                            })
+                            
+                        } else {
+                            swal("Operation Cancelled.", {
+                                icon: "error",
+                            });
+                        }
+                    });
+                }
+            })
+        })
+
+    </script>
 @endsection
 
 
 
 
-<script>
-    
-</script>
 
 
 
@@ -38,15 +205,9 @@
 
 
 @section('content')
-<!-- begin breadcrumb -->
-<ol class="breadcrumb pull-right">
-    <li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
-    <li class="breadcrumb-item"><a href="javascript:;">Page Options</a></li>
-    <li class="breadcrumb-item active">Blank Page</li>
-</ol>
-<!-- end breadcrumb -->
+
 <!-- begin page-header -->
-<h1 class="page-header">Blank Page <small>header small text goes here...</small></h1>
+<h1 class="page-header">User Management<small>header small text goes here...</small></h1>
 <!-- end page-header -->
 
 <!-- begin panel -->
@@ -87,7 +248,7 @@
 
         <!-- #modal-add -->
         <div class="modal fade" id="AddModal">
-            <div class="modal-dialog" style="max-width: 30%">
+            <div class="modal-dialog" style="max-width: 40%">
                 <form id="AddForm" method="POST" >
                     @csrf
                     <div class="modal-content">
@@ -97,17 +258,120 @@
                         </div>
                         <div class="modal-body">
                             {{--modal body start--}}
-                            <div class="col-lg-12">
+                            <div class="col-lg-12 row">
                                 <div class="form-group">
-                                    <label>Sample</label> <span id='reqcatnameadd'></span>
-                                    <input style="text-transform: capitalize;" id="AddCatName" name="AddCatName" class="form-control"  placeholder="e.g.: Missing Persons" required="true">
+                                    <label>Name</label> <span style="color:red">*</span>
+                                    <input style="text-transform: capitalize;"  name="first_name" class="form-control"  placeholder="First Name *"  >                                    
+                                </div>&nbsp;
+                                <div class="form-group">
+                                    <label>&nbsp;</label> <span style="color:red"></span>
+                                    <input style="text-transform: capitalize;"  name="middle_name" class="form-control"  placeholder="Middle Name " >                                    
+                                </div>&nbsp;
+                                <div class="form-group">
+                                    <label>&nbsp;</label> <span style="color:red"></span>
+                                    <input style="text-transform: capitalize;"  name="last_name" class="form-control"  placeholder="Last Name *"    >                                   
+                                </div>&nbsp;
+                                <div class="form-group">
+                                    <label>&nbsp;</label> <span style="color:red"></span>
+                                    <input style="text-transform: capitalize;"  name="ext_name" class="form-control"  placeholder="Extension Name *"    >                                   
                                 </div>
+                            </div>
+                           
+
+                            <div class="col-lg-12 row">
+                                <div class="form-group">
+                                    <label>Email</label><span style="color:red">*</span>
+                                    <input    type="email" name="email" class="form-control"  placeholder="example@gmail.com" >
+                                </div>&nbsp;&nbsp;
+                                <div class="form-group">
+                                    <label>Contact</label><span style="color:red">*</span>
+                                    <input    type="number" name="contact" class="form-control"  placeholder="+639..." >
+                                </div>
+                            </div>
+
+                            <div class="col-lg-12 row ">
+                                <label class="col-md-12 row">Agency <span style="color:red">*</span></label> 
+                                <div class="col-md-12  row">
+                                    <div class="form-check ">
+                                        <input class="form-check-input" type="radio" id="defaultRadio1" name="agency_loc"  value="CO" checked  />
+                                        <label class="form-check-label" for="defaultRadio1">Central Office</label>
+                                    </div> &nbsp; &nbsp;                       
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" id="defaultRadio2" name="agency_loc" value="RFO" />
+                                        <label class="form-check-label" for="defaultRadio2">Regional Field Office</label>
+                                    </div>       
+                                </div>                       
+                            </div><br>
+
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Role</label> <span style="color:red">*</span>
+                                    <select class="form-control" name="role" id="role"  disabled>
+                                        <option selected disabled value="">Select Role</option>                                    
+                                    </select>
+                                </div>                              
+                            </div>
+                            
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Agency</label> <span style="color:red">*</span>
+                                    <select class="form-control" name="agency" >
+                                        <option selected disabled value="">Select Agency</option>
+                                        @foreach ($get_agency as $item)
+                                            <option  value="{{$item->agency_id}}">{{$item->agency_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>                              
+                            </div><br>
+
+                         
+
+
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Region</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="region" name="region" >
+                                        <option selected disabled value="">Select Region</option>
+                                        @foreach ($get_regions as $item)
+                                            <option value="{{$item->reg_code}}">{{$item->reg_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>                              
+                            </div>
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Province</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="province" name="province" disabled >
+                                        <option selected disabled value="">Select Province</option>
+                                    </select>
+                                </div>                              
+                            </div>
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Municipality</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="municipality" name="municipality" disabled >
+                                        <option selected disabled value="">Select Municipality</option>
+                                    </select>
+                                </div>                              
+                            </div>
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Barangay</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="barangay" name="barangay" disabled     >
+                                        <option selected disabled value="">Select Barangay</option>
+                                    </select>
+                                </div>                              
                             </div>
                             {{--modal body end--}}
                         </div>
                         <div class="modal-footer">
                             <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <a id="AddBTN" href="javascript:;" class="btn btn-lime">Add</a>
+                            <button type="submit" class="btn btn-lime add-btn">Add</button>
                         </div>
                     </div>
                 </form>

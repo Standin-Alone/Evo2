@@ -81,6 +81,7 @@
                     dangerMode: false,
                 })
                 .then((confirm) => {
+                    $('#add-btn').prop('disabled','true');
                     // check if confirm
                     if (confirm) {                       
                         $.ajax({
@@ -91,8 +92,10 @@
                                 //    
                                 swal("Successfully "+(status == 1 ? 'disable' : 'enable')+" the module.", {
                                     icon: "success",
-                                }).then(()=>{                                
+                                }).then(()=>{                    
+                                    $('#add-btn').prop('disabled','false');            
                                     module_table.ajax.reload();
+                                    
                                 });
                             },
                             error:function(response){
@@ -300,7 +303,7 @@
                         </div>
                         <div class="modal-footer">
                             <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <button type="submit" class="btn btn-lime">Add</button>
+                            <button type="submit" class="btn btn-lime add-btn">Add</button>
                         </div>
                     </div>
                 </form>
