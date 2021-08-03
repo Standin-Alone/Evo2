@@ -63,7 +63,7 @@ class MobileAppController extends Controller
                 }
               
                 
-
+                
                 Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send], function ($message) use ($to_email, $otp_to_send) {
                     $message->to($to_email)
                             ->subject('DA VMP Mobile')

@@ -127,9 +127,14 @@
                                 type:'get'
                             }
                         },
-                    contact:'required',
+                    contact:{
+                        required:true,
+                        phoneUS: true
+                    }, 
                     agency:'required',
                     agency_loc:'required',
+                    role:'required',
+                    program:'required',
                     region:'required',
                     province:'required',
                     municipality:'required',
@@ -143,9 +148,14 @@
                                     email:'<div class="text-danger">Please enter a valid email address.</div>', 
                                     remote:'<div class="text-danger">This email is already exist.</div>'
                                   },                    
-                    contact     :{required:'<div class="text-danger">Please enter your contact number.</div>'},
+                    contact     :{
+                                    required:'<div class="text-danger">Please enter your phone number.</div>',
+                                    phoneUS: '<div class="text-danger">Invalid format.</div>'
+                                  },
                     agency      :{required:'<div class="text-danger">Please select your agency.</div>'},
                     agency_loc  :{required:'<div class="text-danger">Please select agency location.</div>'},
+                    program     :{required:'<div class="text-danger">Please select your program.</div>'},
+                    role        :{required:'<div class="text-danger">Please select your role.</div>'},
                     region      :{required:'<div class="text-danger">Please select region.</div>'},
                     province    :{required:'<div class="text-danger">Please select province.</div>'},
                     municipality:{required:'<div class="text-danger">Please select municipality.</div>'},
@@ -161,7 +171,7 @@
                     })
                     .then((confirm) => {
                         id = $('input[name="id"]').val();
-                        
+                        $(".add-btn").prop('disabled',true);
                         // check if confirm
                         if (confirm) {                       
                             $.ajax({
@@ -174,15 +184,17 @@
                                             icon: "success",
                                     }).then(()=>{
                                         $("#AddModal").modal('hide')
+                                        $(".add-btn").prop('disabled',false);
                                         // module_table.ajax.reload();
                                     });
                                 },
                                 error:function(response){
-
+                                    $(".add-btn").prop('disabled',false);
                                 }
                             })
                             
                         } else {
+                            $(".add-btn").prop('disabled',false);
                             swal("Operation Cancelled.", {
                                 icon: "error",
                             });
@@ -285,7 +297,7 @@
                                 </div>&nbsp;&nbsp;
                                 <div class="form-group">
                                     <label>Contact</label><span style="color:red">*</span>
-                                    <input    type="number" name="contact" class="form-control"  placeholder="+639..." >
+                                    <input    type="number" name="contact" class="form-control"  placeholder="9102...." >
                                 </div>
                             </div>
 
@@ -307,8 +319,11 @@
                             <div class="col-lg-12 row ">
                                 <div class="form-group" style="width:95%">
                                     <label >Role</label> <span style="color:red">*</span>
-                                    <select class="form-control" name="role" id="role"  disabled>
-                                        <option selected disabled value="">Select Role</option>                                    
+                                    <select class="form-control" name="role" id="role" >
+                                        <option selected disabled value="">Select Role</option>    
+                                        @foreach ($get_roles as $item)
+                                            <option  value="{{$item->role_id}}">{{$item->role}}</option>
+                                        @endforeach                                
                                     </select>
                                 </div>                              
                             </div>
@@ -325,9 +340,17 @@
                                 </div>                              
                             </div><br>
 
-                         
-
-
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Program</label> <span style="color:red">*</span>
+                                    <select class="form-control" name="program" id="program" >
+                                        <option selected disabled value="">Select Program</option>                                    
+                                        @foreach ($get_programs as $item)
+                                            <option value="{{$item->program_id}}">{{$item->shortname}} ({{$item->description}})</option>
+                                        @endforeach
+                                    </select>
+                                </div>                              
+                            </div>                        
 
                             <div class="col-lg-12 row ">
                                 <div class="form-group" style="width:95%">
