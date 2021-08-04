@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use DB;
 use Artisan;
 use Carbon\Carbon;
+use ArtemSchander\L5Modular\Facades\L5Modular;
 class ModulesController extends Controller
 {
 
@@ -26,10 +27,44 @@ class ModulesController extends Controller
         try{
             $module_name = request('module_name');
             $route       = request('route');
+            $has_sub       = request('has_sub');
 
-            Artisan::call("make:module",["name" => $module_name]);
-            db::table('sys_modules')
+            
+
+            if($has_sub != 1){
+                Artisan::call("make:module",["name" => $module_name]);
+                db::table('sys_modules')
                 ->insert(['module'=>$module_name,'routes'=>$route]);
+            }else{
+                $get_last_id = 0;
+                foreach($module_name as $key => $item){
+
+                    if($key == 0){
+                        $get_last_id =  db::table('sys_modules')
+                                            ->insertGetId([
+                                                "module" => $item,
+                                                "has_sub" => 1
+                                            
+                                            ]);
+                    }else{
+                        foreach($route as $route_key => $route_item){
+
+                            if($route_key == $key - 1 ){
+                                db::table('sys_modules')
+                                    ->insert([
+                                        "module"           => $item,
+                                        "routes"           => $route_item,
+                                        "parent_module_id" => $get_last_id
+                                    ]);
+                                
+                                Artisan::call("make:module",["name" => $item]);
+                            }
+                        }
+                    }
+                }
+                
+            }
+            
 
             
         }catch(\Exception $e){
@@ -55,12 +90,14 @@ class ModulesController extends Controller
 
     public function destroy($id){
         $status = request('status');
-        // \ArtemSchander\L5Modular::disable('RolesAndPermissions');
-        // // L5Modular::disable('RolesAndPermissions');
+        
+        L5Modular::disable('Modulename');
 
         db::table('sys_modules')
             ->where('sys_module_id',$id)
             ->update(['status'=>$status == 1 ? '0' : '1']);
+        
+        
     }
 
 }

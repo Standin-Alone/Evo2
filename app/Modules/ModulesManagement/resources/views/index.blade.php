@@ -140,20 +140,23 @@
                     dangerMode: false,
                 })
                 .then((confirm) => {
+                    $has_sub = $("input[name='has_sub']:checked").val();
+                    
                     // check if confirm
-                    if (confirm) {                       
+                    if (confirm) {       
+
                         $.ajax({
                             url:'{{route("modules.store")}}',
                             type:'post',
                             data:$("#AddForm").serialize(),
                             success:function(response){             
                                 //    
-                                swal("Successfully created a new module.", {
-                                    icon: "success",
-                                }).then(()=>{
-                                    $("#AddModal").modal('hide')
-                                    module_table.ajax.reload();
-                                });
+                                // swal("Successfully created a new module.", {
+                                //     icon: "success",
+                                // }).then(()=>{
+                                //     $("#AddModal").modal('hide')
+                                //     module_table.ajax.reload();
+                                // });
                             },
                             error:function(response){
 
@@ -228,10 +231,76 @@
         })
        
     })
+    </script>
 
 
+    <script>
+        $(document).ready(function(){            
+
+            // has sub radio button
+            $("input[name='has_sub']").change(function(){
+                
+                if($(this).val() == 1){
+                    
+                    $(".sub_module").append('<div class="sub_module_component row">'+
+                                        '<div class="form-group">'+
+                                            '<label>Sub Module Name</label> <span id="reqcatnameadd" style="color:red">*</span>'+
+                                            '<input   name="module_name[]" class="form-control"  placeholder="module.index" required="true">'+
+                                        '</div>&nbsp;&nbsp;'+
+                                        '<div class="form-group">'+
+                                            '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
+                                            '<input   name="route[]" class="form-control"  placeholder="module.index" required="true">'+
+                                        '</div>&nbsp;&nbsp;'+
+                                        '<div class="form-group">'+
+                                            '<label>&nbsp;</label> <span id="reqcatnameadd" style="color:red">&nbsp;</span>'+                                            
+                                            '<button type="button" class="form-control btn btn-lime component-plus-btn"><span class="fas fa-plus"></span></button>'+
+                                        '</div>'+
+                                    '</div>');
+
+                    $('.route-component').remove();
+                    
+                }else{
+                    $('.route').append(
+                                '<div class="form-group route-component">'+
+                                '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
+                                '<input   name="route[]" class="form-control"  placeholder="module.index" required="true">'+
+                                '</div>'
+                    );
+
+                    $('.sub_module_component').remove();
+                }
+            });
+
+         
+
+            // add sub module component
+            $(document).on('click', '.component-plus-btn' , function(){
+
+                $(".sub_module").prepend('<div class="sub_module_component row">'+
+                                        '<div class="form-group">'+
+                                            '<label>Sub Module Name</label> <span id="reqcatnameadd" style="color:red">*</span>'+
+                                            '<input   name="module_name[]" class="form-control"  placeholder="module.index" required="true">'+
+                                        '</div>&nbsp;&nbsp;'+
+                                        '<div class="form-group">'+
+                                            '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
+                                            '<input   name="route[]" class="form-control"  placeholder="module.index" required="true">'+
+                                        '</div>&nbsp;&nbsp;'+
+                                        '<div class="form-group">'+
+                                            '<label>&nbsp;</label> <span id="reqcatnameadd" style="color:red">&nbsp;</span>'+
+                                            '<button type="button"  class="form-control btn btn-danger remove-btn" ><span class="fas fa-times"></span></button>'+                                            
+                                        '</div>'+
+                                    '</div>');
+            })
 
 
+            $(document).on('click', '.remove-btn', function(e) {
+            e.preventDefault();
+            $(this).closest('.sub_module_component').remove();
+            return false;
+            });
+      
+        });
+        
     </script>
 
 @endsection
@@ -291,13 +360,35 @@
                             <div class="col-lg-12">
                                 <div class="form-group">
                                     <label>Module Name</label> <span id='reqcatnameadd' style='color:red'>*</span>
-                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name" required="true">
+                                    <input style="text-transform: capitalize;"  name="module_name[]" class="form-control"  placeholder="module name" required="true">
                                 </div>
+
                                 <div class="form-group">
+                                    <label>Do you want to add sub modules? <span style="color:red">*</span></label> 
+                                    <div class="col-md-12  row">
+                                        <div class="form-check ">
+                                            <input class="form-check-input" type="radio" id="defaultRadio1" name="has_sub"  value="1"   />
+                                            <label class="form-check-label" for="defaultRadio1">Yes</label>
+                                        </div> &nbsp; &nbsp;                       
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" id="defaultRadio2" name="has_sub" value="0" checked/>
+                                            <label class="form-check-label" for="defaultRadio2">No</label>
+                                        </div>       
+                                    </div>                       
+                                </div>
+
+
+                                <div class="form-group route">
+                                    <div class="form-group route-component">
                                     <label>Route </label> <span id='reqcatnameadd' style='color:red'>*</span>
                                     <input   name="route" class="form-control"  placeholder="module.index" required="true">
+                                    </div>
                                 </div>
                                 
+
+                                <div class="col-md-12 row  sub_module">                                 
+                                </div>
+    
                             </div>
                             {{--modal body end--}}
                         </div>

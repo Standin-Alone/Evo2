@@ -125,13 +125,16 @@ class RolesAndPermissionsController extends Controller
         $get_permissions = db::table('sys_permission')->get();
         $get_module      = db::table('sys_modules')->where('module',$module)->first();
         foreach($get_permissions as $item){
-            $insert_mod_permissions = db::table('sys_access_matrix')->insert(
+
+         
+           
+                $insert_mod_permissions = db::table('sys_access_matrix')->insert(   
                                             [
                                                 'role_id' => $role_id,
                                                 'sys_permission_id' => $item->sys_permission_id,
                                                 'sys_module_id' => $get_module->sys_module_id,
-
                                             ]);
+          
         }
         
 
