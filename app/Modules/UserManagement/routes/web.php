@@ -4,7 +4,7 @@
 
 
 Route::group([],function(){
-    Route::get('/user','UserManagementController@index');
+    Route::get('/user','UserManagementController@index')->name('user.index');
     Route::get('/user-email','UserManagementController@email');
     Route::post('/user/add','UserManagementController@store')->name('user-add');
 

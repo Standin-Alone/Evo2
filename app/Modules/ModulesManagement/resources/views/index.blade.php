@@ -43,6 +43,17 @@
             columns:[
                 {data:'module'},
                 {data:'routes'},            
+                {data:'sub_modules',
+                    render:function(data,type,row){
+                        let output = '';
+                        if(data){
+                        data.map((item)=>{output += item.module + '<br>'});
+                        }
+                        return output;
+                    }
+
+
+                },            
                 {data:'sys_module_id',
                     render: function(data,type,row){       
                       
@@ -131,7 +142,7 @@
                     required:'<div class="text-danger">Please enter route.</div>'
                 }
             },
-            submitHandler: function() { 
+            submitHandler: function(e) { 
                 swal({
                     title: "Wait!",
                     text: "Are you sure you want to add this module?",
@@ -150,13 +161,14 @@
                             type:'post',
                             data:$("#AddForm").serialize(),
                             success:function(response){             
-                                //    
-                                // swal("Successfully created a new module.", {
-                                //     icon: "success",
-                                // }).then(()=>{
-                                //     $("#AddModal").modal('hide')
-                                //     module_table.ajax.reload();
-                                // });
+                                   
+                                swal("Successfully created a new module.", {
+                                    icon: "success",
+                                }).then(()=>{
+                                    $("#AddModal").modal('hide')
+                                    e.resetForm();
+                                    module_table.ajax.reload();
+                                });
                             },
                             error:function(response){
 
@@ -335,7 +347,8 @@
             <thead>
                 <tr>                    
                     <th >Module Name</th>
-                    <th >Route</th>                    
+                    <th >Route</th> 
+                    <th >Sub Modules</th>                    
                     <th >Action</th>
                 </tr>
             </thead>

@@ -85,6 +85,13 @@ class ModulesController extends Controller
     // show record to datatable
     public function show($id){
         $get_record = db::table('sys_modules')->get();
+        foreach($get_record as $item){
+            if($item->has_sub == 1){
+                $item->sub_modules =  db::table('sys_modules')->where('parent_module_id',$item->sys_module_id)->get();
+            }else{
+                $item->sub_modules = [];
+            }
+        }
         return datatables($get_record)->toJson();    
     }
 

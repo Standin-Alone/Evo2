@@ -34,44 +34,34 @@ class AccessController extends Controller
         
         $modules = [];
 
-        $get_modules = db::table('sys_modules as sm')
-                            ->select('sm.module','sm.routes','sm.has_sub','sm.sys_module_id','sm.parent_module_id')                            
-                            ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
-                          
-                            
-                            ->where('sm.status', 1)
-                            ->where('role_id',5)                            
-                            ->groupBy('module')
+
+        $get_menu = db::table('sys_modules as sm')                            
+                            ->whereIn('sm.sys_module_id',function($query){
+                                    $query->select('sm.sys_module_id') 
+                                    ->from('sys_modules as sm')
+                                    ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
+                                    ->where('sm.status', 1)
+                                    ->where('role_id',5)                                                        
+                                    ->get();
+                            })                        
                             ->get();
+                    
 
-
-
-
-        foreach($get_modules as $item){
-
+        foreach($get_menu as  $key => $item){
             if(!is_null($item->parent_module_id)){
-                
-                
-                $get_parent = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first();    
-                $get_module = db::table('sys_modules')->where('sys_module_id',$item->sys_module_id)->get();    
-                
-                array_push($modules,[ "parent_module_name"=> $get_parent->module,"sub_modules" => $get_module, "has_sub" => 1]);                
-                
-            }else{
-
-                $get_no_parent = db::table('sys_modules')->where('sys_module_id',$item->sys_module_id)->first();   
-                array_push($modules,[ "parent_module_name"=> $get_no_parent->module,"route" => $get_no_parent->routes, "has_sub" => 0]);                
+                $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()    ->module;
             }
         }
 
-        $result = collect($modules);
-    
+
+        
 
     
         // echo json_encode(array_unique(array_merge($modules,$modules),SORT_REGULAR ));
-        echo json_encode($result);
+        echo json_encode($get_menu);
         session(['role'=>'RFO Program Staff']);
-        session(['modules'=>$result]);
+        session(['unique_modules'=>$get_menu->unique('parent_module')]);
+        session(['modules'=>$get_menu]);
 
 
      
