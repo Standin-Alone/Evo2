@@ -3,21 +3,33 @@
     <li class="nav-header">{{session('role')}} Navigation </li>
     
 
-  @foreach(session('modules') as $key => $item) 
-    @if($item[0]['has_sub'] == 1)
-        
+    
+    @foreach (session('unique_modules') as $item)
+
+
+    @if(!is_null($item->parent_module_id))
+    
     <li class="has-sub">
         <a href="javascript:;">
             <b class="caret"></b>
             <i class="fa fa-table"></i>
-            <span>{{$key}}</span>
+            <span>{{$item->parent_module}}</span>
         </a>
         <ul class="sub-menu">    
-                    @foreach($item['sub_modules'] as $value)
-                        <li class="" ><a href="">{{$value->module}} </a></li>                       
+                    @foreach(session('modules') as $value)
+                        @if($value->parent_module_id == $item->parent_module_id)                        
+                        <li class="{{Route::currentRouteName() == $value->routes ? "active" : null}}" ><a href="{{route($value->routes)}}">{{$value->module}} </a></li>    
+                        @endif                   
                     @endforeach           
                 </ul>
             </li>
+    @else    
+        <li class="{{Route::currentRouteName() == $item->routes ? "active" : null}}">
+            <a href="{{route($item->routes)}}">					        
+                <i class="fa fa-th-large"></i>
+                <span>{{$item->module}}</span>
+            </a>        
+        </li> 
     @endif
     @endforeach
 

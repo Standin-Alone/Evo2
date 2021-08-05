@@ -56,15 +56,17 @@
                 },            
                 {data:'sys_module_id',
                     render: function(data,type,row){       
-                      
-                        return  "<button type='button' class='btn btn-warning update-modal-btn' id="+data+" data-toggle='modal' data-target='#UpdateModal'>"+
+                        
+                        
+
+                        return  "<button type='button' class='btn btn-warning update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateModal'>"+
                                     "<i class='fa fa-edit'></i> Edit"+
                                 "</button>   "+(
                                 row['status'] == 1 ?
-                                "<button type='button' class='btn btn-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
+                                "<button type='button' class='btn btn-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                     "<i class='fa fa-trash'></i> Disable"+
                                 "</button>  " :
-                                "<button type='button' class='btn btn-success set-status-btn' id='"+data+"' status='"+row["status"]+"' >"+
+                                "<button type='button' class='btn btn-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                     "<i class='fa fa-undo'></i> Enable"+
                                 "</button> ")
                     }
@@ -72,16 +74,75 @@
             ]   
         });
         
+        let sub_module_table ;
         // edit modal btn
         $("#load-datatable").on('click','.update-modal-btn',function(){
-            $("#UpdateForm  input[name='id']").val($(this).attr('id'));
-            $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
-            $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
-        });
+            $('.update-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(0)').text());            
+            // check if has sub modules
+            if($(this).attr('has_sub')!= 1){
+                $(".main-module-component").show();
+                $(".sub-modules-component").hide();                
+                $("#UpdateForm  input[name='id']").val($(this).attr('sys_module_id'));
+                $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
+                $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+                $(".main-module-update-btn").show();
+            }else{
+                $(".main-module-update-btn").hide();
+                $(".main-module-component").hide();
+                $(".sub-modules-component").show();
+                $("#sub-modules-datatable").DataTable().destroy()
+                $("#sub-modules-datatable").empty();
 
+                // sub modules id
+                 sub_module_table = $("#sub-modules-datatable").DataTable({
+                                        serverSide: true,                        
+                                        ajax: {
+                                                "url" : '{{route("modules.show_sub_modules",["parent_module_id" => ":id"])}}'.replace(':id',$(this).attr('sys_module_id')),
+                                                "type" : "get"
+                                                },
+                                                columns:[
+                                                            {data:'module'},
+                                                            {data:'routes'},                                                             
+                                                            {data:'sys_module_id',
+                                                                render: function(data,type,row){       
+                                                                    
+                                                                    
+
+                                                                    return  "<button type='button' class='btn btn-info update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
+                                                                                "<i class='fa fa-edit'></i> Edit"+
+                                                                            "</button>   "+(
+                                                                            row['status'] == 1 ?
+                                                                            "<button type='button' class='btn btn-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                                                                "<i class='fa fa-trash'></i> Disable"+
+                                                                            "</button>  " :
+                                                                            "<button type='button' class='btn btn-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                                                                "<i class='fa fa-undo'></i> Enable"+
+                                                                            "</button> ")
+                                                                }                                                            
+                                                            }
+                                                    ] 
+                                            })
+                                        }
+            });
+  
+
+            // edit button of sub modules
+            $("#sub-modules-datatable").on('click','.update-modal-btn',function(){
+                $('.update-sub-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(0)').text());            
+            // check if has sub modules
+           
+                             
+                $("#UpdateSubModuleForm  input[name='id']").val($(this).attr('sys_module_id'));
+                $("#UpdateSubModuleForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
+                $("#UpdateSubModuleForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+          
+            
+            });
+        
+   
         // set status btn
         $("#load-datatable").on('click','.set-status-btn',function(){
-            id = $(this).attr('id');
+            id = $(this).attr('sys_module_id');
             status = $(this).attr('status');
                                     
             swal({
@@ -124,6 +185,50 @@
 
 
 
+
+         // set status btn sub modules
+         $("#sub-modules-datatable").on('click','.set-status-btn',function(){
+            id = $(this).attr('sys_module_id');
+            status = $(this).attr('status');
+                                    
+            swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to "+ (status == 1 ? 'disable' : 'enable')+"?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    $('#add-btn').prop('disabled','true');
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:'{{route("modules.destroy",["module"=>":id"])}}'.replace(':id',id),
+                            type:'DELETE',
+                            data:{'_token':'{{csrf_token()}}','status':status},
+                            success:function(response){             
+                                //    
+                                swal("Successfully "+(status == 1 ? 'disable' : 'enable')+" the module.", {
+                                    icon: "success",
+                                }).then(()=>{                    
+                                    $('#add-btn').prop('disabled','false');            
+                                    sub_module_table.ajax.reload();
+                                    
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+        }); 
+        
         // Insert Record
         $("#AddForm").validate({
             rules:{
@@ -166,8 +271,9 @@
                                     icon: "success",
                                 }).then(()=>{
                                     $("#AddModal").modal('hide')
-                                    e.resetForm();
                                     module_table.ajax.reload();
+                                    e.resetForm();
+                                    
                                 });
                             },
                             error:function(response){
@@ -188,7 +294,7 @@
 
 
 
-        // Update Record
+        // Update Record of Main Module
         $("#UpdateForm").validate({
             rules:{
                 module_name:"required",
@@ -202,7 +308,7 @@
                     required:'<div class="text-danger">Please enter route.</div>'
                 }
             },
-            submitHandler: function() { 
+            submitHandler: function(e) { 
                 swal({
                     title: "Wait!",
                     text: "Are you sure you want to update this module?",
@@ -238,7 +344,68 @@
                             icon: "error",
                         });
                     }
+                    e.preventDefault();
                 });
+            }
+        })
+
+
+
+
+
+
+        // Update record of sub module
+        $("#UpdateSubModuleForm").validate({
+            rules:{
+                module_name:"required",
+                route:"required",
+            },
+            messages:{
+                module_name:{
+                    required:'<div class="text-danger">Please enter module name.</div>'
+                },
+                route:{
+                    required:'<div class="text-danger">Please enter route.</div>'
+                }
+            },
+            submitHandler: function(e) { 
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to update this module?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    id = $('#UpdateSubModuleForm input[name="id"]').val();
+                    
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:"{{route('modules.update',['module' => ':id'])}}".replace(':id', id),
+                            type:'PUT',
+                            data:$("#UpdateSubModuleForm").serialize(),
+                            success:function(response){             
+                                //    
+                                swal("Successfully updated the module.", {
+                                         icon: "success",
+                                }).then(()=>{
+                                    $("#UpdateSubModuleModal").modal('hide')
+                                    sub_module_table.ajax.reload();
+                                });
+                            },
+                            error:function(response){
+                                console.warn(response)
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+                
             }
         })
        
@@ -268,10 +435,11 @@
                                             '<button type="button" class="form-control btn btn-lime component-plus-btn"><span class="fas fa-plus"></span></button>'+
                                         '</div>'+
                                     '</div>');
-
+                                    
                     $('.route-component').remove();
                     
                 }else{
+
                     $('.route').append(
                                 '<div class="form-group route-component">'+
                                 '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
@@ -358,7 +526,7 @@
 
 
         <!-- #modal-add -->
-        <div class="modal fade" id="AddModal">
+        <div class="modal fade" id="AddModal"  data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog" style="max-width: 30%">
                 <form id="AddForm" method="POST" >
                     @csrf
@@ -418,14 +586,66 @@
 
 
 
-        <!-- #modal-EDIT -->
-        <div class="modal fade" id="UpdateModal">
+        <!-- #modal-EDIT Main Modal and Sub Modules -->
+        <div class="modal fade" id="UpdateModal"  data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog" style="max-width: 30%">
-                <form id="UpdateForm" method="POST" >
+                <form id="UpdateForm" method="PUT" >
                     @csrf
                     <div class="modal-content">
                         <div class="modal-header" style="background-color: #f59c1a">
-                            <h4 class="modal-title" style="color: white">Edit Module</h4>
+                            <h4 class="modal-title update-modal-title" style="color: white">Edit Module</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                        </div>
+                        <div class="modal-body">
+                            {{--modal body start--}}
+                            <label class="form-label hide"> ID</label>
+                            <input name="id" type="text" class="form-control hide" />
+
+                            <div class="col-lg-12 main-module-component">
+                                <div class="form-group">
+                                    <label>Module Name</label>
+                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">
+                                    <label>Route</label>
+                                    <input   name="route" class="form-control"  placeholder="route" required="true">
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-12 sub-modules-component">
+                            <table id="sub-modules-datatable" class="table table-hover">            
+                                <thead>
+                                    <tr>                    
+                                        <th >Module Name</th>
+                                        <th >Route</th>                                           
+                                        <th >Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+                            </div>
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white update-close-btn" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-warning main-module-update-btn">Update</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+
+        <!-- #modal-EDIT sub modules-->
+        <div class="modal fade" id="UpdateSubModuleModal"  data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="max-width: 30%">
+                <form id="UpdateSubModuleForm" method="POST" >
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: #49b6d6">
+                            <h4 class="modal-title update-sub-modal-title" style="color: white">Edit Module</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                         </div>
                         <div class="modal-body">
@@ -441,11 +661,12 @@
                                     <input   name="route" class="form-control"  placeholder="route" required="true">
                                 </div>
                             </div>
+                        
                             {{--modal body end--}}
                         </div>
                         <div class="modal-footer">
-                            <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <button type="submit" class="btn btn-warning">Update</button>
+                            <a href="javascript:;" class="btn btn-white update-close-btn" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-info">Update</button>
                         </div>
                     </div>
                 </form>

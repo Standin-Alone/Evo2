@@ -84,7 +84,7 @@ class ModulesController extends Controller
 
     // show record to datatable
     public function show($id){
-        $get_record = db::table('sys_modules')->get();
+        $get_record = db::table('sys_modules')->whereNull('parent_module_id')->get();
         foreach($get_record as $item){
             if($item->has_sub == 1){
                 $item->sub_modules =  db::table('sys_modules')->where('parent_module_id',$item->sys_module_id)->get();
@@ -95,10 +95,16 @@ class ModulesController extends Controller
         return datatables($get_record)->toJson();    
     }
 
+    // show sub modules
+    public function show_sub_modules($id){
+        $get_record = db::table('sys_modules')->where('parent_module_id',$id)->get();
+        return datatables($get_record)->toJson();    
+    }
+
     public function destroy($id){
         $status = request('status');
         
-        L5Modular::disable('Modulename');
+        // L5Modular::disable('Modulename');
 
         db::table('sys_modules')
             ->where('sys_module_id',$id)
