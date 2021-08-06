@@ -43,8 +43,8 @@ return [
         ],
         'uploads' => [
             'driver' => 'local',
-            'root' => storage_path('app/uploads'),
-            'url' => env('APP_URL').'/storage',
+            'root' => base_path('/uploads/transactions'),
+            'url' => env('APP_URL').'/uploads/transactions',
             'visibility' => 'public',
         ],
         's3' => [

@@ -32,9 +32,15 @@ class ModulesController extends Controller
             
 
             if($has_sub != 1){
-                Artisan::call("make:module",["name" => $module_name]);
-                db::table('sys_modules')
-                ->insert(['module'=>$module_name,'routes'=>$route]);
+                $check_module =  L5Modular::exists(trim($module_name));
+
+                if(!$check_module){
+                    Artisan::call("make:module",["name" => $module_name]);
+                }
+                
+                    db::table('sys_modules')
+                    ->insert(['module'=>$module_name,'routes'=>$route]);
+                
             }else{
                 $get_last_id = 0;
                 foreach($module_name as $key => $item){
@@ -50,14 +56,17 @@ class ModulesController extends Controller
                         foreach($route as $route_key => $route_item){
 
                             if($route_key == $key - 1 ){
+
+                                $check_module =  L5Modular::exists(trim($item));
                                 db::table('sys_modules')
                                     ->insert([
                                         "module"           => $item,
                                         "routes"           => $route_item,
                                         "parent_module_id" => $get_last_id
-                                    ]);
-                                
-                                Artisan::call("make:module",["name" => $item]);
+                                    ]);                                    
+                                if(!$check_module){
+                                    Artisan::call("make:module",["name" => $item]);
+                                }                                
                             }
                         }
                     }
@@ -104,7 +113,7 @@ class ModulesController extends Controller
     public function destroy($id){
         $status = request('status');
         
-        // L5Modular::disable('Modulename');
+        
 
         db::table('sys_modules')
             ->where('sys_module_id',$id)

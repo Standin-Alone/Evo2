@@ -49,15 +49,13 @@ class AccessController extends Controller
 
         foreach($get_menu as  $key => $item){
             if(!is_null($item->parent_module_id)){
-                $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()    ->module;
+                $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()->module;
             }
         }
 
 
         
 
-    
-        // echo json_encode(array_unique(array_merge($modules,$modules),SORT_REGULAR ));
         echo json_encode($get_menu);
         session(['role'=>'RFO Program Staff']);
         session(['unique_modules'=>$get_menu->unique('parent_module')]);

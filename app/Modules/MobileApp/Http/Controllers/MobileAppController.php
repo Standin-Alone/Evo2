@@ -8,6 +8,7 @@ use Mail;
 use DB;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 class MobileAppController extends Controller
 {
     /**
@@ -167,10 +168,13 @@ class MobileAppController extends Controller
                 'rsbsa_no',
                 'file_name',
                 'v.amount_val',
-                'vt.voucher_details_id',                                
+                'vt.voucher_details_id',   
+                'shortname as program',
+                 DB::raw("YEAR(transac_date) as year_transac")                       
               )
             ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
             ->join('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
+            ->join('programs as p', 'p.program_id','v.program_id')            
             ->where('supplier_id', $supplier_id)  
             ->where('document', 'Farmer with Commodity')            
             ->groupBy('v.reference_no')
@@ -179,7 +183,9 @@ class MobileAppController extends Controller
 
       
             foreach ($get_scanned_vouchers as $key => $item) {
-                $item->base64 = base64_encode(file_get_contents(storage_path() . '/attachments//' . $item->rsbsa_no.'/'.$item->file_name));
+                // $item->base64 = base64_encode(file_get_contents(storage_path() . '/attachments//' . $item->rsbsa_no.'/'.$item->file_name));
+                $item->base64 = base64_encode(Storage::disk('uploads')->get('/attachments//'. $item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
+                
             }
     
         
@@ -259,7 +265,7 @@ class MobileAppController extends Controller
 
 
     // insert attachment function
-    public function insertAttachment($item,$uuid,$voucher_info){
+    public function insertAttachment($item,$uuid,$voucher_info,$program){
         // insert attachment data to database
         $attachment_uuid        = Uuid::uuid4();
         $front_attachment_uuid  = Uuid::uuid4();
@@ -279,7 +285,7 @@ class MobileAppController extends Controller
             $id_back      = str_replace(' ', '+', $id_back);
             $id_back_name = $voucher_info->rsbsa_no . '-' . $item->name . '(back)' . '.jpeg';
 
-            $upload_folder  = storage_path() . '/attachments//' . $voucher_info->rsbsa_no;
+            $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
 
             // insert front page of id in database
             db::table('voucher_attachments')->insert([
@@ -300,11 +306,13 @@ class MobileAppController extends Controller
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
                 File::makeDirectory($upload_folder, 0777, true);
-                File::put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
-                File::put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
+                
             } else {
-                File::put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
-                File::put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
+          
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));                
             }
         } else {
 
@@ -313,9 +321,8 @@ class MobileAppController extends Controller
             $image     = str_replace('data:image/jpeg;base64,', '', $image);
             $image     = str_replace(' ', '+', $image);
             $imageName = $voucher_info->rsbsa_no . '-' . $item->name . '.jpeg';
-
-            $upload_folder  = storage_path() . '/attachments//' . $voucher_info->rsbsa_no;
-
+            
+            $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
             // insert pictures in database
             db::table('voucher_attachments')->insert([
                 'attachment_id'      => $attachment_uuid,
@@ -325,10 +332,10 @@ class MobileAppController extends Controller
             ]);
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0777, true);
-                File::put($upload_folder . '/' . $imageName, base64_decode($image));
+                // File::makeDirectory($upload_folder, 0777, true);                
+                Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
             } else {
-                File::put($upload_folder . '/' . $imageName, base64_decode($image));
+                Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
             }
         }
     }
@@ -364,7 +371,7 @@ class MobileAppController extends Controller
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
-                $this->insertAttachment($item,$uuid,$voucher_info);
+                $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
             }
 
             //  compute remaining balance
@@ -376,7 +383,8 @@ class MobileAppController extends Controller
                 ->where('reference_no', $voucher_info->reference_no)
                 ->update([
                     'amount_val'     => $compute_remaining_bal, 
-                    'voucher_status' => 'FULLY CLAIMED',
+                    // 'voucher_status' => 'FULLY CLAIMED',
+                    'voucher_status' => 'NOT YET CLAIMED',
                 ]);
                 
         } catch (\Exception $e) {
@@ -427,7 +435,7 @@ class MobileAppController extends Controller
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
-                $this->insertAttachment($item,$voucher_details_uuid,$voucher_info);
+                $this->insertAttachment($item,$voucher_details_uuid,$voucher_info,$voucher_info->program);
             }
 
             //  compute remaining balance
