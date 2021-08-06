@@ -34,35 +34,37 @@ return [
     */
 
     'mailers' => [
-        // 'smtp' => [
-        //     'transport' => 'smtp',
-        //     'host' => 'smtp.gmail.com',
-        //     'port' => 465,
-        //     'encryption' => 'ssl',
-        //     'username' =>'support.sadd@da.gov.ph',
-        //     'password' => 'SysADDem@1l123',
-        //     'timeout' => null,
-        //     'auth_mode' => null,
-        // ],
         'smtp' => [
             'transport' => 'smtp',
             'host' => 'smtp.gmail.com',
-            'port' => 587,            
-            'encryption' => 'tls',
-            'username' =>'developer01000@gmail.com ',
-            'password' => 'developerweb01000',
+            'port' => 465,
+            'encryption' => 'ssl',
+            'username' =>'support.sadd@da.gov.ph',
+            'password' => 'SysADDem@1l123',
             'timeout' => null,
             'auth_mode' => null,
         ],
 
-        // 'stream' => [
-        //     'ssl' => [
-        //         'allow_self_signed' => true,
-        //         'verify_peer' => false,
-        //         'verify_peer_name' => false,
-        //     ],
-        // ],  
+        'stream' => [
+            'ssl' => [
+                'allow_self_signed' => true,
+                'verify_peer' => false,
+                'verify_peer_name' => false,
+            ],
+        ],  
 
+        // 'smtp' => [
+        //     'transport' => 'smtp',
+        //     'host' => 'smtp.gmail.com',
+        //     'port' => 587,            
+        //     'encryption' => 'tls',
+        //     'username' =>'developer01000@gmail.com ',
+        //     'password' => 'developerweb01000',
+        //     'timeout' => null,
+        //     'auth_mode' => null,
+        // ],
+
+      
         'ses' => [
             'transport' => 'ses',
         ],

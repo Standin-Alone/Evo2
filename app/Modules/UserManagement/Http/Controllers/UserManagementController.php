@@ -96,12 +96,12 @@ class UserManagementController extends Controller
             $agency_loc     = request('agency_loc');
             $role           = request('role');
             $agency         = request('agency');
-            $program         = request('program');
+            $program        = request('program');
             $region         = request('region');
             $province       = request('province');
             $municipality   = request('municipality');
             $barangay       = request('barangay');
-
+            
             $geo_code = db::table('geo_map')
                             ->where('reg_code',$region)
                             ->where('prov_code',$province)
