@@ -68,7 +68,7 @@ class MobileAppController extends Controller
                 
 
                 $get_otp_record = db::table('user_otp as uo')
-                                        ->select('u.user_id','uo.date_created')
+                                        ->select('u.user_id','uo.date_created','username','role')
                                         ->join('users as u','u.user_id','uo.user_id')
                                         ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
                                         ->join('roles as r','r.role_id','pp.role_id')
@@ -115,16 +115,26 @@ class MobileAppController extends Controller
         ]);
 
         // insert new otp
-        db::table('user_otp')->insert([
+       $get_user_otp_id =  db::table('user_otp')->insertGetId([
             "user_id" => $user_id,
             "otp"     => $random_otp                    
         ]);
 
-          Mail::send('MobileApp::otp', ["otp_code" => $random_otp], function ($message) use ($email, $random_otp) {
-              $message->to($email)
-                      ->subject('DA VMP Mobile')
-                      ->from("webdeveloper01000@gmail.com");
-          });
+        $get_otp_record = db::table('user_otp as uo')
+                                        ->select('u.user_id','uo.date_created','username','role')
+                                        ->join('users as u','u.user_id','uo.user_id')
+                                        ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
+                                        ->join('roles as r','r.role_id','pp.role_id')
+                                        ->where('u.user_id',$get_user_otp_id)
+                                        ->where('uo.status',1)
+                                        ->first();
+                
+        Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
+                    $message->to($to_email)
+                            ->subject('DA VMP Mobile')
+                            ->from("support.sadd@da.gov.ph");
+                });
+         
   
           return json_encode(array(["Message" => 'true',
                                     "OTP"     => $random_otp]));

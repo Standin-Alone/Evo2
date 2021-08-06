@@ -176,7 +176,7 @@
           </div>
 
           <div class="u-row-container"
-            style="padding: 0px;background-image: url('images/image-3.jpeg');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea">
+            style="padding: 0px;background-image: url('{{$message->embed(asset('da-logo.png'))}}');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea">
             <div class="u-row"
               style="Margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;">
               <div style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
@@ -329,7 +329,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="images/image-2.png" alt="user_icon"
+                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-2.png'))}}" alt="user_icon"
                                       title="user_icon"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 45px;"
                                       width="45" />
@@ -395,7 +395,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="images/image-4.png" alt="Dollar" title="Dollar"
+                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-4.png'))}}" alt="Dollar" title="Dollar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 48.5px;"
                                       width="48.5" />
 
@@ -458,7 +458,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="images/image-5.png" alt="Calendar"
+                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-5.png'))}}" alt="Calendar"
                                       title="Calendar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 41.5px;"
                                       width="41.5" />
@@ -486,7 +486,7 @@
                                       style="color: #969696; line-height: 22.4px; font-size: 16px;">Date and
                                       Time:</span></span></p>
                                 <p style="font-size: 14px; line-height: 140%;"><strong><span
-                                      style="font-size: 16px; line-height: 22.4px;">{{$date}}</span></strong>
+                                      style="font-size: 16px; line-height: 22.4px;">{{ \Carbon\Carbon::parse($date)->format('m d, Y h:mA')}}</span></strong>
                                 </p>
                               </div>
 
