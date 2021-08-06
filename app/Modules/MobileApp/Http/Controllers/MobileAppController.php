@@ -164,7 +164,7 @@ class MobileAppController extends Controller
             ->select(
                 'v.reference_no',
                 'transac_date',
-                DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
+                DB::raw("CONCAT(first_name,' ',last_name) as fullname"),
                 'rsbsa_no',
                 'file_name',
                 'v.amount_val',
@@ -183,14 +183,14 @@ class MobileAppController extends Controller
 
       
             foreach ($get_scanned_vouchers as $key => $item) {
-                // $item->base64 = base64_encode(file_get_contents(storage_path() . '/attachments//' . $item->rsbsa_no.'/'.$item->file_name));
+                
                 $item->base64 = base64_encode(Storage::disk('uploads')->get('/attachments//'. $item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
                 
             }
     
         
 
-        // ->orWhere('VOUCHER_STATUS','NOT FULLY CLAIMED')
+
 
         return json_encode($get_scanned_vouchers);
     }
@@ -383,8 +383,7 @@ class MobileAppController extends Controller
                 ->where('reference_no', $voucher_info->reference_no)
                 ->update([
                     'amount_val'     => $compute_remaining_bal, 
-                    // 'voucher_status' => 'FULLY CLAIMED',
-                    'voucher_status' => 'NOT YET CLAIMED',
+                    'voucher_status' => 'FULLY CLAIMED',                    
                 ]);
                 
         } catch (\Exception $e) {

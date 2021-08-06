@@ -671,8 +671,7 @@
 
                               <div
                                 style="color: #646464; line-height: 140%; text-align: center; word-wrap: break-word;">
-                                <p style="font-size: 14px; line-height: 140%;">All rights reserved &amp;#169; Department
-                                  of Agriculture</p>
+                                <p style="font-size: 14px; line-height: 140%;">&copy; 2021, Department of Agriculture</p>
                               </div>
 
                             </td>

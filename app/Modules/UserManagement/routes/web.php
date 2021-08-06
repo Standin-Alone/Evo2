@@ -12,7 +12,7 @@ Route::group([],function(){
     Route::get('/user/filter-role/{agency_loc}','UserManagementController@filter_role')->name('filter-role');
     Route::get('/user/filter-province/{region_code}','UserManagementController@filter_province')->name('filter-province');
     Route::get('/user/filter-municipality/{province_code}','UserManagementController@filter_municipality')->name('filter-municipality');
-    Route::get('/user/filter-barangay/{municipality_code}','UserManagementController@filter_barangay')->name('filter-barangay');
+    Route::get('/user/filter-barangay/{region_code}/{province_code}/{municipality_code}','UserManagementController@filter_barangay')->name('filter-barangay');
 });
 
 

@@ -73,9 +73,13 @@
 
         // filter barangay
         $("#municipality").change(function(){
-            let value = $("option:selected", this).val();
+            
+            let region = $("#region option:selected").val();
+            let province = $("#province option:selected").val();
+            let value = $("option:selected",this).val();
+            console.warn(value)                        
             $.ajax({
-                url:'{{route("filter-barangay",["municipality_code" => ":id"])}}'.replace(':id',value),
+                url:'{{route("filter-barangay",["region_code" => ":id_region_code","province_code" => ":id_province_code","municipality_code" => ":id"])}}'.replace(':id_region_code',region).replace(':id_province_code',province).replace(':id',value),                
                 type:'get',
                 success:function(data){
                     let convertToJson = JSON.parse(data);
@@ -180,6 +184,7 @@
                                 data:$("#AddForm").serialize(),
                                 success:function(response){             
                                     //    
+                                    console.warn(response);
                                     swal("Successfully added new user.", {
                                             icon: "success",
                                     }).then(()=>{

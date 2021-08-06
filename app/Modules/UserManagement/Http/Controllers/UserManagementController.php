@@ -48,10 +48,12 @@ class UserManagementController extends Controller
         return json_encode($get_municipality);
     }
 
-    public function filter_barangay($municipality_code)
+    public function filter_barangay($region_code,$province_code,$municipality_code)
     {       
         $get_barangay = db::table('geo_map')
                             ->select('bgy_code','bgy_name')
+                            ->where('reg_code',$region_code)
+                            ->where('prov_code',$province_code)
                             ->where('mun_code',$municipality_code)
                             ->distinct()->get();
         return json_encode($get_barangay);
@@ -105,7 +107,7 @@ class UserManagementController extends Controller
                             ->where('prov_code',$province)
                             ->where('mun_code',$municipality)   
                             ->where('bgy_code',$barangay)
-                            ->first()->geo_code;
+                            ->first();
 
             db::table('users')
                                 ->insertGetId([
@@ -115,7 +117,7 @@ class UserManagementController extends Controller
                                     'username'  => $email,
                                     'password'  => bcrypt($random_password),
                                     'email'  => $email,
-                                    'geo_code'  =>$geo_code,
+                                    'geo_code'  => $geo_code->geo_code,
                                     'reg' =>$region,
                                     'prov' =>$province,
                                     'mun' =>$municipality,
