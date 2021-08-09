@@ -32,8 +32,9 @@ class MobileAppController extends Controller
 
         $to_email = "";
         $otp_to_send = "";            
+        
         if (!$authenticate->isEmpty()) {
-
+            $get_user_otp_id = 0;
             if(password_verify($password,$get_password)){
                 foreach ($authenticate as $authenticate) {
                     $to_email = $authenticate->email;
@@ -49,12 +50,12 @@ class MobileAppController extends Controller
                                 ->where('user_id',$supplier->user_id)
                                 ->where('status','1')
                                 ->get();
-                $get_user_otp_id = '';
+                
                 // check otp if exists
                 if(!$check_otp->isEmpty()){
                     foreach($check_otp as $item){
                            $otp_to_send = $item->otp;
-                           $get_user_otp_id = $item->user_id;
+                           $get_user_otp_id = $item->otp_id;
                     }
                 }else{
                     $otp_to_send = $random_otp;
@@ -72,7 +73,7 @@ class MobileAppController extends Controller
                                         ->join('users as u','u.user_id','uo.user_id')
                                         ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
                                         ->join('roles as r','r.role_id','pp.role_id')
-                                        ->where('u.user_id',$get_user_otp_id)
+                                        ->where('uo.otp_id',$get_user_otp_id)
                                         ->where('uo.status',1)
                                         ->first();
                 
@@ -125,12 +126,12 @@ class MobileAppController extends Controller
                                         ->join('users as u','u.user_id','uo.user_id')
                                         ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
                                         ->join('roles as r','r.role_id','pp.role_id')
-                                        ->where('u.user_id',$get_user_otp_id)
+                                        ->where('uo.otp_id',$get_user_otp_id)
                                         ->where('uo.status',1)
                                         ->first();
                 
-        Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
-                    $message->to($to_email)
+        Mail::send('MobileApp::otp', ["otp_code" => $random_otp, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($email, $random_otp) {
+                    $message->to($email)
                             ->subject('DA VMP Mobile')
                             ->from("support.sadd@da.gov.ph");
                 });

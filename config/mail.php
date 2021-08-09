@@ -40,7 +40,7 @@ return [
             'port' => 465,
             'encryption' => 'ssl',
             'username' =>'support.sadd@da.gov.ph',
-            'password' => 'SysADDem@1l123',
+            'password' => 'SysADDem@1L0721',
             'timeout' => null,
             'auth_mode' => null,
         ],

@@ -203,7 +203,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="images/image-1.png" alt="Calendar"
+                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-1.png'))}}" alt="Calendar"
                                       title="Calendar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 145px;"
                                       width="145" />
@@ -486,7 +486,7 @@
                                       style="color: #969696; line-height: 22.4px; font-size: 16px;">Date and
                                       Time:</span></span></p>
                                 <p style="font-size: 14px; line-height: 140%;"><strong><span
-                                      style="font-size: 16px; line-height: 22.4px;">{{ \Carbon\Carbon::parse($date)->format('m d, Y h:mA')}}</span></strong>
+                                      style="font-size: 16px; line-height: 22.4px;">{{ \Carbon\Carbon::parse($date)->format('M d, Y h:mA')}}</span></strong>
                                 </p>
                               </div>
 
