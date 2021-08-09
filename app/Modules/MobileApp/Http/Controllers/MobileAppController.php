@@ -79,8 +79,7 @@ class MobileAppController extends Controller
                 
                 Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
                     $message->to($to_email)
-                            ->subject('DA VMP Mobile')
-                            ->from("support.sadd@da.gov.ph");
+                            ->subject('OTP');                            
                 });
 
                 return json_encode(array([
@@ -132,8 +131,8 @@ class MobileAppController extends Controller
                 
         Mail::send('MobileApp::otp', ["otp_code" => $random_otp, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($email, $random_otp) {
                     $message->to($email)
-                            ->subject('DA VMP Mobile')
-                            ->from("support.sadd@da.gov.ph");
+                    ->subject('OTP');
+                            
                 });
          
   

@@ -138,9 +138,7 @@ class UserManagementController extends Controller
             
             $get_role = db::table('roles')->where('role_id',$role)->first()->role;
             Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role], function ($message) use ($email, $random_password) {
-                $message->to($email)
-                        ->subject('User Account Credentials')
-                        ->from("support.sadd@da.gov.ph");
+                $message->to($email)->subject('User Account Credentials');                
             });
 
             return 'true';

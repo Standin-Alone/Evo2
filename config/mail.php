@@ -44,6 +44,10 @@ return [
             'timeout' => null,
             'auth_mode' => null,
         ],
+        'from' => [
+            'address' => 'support.sadd@da.gov.ph',
+            'name' => 'Department of Agriculture',
+        ],
 
         'stream' => [
             'ssl' => [
@@ -105,9 +109,10 @@ return [
 
     'from' => [
         'address' => 'support.sadd@da.gov.ph',
-        'name' => env('MAIL_FROM_NAME', 'Example'),
+        'name' => 'Department of Agriculture',
     ],
 
+    
     /*
     |--------------------------------------------------------------------------
     | Markdown Mail Settings

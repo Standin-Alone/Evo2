@@ -56,7 +56,6 @@ class AccessController extends Controller
 
         
 
-        echo json_encode($get_menu);
         session(['role'=>'RFO Program Staff']);
         session(['unique_modules'=>$get_menu->unique('parent_module')]);
         session(['modules'=>$get_menu]);
