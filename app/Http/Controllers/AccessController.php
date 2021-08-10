@@ -60,7 +60,18 @@ class AccessController extends Controller
                             })                        
                                
                             ->get();    
-        // foreach($get_menu as  $key => $item){
+  
+
+        
+        
+        session(['role'=>'RFO Program Staff']);
+        session(['main_modules'=>$get_main_modules]);
+        session(['sub_modules'=>$get_sub_modules]);
+
+
+     
+        echo json_encode($get_sub_modules);
+              // foreach($get_menu as  $key => $item){
         //     if(!is_null($item->parent_module_id)){
         //         $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()->module;
         //     }else{
@@ -68,17 +79,6 @@ class AccessController extends Controller
         //     }
         // }
 
-
-        
-        echo json_encode($get_sub_modules);
-        session(['role'=>'RFO Program Staff']);
-        session(['main_modules'=>$get_main_modules]);
-        session(['sub_modules'=>$get_sub_modules]);
-
-
-     
-        
-        
     }
 
 

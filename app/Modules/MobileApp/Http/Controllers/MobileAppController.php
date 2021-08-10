@@ -565,7 +565,7 @@ class MobileAppController extends Controller
                     ->where('reference_no', $voucher_info->reference_no)
                     ->update([
                         'amount_val'     => $compute_remaining_bal, 
-                        'voucher_status' => 'PARTIALLY CLAIMED',
+                        'voucher_status' =>  $compute_remaining_bal != 0 ? 'PARTIALLY CLAIMED' : 'FULLY CLAIMED' ,
                     ]);
                     
                 return 'success';

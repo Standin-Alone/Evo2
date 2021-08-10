@@ -42,14 +42,18 @@
             },
             columns:[
                 {data:'module'},
-                {data:'routes'},            
+                {data:'routes',
+                    render: function(data){                   
+                        return data == null ? 'N/A' : data;
+                    }
+                },            
                 {data:'sub_modules',
                     render:function(data,type,row){
                         let output = '';
                         if(data){
                         data.map((item)=>{output += item.module + '<br>'});
                         }
-                        return output;
+                        return output == '' ? "N/A" : output;
                     }
 
 
@@ -80,6 +84,7 @@
             $('.update-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(0)').text());            
             // check if has sub modules
             if($(this).attr('has_sub')!= 1){
+                $(".update-modal-dialog").css('max-width','30%')
                 $(".main-module-component").show();
                 $(".sub-modules-component").hide();                
                 $("#UpdateForm  input[name='id']").val($(this).attr('sys_module_id'));
@@ -87,6 +92,7 @@
                 $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
                 $(".main-module-update-btn").show();
             }else{
+                $(".update-modal-dialog").css('max-width','50%')
                 $(".main-module-update-btn").hide();
                 $(".main-module-component").hide();
                 $(".sub-modules-component").show();
@@ -95,15 +101,15 @@
 
                 // sub modules id
                  sub_module_table = $("#sub-modules-datatable").DataTable({
-                                        serverSide: true,                        
+                                        serverSide: true,                                                       
                                         ajax: {
                                                 "url" : '{{route("modules.show_sub_modules",["parent_module_id" => ":id"])}}'.replace(':id',$(this).attr('sys_module_id')),
                                                 "type" : "get"
                                                 },
                                                 columns:[
-                                                            {data:'module'},
-                                                            {data:'routes'},                                                             
-                                                            {data:'sys_module_id',
+                                                            {data:'module',title:'Module'},
+                                                            {data:'routes',title:'Route'},                                                             
+                                                            {data:'sys_module_id', title:'Actions',
                                                                 render: function(data,type,row){       
                                                                     
                                                                     
@@ -588,7 +594,7 @@
 
         <!-- #modal-EDIT Main Modal and Sub Modules -->
         <div class="modal fade" id="UpdateModal"  data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog" style="max-width: 30%">
+            <div class="modal-dialog update-modal-dialog" style="max-width: 50%">
                 <form id="UpdateForm" method="PUT" >
                     @csrf
                     <div class="modal-content">
@@ -611,8 +617,8 @@
                             </div>
 
 
-                            <div class="col-lg-12 sub-modules-component">
-                            <table id="sub-modules-datatable" class="table table-hover">            
+                            <div class="col-md-12 sub-modules-component">
+                            <table id="sub-modules-datatable" class="table table-hover" style="width:100%">            
                                 <thead>
                                     <tr>                    
                                         <th >Module Name</th>

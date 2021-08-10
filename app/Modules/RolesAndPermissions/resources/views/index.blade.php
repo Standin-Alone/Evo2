@@ -59,17 +59,30 @@
     <script>
         $(document).ready(function(){       
 
-
+        // load modules to selects
         let load_modules  = (data)=>{
+            $("#select_module optgroup").remove();
             $("#select_module option").remove();
             $.ajax({
                         url:"{{route('select-modules')}}",
                         type:'POST',
                         data:data,                                    
                         success:function(data){
-                            data.map((item)=>{
-                                $("#select_module").append('<option value="'+item.module+'">'+item.module+'</option>')
-                            })
+
+                            convertToJson = JSON.parse(data);
+                            console.warn(convertToJson);
+                            convertToJson.main_modules.map((item)=>{
+                                if(item.has_sub == 1){
+                                    $("#select_module").append('<optgroup label="'+item.module+'" id="'+item.sys_module_id+'"></optgroup>');                                    
+                                    convertToJson.sub_modules.map((value) =>{
+                                        if(item.sys_module_id == value.parent_module_id){
+                                            $('#select_module #'+item.sys_module_id).append('<option value="'+value.module+'">'+value.module+'</option>')
+                                        }
+                                    })
+                                }else{
+                                    $("#select_module").append('<option value="'+item.module+'">'+item.module+'</option>')
+                                }
+                            })                        
                             
                         }
                         

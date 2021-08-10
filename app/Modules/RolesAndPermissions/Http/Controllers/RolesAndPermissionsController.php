@@ -104,8 +104,9 @@ class RolesAndPermissionsController extends Controller
                                 ->where('r.role_id',$id)
                                 ->groupBy('module')
                                 ->pluck('module');
-        $get_modules = db::table('sys_modules')->whereNotIn('module',$get_module_matrix)->get();
-        return $get_modules;
+        $main_modules = db::table('sys_modules')->whereNull('parent_module_id')->whereNotIn('module',$get_module_matrix)->get();
+        $sub_modules = db::table('sys_modules')->whereNotNull('parent_module_id')->whereNotIn('module',$get_module_matrix)->get();
+        return json_encode(["main_modules" => $main_modules, "sub_modules" => $sub_modules]);
     }   
     /**
      * Store a newly created resource in storage.
