@@ -386,23 +386,21 @@ class MobileAppController extends Controller
 
         try {
 
-            $attachment_error_count = 0;
+            
             $uuid         = Uuid::uuid4();
             $voucher_info = json_decode(request('voucher_info'));
             $commodity    = json_decode(request('commodity'));
             $attachments  = json_decode(request('attachments'));
             $attachment_response = '';
             $attachment_info = [];
+            $attachment_error_count = 0;
            
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
                 $attachment_response = $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
-                $attachment_info[] = $attachment_response['attachment_info'];
-                
+                $attachment_info[] = $attachment_response['attachment_info'];                
                 $attachment_error_count += $attachment_response['upload_error_count'];
-                
-                
             }
 
             // check if uploading is successfull
@@ -486,52 +484,95 @@ class MobileAppController extends Controller
             $voucher_info = json_decode(request('voucher_info'));
             $commodity    = json_decode(request('commodity'));
             $attachments  = json_decode(request('attachments'));
-
-            // insert to voucher transaction table
-            
-            $voucher_details_uuid = '';
-            $sum_total_amount = 0;
-            foreach($commodity as $item){
-                $voucher_details_uuid = Uuid::uuid4();
-                db::table('voucher_transaction')->insert(
-                    [
-                        'voucher_details_id'  => $voucher_details_uuid,
-                        'reference_no'        => $voucher_info->reference_no,
-                        'supplier_id'         => $voucher_info->supplier_id,
-                        'sub_program_id'      => $item->sub_id,
-                        'fund_id'             =>  $voucher_info->fund_id,
-                        'quantity'            =>  $item->quantity,
-                        'amount'              =>  $item->price,
-                        'total_amount'        =>  $item->total_amount,
-                        'latitude'            =>  $voucher_info->latitude,
-                        'longitude'           =>  $voucher_info->longitude,
-                        'transac_by_id'       =>  $voucher_info->supplier_id,
-                        'transac_by_fullname' =>  $voucher_info->full_name,
-                    ]
-                );
-
-                // comp
-                $sum_total_amount += $item->total_amount;
-
-
-            }
+            $attachment_response = '';
+            $attachment_info = [];
+            $attachment_error_count = 0;
+           
+          
+          
         
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
-                $this->insertAttachment($item,$voucher_details_uuid,$voucher_info,$voucher_info->program);
+                $attachment_response = $this->insertAttachment($item,0,$voucher_info,$voucher_info->program);
+                $attachment_info[] = $attachment_response['attachment_info'];                
+                $attachment_error_count += $attachment_response['upload_error_count'];
             }
 
-            //  compute remaining balance
-            $compute_remaining_bal = $voucher_info->current_balance - $sum_total_amount;
 
-            // update  voucher gen table amount_val
-            db::table('voucher')
-                ->where('reference_no', $voucher_info->reference_no)
-                ->update([
-                    'amount_val'     => $compute_remaining_bal, 
-                    'voucher_status' => 'PARTIALLY CLAIMED',
-                ]);
+            // check if uploading is successfull
+            if($attachment_error_count == 0){
+                // insert to voucher transaction table
+                $voucher_details_uuid = '';
+                $sum_total_amount = 0;
+
+                foreach($commodity as $item){
+                    $voucher_details_uuid = Uuid::uuid4();
+                    db::table('voucher_transaction')->insert(
+                        [
+                            'voucher_details_id'  => $voucher_details_uuid,
+                            'reference_no'        => $voucher_info->reference_no,
+                            'supplier_id'         => $voucher_info->supplier_id,
+                            'sub_program_id'      => $item->sub_id,
+                            'fund_id'             =>  $voucher_info->fund_id,
+                            'quantity'            =>  $item->quantity,
+                            'amount'              =>  $item->price,
+                            'total_amount'        =>  $item->total_amount,
+                            'latitude'            =>  $voucher_info->latitude,
+                            'longitude'           =>  $voucher_info->longitude,
+                            'transac_by_id'       =>  $voucher_info->supplier_id,
+                            'transac_by_fullname' =>  $voucher_info->full_name,
+                        ]
+                    );
+    
+                    // compute total amount
+                    $sum_total_amount += $item->total_amount;        
+                }
+
+                // get the attachments to batch insert to database
+                foreach($attachment_info as $item){
+                        
+                    if(count($item[0]) == 2){
+                        foreach($item[0] as $value){
+                            $encode_valid_id =  json_encode($value);
+                            $decode_valid_id = json_decode($encode_valid_id);
+                            // insert pictures in database
+                            db::table('voucher_attachments')->insert([
+                                'attachment_id'      => $decode_valid_id->attachment_id,
+                                'voucher_details_id' => $voucher_details_uuid,
+                                'document'           => $decode_valid_id->document,
+                                'file_name'          => $decode_valid_id->file_name,
+                            ]);
+                        }
+                    }else{
+                            $encode_attachment =  json_encode($item[0]);
+                            $decode_attachment = json_decode($encode_attachment);
+                            db::table('voucher_attachments')->insert([
+                                'attachment_id'      => $decode_attachment->attachment_id,
+                                'voucher_details_id' => $voucher_details_uuid,
+                                'document'           => $decode_attachment->document,
+                                'file_name'          => $decode_attachment->file_name,
+                            ]);
+                    }
+                                        
+                }
+
+                //  compute remaining balance
+                $compute_remaining_bal = $voucher_info->current_balance - $sum_total_amount;
+
+                // update  voucher gen table amount_val
+                db::table('voucher')
+                    ->where('reference_no', $voucher_info->reference_no)
+                    ->update([
+                        'amount_val'     => $compute_remaining_bal, 
+                        'voucher_status' => 'PARTIALLY CLAIMED',
+                    ]);
+                    
+                return 'success';
+            }else{
+
+                return 'error';
+            }
         } catch (\Exception $e) {
             echo json_encode(array(["Message"    => $e->getMessage(), 
                                     "StatusCode" => $e->getCode()]));
