@@ -34,7 +34,7 @@ trait MakesComponent
     protected function getConfiguredFolder($key = null)
     {
         if (! $key) $key = self::KEY;
-        return config("modules.specific.{$this->module}.structure.{$key}", config("modules.default.structure.{$key}"));
+        return config("{$this->module}.structure.{$key}", config("modules.default.structure.{$key}"));
     }
 
     /**
@@ -79,7 +79,7 @@ trait MakesComponent
      *
      * @return void
      */
-    private function initModuleOption()
+    protected function initModuleOption()
     {
         if (! $this->module = $this->option('module')) {
             $this->module = $this->ask('In what module would you like to generate?');

@@ -7,6 +7,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Database\Eloquent\Factory;
 
+use ArtemSchander\L5Modular\Services\L5Modular;
+
 class ModuleServiceProvider extends ServiceProvider
 {
     use Traits\RegisteresCommands;
@@ -16,7 +18,7 @@ class ModuleServiceProvider extends ServiceProvider
     /**
      * Bootstrap the application services.
      *
-     * @param  \Illuminate\Contracts\Foundation\Application  $app
+     * @param  \Illuminate\Filesystem\Filesystem  $files
      *
      * @return void
      */
@@ -42,7 +44,9 @@ class ModuleServiceProvider extends ServiceProvider
      */
     protected function registerModule(string $name)
     {
-        $enabled = config("modules.specific.{$name}.enabled", true);
+        $this->registerConfig($name);
+
+        $enabled = config("{$name}.enabled", true);
         if ($enabled) {
             $this->registerRoutes($name);
             $this->registerHelpers($name);
@@ -50,6 +54,31 @@ class ModuleServiceProvider extends ServiceProvider
             $this->registerTranslations($name);
             $this->registerMigrations($name);
             $this->registerFactories($name);
+        }
+    }
+
+    /**
+     * Register the config file for a module by its name
+     *
+     * @param  string $module
+     *
+     * @return void
+     */
+    protected function registerConfig(string $module)
+    {
+        $key = "modules.specific.{$module}";
+        $config = $this->app['config']->get($key, []);
+
+        $file = app_path("Modules/{$module}/config.php");
+        if ($this->files->exists($file)) {
+            $config = array_merge(require $file, $config);
+        }
+
+        if ($config) {
+            $this->app['config']->set($key, $config);
+            if (! $this->app['config']->get($module)) {
+                $this->app['config']->set($module, $config);
+            }
         }
     }
 
@@ -104,10 +133,10 @@ class ModuleServiceProvider extends ServiceProvider
      */
     protected function getRoutingConfig(string $module)
     {
-        $types = config("modules.specific.{$module}.routing", config('modules.default.routing'));
-        $path = config("modules.specific.{$module}.structure.routes", config('modules.default.structure.routes'));
+        $types = config("{$module}.routing", config('modules.default.routing'));
+        $path = config("{$module}.structure.routes", config('modules.default.structure.routes'));
 
-        $cp = config("modules.specific.{$module}.structure.controllers", config('modules.default.structure.controllers'));
+        $cp = config("{$module}.structure.controllers", config('modules.default.structure.controllers'));
         $namespace = $this->app->getNamespace() . trim("Modules\\{$module}\\" . implode('\\', explode('/', $cp)), '\\');
 
         return compact('types', 'path', 'namespace');
@@ -194,7 +223,7 @@ class ModuleServiceProvider extends ServiceProvider
      */
     protected function prepareComponent(string $module, string $component, string $file = '')
     {
-        $path = config("modules.specific.{$module}.structure.{$component}", config("modules.default.structure.{$component}"));
+        $path = config("{$module}.structure.{$component}", config("modules.default.structure.{$component}"));
         $resource = rtrim(str_replace('//', '/', app_path("Modules/{$module}/{$path}/{$file}")), '/');
 
         if (! ($file && $this->files->exists($resource)) && ! (!$file && $this->files->isDirectory($resource))) {
@@ -212,10 +241,11 @@ class ModuleServiceProvider extends ServiceProvider
     {
         $this->registerPublishConfig();
         $this->registerCommands();
+        $this->registerService();
     }
 
     /**
-     * undocumented function
+     * register config
      *
      * @return void
      */
@@ -226,5 +256,17 @@ class ModuleServiceProvider extends ServiceProvider
 
         $this->mergeConfigFrom($configPath, 'modules');
         $this->publishes([ $configPath => $publishPath ], 'config');
+    }
+
+    /**
+     * register service
+     *
+     * @return void
+     */
+    protected function registerService()
+    {
+        $this->app->singleton('l5modular', function($app) {
+            return new L5Modular($app['config'], $app['files']);
+        });
     }
 }

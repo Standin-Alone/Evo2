@@ -2,6 +2,7 @@ env:
   global:
     - CC_TEST_REPORTER_ID=b287c71c320d98d25e34fc38d12750f450ed0ba869bb987608601c42f6f1b35f
     - GIT_COMMITTED_AT=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then git log -1 --pretty=format:%ct; else git log -1 --skip 1 --pretty=format:%ct; fi)
+    - XDEBUG_MODE=coverage
 
 language: php
 
@@ -17,7 +18,7 @@ before_script:
   - ./cc-test-reporter before-build
 
 script:
-  - phpunit --coverage-text --coverage-clover build/logs/clover.xml
+  - vendor/bin/phpunit --coverage-text --coverage-clover build/logs/clover.xml
   - if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT; fi
 
 branches:

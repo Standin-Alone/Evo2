@@ -181,7 +181,7 @@ class PendingRequest
     /**
      * Attach a raw body to the request.
      *
-     * @param  resource|string  $content
+     * @param  string  $content
      * @param  string  $contentType
      * @return $this
      */
@@ -220,7 +220,7 @@ class PendingRequest
      * Attach a file to the request.
      *
      * @param  string|array  $name
-     * @param  string  $contents
+     * @param  string|resource  $contents
      * @param  string|null  $filename
      * @param  array  $headers
      * @return $this
@@ -707,7 +707,10 @@ class PendingRequest
     {
         return $this->promise = $this->sendRequest($method, $url, $options)
             ->then(function (MessageInterface $message) {
-                return $this->populateResponse(new Response($message));
+                return tap(new Response($message), function ($response) {
+                    $this->populateResponse($response);
+                    $this->dispatchResponseReceivedEvent($response);
+                });
             })
             ->otherwise(function (TransferException $e) {
                 return $e instanceof RequestException ? $this->populateResponse(new Response($e->getResponse())) : $e;

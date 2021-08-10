@@ -9,8 +9,6 @@
   "imageSize": 100,
   "commit": true,
   "commitConvention": "none",
-  "contributors": [],
-  "contributorsPerLine": 7,
   "contributors": [
     {
       "login": "juliomotol",
@@ -21,6 +19,26 @@
         "code",
         "test",
         "tool"
+      ]
+    },
+    {
+      "login": "husseinferas",
+      "name": "Hussein Feras",
+      "avatar_url": "https://avatars1.githubusercontent.com/u/27640691?v=4",
+      "profile": "https://github.com/husseinferas",
+      "contributions": [
+        "code",
+        "test",
+        "tool"
+      ]
+    },
+    {
+      "login": "farhanwazir",
+      "name": "Farhan Wazir",
+      "avatar_url": "https://avatars0.githubusercontent.com/u/241825?v=4",
+      "profile": "https://www.cideator.com",
+      "contributions": [
+        "code"
       ]
     },
     {
@@ -51,15 +69,6 @@
       ]
     },
     {
-      "login": "farhanwazir",
-      "name": "Farhan Wazir",
-      "avatar_url": "https://avatars0.githubusercontent.com/u/241825?v=4",
-      "profile": "https://www.cideator.com",
-      "contributions": [
-        "code"
-      ]
-    },
-    {
       "login": "tombombadilll",
       "name": "Thomas Eriksson",
       "avatar_url": "https://avatars2.githubusercontent.com/u/1056064?v=4",
@@ -69,5 +78,6 @@
       ]
     }
   ],
+  "contributorsPerLine": 7,
   "badgeTemplate": "<a href='#contributors'><img src='https://img.shields.io/badge/contributors-<%= contributors.length %>-orange.svg' alt='All Contributors'></a>"
 }

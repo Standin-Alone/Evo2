@@ -1,8 +1,8 @@
 <?php
 
-namespace ArtemSchander\L5Modular\Tests\Commands;
+namespace ArtemSchander\L5Modular\Tests;
 
-// use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Foundation\Application;
 use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Filesystem\Filesystem;
@@ -17,6 +17,7 @@ use ArtemSchander\L5Modular\ModuleServiceProvider;
  */
 class ModuleServiceProviderTest extends TestCase
 {
+    private $finder;
     private $serviceProvider;
 
     protected function setUp(): void
@@ -48,6 +49,7 @@ class ModuleServiceProviderTest extends TestCase
                 'seeder' => true,
                 'factory' => true,
                 'helpers' => true,
+                'config' => true,
             ],
             'default' => [
                 'routing' => [ 'web', 'api', 'simple' ],
@@ -83,7 +85,7 @@ class ModuleServiceProviderTest extends TestCase
     }
 
     /** @test */
-    public function it_registeres_the_package()
+    public function should_register_the_package()
     {
         $this->app->setBasePath(__DIR__ . '/..');
 
@@ -91,7 +93,7 @@ class ModuleServiceProviderTest extends TestCase
         $serviceProvider = new ModuleServiceProvider($app);
 
         $app->shouldReceive('singleton')
-            ->times(19)
+            ->times(22)
             ->andReturnNull();
 
         $app->shouldReceive('configPath')
@@ -100,6 +102,13 @@ class ModuleServiceProviderTest extends TestCase
             ->andReturn('config/modules.php');
 
         $configRepository = Mockery::mock(ConfigRepository::class);
+
+        if (version_compare(Application::VERSION, '7.19.0', '>=')) {
+            $app->shouldReceive('make')
+                ->once()
+                ->with('config')
+                ->andReturn($configRepository);
+        }
 
         $configRepository->shouldReceive('set')
             ->once();
@@ -121,7 +130,7 @@ class ModuleServiceProviderTest extends TestCase
     }
 
     /** @test */
-    public function it_bootes_a_full_module()
+    public function should_boot_a_full_module()
     {
         $basePath = realpath($this->app['path.base']);
         $this->artisan('make:module', ['name' => 'foo-bar']);
@@ -129,6 +138,61 @@ class ModuleServiceProviderTest extends TestCase
         $app = Mockery::mock(ArrayAccess::class);
         $fileSystem = Mockery::mock(FileSystem::class);
         $serviceProvider = new ModuleServiceProvider($app);
+
+        $configRepository = Mockery::mock(ConfigRepository::class);
+
+        $configRepository->shouldReceive('get')
+            ->with('modules.specific.FooBar', [])
+            ->once()
+            ->andReturn([]);
+
+        $app->shouldReceive('offsetGet')
+            ->zeroOrMoreTimes()
+            ->with('config')
+            ->andReturn($configRepository);
+
+        $fileSystem->shouldReceive('exists')
+            ->once()
+            ->with($basePath . '/app/Modules/FooBar/config.php')
+            ->andReturn(true);
+
+        $config = [
+            'enabled' => true,
+            'routing' => [ 'web', 'api' ],
+            'structure' => [
+                'controllers' => 'Http/Controllers',
+                'resources' => 'Http/Resources',
+                'requests' => 'Http/Requests',
+                'models' => 'Models',
+                'mails' => 'Mail',
+                'notifications' => 'Notifications',
+                'events' => 'Events',
+                'listeners' => 'Listeners',
+                'observers' => 'Observers',
+                'jobs' => 'Jobs',
+                'rules' => 'Rules',
+                'views' => 'resources/views',
+                'translations' => 'resources/lang',
+                'routes' => 'routes',
+                'migrations' => 'database/migrations',
+                'seeds' => 'database/seeds',
+                'factories' => 'database/factories',
+                'helpers' => '',
+            ],
+        ];
+
+        $configRepository->shouldReceive('set')
+            ->withArgs(['modules.specific.FooBar', $config])
+            ->once();
+
+        $configRepository->shouldReceive('get')
+            ->with('FooBar')
+            ->once()
+            ->andReturn(false);
+
+        $configRepository->shouldReceive('set')
+            ->withArgs(['FooBar', $config])
+            ->once();
 
         $fileSystem->shouldReceive('directories')
             ->once()
@@ -202,7 +266,7 @@ class ModuleServiceProviderTest extends TestCase
     }
 
     /** @test */
-    public function it_bootes_a_module_with_a_simple_route_file_only()
+    public function should_boot_a_module_with_a_simple_route_file_only()
     {
         $this->app['config']->set('modules.default.structure.routes', '');
         $this->app['config']->set('modules.default.routing', [ 'simple' ]);
@@ -216,6 +280,22 @@ class ModuleServiceProviderTest extends TestCase
         $app = Mockery::mock(ArrayAccess::class);
         $fileSystem = Mockery::mock(FileSystem::class);
         $serviceProvider = new ModuleServiceProvider($app);
+
+        $configRepository = Mockery::mock(ConfigRepository::class);
+
+        $configRepository->shouldReceive('get')
+            ->once()
+            ->andReturn([]);
+
+        $app->shouldReceive('offsetGet')
+            ->zeroOrMoreTimes()
+            ->with('config')
+            ->andReturn($configRepository);
+
+        $fileSystem->shouldReceive('exists')
+            ->once()
+            ->with($basePath . '/app/Modules/FooBar/config.php')
+            ->andReturn(false);
 
         $fileSystem->shouldReceive('directories')
             ->once()

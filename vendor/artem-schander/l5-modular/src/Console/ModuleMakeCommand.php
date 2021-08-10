@@ -120,7 +120,8 @@ class ModuleMakeCommand extends GeneratorCommand
                 break;
 
             case 'translation':
-                $options['name'] = 'en';
+                $options['name'] = 'example';
+                $options['--language'] = 'en';
                 break;
 
             case 'seeder':
@@ -138,6 +139,7 @@ class ModuleMakeCommand extends GeneratorCommand
                 $options['--create'] = $table;
                 break;
 
+            case 'config':
             case 'helpers':
                 unset($options['name']);
                 break;
@@ -173,9 +175,9 @@ class ModuleMakeCommand extends GeneratorCommand
      */
     protected function getArguments()
     {
-        return array(
+        return [
             ['name', InputArgument::REQUIRED, 'Module name.'],
-        );
+        ];
     }
 
     /**

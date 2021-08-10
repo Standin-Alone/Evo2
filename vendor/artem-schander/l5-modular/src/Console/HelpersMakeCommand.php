@@ -24,7 +24,7 @@ class HelpersMakeCommand extends GeneratorCommand
     protected $description = 'Create a new helpers file in a module';
 
     /**
-     * The type of class being generated.
+     * The type of component being generated.
      *
      * @var string
      */
