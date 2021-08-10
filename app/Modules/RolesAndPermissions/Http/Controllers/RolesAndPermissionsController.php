@@ -101,10 +101,17 @@ class RolesAndPermissionsController extends Controller
         $get_module_matrix = DB::table('roles as r')                                                                
                                 ->join('sys_access_matrix as sam','r.role_id','sam.role_id')                                
                                 ->join('sys_modules as sm','sm.sys_module_id','sam.sys_module_id')
-                                ->where('r.role_id',$id)
+                                ->where('r.role_id',$id)                                                                 
                                 ->groupBy('module')
                                 ->pluck('module');
+
+
+             
+
         $main_modules = db::table('sys_modules')->whereNull('parent_module_id')->whereNotIn('module',$get_module_matrix)->get();
+
+
+        
         $sub_modules = db::table('sys_modules')->whereNotNull('parent_module_id')->whereNotIn('module',$get_module_matrix)->get();
         return json_encode(["main_modules" => $main_modules, "sub_modules" => $sub_modules]);
     }   
@@ -131,7 +138,8 @@ class RolesAndPermissionsController extends Controller
 
                 $check_parent = db::table('sys_access_matrix')
                                 ->where('sys_module_id',$get_module->parent_module_id)
-                                ->where('role_id',$role_id)                
+                                ->where('role_id',$role_id)  
+                                ->where('sys_permission_id',$item->sys_permission_id)              
                                 ->get();
 
                 if($check_parent->isEmpty()){
