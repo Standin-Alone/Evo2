@@ -271,8 +271,8 @@
                                     icon: "success",
                                 }).then(()=>{
                                     $("#AddModal").modal('hide')
-                                    module_table.ajax.reload();
-                                    e.resetForm();
+                                    // module_table.ajax.reload();
+                                    
                                     
                                 });
                             },
@@ -288,7 +288,7 @@
                     }
                 });
                
-
+                
             }
         })
 

@@ -32,14 +32,14 @@ class ModulesController extends Controller
             
 
             if($has_sub != 1){
-                $check_module =  L5Modular::exists(trim($module_name));
+                $check_module =  L5Modular::exists(trim($module_name[0]));
 
                 if(!$check_module){
-                    Artisan::call("make:module",["name" => $module_name]);
+                    Artisan::call("make:module",["name" => trim($module_name[0])]);
                 }
                 
                     db::table('sys_modules')
-                    ->insert(['module'=>$module_name,'routes'=>$route]);
+                    ->insert(['module'=>$module_name[0],'routes'=>$route]);
                 
             }else{
                 $get_last_id = 0;
@@ -56,7 +56,7 @@ class ModulesController extends Controller
                         foreach($route as $route_key => $route_item){
 
                             if($route_key == $key - 1 ){
-
+                                
                                 $check_module =  L5Modular::exists(trim($item));
                                 db::table('sys_modules')
                                     ->insert([
@@ -65,7 +65,7 @@ class ModulesController extends Controller
                                         "parent_module_id" => $get_last_id
                                     ]);                                    
                                 if(!$check_module){
-                                    Artisan::call("make:module",["name" => $item]);
+                                    Artisan::call("make:module",["name" => trim($item)]);
                                 }                                
                             }
                         }
@@ -77,7 +77,7 @@ class ModulesController extends Controller
 
             
         }catch(\Exception $e){
-            echo json_encode($e);
+            dd($e);
         }
     }   
     

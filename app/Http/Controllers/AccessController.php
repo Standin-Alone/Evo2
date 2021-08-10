@@ -35,30 +35,45 @@ class AccessController extends Controller
         $modules = [];
 
 
-        $get_menu = db::table('sys_modules as sm')                            
+        $get_main_modules = db::table('sys_modules as sm')                            
                             ->whereIn('sm.sys_module_id',function($query){
                                     $query->select('sm.sys_module_id') 
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
                                     ->where('sm.status', 1)
-                                    ->where('role_id',5)                                                        
+                                    ->where('role_id',5)         
+                                    ->whereNull('parent_module_id')                                                                                      
                                     ->get();
                             })                        
+                        
                             ->get();
                     
-
-        foreach($get_menu as  $key => $item){
-            if(!is_null($item->parent_module_id)){
-                $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()->module;
-            }
-        }
+        $get_sub_modules = db::table('sys_modules as sm')                            
+                            ->whereIn('sm.sys_module_id',function($query){
+                                    $query->select('sm.sys_module_id') 
+                                    ->from('sys_modules as sm')
+                                    ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
+                                    ->where('sm.status', 1)
+                                    ->where('role_id',5)  
+                                    ->whereNotNull('parent_module_id')                                                                                          
+                                    ->get();
+                            })                        
+                               
+                            ->get();    
+        // foreach($get_menu as  $key => $item){
+        //     if(!is_null($item->parent_module_id)){
+        //         $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()->module;
+        //     }else{
+        //         $item->parent_module = null;
+        //     }
+        // }
 
 
         
-
+        echo json_encode($get_sub_modules);
         session(['role'=>'RFO Program Staff']);
-        session(['unique_modules'=>$get_menu->unique('parent_module')]);
-        session(['modules'=>$get_menu]);
+        session(['main_modules'=>$get_main_modules]);
+        session(['sub_modules'=>$get_sub_modules]);
 
 
      

@@ -4,20 +4,20 @@
     
 
     
-    @foreach (session('unique_modules') as $item)
+    @foreach (session('main_modules') as $item)
 
 
-    @if(!is_null($item->parent_module_id))
+    @if($item->has_sub == 1)
     
     <li class="has-sub">
         <a href="javascript:;">
             <b class="caret"></b>
             <i class="fa fa-table"></i>
-            <span>{{$item->parent_module}}</span>
+            <span>{{$item->module}}</span>
         </a>
         <ul class="sub-menu">    
-                    @foreach(session('modules') as $value)
-                        @if($value->parent_module_id == $item->parent_module_id)                        
+                    @foreach(session('sub_modules') as $value)
+                        @if($value->parent_module_id == $item->sys_module_id)                        
                         <li class="{{Route::currentRouteName() == $value->routes ? "active" : null}}" ><a href="{{route($value->routes)}}">{{$value->module}} </a></li>    
                         @endif                   
                     @endforeach           

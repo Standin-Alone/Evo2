@@ -9,7 +9,6 @@ use DB;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
-use \Illuminate\Support\Arr;
 class MobileAppController extends Controller
 {
     /**
@@ -288,16 +287,10 @@ class MobileAppController extends Controller
 
     // insert attachment function
     public function insertAttachment($item,$uuid,$voucher_info,$program){
-
-        // count error upload 
-        $upload_error_count = 0;
         // insert attachment data to database
         $attachment_uuid        = Uuid::uuid4();
         $front_attachment_uuid  = Uuid::uuid4();
         $back_attachment_uuid   = Uuid::uuid4();
-        $attachment_info = [];
-
-
 
         if ($item->name == 'Valid ID') {
             $id_front = $item->file[0]->front;
@@ -315,35 +308,33 @@ class MobileAppController extends Controller
 
             $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
 
-            
+            // insert front page of id in database
+            db::table('voucher_attachments')->insert([
+                'attachment_id'      => $front_attachment_uuid,
+                'voucher_details_id' => $uuid,
+                'document'           => $item->name,
+                'file_name'          => $id_front_name,
+            ]);
+
+            // insert back page of id in database
+            db::table('voucher_attachments')->insert([
+                'attachment_id'      => $back_attachment_uuid,
+                'voucher_details_id' => $uuid,
+                'document'           => $item->name,
+                'file_name'          => $id_back_name,
+            ]);
 
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0777, true);                                
+                File::makeDirectory($upload_folder, 0777, true);
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
+                
+            } else {
+          
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
+                Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));                
             }
-
-            $upload_front_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
-            $upload_back_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
-
-            if(!($upload_front_id && $upload_back_id)){
-                $upload_error_count++;
-            }else{                
-                 $attachment_info[] = [
-                    [
-                        'attachment_id'      => $front_attachment_uuid,                  
-                        'voucher_details_id' => $uuid,                  
-                        'document'           => $item->name,
-                        'file_name'          => $id_front_name,
-                    ]
-                    ,
-                    [
-                        'attachment_id'      => $back_attachment_uuid,                  
-                        'voucher_details_id' => $uuid,                  
-                        'document'           => $item->name,
-                        'file_name'          => $id_back_name,
-                    ]];
-            }
-
         } else {
 
             $image = $item->file;
@@ -353,31 +344,21 @@ class MobileAppController extends Controller
             $imageName = $voucher_info->rsbsa_no . '-' . $item->name . '.jpeg';
             
             $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
-            
+            // insert pictures in database
+            db::table('voucher_attachments')->insert([
+                'attachment_id'      => $attachment_uuid,
+                'voucher_details_id' => $uuid,
+                'document'           => $item->name,
+                'file_name'          => $imageName,
+            ]);
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0777, true);                                
-            } 
-
-            $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
-            
-            if(!$upload_image){
-                $upload_error_count++;
-            }else{    
-               
-
-               
-
-                $attachment_info[] = [
-                    'attachment_id'      => $attachment_uuid,                  
-                    'voucher_details_id' => $uuid,                  
-                    'document'           => $item->name,
-                    'file_name'          => $imageName,
-                ];
+                // File::makeDirectory($upload_folder, 0777, true);                
+                Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
+            } else {
+                Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
             }
         }
-
-        return [ 'upload_error_count' => $upload_error_count, 'attachment_info'    =>   $attachment_info ];
     }
 
     //SUBMIT FUNCTION OF CLAIM VOUCHER RRP
@@ -386,91 +367,46 @@ class MobileAppController extends Controller
 
         try {
 
-            $attachment_error_count = 0;
             $uuid         = Uuid::uuid4();
             $voucher_info = json_decode(request('voucher_info'));
             $commodity    = json_decode(request('commodity'));
             $attachments  = json_decode(request('attachments'));
-            $attachment_response = '';
-            $attachment_info = [];
-           
+
+            // insert to voucher transaction table
+            db::table('voucher_transaction')->insert(
+                [
+                    'voucher_details_id'  => $uuid,
+                    'reference_no'        => $voucher_info->reference_no,
+                    'supplier_id'         => $voucher_info->supplier_id,
+                    'sub_program_id'      => $commodity->sub_id,
+                    'fund_id'             =>  $voucher_info->fund_id,
+                    'quantity'            =>  $commodity->quantity,
+                    'amount'              =>  $commodity->fertilizer_amount,
+                    'total_amount'        =>  $commodity->total_amount,
+                    'latitude'            =>  $voucher_info->latitude,
+                    'longitude'           =>  $voucher_info->longitude,
+                    'transac_by_id'       =>  $voucher_info->supplier_id,
+                    'transac_by_fullname' =>  $voucher_info->full_name,
+                ]
+            );
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
-                $attachment_response = $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
-                $attachment_info[] = $attachment_response['attachment_info'];
-                
-                $attachment_error_count += $attachment_response['upload_error_count'];
-                
-                
+                $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
             }
 
-            // check if uploading is successfull
-            if($attachment_error_count == 0){
-                // insert to voucher transaction table
-                db::table('voucher_transaction')->insert(
-                    [
-                        'voucher_details_id'  => $uuid,
-                        'reference_no'        => $voucher_info->reference_no,
-                        'supplier_id'         => $voucher_info->supplier_id,
-                        'sub_program_id'      => $commodity->sub_id,
-                        'fund_id'             =>  $voucher_info->fund_id,
-                        'quantity'            =>  $commodity->quantity,
-                        'amount'              =>  $commodity->fertilizer_amount,
-                        'total_amount'        =>  $commodity->total_amount,
-                        'latitude'            =>  $voucher_info->latitude,
-                        'longitude'           =>  $voucher_info->longitude,
-                        'transac_by_id'       =>  $voucher_info->supplier_id,
-                        'transac_by_fullname' =>  $voucher_info->full_name,
-                    ]
-                );
-                    
-                // get the attachments to batch insert to database
-                foreach($attachment_info as $item){
-                    
-                    if(count($item[0]) == 2){
-                        foreach($item[0] as $value){
-                            $encode_valid_id =  json_encode($value);
-                            $decode_valid_id = json_decode($encode_valid_id);
-                            // insert pictures in database
-                            db::table('voucher_attachments')->insert([
-                                'attachment_id'      => $decode_valid_id->attachment_id,
-                                'voucher_details_id' => $decode_valid_id->voucher_details_id,
-                                'document'           => $decode_valid_id->document,
-                                'file_name'          => $decode_valid_id->file_name,
-                            ]);
-                        }
-                    }else{
-                            $encode_attachment =  json_encode($item[0]);
-                            $decode_attachment = json_decode($encode_attachment);
-                            db::table('voucher_attachments')->insert([
-                                'attachment_id'      => $decode_attachment->attachment_id,
-                                'voucher_details_id' => $decode_attachment->voucher_details_id,
-                                'document'           => $decode_attachment->document,
-                                'file_name'          => $decode_attachment->file_name,
-                            ]);
-                    }
-                                        
-                }
+            //  compute remaining balance
+            $compute_remaining_bal = $voucher_info->current_balance - $commodity->total_amount;
+
+            // update  voucher gen table amount_val
+            
+            db::table('voucher')
+                ->where('reference_no', $voucher_info->reference_no)
+                ->update([
+                    'amount_val'     => $compute_remaining_bal, 
+                    'voucher_status' => 'FULLY CLAIMED',                    
+                ]);
                 
-                //  compute remaining balance
-                $compute_remaining_bal = $voucher_info->current_balance - $commodity->total_amount;
-
-                // update  voucher gen table amount_val                
-                db::table('voucher')
-                    ->where('reference_no', $voucher_info->reference_no)
-                    ->update([
-                        'amount_val'     => $compute_remaining_bal, 
-                        'voucher_status' => 'FULLY CLAIMED',                    
-                    ]);
-                   
-         
-                return 'success';
-            }else{
-
-                return 'error';
-            }
-           
         } catch (\Exception $e) {
             echo json_encode(array(["Message"    => $e->getMessage(), 
                                     "StatusCode" => $e->getCode()]));
