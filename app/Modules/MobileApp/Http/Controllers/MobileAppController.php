@@ -306,12 +306,12 @@ class MobileAppController extends Controller
             // front page of id 
             $id_front      = str_replace('data:image/jpeg;base64,', '', $id_front);
             $id_front      = str_replace(' ', '+', $id_front);
-            $id_front_name = $voucher_info->rsbsa_no . '-' . $item->name . '(front)' . '.jpeg';
+            $id_front_name = $voucher_info->rsbsa_no . '-'. $front_attachment_uuid.'-' . $item->name . '(front)'. '.jpeg';
 
             // back page of id
             $id_back      = str_replace('data:image/jpeg;base64,', '', $id_back);
             $id_back      = str_replace(' ', '+', $id_back);
-            $id_back_name = $voucher_info->rsbsa_no . '-' . $item->name . '(back)' . '.jpeg';
+            $id_back_name = $voucher_info->rsbsa_no . '-' . $back_attachment_uuid.'-' . $item->name . '(back)' . '.jpeg';
 
             $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
 
@@ -319,7 +319,7 @@ class MobileAppController extends Controller
 
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0777, true);                                
+                File::makeDirectory($upload_folder, 0777, true);                                                
             }
 
             $upload_front_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
@@ -350,7 +350,7 @@ class MobileAppController extends Controller
 
             $image     = str_replace('data:image/jpeg;base64,', '', $image);
             $image     = str_replace(' ', '+', $image);
-            $imageName = $voucher_info->rsbsa_no . '-' . $item->name . '.jpeg';
+            $imageName = $voucher_info->rsbsa_no . '-' . $back_attachment_uuid.'-'. $item->name . '.jpeg';
             
             $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
             
