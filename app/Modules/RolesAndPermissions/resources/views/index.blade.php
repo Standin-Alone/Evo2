@@ -9,6 +9,10 @@
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+    <style>
+        td { font-size: 17px; font-weight: 500 }
+
+    </style>
 @endsection
 
 
@@ -33,11 +37,11 @@
             ajax: "{{route('roles.create')}}",               
             columns:[
                 {data:'role'},
-                {data:'modules',
+                {data:'modules',                   
                     render: function(data,type,row){
                         var print_module = [];
                         data.map(item=>{  print_module.push(item.module+'<br>') })
-                            return print_module;
+                            return print_module.length != 0 ? print_module : 'N/A' ;
                     },
                     defaultContent: "",
                     sortable:false
@@ -83,7 +87,9 @@
                                         }
                                     })
                                 }else{
-                                    $("#select_module").append('<option value="'+item.module+'">'+item.module+'</option>')
+                                    if(item.has_sub  == 0){
+                                        $("#select_module").append('<option value="'+item.module+'">'+item.module+'</option>')
+                                    }
                                 }
                             })                        
                             
@@ -238,7 +244,7 @@
     </div>
     <div class="panel-body">        
         {{-- table --}}
-        <table id="load-datatable" class="table table-hover">            
+        <table id="load-datatable" class="table table-hover" style="width:100%">            
             <thead>
                 <tr>                    
                     <th >Roles</th>
