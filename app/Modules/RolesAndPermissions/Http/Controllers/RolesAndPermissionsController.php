@@ -135,23 +135,23 @@ class RolesAndPermissionsController extends Controller
         $get_module      = db::table('sys_modules')->where('module',$module)->first();
         foreach($get_permissions as $item){
 
-            if(!is_null($get_module->parent_module_id)){
+            // if(!is_null($get_module->parent_module_id)){
 
-                $check_parent = db::table('sys_access_matrix')
-                                ->where('sys_module_id',$get_module->parent_module_id)
-                                ->where('role_id',$role_id)  
-                                ->where('sys_permission_id',$item->sys_permission_id)              
-                                ->get();
+            //     $check_parent = db::table('sys_access_matrix')
+            //                     ->where('sys_module_id',$get_module->parent_module_id)
+            //                     ->where('role_id',$role_id)  
+            //                     ->where('sys_permission_id',$item->sys_permission_id)              
+            //                     ->get();
 
-                if($check_parent->isEmpty()){
-                    db::table('sys_access_matrix')->insert(   
-                        [
-                            'role_id' => $role_id,
-                            'sys_permission_id' => $item->sys_permission_id,
-                            'sys_module_id' => $get_module->parent_module_id,
-                        ]);
-                }
-            }
+            //     if($check_parent->isEmpty()){
+            //         db::table('sys_access_matrix')->insert(   
+            //             [
+            //                 'role_id' => $role_id,
+            //                 'sys_permission_id' => $item->sys_permission_id,
+            //                 'sys_module_id' => $get_module->parent_module_id,
+            //             ]);
+            //     }
+            // }
             
                 $insert_mod_permissions = db::table('sys_access_matrix')->insert(   
                                             [

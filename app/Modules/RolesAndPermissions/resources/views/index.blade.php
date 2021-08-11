@@ -70,10 +70,13 @@
                         success:function(data){
 
                             convertToJson = JSON.parse(data);
-                            console.warn(convertToJson);
+                            
+                            console.warn();
                             convertToJson.main_modules.map((item)=>{
-                                if(item.has_sub == 1){
+                                let check_parent_module = convertToJson.sub_modules.some((result)=> result.parent_module_id === item.sys_module_id);
+                                if(item.has_sub == 1 && check_parent_module ){
                                     $("#select_module").append('<optgroup label="'+item.module+'" id="'+item.sys_module_id+'"></optgroup>');                                    
+
                                     convertToJson.sub_modules.map((value) =>{
                                         if(item.sys_module_id == value.parent_module_id){
                                             $('#select_module #'+item.sys_module_id).append('<option value="'+value.module+'">'+value.module+'</option>')
