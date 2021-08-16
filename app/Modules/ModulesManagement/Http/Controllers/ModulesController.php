@@ -80,6 +80,29 @@ class ModulesController extends Controller
             dd($e);
         }
     }   
+
+    public function store_sub_modules(){
+        try{
+            $module_name = request('module_name');
+            $route       = request('route');
+            $parent_module_id       = request('parent_module_id');
+
+            $check_module =  L5Modular::exists(trim($module_name));
+            db::table('sys_modules')
+                ->insert([
+                    "module"           => $module_name,
+                    "routes"           => $route,
+                    "parent_module_id" => $parent_module_id
+                ]);        
+
+            if(!$check_module){
+                Artisan::call("make:module",["name" => trim($module_name)]);
+            }   
+            
+        }catch(\Exception $e){
+
+        }
+    }
     
     // update data
     public function update($id){

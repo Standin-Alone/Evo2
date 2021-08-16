@@ -91,7 +91,9 @@
                 $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
                 $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
                 $(".main-module-update-btn").show();
-            }else{
+            }else{                
+                
+                $("input[name='parent_module_id']").val($(this).attr('sys_module_id'));
                 $(".update-modal-dialog").css('max-width','50%')
                 $(".main-module-update-btn").hide();
                 $(".main-module-component").hide();
@@ -235,7 +237,7 @@
                 });
         }); 
         
-        // Insert Record
+        // Insert Module Record
         $("#AddForm").validate({
             rules:{
                 module_name:"required",
@@ -247,11 +249,7 @@
                 },
                 route:{
                     required:'<div class="text-danger">Please enter route.</div>'
-                }
-                ,
-                sample:{
-                    required:'<div class="text-danger">Please enter route.</div>'
-                }
+                }              
             },
             submitHandler: function(e) { 
                 swal({
@@ -277,7 +275,69 @@
                                     icon: "success",
                                 }).then(()=>{
                                     $("#AddModal").modal('hide')
-                                    // module_table.ajax.reload();
+                                    module_table.ajax.reload();
+                                    
+                                    
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+                
+                
+            }
+        })
+
+
+
+
+        $("#AddSubModulesForm").validate({
+            rules:{
+                module_name:"required",
+                route:"required",
+            },
+            messages:{
+                module_name:{
+                    required:'<div class="text-danger">Please enter module name.</div>'
+                },
+                route:{
+                    required:'<div class="text-danger">Please enter route.</div>'
+                }              
+            },
+            submitHandler: function(e) { 
+                
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to add this module?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    $has_sub = $("input[name='has_sub']:checked").val();
+                    
+                    // check if confirm
+                    if (confirm) {       
+
+                        $.ajax({
+                            url:'{{route("modules.store_sub_modules")}}',
+                            type:'post',
+                            data:$("#AddSubModulesForm").serialize(),
+                            success:function(response){             
+                                   
+                                swal("Successfully created a new sub module.", {
+                                    icon: "success",
+                                }).then(()=>{
+                                    $("#AddSubModulesModal").modal('hide')
+                                     sub_module_table.ajax.reload();
                                     
                                     
                                 });
@@ -297,7 +357,6 @@
                 
             }
         })
-
 
 
         // Update Record of Main Module
@@ -350,8 +409,8 @@
                             icon: "error",
                         });
                     }
-                    e.preventDefault();
-                });
+                    
+                });         
             }
         })
 
@@ -606,7 +665,10 @@
                             {{--modal body start--}}
                             <label class="form-label hide"> ID</label>
                             <input name="id" type="text" class="form-control hide" />
-
+                            <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddSubModulesModal' >
+                                <i class='fa fa-plus'></i> Add New
+                            </button>
+                            <br><br>
                             <div class="col-lg-12 main-module-component">
                                 <div class="form-group">
                                     <label>Module Name</label>
@@ -617,7 +679,8 @@
                             </div>
 
 
-                            <div class="col-md-12 sub-modules-component">
+                            
+                            <div class="col-md-12 sub-modules-component">                               
                             <table id="sub-modules-datatable" class="table table-hover" style="width:100%">            
                                 <thead>
                                     <tr>                    
@@ -640,6 +703,7 @@
                 </form>
             </div>
         </div>
+
 
 
 
@@ -678,6 +742,45 @@
                 </form>
             </div>
         </div>
+
+
+
+
+         <!-- #modal-ADD sub modules-->
+         <div class="modal fade" id="AddSubModulesModal"  data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="max-width: 30%">
+                <form id="AddSubModulesForm" method="POST" >
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: #6C9738">
+                            <h4 class="modal-title update-sub-modal-title" style="color: white">Add Sub Module</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                        </div>
+                        <div class="modal-body">
+                            {{--modal body start--}}
+                            <div class="col-lg-12 row">
+                                <input type="text" name="parent_module_id"   class="form-control hide">
+                                <div class="form-group">
+                                    <label>Module Name</label>
+                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">                                        
+                                </div> &nbsp;&nbsp;
+                                <div class="form-group">
+                                    <label>Route</label>
+                                    <input   name="route" class="form-control"  placeholder="route" required="true">
+                                </div>&nbsp;&nbsp;                                
+                            </div>  
+                        
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white update-close-btn" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-lime">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
 
     </div>
 </div>

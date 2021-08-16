@@ -9,8 +9,25 @@
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.css">
+    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
     <style>
         td { font-size: 17px; font-weight: 500 }
+
+        
+        #load-datatable > thead > tr > th {
+            color:white;
+            background-color: #008a8a;
+            font-size: 20px;
+            font-family: calibri
+        }
+
+        #permission-datatable > thead > tr > th {
+            color:white;
+            font-size: 15px;
+            background-color: #008a8a;
+        }
+
 
     </style>
 @endsection
@@ -27,6 +44,8 @@
 	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
 	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
     
     <script>
         $(document).ready(function(){
@@ -121,7 +140,7 @@
            
                 
                 // Permission table
-                permission_table = $('#permission-datatable').DataTable({
+                permission_table = $('#permission-datatable').DataTable({                        
                         serverSide: true,
                         ajax: {url:"{{route('roles-get-module-permissions')}}",type:'post',data:data_modules},                                                         
                         columns:[{data:'module'},
@@ -261,7 +280,7 @@
 
         <!-- #modal-view -->
          <div class="modal fade" id="SetModulesModal">
-            <div class="modal-dialog" style="max-width: 50%">
+            <div class="modal-dialog" style="max-width: 40%">
                 <div class="modal-content">
                     <div class="modal-header" style="background-color: #008a8a">
                         <h4 class="modal-title" style="color: white">Set Modules and Permission</h4>
@@ -297,19 +316,18 @@
 
                         <br><br>
 
-                        <table id="permission-datatable" class="table table-hover">            
+                        <table id="permission-datatable" class="table table-hover" style="width: 100%" >            
                             <thead>
                                 <tr>                    
                                     <th >Modules</th>                                    
                                     @foreach ( $get_permissions as $item )                                    
-                                    <th >{{$item->permission}}</th>
+                                        <th>{{$item->permission}}</th>
                                     @endforeach
                                 </tr>
                             </thead>
                             <tbody>              
                             </tbody>
-                        </table>    
-                
+                        </table>                    
                         {{--modal body end--}}
                     </div>
                     <div class="modal-footer">

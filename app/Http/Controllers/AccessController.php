@@ -45,7 +45,8 @@ class AccessController extends Controller
                                     ->where('role_id',5)                                      
                                     ->get();
                             })                                    
-                            ->groupBy('sm.parent_module_id')                                                               
+                            ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))         
+                            
                             ->get();
                             
         $get_parent_modules = db::table('sys_modules')
@@ -71,7 +72,7 @@ class AccessController extends Controller
         session(['parent_modules'=>$get_parent_modules]);
         session(['sub_modules'=>$get_sub_modules]);
 
-
+        echo json_encode($get_main_modules);
      
    
         

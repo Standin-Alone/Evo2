@@ -12,7 +12,7 @@
     <li class="has-sub">
         <a href="javascript:;">
             <b class="caret"></b>
-            <i class="fa fa-table"></i>
+            <i class="fa fa-th-large"></i>
             @foreach (session('parent_modules') as $item_parent)
                 @if($item_parent->sys_module_id == $item->parent_module_id)
                     <span>{{$item_parent->module}}</span>
