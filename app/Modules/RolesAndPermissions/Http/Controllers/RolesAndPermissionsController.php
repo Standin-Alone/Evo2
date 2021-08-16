@@ -63,17 +63,21 @@ class RolesAndPermissionsController extends Controller
     public function get_module_permissions(){
         $id = request('role_id');
         $record = [];
-        $get_module_permission = DB::table('roles as r')
-                                ->select('module')                                                                
+        $get_module_permission =
+                                 DB::table('roles as r')
+                                ->select('module',db::raw("(select module from sys_modules where sys_module_id = sm.parent_module_id)as parent_module"))                                                                
                                 ->join('sys_access_matrix as sam','r.role_id','sam.role_id')                                
                                 ->join('sys_modules as sm','sm.sys_module_id','sam.sys_module_id')                                
                                 ->where('r.role_id',$id)
                                 ->groupBy('module')
                                 ->get();
+                         
+
+
         
         foreach($get_module_permission as $key_item => $item){
                 $get_permissions_id = DB::table('roles as r')
-                                ->select('sp.sys_permission_id as sys_permission_id','permission','sam.status')                                                                                                
+                                ->select('sp.sys_permission_id as sys_permission_id','permission','sam.status','sm.parent_module_id')                                                                                                
                                 ->join('sys_access_matrix as sam','r.role_id','sam.role_id')                                
                                 ->join('sys_permission as sp','sp.sys_permission_id','sam.sys_permission_id')                                
                                 ->join('sys_modules as sm','sm.sys_module_id','sam.sys_module_id')                                
@@ -81,7 +85,7 @@ class RolesAndPermissionsController extends Controller
                                 ->where('module',$item->module)                                
                                 ->get();
 
-                array_push($record,["module"=>$item->module]);
+                array_push($record,["module"=>$item->module,"parent_module"=>$item->parent_module]);
 
             foreach($get_permissions_id as $key_val => $val){
                 $record[$key_item][$val->permission] =  $val->status;
@@ -89,7 +93,6 @@ class RolesAndPermissionsController extends Controller
             
             
         }
-
         
         return datatables($record)->toJson();
     }

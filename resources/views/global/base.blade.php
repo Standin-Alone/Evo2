@@ -147,6 +147,7 @@ header('Content-Type: text/html');?>
 		$(document).ready(function() {
 			App.init();
 			TableManageDefault.init();
+			
 		});
 	</script>
 

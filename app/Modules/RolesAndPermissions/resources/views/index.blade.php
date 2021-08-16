@@ -11,6 +11,7 @@
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.css">
     <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css">
     <style>
         td { font-size: 17px; font-weight: 500 }
 
@@ -26,6 +27,10 @@
             color:white;
             font-size: 15px;
             background-color: #008a8a;
+        }
+
+        input[type="checkbox"] {
+            cursor: pointer;
         }
 
 
@@ -45,7 +50,8 @@
 	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
     <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+    <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>    
+    <script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
     
     <script>
         $(document).ready(function(){
@@ -143,19 +149,40 @@
                 permission_table = $('#permission-datatable').DataTable({                        
                         serverSide: true,
                         ajax: {url:"{{route('roles-get-module-permissions')}}",type:'post',data:data_modules},                                                         
-                        columns:[{data:'module'},
+                        columns:[   
+                                    {data:'parent_module',visible:false}, 
+                                    {data:'module'},                                
                                 @foreach ($get_permissions as $key => $item)
                                     {data:'{{$item->permission}}',
+                                        orderable:false,
+
                                     render: function(data,type,row,meta){                                           
                                     
                                     return  '<div class="checkbox checkbox-css">'+
-                                                '<input type="checkbox" id="checkbox'+row['module']+'{{$key}}" permission="{{$item->permission}}" class="permission_chk" value="'+row['module']+'" '+ (data == 1 ? 'checked' : 'unchecked') +" />"                                                +
+                                                '<input type="checkbox" id="checkbox'+row['module']+'{{$key}}"  permission="{{$item->permission}}" class="permission_chk" value="'+row['module']+'" '+ (data == 1 ? 'checked' : 'unchecked') +" />"                                                +
                                                 '<label for="checkbox'+row['module']+'{{$key}}"></label>'+
                                             '</div>'                                                    
                                                 }
                                 },
-                                @endforeach                    
-                            ],                                         
+                                @endforeach                                                                                    
+                            ],      
+                        columnDefs:[{visible:false,target:1}],
+                        drawCallback:function(data){
+                            let api = this.api();
+                            let rows = api.rows({page:'current'}).nodes();
+                            let last = null ;
+
+                            api.column(0,{page:"current"})
+                                .data()
+                                .each((group,i)=>{
+                                    
+                                    console.warn(group);
+                                        if(last != group && group != null){
+                                            $(rows).eq(i).before('<tr  class="bg-success font-weight-bold  text-white" ><td colspan="7" >'+group+'</td></tr>')
+                                            last = group;
+                                        }
+                                });
+                        },
                         bDestroy: true 
                     });
                 
@@ -318,8 +345,9 @@
 
                         <table id="permission-datatable" class="table table-hover" style="width: 100%" >            
                             <thead>
-                                <tr>                    
-                                    <th >Modules</th>                                    
+                                <tr>                 
+                                    <th >Parent Module</th>   
+                                    <th >Modules</th>
                                     @foreach ( $get_permissions as $item )                                    
                                         <th>{{$item->permission}}</th>
                                     @endforeach

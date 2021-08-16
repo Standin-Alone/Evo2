@@ -14,6 +14,7 @@ class AccessController extends Controller
     public function index()
     {
         //
+        
         return view('auth.login');
     }
 
@@ -42,24 +43,24 @@ class AccessController extends Controller
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
                                     ->where('sm.status', 1)
-                                    ->where('role_id',5)                                      
+                                    ->whereIn('role_id',[3,7])                                      
                                     ->get();
                             })                                    
-                            ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))         
-                            
+                            ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                     
                             ->get();
                             
         $get_parent_modules = db::table('sys_modules')
                                     ->where('has_sub',1)    
                                     ->where('status',1)                                    
                                     ->get();
+
         $get_sub_modules = db::table('sys_modules as sm')                            
                             ->whereIn('sm.sys_module_id',function($query){
                                     $query->select('sm.sys_module_id') 
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
                                     ->where('sm.status', 1)
-                                    ->where('role_id',5)  
+                                    ->where('role_id',[3,7])  
                                     ->whereNotNull('parent_module_id')                                                                                          
                                     ->get();
                             })                        
@@ -72,7 +73,7 @@ class AccessController extends Controller
         session(['parent_modules'=>$get_parent_modules]);
         session(['sub_modules'=>$get_sub_modules]);
 
-        echo json_encode($get_main_modules);
+        echo json_encode($get_sub_modules);
      
    
         
