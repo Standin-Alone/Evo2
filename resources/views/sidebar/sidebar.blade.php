@@ -7,17 +7,21 @@
     @foreach (session('main_modules') as $item)
 
 
-    @if($item->has_sub == 1)
+    @if(!is_null($item->parent_module_id))
     
     <li class="has-sub">
         <a href="javascript:;">
             <b class="caret"></b>
             <i class="fa fa-table"></i>
-            <span>{{$item->module}}</span>
+            @foreach (session('parent_modules') as $item_parent)
+                @if($item_parent->sys_module_id == $item->parent_module_id)
+                    <span>{{$item_parent->module}}</span>
+                @endif
+            @endforeach
         </a>
         <ul class="sub-menu">    
                     @foreach(session('sub_modules') as $value)
-                        @if($value->parent_module_id == $item->sys_module_id)                        
+                        @if($value->parent_module_id == $item->parent_module_id)                        
                         <li class="{{Route::currentRouteName() == $value->routes ? "active" : null}}" ><a href="{{route($value->routes)}}">{{$value->module}} </a></li>    
                         @endif                   
                     @endforeach           

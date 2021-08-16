@@ -35,19 +35,23 @@ class AccessController extends Controller
         $modules = [];
 
 
-        $get_main_modules = db::table('sys_modules as sm')                            
+        $get_main_modules = db::table('sys_modules as sm')  
+                            
                             ->whereIn('sm.sys_module_id',function($query){
                                     $query->select('sm.sys_module_id') 
                                     ->from('sys_modules as sm')
-                                    ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
+                                    ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
                                     ->where('sm.status', 1)
-                                    ->where('role_id',5)         
-                                    ->whereNull('parent_module_id')                                                                                      
+                                    ->where('role_id',5)                                      
                                     ->get();
-                            })                        
-                        
+                            })                                    
+                            ->groupBy('sm.parent_module_id')                                                               
                             ->get();
-                    
+                            
+        $get_parent_modules = db::table('sys_modules')
+                                    ->where('has_sub',1)    
+                                    ->where('status',1)                                    
+                                    ->get();
         $get_sub_modules = db::table('sys_modules as sm')                            
                             ->whereIn('sm.sys_module_id',function($query){
                                     $query->select('sm.sys_module_id') 
@@ -60,25 +64,17 @@ class AccessController extends Controller
                             })                        
                                
                             ->get();    
-  
-
-        
+          
         
         session(['role'=>'RFO Program Staff']);
         session(['main_modules'=>$get_main_modules]);
+        session(['parent_modules'=>$get_parent_modules]);
         session(['sub_modules'=>$get_sub_modules]);
 
 
      
-        echo json_encode($get_sub_modules);
-              // foreach($get_menu as  $key => $item){
-        //     if(!is_null($item->parent_module_id)){
-        //         $item->parent_module = db::table('sys_modules')->where('sys_module_id',$item->parent_module_id)->first()->module;
-        //     }else{
-        //         $item->parent_module = null;
-        //     }
-        // }
-
+   
+        
     }
 
 
