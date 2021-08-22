@@ -1,6 +1,7 @@
 <?php
 
 Route::resource('roles', 'RolesAndPermissionsController');
+// Route::resource('/roles/sample', 'RolesAndPermissionsController');
 Route::post('/roles/get-permissions', 'RolesAndPermissionsController@get_permissions')
             ->name('roles-get-permissions');
 
