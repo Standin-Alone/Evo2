@@ -319,7 +319,7 @@ class MobileAppController extends Controller
 
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0777, true);                                                
+                File::makeDirectory($upload_folder,0775,true);                                                
             }
 
             $upload_front_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
@@ -356,7 +356,7 @@ class MobileAppController extends Controller
             
             // Check Folder if exist for farmers attachment;
             if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0777, true);                                
+                File::makeDirectory($upload_folder, 0775, true);                                
             } 
 
             $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));

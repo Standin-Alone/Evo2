@@ -32,10 +32,12 @@
 
 
     $(document).ready(function(){
+       
 
         // filter province
         $("#region").change(function(){
             let value = $("option:selected", this).val();
+               
             $.ajax({
                 url:'{{route("filter-province",["region_code" => ":id"])}}'.replace(':id',value),
                 type:'get',
@@ -51,6 +53,17 @@
             });
         })
 
+        // check agency of CO or RFO
+        check_agency = $("input[name='agency_loc']:checked").val();
+        if(check_agency == 'CO'){
+            $("#region").val(13).change();
+            $("#region option").filter(function(){
+                return this.value != 13;
+            }).hide()
+        }
+
+
+        
         // filter municipality
         $("#province").change(function(){
             let value = $("option:selected", this).val();
@@ -95,6 +108,7 @@
 
         $("input[name='agency_loc']").change(function(){
             let value = $(this).val();
+            
             $.ajax({
                 url:'{{route("filter-role",["agency_loc" => ":id"])}}'.replace(':id',value),
                 type:'get',
@@ -109,6 +123,69 @@
                 }                
             });
             
+
+            
+            if(value == 'CO'){
+                    $("#municipality").prop('selectedIndex',0);
+                    $("#barangay").prop('selectedIndex',0);
+                    $("#municipality").prop('disabled','disabled');
+                    $("#barangay").prop('disabled','disabled');
+                    $("#region").val(13).change();
+                    $("#region option").filter(function(){
+                        return this.value != 13;
+                    }).hide()
+
+                    if($("#role option:selected").val() == 1 ){
+                        $("#region option").filter(function(){
+                            return this.value
+                        }).show()
+                    }else{
+                        $("#region option").filter(function(){
+                            return this.value == 13 ;
+                        }).show()
+
+                    }                
+            }else{
+                $("#province").prop('selectedIndex',0);
+                $("#municipality").prop('selectedIndex',0);
+                $("#barangay").prop('selectedIndex',0);
+                $("#province").prop('disabled','disabled');
+                $("#municipality").prop('disabled','disabled');
+                $("#barangay").prop('disabled','disabled');
+                $("#region").val("").change();
+                $("#region option").filter(function(){
+                    return this.value != 13;
+                }).show()
+
+                $("#region option").filter(function(){
+                    return this.value == 13;
+                }).hide()
+
+
+            }
+
+        })
+
+        $("#role").change(function(){
+
+            let value = $("option:selected",this).val();                  
+            let check_agency = $("input[name='agency_loc']:checked").val();
+            if(check_agency == "CO"){
+                if(value == 1){
+                    $("#region option").filter(function(){
+                        return this.value
+                        }).show()                    
+                }else{
+                    $("#region").val(13).change();
+                    $("#region option").filter(function(){
+                        return this.value == 13 && this.value == ""
+                        }).show()    
+
+                    $("#region option").filter(function(){
+                        return this.value 
+                        }).hide()                   
+                }
+            }
         })
     })
 
@@ -119,7 +196,7 @@
     <script>
         $(document).ready(function(){
 
-
+            // Add User
             $("#AddForm").validate({
                 rules:{
                     first_name:'required',
@@ -207,6 +284,81 @@
                     });
                 }
             })
+
+
+
+            // import file
+            $("#ImportForm").validate({
+
+                rules:{
+                    import_region: "required",
+                    import_program: "required",
+                    file:{
+                        required:true,
+                        accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                    }
+                },
+                messages:{
+                    import_region: '<div class="text-danger">Please select region.</div>',
+                    import_program: '<div class="text-danger">Please select program.</div>',
+                    file:{
+                        required: '<div class="text-danger">Please select file to upload.</div>',
+                        accept: '<div class="text-danger">Please upload valid files formats .xlsx, . xls only.</div>'
+                    }
+                },
+                submitHandler: function(){
+                    let fd = this;
+                    swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to import this file?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                    })
+                    .then((confirm) => {
+                        let fd = new FormData();
+
+                        fd.append('_token','{{csrf_token()}}')
+                        fd.append('import_region',$("#import_region").val())
+                        fd.append('import_program',$("#import_program").val())
+                        fd.append('file',$("input[name='file']")[0].files[0])
+                        $(".import-btn").props('disabled',true)
+                        // check if confirm
+                        if (confirm) {                       
+                            $.ajax({
+                                url:"{{route('import-file')}}",
+                                type:'post',
+                                data: fd,
+                                processData:false,
+                                contentType:false,
+                                success:function(response){             
+                                    //    
+                                    console.warn(response);
+                                    swal("Successfully added new users.", {
+                                            icon: "success",
+                                    }).then(()=>{
+                                        $("#ImportModal").modal('hide')
+                                        $(".import-btn").props('disabled',false)
+                                        
+                                    });
+                                },
+                                error:function(response){
+                                    $("#ImportModal").modal('hide')
+                                    console.warn(response);
+                                    $(".import-btn").props('disabled',false)
+                                }   
+                            })
+                            
+                        } else {
+                            $(".import-btn").props('disabled',false)                            
+                            swal("Operation Cancelled.", {
+                                icon: "error",
+                            });
+                        }
+                    });
+                }
+            })
+            
         })
 
     </script>
@@ -235,6 +387,10 @@
     <div class="panel-body">
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
             <i class='fa fa-plus'></i> Add New
+        </button>
+
+        <button type='button' class='btn btn-info' data-toggle='modal' data-target='#ImportModal' >
+            <i class='fa fa-file-excel'></i> Import File
         </button>
         <br>
         <br><br>
@@ -462,6 +618,66 @@
             </div>
         </div>
 
+
+
+         <!-- #modal-Import File -->
+         <div class="modal fade" id="ImportModal">
+            <div class="modal-dialog" style="max-width: 30%">
+                <form id="ImportForm" method="POST"  >
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: #3a92ab">
+                            <h4 class="modal-title" style="color: white">Import File</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                        </div>
+                        <div class="modal-body">
+                            {{--modal body start--}}
+                            <label class="form-label hide"> ID</label>                            
+
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label >Region</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="import_region" name="import_region" >
+                                        <option selected disabled value="">Select Region</option>
+                                        @foreach ($get_regions as $item)
+                                            <option value="{{$item->reg_code}}">{{$item->reg_name}}</option>
+                                        @endforeach
+                                    </select>      
+                                </div>                          
+                            </div>
+
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label >Program</label> <span style="color:red">*</span>
+                                    <select class="form-control" name="import_program" id="import_program" >
+                                        <option selected disabled value="">Select Program</option>                                    
+                                        @foreach ($get_programs as $item)
+                                            <option value="{{$item->program_id}}">{{$item->shortname}} ({{$item->description}})</option>
+                                        @endforeach
+                                    </select>
+                                </div>                              
+                            </div>    
+
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label>File </label>
+                                    <input type="file" class="form-control" accept=".xlsx" name="file">
+                                </div>
+                            </div>
+                           
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-info import-btn">Import</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        
     </div>
 </div>
 <!-- end panel -->

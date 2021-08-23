@@ -65,7 +65,7 @@ class RolesAndPermissionsController extends Controller
         $record = [];
         $get_module_permission =
                                  DB::table('roles as r')
-                                ->select('module',db::raw("(select module from sys_modules where sys_module_id = sm.parent_module_id)as parent_module"))                                                                
+                                ->select('module',db::raw("(select module from sys_modules where sys_module_id = sm.parent_module_id)as parent_module"),'sm.sys_module_id')                                                                
                                 ->join('sys_access_matrix as sam','r.role_id','sam.role_id')                                
                                 ->join('sys_modules as sm','sm.sys_module_id','sam.sys_module_id')                                
                                 ->where('r.role_id',$id)
@@ -85,7 +85,7 @@ class RolesAndPermissionsController extends Controller
                                 ->where('module',$item->module)                                
                                 ->get();
 
-                array_push($record,["module"=>$item->module,"parent_module"=>$item->parent_module]);
+                array_push($record,["module"=>$item->module,"parent_module"=>$item->parent_module,"sys_module_id"=>$item->sys_module_id]);
 
             foreach($get_permissions_id as $key_val => $val){
                 $record[$key_item][$val->permission] =  $val->status;
@@ -196,8 +196,18 @@ class RolesAndPermissionsController extends Controller
                     ->update([
                             'status' => '0'
                     ]);
-        }
-        
+        }        
 
+    }
+
+    public function remove_module(){
+        $sys_module_id = request('sys_module_id');
+        $role_id = request('role_id');
+        
+        db::table('sys_access_matrix')
+            ->where('sys_module_id', $sys_module_id)
+            ->where('role_id',$role_id)
+            ->delete();
+            
     }
 }

@@ -13,3 +13,6 @@ Route::post('/roles/select-modules', 'RolesAndPermissionsController@select_modul
 
 Route::post('/roles/set-permissions', 'RolesAndPermissionsController@set_permissions')
             ->name('roles-set-permissions');
+
+Route::post('/roles/remove-module', 'RolesAndPermissionsController@remove_module')
+            ->name('remove-module');

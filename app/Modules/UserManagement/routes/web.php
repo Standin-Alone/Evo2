@@ -6,7 +6,9 @@
 Route::group([],function(){
     Route::get('/user','UserManagementController@index')->name('user.index');
     Route::get('/user-email','UserManagementController@email');
+
     Route::post('/user/add','UserManagementController@store')->name('user-add');
+    Route::post('/user/import-file','UserManagementController@import_file')->name('import-file');
 
     Route::get('/user/check-email','UserManagementController@checkEmail')->name('check-email');
     Route::get('/user/filter-role/{agency_loc}','UserManagementController@filter_role')->name('filter-role');

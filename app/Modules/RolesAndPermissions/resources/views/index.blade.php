@@ -55,8 +55,17 @@
     
     <script>
         $(document).ready(function(){
-        // load record to datatable
-        $('#load-datatable').DataTable({
+      
+
+    })
+    </script>
+
+    <script>
+        loadDataTable  = '';
+        $(document).ready(function(){       
+
+         // load record to datatable
+        loadDataTable =  $('#load-datatable').DataTable({
             serverSide: true,
             
             ajax: "{{route('roles.create')}}",               
@@ -81,12 +90,6 @@
                 }
             ]   
         });
-
-    })
-    </script>
-
-    <script>
-        $(document).ready(function(){       
 
         // load modules to selects
         let load_modules  = (data)=>{
@@ -148,6 +151,7 @@
                 // Permission table
                 permission_table = $('#permission-datatable').DataTable({                        
                         serverSide: true,
+                      
                         ajax: {url:"{{route('roles-get-module-permissions')}}",type:'post',data:data_modules},                                                         
                         columns:[   
                                     {data:'parent_module',visible:false}, 
@@ -164,7 +168,15 @@
                                             '</div>'                                                    
                                                 }
                                 },
-                                @endforeach                                                                                    
+                                @endforeach   
+                                {data:'sys_module_id',
+                                    render: function(data,type,row){            
+                                        return "<button type='button' class='btn btn-danger remove-module-btn' id='"+data+"' >"+
+                                                            "<i class='fa fa-times'></i> Remove"+
+                                                        "</button>";
+                                                        
+                                                    }
+                                }                                                                                 
                             ],      
                         columnDefs:[{visible:false,target:1}],
                         drawCallback:function(data){
@@ -178,7 +190,7 @@
                                     
                                     console.warn(group);
                                         if(last != group && group != null){
-                                            $(rows).eq(i).before('<tr  class="bg-success font-weight-bold  text-white" ><td colspan="7" >'+group+'</td></tr>')
+                                            $(rows).eq(i).before('<tr  class="bg-success font-weight-bold  text-white" ><td colspan="{{count($get_permissions)+2}}" >'+group+'</td></tr>')
                                             last = group;
                                         }
                                 });
@@ -193,6 +205,8 @@
 
                 
 
+
+            
 
             // checkbox permissions
             $("#permission-datatable").on('click','input[type="checkbox"]',function(){
@@ -248,6 +262,52 @@
             })
 
 
+
+             // remove module
+             $("#permission-datatable").on('click','.remove-module-btn',function(){
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to remove this module?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                    })
+                    .then((confirm) => {
+                        role_id = $('#role_id').val();                        
+                        // check if confirm
+                        if (confirm) {                       
+                            $.ajax({
+                                url:"{{route('remove-module')}}",
+                                type:'post',
+                                data:{role_id : role_id , _token: '{{csrf_token()}}', sys_module_id : $(this).attr('id')},
+                                success:function(response){             
+                                    //    
+                                    console.warn(response);
+                                    swal("Successfully removed the module.", {
+                                            icon: "success",
+                                    }).then(()=>{
+                                        load_modules(data_modules);
+                                        loadDataTable.ajax.reload()
+                                        permission_table.ajax.reload()
+                                    });
+                                },
+                                error:function(response){
+                                    $(".add-btn").prop('disabled',false);
+                                }
+                            })
+                            
+                        } else {
+                     
+                            swal("Operation Cancelled.", {
+                                icon: "error",
+                            });
+                        }
+                    });
+
+
+             });
+
+
             // add module button
             $("#AddModuleBtn").click(function(){
                     var role_id = $("#role_id").val();
@@ -286,7 +346,7 @@
 <!-- begin panel -->
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">Roles and Permissions</h4>
+        <h4 class="panel-title">Roles and Permissions </h4>
     </div>
     <div class="panel-body">        
         {{-- table --}}
@@ -351,6 +411,7 @@
                                     @foreach ( $get_permissions as $item )                                    
                                         <th>{{$item->permission}}</th>
                                     @endforeach
+                                    <th >Action</th>
                                 </tr>
                             </thead>
                             <tbody>              

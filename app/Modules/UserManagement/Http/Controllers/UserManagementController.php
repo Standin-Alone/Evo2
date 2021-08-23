@@ -8,6 +8,8 @@ use DB;
 use Ramsey\Uuid\Uuid;
 use Mail;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Imports\UsersImport;
 class UserManagementController extends Controller
 {
 
@@ -110,7 +112,7 @@ class UserManagementController extends Controller
                             ->first();
 
             db::table('users')
-                                ->insertGetId([
+                                ->insert([
                                     'user_id'  => $user_id,
                                     'agency'  => $agency,
                                     'agency_loc'  => $agency_loc,
@@ -147,4 +149,13 @@ class UserManagementController extends Controller
         }
     }
     
-}
+
+    public function import_file(){
+        $region = request('import_region');
+        $program = request('import_program');
+        $file = request()->file('file');
+
+        Excel::import(new UsersImport($region,$program), $file);
+        
+    }
+}   
