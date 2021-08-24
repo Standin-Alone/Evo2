@@ -136,40 +136,45 @@ class UserManagementController extends Controller
                             ->where('mun_code',$municipality)   
                             ->where('bgy_code',$barangay)
                             ->first();
-
-            db::table('users')
-                                ->insert([
-                                    'user_id'  => $user_id,
-                                    'agency'  => $agency,
-                                    'agency_loc'  => $agency_loc,
-                                    'username'  => $email,
-                                    'password'  => bcrypt($random_password),
-                                    'email'  => $email,
-                                    'geo_code'  => $geo_code->geo_code,
-                                    'reg' =>$region,
-                                    'prov' =>$province,
-                                    'mun' =>$municipality,
-                                    'bgy' =>$barangay,
-                                    'first_name' => $first_name,
-                                    'middle_name' => $middle_name,
-                                    'last_name' => $last_name,
-                                    'ext_name' => $ext_name,
-                                    'contact_no' => $contact,
-            ]);
-        
-        
-            db::table('program_permissions')->insert([
-                "role_id" =>$role,
-                "program_id" => $program,
-                "user_id" => $user_id,                
-            ]);
+            if($geo_code){
+                db::table('users')
+                                    ->insert([
+                                        'user_id'  => $user_id,
+                                        'agency'  => $agency,
+                                        'agency_loc'  => $agency_loc,
+                                        'username'  => $email,
+                                        'password'  => bcrypt($random_password),
+                                        'email'  => $email,
+                                        'geo_code'  => $geo_code->geo_code,
+                                        'reg' =>$region,
+                                        'prov' =>$province,
+                                        'mun' =>$municipality,
+                                        'bgy' =>$barangay,
+                                        'first_name' => $first_name,
+                                        'middle_name' => $middle_name,
+                                        'last_name' => $last_name,
+                                        'ext_name' => $ext_name,
+                                        'contact_no' => $contact,
+                ]);
             
-            $get_role = db::table('roles')->where('role_id',$role)->first()->role;
-            Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role], function ($message) use ($email, $random_password) {
-                $message->to($email)->subject('User Account Credentials');                
-            });
+            
+                db::table('program_permissions')->insert([
+                    "role_id" => $role,
+                    "program_id" => $role != 2 ? $program : null ,
+                    "user_id" => $user_id,                
+                ]);
+                
+                $get_role = db::table('roles')->where('role_id',$role)->first()->role;
+                Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role], function ($message) use ($email, $random_password) {
+                    $message->to($email)->subject('User Account Credentials');                
+                });
 
-            return 'true';
+                return 'true';
+            }else{
+                return 'false';
+            }
+
+
         }catch(\Exception $e){
             return $e;
         }

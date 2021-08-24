@@ -50,6 +50,7 @@ class UsersImport implements ToCollection,WithStartRow
 
 
             $check_email = db::table('users')->where('email',$email)->get();
+
             $geo_code    = db::table('geo_map')
                                 ->where('reg_code',$this->region)
                                 ->where('prov_code',$province)
@@ -67,6 +68,7 @@ class UsersImport implements ToCollection,WithStartRow
                 && $province     != ''
                 && $municipality != ''
                 && $barangay     != ''
+                && $geo_code
                 ){
                 $user_id        = Uuid::uuid4();
                 $random_password = Str::random(4);

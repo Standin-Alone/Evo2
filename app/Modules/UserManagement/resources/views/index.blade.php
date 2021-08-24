@@ -241,6 +241,13 @@
 
             let value = $("option:selected",this).val();                  
             let check_agency = $("input[name='agency_loc']:checked").val();
+
+            if(value == 2){
+                $(".program-group").hide()
+            }else{
+                $(".program-group").show()
+            }
+            
             if(check_agency == "CO"){
                 if(value == 1){
                     $("#region option").filter(function(){
@@ -286,7 +293,15 @@
                     agency:'required',
                     agency_loc:'required',
                     role:'required',
-                    program:'required',
+                    program: {
+                        required: {
+                            depends: function (){
+                                if($("#role option:selected").val() != 2){
+                                    return true
+                                }
+                            }
+                        }
+                    },
                     region:'required',
                     province:'required',
                     municipality:'required',
@@ -333,13 +348,23 @@
                                 success:function(response){             
                                     //    
                                     console.warn(response);
-                                    swal("Successfully added new user.", {
+                                    if(response == 'true'){
+                                        swal("Successfully added new user.", {
                                             icon: "success",
-                                    }).then(()=>{
-                                        $("#AddModal").modal('hide')
-                                        $(".add-btn").prop('disabled',false);
-                                        // module_table.ajax.reload();
-                                    });
+                                        }).then(()=>{
+                                            $("#AddModal").modal('hide')
+                                            $(".add-btn").prop('disabled',false);
+                                            $("#AddForm")[0].reset();
+                                        });
+                                    }else{
+                                        swal("Failed to add new user.", {
+                                            icon: "error",
+                                        }).then(()=>{
+                                            
+                                            $(".add-btn").prop('disabled',false);
+                                            
+                                        });
+                                    }
                                 },
                                 error:function(response){
                                     $(".add-btn").prop('disabled',false);
@@ -560,7 +585,7 @@
                                 </div>                              
                             </div><br>
 
-                            <div class="col-lg-12 row ">
+                            <div class="col-lg-12 row program-group ">
                                 <div class="form-group" style="width:95%">
                                     <label >Program</label> <span style="color:red">*</span>
                                     <select class="form-control" name="program" id="program" >
