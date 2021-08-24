@@ -11,7 +11,12 @@
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
     <style>
-       
+        #load-datatable > thead > tr > th {
+            color:white;
+            background-color: #008a8a;
+            font-size: 20px;
+            font-family: calibri
+        }
     </style>
 @endsection
 
@@ -59,6 +64,7 @@
 
                 },            
                 {data:'sys_module_id',
+                    orderable:false,
                     render: function(data,type,row){       
                         
                         
@@ -576,7 +582,7 @@
         <br>
         <br>
         <br>
-        <table id="load-datatable" class="table table-hover">            
+        <table id="load-datatable" class="table table-hover table-bordered">            
             <thead>
                 <tr>                    
                     <th >Module Name</th>

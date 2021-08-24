@@ -107,6 +107,7 @@ class UsersImport implements ToCollection,WithStartRow
                 Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role->role], function ($message) use ($email, $random_password) {
                     $message->to($email)->subject('User Account Credentials');                
                 });
+                
             }
 
 
