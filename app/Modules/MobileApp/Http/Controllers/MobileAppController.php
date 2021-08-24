@@ -66,9 +66,27 @@ class MobileAppController extends Controller
                         "otp"     => $otp_to_send                    
                     ]);
                 }
-              
-                
 
+
+                foreach($check_otp as $item){
+                $current_date_time = Carbon::now(); 
+                $otp_date = Carbon::parse($item->date_created);
+                $check_expiration = $otp_date->diffInDays($current_date_time);
+                
+                if($check_expiration > 0){     
+                    db::table('user_otp')
+                        ->where('user_id',$supplier->user_id)
+                        ->where('otp',$otp_to_send)
+                        ->update(["status" => '0']);                                                
+                    $otp_to_send = $random_otp;
+                    // insert otp to user_otp table
+                    $get_user_otp_id = db::table('user_otp')->insertGetId([
+                        "user_id" => $supplier->user_id,
+                        "otp"     => $otp_to_send                    
+                    ]);
+                }
+
+                }
                 $get_otp_record = db::table('user_otp as uo')
                                         ->select('u.user_id','uo.date_created','username','role')
                                         ->join('users as u','u.user_id','uo.user_id')
