@@ -8,9 +8,9 @@
 @section('page-css')
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
-	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.css">
-    <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
+	{{-- <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" /> --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css">
     <style>
         td { font-size: 17px; font-weight: 500 }
@@ -33,6 +33,11 @@
             cursor: pointer;
         }
 
+        #permission-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+    padding: 5px !important;
+}
+
+
 
     </style>
 @endsection
@@ -49,8 +54,8 @@
 	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
 	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
 	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.js"></script>
-    <script src="//cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>    
+    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.js"></script>
+    {{-- <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>     --}}
     <script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
     
     <script>
@@ -67,15 +72,15 @@
          // load record to datatable
         loadDataTable =  $('#load-datatable').DataTable({
             serverSide: true,
-            
+            responsive:true,
             ajax: "{{route('roles.create')}}",               
             columns:[
                 {data:'role'},
                 {data:'modules',                   
                     render: function(data,type,row){
                         var print_module = [];
-                        data.map(item=>{  print_module.push(item.module+'<br>') })
-                            return print_module.length != 0 ? print_module : 'N/A' ;
+                        data.map(item=>{  print_module.push('<li>'+item.module+'</li>') })
+                            return print_module.length != 0 ? '<ul>'+print_module+'</ul>' : 'N/A' ;
                     },
                     defaultContent: "",
                     sortable:false
@@ -126,7 +131,7 @@
                     }) 
         }
 
-        var permission_table = '';
+        let permission_table = '';
         let data_modules = '';
 
              //open set modules form
@@ -146,12 +151,16 @@
                 });
 
                 load_modules(data_modules);
-           
+                
+
+
+                
                 
                 // Permission table
                 permission_table = $('#permission-datatable').DataTable({                        
                         serverSide: true,
-                      
+                        responsive:true,
+                        destroy:true,                        
                         ajax: {url:"{{route('roles-get-module-permissions')}}",type:'post',data:data_modules},                                                         
                         columns:[   
                                     {data:'parent_module',visible:false}, 
@@ -178,6 +187,7 @@
                                                     }
                                 }                                                                                 
                             ],      
+                         
                         columnDefs:[{visible:false,target:1}],
                         drawCallback:function(data){
                             let api = this.api();
@@ -194,9 +204,10 @@
                                             last = group;
                                         }
                                 });
-                        },
-                        bDestroy: true 
+                        },                        
+                  
                     });
+                    permission_table.ajax.reload() ;               
                 
                 $('#role_id').val(id);
                 $("#role_span").text($(this).closest("tbody tr").find("td:eq(0)").html());
@@ -366,8 +377,8 @@
 
 
         <!-- #modal-view -->
-         <div class="modal fade" id="SetModulesModal">
-            <div class="modal-dialog" style="max-width: 40%">
+         <div class="modal fade bd-example-modal-lg" id="SetModulesModal">
+            <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header" style="background-color: #008a8a">
                         <h4 class="modal-title" style="color: white">Set Modules and Permission</h4>
@@ -378,12 +389,12 @@
                         <h2 id="ViewCategName" align="center"></h2>
                         
 
-                        <div class="note note-success">
+                        {{-- <div class="note note-success">
                             <div class="note-icon"><i class="fas fa-user"></i></div>
                             <div class="note-content">
                                 <label style="font-size:30px" id="role_label"></label>
                             </div>
-                        </div>
+                        </div> --}}
 
                         <br><br><br>
                         <input id="role_id" type="text" class="form-control hide " />
@@ -408,7 +419,7 @@
                                 <tr>                 
                                     <th >Parent Module</th>   
                                     <th >Modules</th>
-                                    @foreach ( $get_permissions as $item )                                    
+                                    @foreach( $get_permissions as $item )                                    
                                         <th>{{$item->permission}}</th>
                                     @endforeach
                                     <th >Action</th>
@@ -420,7 +431,7 @@
                         {{--modal body end--}}
                     </div>
                     <div class="modal-footer">
-                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+                        <a href="javascript:;" class="btn btn-white " data-dismiss="modal">Close</a>
                     </div>
                 </div>
             </div>

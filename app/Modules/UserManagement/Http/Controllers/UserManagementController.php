@@ -24,9 +24,35 @@ class UserManagementController extends Controller
         $get_agency = db::table('agency')->get();
         $get_roles = db::table('roles')->where('rfo_use','0')->get();
         $get_programs = db::table('programs')->get();
+        
+
+        
         return view("UserManagement::index",compact('get_regions','get_agency','get_roles','get_programs'));
     }
 
+
+    public function show(){
+        $get_users =  db::table('users as u')
+                            ->select(db::raw("CONCAT(first_name,last_name) as full_name"),'shortname','pp.id as id','pp.status')
+                            ->join('program_permissions as pp', 'u.user_id', 'pp.user_id')
+                            ->join('programs as p', 'p.program_id' , 'pp.program_id')
+                            ->get();
+
+        return datatables($get_users)->toJson();
+    }
+    
+
+    public function destroy($id){
+        $status = request('status');
+        
+        
+
+        db::table('program_permissions')
+            ->where('id',$id)
+            ->update(['status'=>$status == 1 ? '0' : '1']);
+        
+
+    }
 
     public function email(){
         return view('UserManagement::user-account');

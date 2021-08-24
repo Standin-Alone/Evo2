@@ -29,14 +29,7 @@ class UsersImport implements ToCollection,WithStartRow
     public function collection(Collection $row)
     {       
 
-        // First Name   = 0
-        // Middle Name  = 1
-        // Last Name    = 2
-        // Role         = 3
-        // Email        = 4
-        // Province     = 5
-        // Municipality = 6
-        // Barangay     = 7
+
         
 
         
@@ -57,7 +50,7 @@ class UsersImport implements ToCollection,WithStartRow
 
 
             $check_email = db::table('users')->where('email',$email)->get();
-            $geo_code = db::table('geo_map')
+            $geo_code    = db::table('geo_map')
                                 ->where('reg_code',$this->region)
                                 ->where('prov_code',$province)
                                 ->where('mun_code',$municipality)   
@@ -112,9 +105,10 @@ class UsersImport implements ToCollection,WithStartRow
                 Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role->role], function ($message) use ($email, $random_password) {
                     $message->to($email)->subject('User Account Credentials');                
                 });
-
-
             }
+
+
+        
             
         }
     }

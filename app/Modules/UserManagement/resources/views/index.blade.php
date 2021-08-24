@@ -32,7 +32,78 @@
 
 
     $(document).ready(function(){
-       
+        load_datatable = $("#load-datatable").DataTable({
+            serverSide:true,
+            ajax: "{{route('user.show')}}",
+            columns:[
+                    {data:'full_name'},
+                    {data:'shortname'},
+                    {data:'id',
+                        render: function(data,type,row){       
+                        
+                        
+
+                            return  "<button type='button' class='btn btn-warning view-modal-btn'  id="+data+" data-toggle='modal' data-target='#ViewModal'>"+
+                                        "<i class='fa fa-edit'></i> View"+
+                                    "</button>   "+(
+                                    row['status'] == 1 ?
+                                    "<button type='button' class='btn btn-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
+                                        "<i class='fa fa-trash'></i> Disable"+
+                                    "</button>  " :
+                                    "<button type='button' class='btn btn-success set-status-btn' id='"+data+"' status='"+row["status"]+"' >"+
+                                        "<i class='fa fa-undo'></i> Enable"+
+                                    "</button> ")
+                        }
+                    }
+            ]
+
+        })
+
+
+         // set status btn
+         $("#load-datatable").on('click','.set-status-btn',function(){
+            id = $(this).attr('id');
+            status = $(this).attr('status');
+                                    
+            swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to "+ (status == 1 ? 'disable' : 'enable')+" this user?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    $('#add-btn').prop('disabled','true');
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:'{{route("user.destroy",["id"=>":id"])}}'.replace(':id',id),
+                            type:'get',
+                            data:{'_token':'{{csrf_token()}}','status':status},
+                            success:function(response){             
+                                //    
+                                swal("Successfully "+(status == 1 ? 'disable' : 'enable')+" the user.", {
+                                    icon: "success",
+                                }).then(()=>{                    
+                                    
+                                    load_datatable.ajax.reload();
+                                    
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+        }); 
+
+
 
         // filter province
         $("#region").change(function(){
@@ -394,27 +465,15 @@
         </button>
         <br>
         <br><br>
-        <table id="data-table-default" class="table table-striped table-bordered">            
+        <table id="load-datatable" class="table table-striped table-bordered">            
             <thead>
                 <tr>                    
-                    <th >Supplier Name</th>
-                    <th >Address</th>                    
+                    <th >Name</th>
+                    <th >Program</th>                    
                     <th >Action</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>John Edcel Zenarosa</td>
-                    <td>San Jose Del Monte, Bulacan</td>
-                    <td>
-                        <button type='button' class='btn btn-success'data-toggle='modal' data-target='#ViewModal' >
-                            <i class='fa fa-eye'></i> View
-                        </button>
-                        <button type='button' class='btn btn-warning' data-toggle='modal' data-target='#UpdateModal'>
-                            <i class='fa fa-edit'></i> Edit
-                        </button>
-                    </td>
-                </tr>
+            <tbody>                
             </tbody>
         </table>
 
@@ -568,13 +627,14 @@
             <div class="modal-dialog" style="max-width: 30%">
                 <div class="modal-content">
                     <div class="modal-header" style="background-color: #008a8a">
-                        <h4 class="modal-title" style="color: white">View Category</h4>
+                        <h4 class="modal-title" style="color: white">View Profile</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                     </div>
                     <div class="modal-body">
                         {{--modal body start--}}
                         <h2 id="ViewCategName" align="center"></h2>
                         <label style="display: block; text-align: center">Sample</label>
+                        
 
                         {{--modal body end--}}
                     </div>

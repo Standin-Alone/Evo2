@@ -1,3 +1,7 @@
+{{-- @if(!(session('main_modules')->where('routes', Route::currentRouteName())->all() || session('sub_modules')->where('routes', Route::currentRouteName())->all()) )	    
+	<script>window.location.href = "{{route('error.index')}}"</script>
+@endif --}}
+
 <?php echo
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
@@ -63,7 +67,9 @@ header('Content-Type: text/html');?>
 				<li class="dropdown navbar-user">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
 						<img src="assets/img/user/user-13.jpg" alt="" /> 
-						<span class="d-none d-md-inline">John Doe</span> <b class="caret"></b>
+						<span class="d-none d-md-inline">John Doe 
+							
+				</span> <b class="caret"></b>
 					</a>
 					<div class="dropdown-menu dropdown-menu-right">
 						<a href="javascript:;" class="dropdown-item">Edit Profile</a>																		

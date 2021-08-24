@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::resource('/','AccessController');
+Route::resource('/error','Controller');
 Route::get('/sign-in','AccessController@signIn');
+
 // Route::get('/login','AccessController@index');
 
 

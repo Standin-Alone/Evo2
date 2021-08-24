@@ -69,11 +69,12 @@ class AccessController extends Controller
           
         
         session(['role'=>'RFO Program Staff']);
-        session(['main_modules'=>$get_main_modules]);
+        session(['main_modules'=>$get_main_modules]);        
         session(['parent_modules'=>$get_parent_modules]);
         session(['sub_modules'=>$get_sub_modules]);
+        
 
-        echo json_encode($get_sub_modules);
+        echo json_encode($get_main_modules);
      
    
         
