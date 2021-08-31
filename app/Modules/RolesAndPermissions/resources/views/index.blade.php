@@ -389,12 +389,12 @@
                         <h2 id="ViewCategName" align="center"></h2>
                         
 
-                        {{-- <div class="note note-success">
+                        <div class="note note-success">
                             <div class="note-icon"><i class="fas fa-user"></i></div>
                             <div class="note-content">
                                 <label style="font-size:30px" id="role_label"></label>
                             </div>
-                        </div> --}}
+                        </div>
 
                         <br><br><br>
                         <input id="role_id" type="text" class="form-control hide " />
