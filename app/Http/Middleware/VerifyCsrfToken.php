@@ -26,4 +26,6 @@ class VerifyCsrfToken extends Middleware
         '/api/validate-otp',
         'api'
     ];
+    // sample
+    // sample
 }
