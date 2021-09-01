@@ -9,6 +9,13 @@
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        
+        dd{
+            font-size: 20
+        }
+    </style>
 @endsection
 
 
@@ -36,15 +43,22 @@
             serverSide:true,
             ajax: "{{route('user.show')}}",
             columns:[
-                    {data:'full_name'},
-                    {data:'shortname'},
+                    {data:'full_name',title:'Name'},
+                    {data:'shortname',title:'Program'},
+                    {data:'email',title:"email",visible:false},
+                    {data:'contact_no',title:"contact_no",visible:false},
+                    {data:'reg_name',title:"reg_name",visible:false},
+                    {data:'prov_name',title:"prov_name",visible:false},
+                    {data:'mun_name',title:"mun_name",visible:false},
+                    {data:'bgy_name',title:"bgy_name",visible:false},
                     {data:'id',
+                        title:"Actions",
                         render: function(data,type,row){       
                         
                         
 
-                            return  "<button type='button' class='btn btn-warning view-modal-btn'  id="+data+" data-toggle='modal' data-target='#ViewModal'>"+
-                                        "<i class='fa fa-edit'></i> View"+
+                            return  "<button type='button' class='btn btn-warning view-modal-btn'   id="+data+" data-toggle='modal' data-target='#ViewModal'>"+
+                                        "<i class='fa fa-edit'></i> Edit"+
                                     "</button>   "+(
                                     row['status'] == 1 ?
                                     "<button type='button' class='btn btn-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
@@ -59,6 +73,33 @@
 
         })
 
+
+        $("#load-datatable").on('click','.view-modal-btn',function(){
+            
+            let currentRow = $(this).closest('tr');
+            let email = load_datatable.row(currentRow).data()['email'];
+            let contact = load_datatable.row(currentRow).data()['contact_no'];
+            let program = load_datatable.row(currentRow).data()['shortname'];
+            let agency = load_datatable.row(currentRow).data()['agency'];
+            let reg_name = load_datatable.row(currentRow).data()['reg_name'];
+            let mun_name = load_datatable.row(currentRow).data()['mun_name'];
+            let prov_name = load_datatable.row(currentRow).data()['prov_name'];
+            let bgy_name = load_datatable.row(currentRow).data()['bgy_name'];
+
+
+            $("#email").val(email);
+            $("#contact").val(contact);
+            $("#agency_view").text(agency);
+            $("#program_view").text(program);
+            $("#reg_name").text(reg_name);
+            $("#mun_name").text(mun_name);
+            $("#prov_name").text(prov_name);
+            $("#bgy_name").text(bgy_name);
+
+      
+
+            
+        });
 
          // set status btn
          $("#load-datatable").on('click','.set-status-btn',function(){
@@ -242,11 +283,7 @@
             let value = $("option:selected",this).val();                  
             let check_agency = $("input[name='agency_loc']:checked").val();
 
-            if(value == 2){
-                $(".program-group").hide()
-            }else{
-                $(".program-group").show()
-            }
+            
             
             if(check_agency == "CO"){
                 if(value == 1){
@@ -492,11 +529,7 @@
         <br><br>
         <table id="load-datatable" class="table table-striped table-bordered">            
             <thead>
-                <tr>                    
-                    <th >Name</th>
-                    <th >Program</th>                    
-                    <th >Action</th>
-                </tr>
+             
             </thead>
             <tbody>                
             </tbody>
@@ -649,22 +682,76 @@
 
          <!-- #modal-view -->
          <div class="modal fade" id="ViewModal">
-            <div class="modal-dialog" style="max-width: 30%">
+            <div class="modal-dialog" style="max-width: 40%">
                 <div class="modal-content">
-                    <div class="modal-header" style="background-color: #008a8a">
+                    <div class="modal-header" style="background-color: #f59c1a">
                         <h4 class="modal-title" style="color: white">View Profile</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                     </div>
                     <div class="modal-body">
                         {{--modal body start--}}
                         <h2 id="ViewCategName" align="center"></h2>
-                        <label style="display: block; text-align: center">Sample</label>
-                        
 
+                        
+                        <div class="note note-success">
+                            <div class="note-icon"><i class="fas fa-user"></i></div>
+                            <div class="note-content">
+                                <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="name">John Edcel Zenarosa</label>
+                                <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role">CO Banner Program</label>
+                            </div>
+                        </div>
+
+
+                        
+                            <br>
+                            <br>
+                        <div class="col-lg-12">
+                            <div class="row">
+                                <dl class="dl-horizontal">                                
+                                    <dt class="text-inverse">Agency</dt>
+                                    <dd  id="agency_view" ></dd>
+                                </dl>
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                &nbsp;&nbsp;&nbsp;&nbsp;
+                                <dl class="dl-horizontal">                                
+                                    <dt class="text-inverse">Program</dt>
+                                    <dd  id="program_view" ></dd>
+                                </dl>
+                            </div>
+
+                            <div class="row">
+                                <dl class="dl-horizontal">                                
+                                    <dt class="text-inverse">Region</dt>
+                                    <dd  id="reg_name" ></dd>
+                                    <dt class="text-inverse">Province</dt>
+                                    <dd id="prov_name" ></dd>                                
+                                    <dt class="text-inverse">Municipality</dt>
+                                    <dd id="mun_name"></dd>
+                                    <dt class="text-inverse">Barangay</dt>
+                                    <dd id="bgy_name"></dd>
+                                </dl>
+                            </div>
+                        </div>
+
+
+                        <div class="col-lg-12 row">                            
+                            <div class="form-group">
+                                <label>Email</label>                                       
+                                    <input type="email" id="email" name="email" class="form-control"   required="true" >                                              
+                            </div>&nbsp;&nbsp;&nbsp;  
+
+                            <div class="form-group">
+                                <label>Contact</label>
+                                    <input type="number" id="contact" name="contact" class="form-control"  required="true" >                                                        
+                            </div>
+                        </div>
+
+                            
                         {{--modal body end--}}
                     </div>
                     <div class="modal-footer">
                         <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+                        <button type="submit" class="btn btn-warning">Update</button>
                     </div>
                 </div>
             </div>

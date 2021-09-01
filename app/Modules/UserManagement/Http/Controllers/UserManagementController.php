@@ -33,9 +33,22 @@ class UserManagementController extends Controller
 
     public function show(){
         $get_users =  db::table('users as u')
-                            ->select(db::raw("CONCAT(first_name,last_name) as full_name"),'shortname','pp.id as id','pp.status')
-                            ->join('program_permissions as pp', 'u.user_id', 'pp.user_id')
-                            ->join('programs as p', 'p.program_id' , 'pp.program_id')
+                            ->select(
+                                db::raw("CONCAT(first_name,' ',last_name) as full_name"),
+                                'shortname',
+                                'pp.id as id',
+                                'pp.status',
+                                'email',
+                                'contact_no',
+                                'agency_shortname as agency',                                
+                                'reg_name',
+                                'prov_name',
+                                'mun_name',
+                                'bgy_name')
+                            ->leftjoin('program_permissions as pp', 'u.user_id', 'pp.user_id')
+                            ->leftjoin('programs as p', 'p.program_id' , 'pp.program_id')
+                            ->join('geo_map as gm', 'gm.geo_code' , 'u.geo_code')
+                            ->join('agency as a', 'a.agency_id' , 'u.agency')
                             ->get();
 
         return datatables($get_users)->toJson();
@@ -116,8 +129,8 @@ class UserManagementController extends Controller
             $user_id        = Uuid::uuid4();
             $random_password = Str::random(4);
             $first_name     = request('first_name');
-            $middle_name    = request('first_name');
-            $last_name      = request('first_name');
+            $middle_name    = request('middle_name');
+            $last_name      = request('last_name');
             $ext_name       = request('ext_name');
             $email          = request('email');
             $contact        = request('contact');        
@@ -160,7 +173,7 @@ class UserManagementController extends Controller
             
                 db::table('program_permissions')->insert([
                     "role_id" => $role,
-                    "program_id" => $role != 2 ? $program : null ,
+                    "program_id" =>  $program  ,
                     "user_id" => $user_id,                
                 ]);
                 

@@ -35,6 +35,11 @@ header('Content-Type: text/html');?>
 	<script src="assets/plugins/pace/pace.min.js"></script>
 	<!-- ================== END BASE JS ================== -->
 
+	<style>
+		input.form-control.error{
+			text-align: left;
+		}
+	</style>
 
 	
 
@@ -46,7 +51,60 @@ header('Content-Type: text/html');?>
 	<!-- begin #page-loader -->
 	<div id="page-loader" class="fade show"><span class="spinner"></span></div>
 	<!-- end #page-loader -->
-	
+
+	{{-- Change Password --}}
+	<!-- #modal-Change Password-->
+	<div class="modal fade" id="ChangePassModal"  data-backdrop="static" data-keyboard="false">
+		<div class="modal-dialog" style="max-width: 30%">
+			<form id="ChangePassForm" method="POST" >
+				@csrf
+				<div class="modal-content">
+					<div class="modal-header" style="background-color: #49b6d6">
+						<h4 class="modal-title" style="color: white">Change your Default Password</h4>
+						{{-- <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button> --}}
+					</div>
+					<div class="modal-body">
+						{{--modal body start--}}
+						<label class="form-label hide"> ID</label>
+						<input name="id" type="text" class="form-control hide" />
+
+						<div class="col-lg-12">
+							<div class="form-group">
+								<label>Default Password</label>
+								<input type="password"  name="default_pass" class="form-control"  placeholder="Enter your default password"  required="true">								
+							</div>
+						</div>
+
+						<div class="col-lg-12">
+							<div class="form-group">
+
+								<label>New Password</label>
+								<input type="password"  name="new_pass"  id="new_pass" class="form-control"  placeholder="Enter your new password" required="true">
+							</div>
+						</div>
+
+						<div class="col-lg-12">
+							<div class="form-group">
+								<label>Confirm New Password</label>
+								<input  type="password" name="confirm_new_pass" class="form-control"  placeholder="Enter your confirm new password" required="true">
+							</div>
+						</div>
+
+
+								
+					
+						{{--modal body end--}}
+					</div>
+					<div class="modal-footer">
+						
+						<button type="submit" class="btn btn-info">Save Changes</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+
 	<!-- begin #page-container -->
 	<div id="page-container" class="page-container fade page-sidebar-fixed page-header-fixed">
 		<!-- begin #header -->
@@ -157,6 +215,100 @@ header('Content-Type: text/html');?>
 		});
 	</script>
 
+
+
+{{-- Change Password First Log in  --}}
+	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
+	<script>
+
+		$(document).ready(function(){
+			$("#ChangePassForm").validate({
+
+				rules:{
+					default_pass:{
+						required:true,
+						remote:{
+							url:"{{route('check-default-pass')}}",
+							type:'get'
+						}						
+					},
+					new_pass:{
+						required:true,																
+					},
+					confirm_new_pass:{
+						required:true,
+						equalTo:'#new_pass'										
+					},
+				},
+				messages:{
+					default_pass:{
+						required:'<div class="text-danger">This field is required</div>',
+						remote: "<div class='text-danger'>Your password doesn't match to your default password.</div>"
+					},
+					new_pass:{
+						required:'<div class="text-danger">This field is required.</div>',						
+					},
+					confirm_new_pass:{
+						required:true,
+						equalTo: "<div class='text-danger'>Your confirm password doesn''t match to your new password.</div>"
+					}
+				},
+				submitHandler:function(){
+					$.ajax({
+						url:"{{route('change-default-pass')}}",
+						type:'post',
+						data:$("#ChangePassForm").serialize(),
+						success:function(data){
+							if(Boolean(data) == true){
+								swal("Successfully change your Password!", {
+                                    icon: "success",
+                                }).then(()=>{                                                        
+									swal("Welcome To Voucher Management System", {
+                                 	   icon: "success",
+                                	}).then(()=>{
+										$("#ChangePassModal").modal('hide');
+									})
+                                    
+                                });						
+								
+							}else{
+								swal("Something went wrong.", {
+									icon: "error",
+								});
+							}
+						},
+						error:function(){
+							swal("Something went wrong.", {
+									icon: "error",
+								});
+						}
+					})
+				}				
+			});
+
+
+
+
+		});
+
+		
+		// $("#ChangePassModal").modal('show');
+		// $.ajax({
+		
+		// 	type:'post',
+		// 	data:{_token:'{{csrf_token()}}'},
+		// 	success:function(data){
+				
+		// 	},
+		// 	error:function(){
+
+		// 	}
+		// })
+
+	</script>
 
 </body>
 </html>

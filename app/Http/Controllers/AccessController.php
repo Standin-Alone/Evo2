@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use DB;
+use App\Models\AccessModel;
 class AccessController extends Controller
 {
     /**
@@ -80,8 +81,24 @@ class AccessController extends Controller
         
     }
 
+    // change password of first logged in
+    public function firstLoggedIn(){
+        $user_id = '99313468879929344';
+        $new_pass = request('new_pass');
+        $access_model = new AccessModel();
 
+        return $access_model->change_password($user_id,$new_pass);
+    }
 
+    // check default pass
+    public function checkDefaultPass(){
+
+        $default_pass = request('default_pass');
+        $user_id = '99313468879929344';
+        $access_model = new AccessModel();
+
+        return $access_model->check_default_password($user_id,$default_pass);
+    }
     /**
      * Store a newly created resource in storage.
      *
