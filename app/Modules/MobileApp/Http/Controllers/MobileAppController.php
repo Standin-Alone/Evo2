@@ -479,8 +479,7 @@ class MobileAppController extends Controller
                         'amount_val'     => $compute_remaining_bal, 
                         'voucher_status' => 'FULLY CLAIMED',                    
                     ]);
-                   
-         
+                            
                 return 'success';
             }else{
 
