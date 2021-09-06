@@ -176,11 +176,11 @@
           </div>
 
           <div class="u-row-container"
-            style="padding: 0px;background-image: url('{{$message->embed(asset('da-logo.png'))}}');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea">
+            style="padding: 0px;background-image: url('{{$message->embed(public_path('/edcel_images/DA-Logo.png'))}}');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea">
             <div class="u-row"
               style="Margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;">
               <div style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
-                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-image: url('images/image-3.jpeg');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: transparent;"><![endif]-->
+                <!--[if (mso)|(IE)]><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="padding: 0px;background-image: url('edcel_images/image-3.jpeg');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea;" align="center"><table cellpadding="0" cellspacing="0" border="0" style="width:600px;"><tr style="background-color: transparent;"><![endif]-->
 
                 <!--[if (mso)|(IE)]><td align="center" width="600" style="background-color: #ffffff;width: 600px;padding: 0px;border-top: 0px solid transparent;border-left: 0px solid transparent;border-right: 0px solid transparent;border-bottom: 0px solid transparent;" valign="top"><![endif]-->
                 <div class="u-col u-col-100"
@@ -203,7 +203,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-1.png'))}}" alt="Calendar"
+                                    <img align="center" border="0" src="{{$message->embed(public_path('/edcel_images/image-1.png'))}}" alt="Calendar"
                                       title="Calendar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 145px;"
                                       width="145" />
@@ -329,7 +329,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-2.png'))}}" alt="user_icon"
+                                    <img align="center" border="0" src="{{$message->embed(public_path('/edcel_images/image-2.png'))}}" alt="user_icon"
                                       title="user_icon"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 45px;"
                                       width="45" />
@@ -355,11 +355,11 @@
                                 style="color: #ffffff; line-height: 140%; text-align: center; word-wrap: break-word;">
                                 <p style="font-size: 14px; line-height: 140%;"><span
                                     style="font-size: 16px; line-height: 22.4px;"><span
-                                      style="color: #969696; line-height: 22.4px; font-size: 16px;">Username:</span></span>
+                                      style="color: #969696; line-height: 22.4px; font-size: 16px;">User</span></span>
                                 </p>
                                 <p style="font-size: 14px; line-height: 140%;"><span
                                     style="font-size: 16px; line-height: 22.4px;"><strong><span
-                                        style="color: #595959; line-height: 22.4px; font-size: 16px;">{{$username}}</span></strong></span>
+                                        style="color: #595959; line-height: 22.4px; font-size: 16px;">{{$full_name}}</span></strong></span>
                                 </p>
                               </div>
 
@@ -395,7 +395,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-4.png'))}}" alt="Dollar" title="Dollar"
+                                    <img align="center" border="0" src="{{$message->embed(public_path('/edcel_images/image-4.png'))}}" alt="Dollar" title="Dollar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 48.5px;"
                                       width="48.5" />
 
@@ -458,7 +458,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-5.png'))}}" alt="Calendar"
+                                    <img align="center" border="0" src="{{$message->embed(public_path('/edcel_images/image-5.png'))}}" alt="Calendar"
                                       title="Calendar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 41.5px;"
                                       width="41.5" />

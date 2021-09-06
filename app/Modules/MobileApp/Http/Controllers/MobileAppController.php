@@ -88,7 +88,7 @@ class MobileAppController extends Controller
 
                 }
                 $get_otp_record = db::table('user_otp as uo')
-                                        ->select('u.user_id','uo.date_created','username','role')
+                                        ->select('u.user_id','uo.date_created',db::raw("CONCAT(first_name,' ',last_name) as full_name"),'role')
                                         ->join('users as u','u.user_id','uo.user_id')
                                         ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
                                         ->join('roles as r','r.role_id','pp.role_id')
@@ -96,7 +96,7 @@ class MobileAppController extends Controller
                                         ->where('uo.status',1)
                                         ->first();
                 
-                Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
+                Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "full_name" => $get_otp_record->full_name  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
                     $message->to($to_email)
                             ->subject('OTP');                            
                 });
@@ -224,7 +224,7 @@ class MobileAppController extends Controller
       
             foreach ($get_scanned_vouchers as $key => $item) {
                 
-                $item->base64 = base64_encode(Storage::disk('uploads')->get('/attachments//'. $item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
+                $item->base64 = base64_encode(Storage::disk('uploads')->get('attachments'.'/'. $item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
                 
             }
     
@@ -331,15 +331,39 @@ class MobileAppController extends Controller
             $id_back      = str_replace(' ', '+', $id_back);
             $id_back_name = $voucher_info->rsbsa_no . '-' . $back_attachment_uuid.'-' . $item->name . '(back)' . '.jpeg';
 
-            $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
-
+            
+            $upload_folder  = '/attachments'.'/'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
+            $base_path = './uploads';
+            
             
 
             // Check Folder if exist for farmers attachment;
-            if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder,0775,true);                                                
-            }
+            // if (!File::isDirectory($base_path)) {     
 
+            //     File::makeDirectory($base_path.$upload_folder,0755,true);                                                
+            // }
+
+               
+            if (File::isDirectory($base_path)) {                                
+                $program_path = $base_path.'/attachments'.'/'.$program;
+                if(!File::isDirectory($program_path)){
+
+                    File::makeDirectory($program_path, 0775, true);                                
+                    $by_year_path = $program_path. '/'.Carbon::now()->year;
+                    
+                    if(!File::isDirectory($by_year_path)){
+                        
+                        File::makeDirectory($by_year_path, 0775, true);                                
+                        $rsbsa_path = $by_year_path.'/'. $voucher_info->rsbsa_no;
+
+                        if(!File::isDirectory($rsbsa_path)){
+                            File::makeDirectory($rsbsa_path, 0775, true); 
+                        }
+                    }
+                }                
+            } 
+
+            
             $upload_front_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
             $upload_back_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
 
@@ -370,11 +394,30 @@ class MobileAppController extends Controller
             $image     = str_replace(' ', '+', $image);
             $imageName = $voucher_info->rsbsa_no . '-' . $back_attachment_uuid.'-'. $item->name . '.jpeg';
             
-            $upload_folder  = '/attachments//'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
+            $upload_folder  = '/attachments'.'/'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
+            
+            $base_path = './uploads';
             
             // Check Folder if exist for farmers attachment;
-            if (!File::isDirectory($upload_folder)) {
-                File::makeDirectory($upload_folder, 0775, true);                                
+            
+            
+            if (File::isDirectory($base_path)) {                                
+                $program_path = $base_path.'/attachments'.'/'.$program;
+                if(!File::isDirectory($program_path)){
+
+                    File::makeDirectory($program_path, 0775, true);                                
+                    $by_year_path = $program_path. '/'.Carbon::now()->year;
+                    
+                    if(!File::isDirectory($by_year_path)){
+                        
+                        File::makeDirectory($by_year_path, 0775, true);                                
+                        $rsbsa_path = $by_year_path.'/'. $voucher_info->rsbsa_no;
+
+                        if(!File::isDirectory($rsbsa_path)){
+                            File::makeDirectory($rsbsa_path, 0775, true); 
+                        }
+                    }
+                }                
             } 
 
             $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
@@ -391,6 +434,7 @@ class MobileAppController extends Controller
                     'voucher_details_id' => $uuid,                  
                     'document'           => $item->name,
                     'file_name'          => $imageName,
+   
                 ];
             }
         }
@@ -479,7 +523,8 @@ class MobileAppController extends Controller
                         'amount_val'     => $compute_remaining_bal, 
                         'voucher_status' => 'FULLY CLAIMED',                    
                     ]);
-                            
+                   
+         
                 return 'success';
             }else{
 
