@@ -57,7 +57,7 @@
                         
                         
 
-                            return  "<button type='button' class='btn btn-warning view-modal-btn'   id="+data+" data-toggle='modal' data-target='#ViewModal'>"+
+                            return  "<button type='button' class='btn btn-warning view-modal-btn'   user_id="+row['user_id']+" data-toggle='modal' data-target='#ViewModal'>"+
                                         "<i class='fa fa-edit'></i> Edit"+
                                     "</button>   "+(
                                     row['status'] == 1 ?
@@ -77,6 +77,8 @@
         $("#load-datatable").on('click','.view-modal-btn',function(){
             
             let currentRow = $(this).closest('tr');
+            let id =  $(this).attr('user_id');
+            
             let email = load_datatable.row(currentRow).data()['email'];
             let contact = load_datatable.row(currentRow).data()['contact_no'];
             let program = load_datatable.row(currentRow).data()['shortname'];
@@ -85,8 +87,9 @@
             let mun_name = load_datatable.row(currentRow).data()['mun_name'];
             let prov_name = load_datatable.row(currentRow).data()['prov_name'];
             let bgy_name = load_datatable.row(currentRow).data()['bgy_name'];
-
-
+         
+            $("#user_id").val(id);
+            
             $("#email").val(email);
             $("#contact").val(contact);
             $("#agency_view").text(agency);
@@ -302,6 +305,10 @@
                 }
             }
         })
+
+
+
+        $("#")
     })
 
     </script>
@@ -491,6 +498,85 @@
                     });
                 }
             })
+
+            // Update Form validate
+            $("#UpdateForm").validate({
+                rules:{
+                    email:{
+                            required:true,
+                            email   :true,
+                            remote  :{
+                                url:"{{route('check-email')}}",
+                                type:'get'
+                            }
+                        },
+                    contact:{
+                        required:true,
+                        phoneUS: true
+                    }, 
+                },
+                messages:{
+                     email:{
+                            required:'<div class="text-danger">Please enter your email.</div>',
+                            email:'<div class="text-danger">Please enter a valid email address.</div>', 
+                            remote:'<div class="text-danger">This email is already exist.</div>'
+                            },                    
+                    contact:{
+                            required:'<div class="text-danger">Please enter your phone number.</div>',
+                            phoneUS: '<div class="text-danger">Invalid format.</div>'
+                            },
+                },
+                submitHandler:function(){
+
+                    $("i").removeClass('hide');
+                    $(".update-btn").prop('disabled',true);   
+                    $(".update-btn").html('<i class="fas fa-circle-notch fa-spin"></i> updating');   
+
+                    if (confirm) {                       
+                            $.ajax({
+                                url:"{{route('user-update')}}",
+                                type:'post',
+                                data:$("#UpdateForm").serialize(),
+                                success:function(response){             
+                                    //          
+                                    console.warn(response);
+                                    if(response == 'true'){
+                                        $("i").addClass('hide');
+                                       
+                                        swal("Successfully updated the user info.", {
+                                            icon: "success",
+                                        }).then(()=>{
+                                            load_datatable.ajax.reload();
+                                            $("#ViewModal").modal('hide')
+                                            $(".update-btn").prop('disabled',false);                                            
+                                            $(".update-btn").text('update');   
+                                        });
+                                    }else{
+                                        $("i").addClass('hide');
+                                        swal("Failed to update user info.", {
+                                            icon: "error",
+                                        }).then(()=>{
+                                            
+                                            $(".update-btn").prop('disabled',false);
+                                            $(".update-btn").text('update');   
+                                            
+                                        });
+                                    }
+                                },
+                                error:function(response){
+                                    $(".add-btn").prop('disabled',false);
+                                }
+                            })
+                            
+                        } else {
+                            $(".add-btn").prop('disabled',false);
+                            swal("Operation Cancelled.", {
+                                icon: "error",
+                            });
+                        }
+
+                }
+            });
             
         })
 
@@ -688,71 +774,75 @@
                         <h4 class="modal-title" style="color: white">View Profile</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                     </div>
-                    <div class="modal-body">
-                        {{--modal body start--}}
-                        <h2 id="ViewCategName" align="center"></h2>
-
-                        
-                        <div class="note note-success">
-                            <div class="note-icon"><i class="fas fa-user"></i></div>
-                            <div class="note-content">
-                                <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="name">John Edcel Zenarosa</label>
-                                <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role">CO Banner Program</label>
-                            </div>
-                        </div>
-
-
-                        
-                            <br>
-                            <br>
-                        <div class="col-lg-12">
-                            <div class="row">
-                                <dl class="dl-horizontal">                                
-                                    <dt class="text-inverse">Agency</dt>
-                                    <dd  id="agency_view" ></dd>
-                                </dl>
-                                &nbsp;&nbsp;&nbsp;&nbsp;
-                                &nbsp;&nbsp;&nbsp;&nbsp;
-                                <dl class="dl-horizontal">                                
-                                    <dt class="text-inverse">Program</dt>
-                                    <dd  id="program_view" ></dd>
-                                </dl>
-                            </div>
-
-                            <div class="row">
-                                <dl class="dl-horizontal">                                
-                                    <dt class="text-inverse">Region</dt>
-                                    <dd  id="reg_name" ></dd>
-                                    <dt class="text-inverse">Province</dt>
-                                    <dd id="prov_name" ></dd>                                
-                                    <dt class="text-inverse">Municipality</dt>
-                                    <dd id="mun_name"></dd>
-                                    <dt class="text-inverse">Barangay</dt>
-                                    <dd id="bgy_name"></dd>
-                                </dl>
-                            </div>
-                        </div>
-
-
-                        <div class="col-lg-12 row">                            
-                            <div class="form-group">
-                                <label>Email</label>                                       
-                                    <input type="email" id="email" name="email" class="form-control"   required="true" >                                              
-                            </div>&nbsp;&nbsp;&nbsp;  
-
-                            <div class="form-group">
-                                <label>Contact</label>
-                                    <input type="number" id="contact" name="contact" class="form-control"  required="true" >                                                        
-                            </div>
-                        </div>
+                    <form id="UpdateForm" method="post">
+                        @csrf
+                        <input type="text" id="user_id" name="id" hidden>
+                        <div class="modal-body">
+                            {{--modal body start--}}
+                            <h2 id="ViewCategName" align="center"></h2>
 
                             
-                        {{--modal body end--}}
-                    </div>
-                    <div class="modal-footer">
-                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                        <button type="submit" class="btn btn-warning">Update</button>
-                    </div>
+                            <div class="note note-success">
+                                <div class="note-icon"><i class="fas fa-user"></i></div>
+                                <div class="note-content">
+                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="name">John Edcel Zenarosa</label>
+                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role">CO Banner Program</label>
+                                </div>
+                            </div>
+
+
+                            
+                                <br>
+                                <br>
+                            <div class="col-lg-12">
+                                <div class="row">
+                                    <dl class="dl-horizontal">                                
+                                        <dt class="text-inverse">Agency</dt>
+                                        <dd  id="agency_view" ></dd>
+                                    </dl>
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <dl class="dl-horizontal">                                
+                                        <dt class="text-inverse">Program</dt>
+                                        <dd  id="program_view" ></dd>
+                                    </dl>
+                                </div>
+
+                                <div class="row">
+                                    <dl class="dl-horizontal">                                
+                                        <dt class="text-inverse">Region</dt>
+                                        <dd  id="reg_name" ></dd>
+                                        <dt class="text-inverse">Province</dt>
+                                        <dd id="prov_name" ></dd>                                
+                                        <dt class="text-inverse">Municipality</dt>
+                                        <dd id="mun_name"></dd>
+                                        <dt class="text-inverse">Barangay</dt>
+                                        <dd id="bgy_name"></dd>
+                                    </dl>
+                                </div>
+                            </div>
+
+
+                            <div class="col-lg-12 row">                            
+                                <div class="form-group">
+                                    <label>Email</label>                                       
+                                        <input type="email" id="email" name="email" class="form-control"   required="true" >                                              
+                                </div>&nbsp;&nbsp;&nbsp;  
+
+                                <div class="form-group">
+                                    <label>Contact</label>
+                                        <input type="number" id="contact" name="contact" class="form-control"  required="true" >                                                        
+                                </div>
+                            </div>
+
+                                
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-warning update-btn">    Update</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>

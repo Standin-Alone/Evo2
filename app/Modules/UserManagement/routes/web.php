@@ -10,6 +10,7 @@ Route::group([],function(){
     Route::get('/user-email','UserManagementController@email');
 
     Route::post('/user/add','UserManagementController@store')->name('user-add');
+    Route::post('/user/update','UserManagementController@update')->name('user-update');
     Route::post('/user/import-file','UserManagementController@import_file')->name('import-file');
 
     Route::get('/user/check-email','UserManagementController@checkEmail')->name('check-email');

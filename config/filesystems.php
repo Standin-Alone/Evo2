@@ -43,7 +43,7 @@ return [
         ],
         'uploads' => [
             'driver' => 'local',
-            'root' => base_path('/uploads/transactions'),
+            'root' => base_path('uploads/transactions'),
             'url' => env('APP_URL').'/uploads/transactions',
             'visibility' => 'public',
         ],

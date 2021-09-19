@@ -224,9 +224,12 @@ class MobileAppController extends Controller
       
             foreach ($get_scanned_vouchers as $key => $item) {
                 
-                $item->base64 = base64_encode(Storage::disk('uploads')->get('attachments'.'/'. $item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
+                $item->base64 = base64_encode(Storage::disk('uploads')->get('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
                 
             }
+
+
+            
     
         
 
@@ -316,7 +319,7 @@ class MobileAppController extends Controller
         $attachment_info = [];
 
 
-
+        $base_path = './uploads/transactions';
         if ($item->name == 'Valid ID') {
             $id_front = $item->file[0]->front;
             $id_back  = $item->file[0]->back;
@@ -333,7 +336,7 @@ class MobileAppController extends Controller
 
             
             $upload_folder  = '/attachments'.'/'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
-            $base_path = './uploads';
+            
             
             
 
@@ -395,8 +398,7 @@ class MobileAppController extends Controller
             $imageName = $voucher_info->rsbsa_no . '-' . $back_attachment_uuid.'-'. $item->name . '.jpeg';
             
             $upload_folder  = '/attachments'.'/'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
-            
-            $base_path = './uploads';
+                        
             
             // Check Folder if exist for farmers attachment;
             

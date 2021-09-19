@@ -37,6 +37,7 @@ class UserManagementController extends Controller
                                 db::raw("CONCAT(first_name,' ',last_name) as full_name"),
                                 'shortname',
                                 'pp.id as id',
+                                'u.user_id',
                                 'pp.status',
                                 'email',
                                 'contact_no',
@@ -193,6 +194,29 @@ class UserManagementController extends Controller
         }
     }
     
+    // update user info
+    public function update(){
+        try{
+            $id = request('id');
+            $email = request('email');
+            $contact = request('contact');
+            $update_info = db::table('users')
+                            ->where('user_id',$id)
+                            ->update([
+                                'email' => $email,
+                                'contact_no' => $contact,
+                            ]);
+
+            if($update_info){
+                return 'true';
+            }else{
+                return 'false';
+            }
+        }
+        catch(\Exception $e){
+            return $e;
+        }
+    }
 
     public function import_file(){
         $region = request('import_region');
