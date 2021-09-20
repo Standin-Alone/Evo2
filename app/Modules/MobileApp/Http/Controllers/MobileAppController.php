@@ -113,7 +113,7 @@ class MobileAppController extends Controller
                 return json_encode(array(["Message" => "false"]));
             }
         } else {
-            return json_encode(array(["Message" => "false"]));
+            return json_encode(array(["Message" => "no account"]));
         }
     }
 
@@ -194,6 +194,13 @@ class MobileAppController extends Controller
   
       }
 
+    
+    //   discard transaction
+    public function discard_transaction(){
+        $reference_num = request('reference_num');
+        // set already scanned to 0
+        db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+    }
     // get scanned vouchers for home screen
     public function get_scanned_vouchers($supplier_id)
     {
@@ -224,7 +231,7 @@ class MobileAppController extends Controller
       
             foreach ($get_scanned_vouchers as $key => $item) {
                 
-                $item->base64 = base64_encode(Storage::disk('uploads')->get('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
+                $item->base64 = base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
                 
             }
 
@@ -247,6 +254,12 @@ class MobileAppController extends Controller
         return $get_voucher_transactions; 
     }
 
+    
+    
+       
+   
+
+
     // get voucher info for farmer profile screen
     public function get_voucher_info()
     {
@@ -259,45 +272,67 @@ class MobileAppController extends Controller
                        ->join('programs as p','p.program_id','v.program_id')
                        ->where('reference_no', $reference_num)->get();
         
-
+         
 
         if (!$get_info->isEmpty()) {
             // Compute the balance of voucher    
             $get_voucher = db::table('voucher')->where('reference_no', $reference_num)->first();
 
 
-            $get_region       = $get_voucher->reg;
-            $get_province     = $get_voucher->prv;
-            $get_municipality = $get_voucher->mun;
-            $get_brgy         = $get_voucher->brgy;
+            
 
+            if($get_voucher->is_scanned == 0){
 
-            $get_geo_map =  db::table('geo_map')
-                         ->where('reg_code', $get_region)
-                         ->where('prov_code', $get_province)
-                         ->where('mun_code', $get_municipality)
-                         ->where('bgy_code', $get_brgy)
-                         ->first();
+                // set already scanned
+                db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1']);
+                
+                $get_region       = $get_voucher->reg;
+                $get_province     = $get_voucher->prv;
+                $get_municipality = $get_voucher->mun;
+                $get_brgy         = $get_voucher->brgy;
+    
+    
+                $get_geo_map =  db::table('geo_map')
+                             ->where('reg_code', $get_region)
+                             ->where('prov_code', $get_province)
+                             ->where('mun_code', $get_municipality)
+                             ->where('bgy_code', $get_brgy)
+                             ->first();
+    
+                $check_balance = $get_voucher->amount_val;
+    
+                foreach($get_info as $item){          
+                    $item->Available_Balance = $check_balance;
+                    $item->Region            = $get_geo_map->reg_name;
+                    $item->Province          = $get_geo_map->prov_name;
+                    $item->Municipality      = $get_geo_map->mun_name;
+                    $item->Barangay          = $get_geo_map->bgy_name;
+                }
+                
+                $get_program_items   = $this->getProgramItems($supplier_id);
+                $get_recent_claiming = $this->get_transactions_history($reference_num);
+    
+                // validate voucher
+                if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->Available_Balance == 0.00){
+                    db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+                }
 
-            $check_balance = $get_voucher->amount_val;
+                return json_encode(array(["Message"       => 'true',
+                                          "data"          => $get_info, 
+                                          "program_items" => $get_program_items,
+                                          "history"       => $get_recent_claiming]));
+    
+    
+                
+            }else{
 
-            foreach($get_info as $item){          
-                $item->Available_Balance = $check_balance;
-                $item->Region            = $get_geo_map->reg_name;
-                $item->Province          = $get_geo_map->prov_name;
-                $item->Municipality      = $get_geo_map->mun_name;
-                $item->Barangay          = $get_geo_map->bgy_name;
+                return json_encode(array(["Message" => 'already scanned']));
             }
+      
 
-            $get_program_items   = $this->getProgramItems($supplier_id);
-            $get_recent_claiming = $this->get_transactions_history($reference_num);
-
-            return json_encode(array(["Message"       => 'true',
-                                      "data"          => $get_info, 
-                                      "program_items" => $get_program_items,
-                                      "history"       => $get_recent_claiming]));
         }else{
-            return json_encode(array(["Message" => 'false']));
+            db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+            return json_encode(array(["Message" => 'false']));            
         }
     }
 
@@ -444,6 +479,8 @@ class MobileAppController extends Controller
         return [ 'upload_error_count' => $upload_error_count, 'attachment_info'    =>   $attachment_info ];
     }
 
+    
+
     //SUBMIT FUNCTION OF CLAIM VOUCHER RRP
     public function submit_voucher_rrp()
     {
@@ -525,6 +562,10 @@ class MobileAppController extends Controller
                         'amount_val'     => $compute_remaining_bal, 
                         'voucher_status' => 'FULLY CLAIMED',                    
                     ]);
+
+
+            // set already scanned to 0
+            db::table('voucher')->where('reference_no', $voucher_info->reference_no)->update(['is_scanned' => '0']);
                    
          
                 return 'success';
@@ -631,6 +672,9 @@ class MobileAppController extends Controller
                         'amount_val'     => $compute_remaining_bal, 
                         'voucher_status' =>  $compute_remaining_bal != 0 ? 'PARTIALLY CLAIMED' : 'FULLY CLAIMED' ,
                     ]);
+
+                // set already scanned to 0
+                db::table('voucher')->where('reference_no', $voucher_info->reference_no)->update(['is_scanned' => '0']);
                     
                 return 'success';
             }else{

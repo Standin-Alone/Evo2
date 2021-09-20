@@ -1,6 +1,7 @@
 <?php
 
 Route::group([],function(){
+Route::post('/api/discard_transaction','MobileAppController@discard_transaction');
 // Login Screen
 Route::post('/api/sign_in','MobileAppController@sign_in');
 
