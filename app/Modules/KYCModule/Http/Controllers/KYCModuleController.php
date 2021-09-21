@@ -23,7 +23,8 @@ class KYCModuleController extends Controller
     public function import(){        
 
         $file = request()->file('file');
-        $kyc_import = new KYCImport();
+        $provider = request('provider');
+        $kyc_import = new KYCImport($provider);
         Excel::import($kyc_import, $file);
 
         return $kyc_import->getRowCount();

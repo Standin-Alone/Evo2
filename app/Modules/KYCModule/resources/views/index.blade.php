@@ -49,6 +49,9 @@
             },
             submitHandler: function(){
                 let fd = this;
+                
+                
+                
                 swal({
                 title: "Wait!",
                 text: "Are you sure you want to import this file?",
@@ -58,12 +61,14 @@
                 })
                 .then((confirm) => {
                     let fd = new FormData();
-
+                    let get_provider = $("#provider option:selected").val();
+                    fd.append('provider',get_provider)
                     fd.append('_token','{{csrf_token()}}')                    
                     fd.append('file',$("input[name='file']")[0].files[0])
                     $(".import-btn").prop('disabled',true)
                     // check if confirm
-                    if (confirm) {                       
+                    if (confirm) {         
+                        $(".import-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Importing');                 
                         $.ajax({
                             url:"{{route('import-kyc')}}",
                             type:'post',
@@ -75,24 +80,30 @@
                                 parses_result = JSON.parse(response)
                                 total_rows_inserted = parses_result['total_rows_inserted'];
                                 total_rows = parses_result['total_rows'];
-
+                                console.warn(response);
                                 if(parses_result['message'] == 'true'){
                                     swal(total_rows_inserted + ' out of ' + total_rows + ' rows has been successfully inserted.', {
                                         icon: "success",
                                     }).then(()=>{                                    
-                                        $(".import-btn").prop('disabled',false)                                    
+                                        $("#ImportForm")[0].reset();
+                                        $(".import-btn").prop('disabled',false)      
+                                        $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
                                     });
                                 }else{
                                     swal("Error!Wrong excel format.", {
                                             icon: "error",
                                         });
+                                    $("#ImportForm")[0].reset();
                                     $(".import-btn").prop('disabled',false) 
+                                    $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');   
                                 }
                                 
                             },
                             error:function(response){
                                 console.warn(response);
+                                $("#ImportForm")[0].reset();
                                 $(".import-btn").prop('disabled',false)
+                                $(".import-btn").html('<i class="fas fa-cloud-download-alt"></i> Import');   
                             }   
                         })
                         
@@ -142,9 +153,21 @@
                     @csrf
                     <div class="panel-body border">
 
+                        <div class="col-lg-12 ">
+                            <div class="form-group">
+                                <label >Select Fintech Provider</label> <span style="color:red">*</span>
+                                <select class="form-control" name="provider" id="provider" >
+                                    <option selected disabled value="">Select Provider</option>                                        
+                                        <option  value="SPTI">SPTI</option>
+                                        <option  value="UMSI">UMSI</option>                                    
+                                </select>
+                            </div>                              
+                        </div>
+
+
                         <div class="col-lg-12">
                             <div class="form-group">
-                                <label>Import Excel</label> <span id='reqcatnameadd'></span>
+                                <label>Import Excel</label><span style="color:red">*</span>
                                 <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
                             </div>
                         </div>
