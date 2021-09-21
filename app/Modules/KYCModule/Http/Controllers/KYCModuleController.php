@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Modules\KYCModule\Models\KYCModel;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\KYCImport;
+use DB;
 class KYCModuleController extends Controller
 {
 
@@ -29,5 +30,18 @@ class KYCModuleController extends Controller
 
         return $kyc_import->getRowCount();
        
+    }
+
+    public function show(){
+
+        $get_records = db::table('kyc_profiles')
+                                ->select(
+                                    'rsbsa_no',
+                                    db::raw("CONCAT(first_name,' ',last_name) as full_name"),
+                                    db::raw("CONCAT(province,', ',region) as address"),
+                                    'fintech_provider',
+                                    'kyc_id'                                 
+                                )->get();
+        return datatables($get_records)->toJson();
     }
 }

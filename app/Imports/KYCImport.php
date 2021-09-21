@@ -72,7 +72,7 @@ class KYCImport implements ToCollection,WithStartRow
                         $street_purok        = trim($item[8]);
                         $barangay            = trim($item[9]);
                         $municipality        = trim($item[10]);
-                        $district            = trim($item[11]);
+                        $district            = trim($item[11]);                        
                         $province            = trim($item[12]);
                         $region              = trim($item[13]);
                         $birthdate           = $format_birthday;
@@ -92,7 +92,8 @@ class KYCImport implements ToCollection,WithStartRow
 
                         if(!$check_reg_prov->isEmpty()){
                         
-
+                        $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
+                        $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
                         $insert_kyc = db::table('kyc_profiles')
                                 ->insert([
                                     'kyc_id'              => $uuid,
@@ -109,7 +110,9 @@ class KYCImport implements ToCollection,WithStartRow
                                     'barangay'            => $barangay,
                                     'municipality'        => $municipality,
                                     'district'            => $district,
+                                    'prov_code'           => $prov_code,
                                     'province'            => $province,
+                                    'reg_code'            => $reg_code,
                                     'region'              => $region,
                                     'birthdate'           => $birthdate,
                                     'place_of_birth'      => $place_of_birth,

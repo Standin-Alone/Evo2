@@ -1,5 +1,5 @@
 @extends('global.base')
-@section('title', 'Supplier Registration')
+@section('title', 'KYC Profiles')
 
 
 
@@ -9,6 +9,28 @@
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+
+    <style>
+        td { font-size: 17px; font-weight: 500 }
+
+        
+        #load-datatable > thead > tr > th {
+            color:white;
+            background-color: #008a8a;
+            font-size: 20px;
+            font-family: calibri
+        }
+
+        #load-datatable > thead > tr > th {
+            color:white;
+            font-size: 20px;
+            background-color: #008a8a;
+            font-weight: bold
+        }
+        #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+            padding: 5px !important;
+        }           
+    </style>
 @endsection
 
 
@@ -32,6 +54,20 @@
 
     <script>
         $(document).ready(function(){
+
+            load_datatable = $("#load-datatable").DataTable({
+                                serverSide:true,
+                                ajax: "{{route('kyc.show')}}",
+                                columns:[
+                                        {data:'rsbsa_no',title:'RSBSA Number'},
+                                        {data:'fintech_provider',title:'Provider',orderable:false},
+                                        {data:'full_name',title:'Name',orderable:false},
+                                        {data:'address',title:'Address',orderable:false}
+                                        
+                                ]
+
+                            })
+
             // import file
             $("#ImportForm").validate({
 
@@ -88,6 +124,7 @@
                                         $("#ImportForm")[0].reset();
                                         $(".import-btn").prop('disabled',false)      
                                         $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
+                                        load_datatable.ajax.reload();
                                     });
                                 }else{
                                     swal("Error!Wrong excel format.", {
@@ -127,15 +164,10 @@
 
 
 @section('content')
-    <!-- begin breadcrumb -->
-    <ol class="breadcrumb pull-right">
-        <li class="breadcrumb-item"><a href="javascript:;">Home</a></li>
-        <li class="breadcrumb-item"><a href="javascript:;">Page Options</a></li>
-        <li class="breadcrumb-item active">Blank Page</li>
-    </ol>
+    
     <!-- end breadcrumb -->
     <!-- begin page-header -->
-    <h1 class="page-header">Blank Page <small>header small text goes here...</small></h1>
+    <h1 class="page-header">KYC Profiles <small>header small text goes here...</small></h1>
     <!-- end page-header -->
 
     <!-- begin panel -->
@@ -147,7 +179,7 @@
         <div class="panel-body">
             <div class="panel panel-primary col-md-6">
                 <div class="panel-heading">
-                    <h4 class="panel-title">KYC Import</h4>
+                    <h4 class="panel-title">Import KYC Profiles</h4>
                 </div>
                 <form id="ImportForm" method="POST">
                     @csrf
@@ -171,20 +203,30 @@
                                 <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
                             </div>
                         </div>
-                        
-                    </div>
 
-                    <div class="panel-footer">
-                        <div class="pull-right">
-                            <button type='submit' class='btn btn-lime import-btn' >
-                                <i class='fa fa-cloud-download-alt'></i> Import
-                            </button>
-                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-group text-right">
+                                <button type='submit' class='btn btn-lime import-btn' >
+                                    <i class='fa fa-cloud-download-alt'></i> Import
+                                </button>      
+                            </div>
+                        </div>                        
                     </div>
+                
                 </form>
                 <br>
             </div>
 
+
+            <table id="load-datatable" class="table table-striped table-bordered">            
+                <thead>
+                 
+                </thead>
+                <tbody>                
+                </tbody>
+            </table>
+    
+    
 
      
         </div>

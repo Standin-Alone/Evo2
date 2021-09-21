@@ -34,11 +34,8 @@
         }
 
         #permission-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
-    padding: 5px !important;
-}
-
-
-
+            padding: 5px !important;
+        }           
     </style>
 @endsection
 
