@@ -462,7 +462,7 @@
                         fd.append('import_region',$("#import_region").val())
                         fd.append('import_program',$("#import_program").val())
                         fd.append('file',$("input[name='file']")[0].files[0])
-                        $(".import-btn").props('disabled',true)
+                        $(".import-btn").prop('disabled',true)
                         // check if confirm
                         if (confirm) {                       
                             $.ajax({
@@ -478,19 +478,19 @@
                                             icon: "success",
                                     }).then(()=>{
                                         $("#ImportModal").modal('hide')
-                                        $(".import-btn").props('disabled',false)
+                                        $(".import-btn").prop('disabled',false)
                                         
                                     });
                                 },
                                 error:function(response){
                                     $("#ImportModal").modal('hide')
                                     console.warn(response);
-                                    $(".import-btn").props('disabled',false)
+                                    $(".import-btn").prop('disabled',false)
                                 }   
                             })
                             
                         } else {
-                            $(".import-btn").props('disabled',false)                            
+                            $(".import-btn").prop('disabled',false)                            
                             swal("Operation Cancelled.", {
                                 icon: "error",
                             });
