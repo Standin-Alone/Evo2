@@ -202,7 +202,7 @@ class MobileAppController extends Controller
         db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
     }
     // get scanned vouchers for home screen
-    public function get_scanned_vouchers($supplier_id)
+    public function get_scanned_vouchers($supplier_id,$offset)
     {
         
 
@@ -225,7 +225,9 @@ class MobileAppController extends Controller
             ->where('supplier_id', $supplier_id)  
             ->where('document', 'Farmer with Commodity')            
             ->groupBy('v.reference_no')
-            ->orderBy('transac_date', 'DESC')            
+            ->orderBy('transac_date', 'DESC')     
+            ->skip($offset == 1 ? 0 : $offset)
+            ->take(2)               
             ->get();
 
       

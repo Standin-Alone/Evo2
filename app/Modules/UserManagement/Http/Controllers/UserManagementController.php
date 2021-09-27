@@ -23,7 +23,7 @@ class UserManagementController extends Controller
         $get_regions = db::table('geo_map')->select('reg_code','reg_name')->distinct()->get();
         $get_agency = db::table('agency')->get();
         $get_roles = db::table('roles')->where('rfo_use','0')->get();
-        $get_programs = db::table('programs')->get();
+        $get_programs = db::table('programs')->where('status',1)->get();
         
 
         
