@@ -75,38 +75,44 @@ class UsersImport implements ToCollection,WithStartRow
 
 
                 $get_role = db::table('roles')->where('role',$role)->first();
-                db::table('users')
-                                ->insert([
-                                    'user_id'  => $user_id,
-                                    'agency'  => $agency,
-                                    'agency_loc'  => 'RFO',
-                                    'username'  => $email,
-                                    'password'  => bcrypt($random_password),
-                                    'email'  => $email,
-                                    'geo_code'  => $geo_code->geo_code,
-                                    'reg' =>$this->region,
-                                    'prov' =>$province,
-                                    'mun' =>$municipality,
-                                    'bgy' =>$barangay,
-                                    'first_name' => $first_name,
-                                    'middle_name' => $middle_name,
-                                    'last_name' => $last_name,
-                                    'ext_name' => $ext_name,
-                                    'contact_no' => $contact,
-                ]);
+
+                db::transact(function() {
+
+                    db::table('users')
+                    ->insert([
+                        'user_id'  => $user_id,
+                        'agency'  => $agency,
+                        'agency_loc'  => 'RFO',
+                        'username'  => $email,
+                        'password'  => bcrypt($random_password),
+                        'email'  => $email,
+                        'geo_code'  => $geo_code->geo_code,
+                        'reg' =>$this->region,
+                        'prov' =>$province,
+                        'mun' =>$municipality,
+                        'bgy' =>$barangay,
+                        'first_name' => $first_name,
+                        'middle_name' => $middle_name,
+                        'last_name' => $last_name,
+                        'ext_name' => $ext_name,
+                        'contact_no' => $contact,
+                    ]);
 
 
 
-                db::table('program_permissions')->insert([
-                    "role_id" =>$get_role->role_id,
-                    "program_id" => $this->program_id,
-                    "user_id" => $user_id,                
-                ]);
+                    db::table('program_permissions')->insert([
+                        "role_id" =>$get_role->role_id,
+                        "program_id" => $this->program_id,
+                        "user_id" => $user_id,                
+                    ]);
 
 
-                Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role->role], function ($message) use ($email, $random_password) {
-                    $message->to($email)->subject('User Account Credentials');                
+                    Mail::send('UserManagement::user-account', ["username" => $email,"password" => $random_password,"role" => $get_role->role], function ($message) use ($email, $random_password) {
+                        $message->to($email)->subject('User Account Credentials');                
+                    });
+                    
                 });
+               
                 
             }
 

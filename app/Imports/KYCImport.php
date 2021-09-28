@@ -90,7 +90,7 @@ class KYCImport implements ToCollection,WithStartRow
 
                         $check_reg_prov =  db::table('geo_map')->where('prov_name',$province)->where('reg_name',$region)->get();    
 
-                        if(!$check_reg_prov->isEmpty()){
+                        if(!$check_reg_prov->isEmpty() && !is_null($item[24])){
                         
                         $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
                         $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
@@ -124,7 +124,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'mothers_maiden_name' => $mothers_maiden_name,
                                     'no_parcel'           => $no_parcel,
                                     'total_farm_area'     => $total_farm_area,
-                                    'account_number'      => !is_null($item[24]) ? DB::raw("AES_ENCRYPT(".$account.",'".$PRIVATE_KEY."')") : '' ,
+                                    'account_number'      => DB::raw("AES_ENCRYPT(".$account.",'".$PRIVATE_KEY."')"),
                                     'remarks'             => $remarks
                                 ]);
                     

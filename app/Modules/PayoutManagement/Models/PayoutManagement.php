@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Modules\PayoutMonitoring\Models;
+namespace App\Modules\PayoutManagement\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PayoutMonitoring extends Model
+class PayoutManagement extends Model
 {
     use HasFactory;
 }

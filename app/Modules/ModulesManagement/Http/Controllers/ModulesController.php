@@ -29,18 +29,28 @@ class ModulesController extends Controller
             $route       = request('route');
             $has_sub       = request('has_sub');
 
+            $check_module =  L5Modular::exists(trim($module_name[0]));
+
+            $check_db = db::table("sys_modules")->where('module',trim($module_name[0]))->get();
             
 
+            
+            
             if($has_sub != 1){
-                $check_module =  L5Modular::exists(trim($module_name[0]));
+
+
+             
 
                 if(!$check_module){
                     Artisan::call("make:module",["name" => trim($module_name[0])]);
                 }
-                
+
+                if($check_db->isEmpty()){
                     db::table('sys_modules')
-                    ->insert(['module'=>$module_name[0],'routes'=>$route]);
-                
+                    ->insert(['module'=>trim($module_name[0]),'routes'=>$route]);
+                }
+
+                return 'true';                
             }else{
                 $get_last_id = 0;
                 foreach($module_name as $key => $item){
@@ -58,12 +68,19 @@ class ModulesController extends Controller
                             if($route_key == $key - 1 ){
                                 
                                 $check_module =  L5Modular::exists(trim($item));
+                                $check_submodule = db::table("sys_modules")->where('module',trim($item))->get();
+                                
+                                if($check_submodule->isEmpty()){
                                 db::table('sys_modules')
                                     ->insert([
                                         "module"           => $item,
                                         "routes"           => $route_item,
                                         "parent_module_id" => $get_last_id
-                                    ]);                                    
+                                    ]);    
+                                    
+                                }
+
+
                                 if(!$check_module){
                                     Artisan::call("make:module",["name" => trim($item)]);
                                 }                                
@@ -73,8 +90,7 @@ class ModulesController extends Controller
                 }
                 
             }
-            
-
+         
             
         }catch(\Exception $e){
             dd($e);

@@ -267,27 +267,38 @@
                 })
                 .then((confirm) => {
                     $has_sub = $("input[name='has_sub']:checked").val();
-                    
+                        
                     // check if confirm
                     if (confirm) {       
-
+                        $('.add-btn').prop('disabled','true');
                         $.ajax({
                             url:'{{route("modules.store")}}',
                             type:'post',
                             data:$("#AddForm").serialize(),
                             success:function(response){             
-                                   
-                                swal("Successfully created a new module.", {
-                                    icon: "success",
-                                }).then(()=>{
-                                    $("#AddModal").modal('hide')
-                                    module_table.ajax.reload();
-                                    
-                                    
-                                });
+                                
+                                if(response == 'true'){
+                                    swal("Successfully created a new module.", {
+                                        icon: "success",
+                                    }).then(()=>{
+                                        $("#AddModal").modal('hide')
+                                        module_table.ajax.reload();
+                                        $('.add-btn').prop('disabled','false');
+                                        
+                                    });
+
+                                }else{
+
+                                    swal("This module is already exist.", {
+                                            icon: "error",
+                                        });
+
+                                        $('.add-btn').prop('disabled','false');
+                                }
                             },
                             error:function(response){
-
+                                $('.add-btn').prop('disabled','false');
+                                console.warn(response)
                             }
                         })
                         
@@ -295,6 +306,7 @@
                         swal("Operation Cancelled.", {
                             icon: "error",
                         });
+                        $('.add-btn').prop('disabled','false');
                     }
                 });
                 
@@ -659,7 +671,7 @@
 
         <!-- #modal-EDIT Main Modal and Sub Modules -->
         <div class="modal fade" id="UpdateModal"  data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog update-modal-dialog" style="max-width: 50%">
+            <div class="modal-dialog update-modal-dialog" style="max-width: 100%">
                 <form id="UpdateForm" method="PUT" >
                     @csrf
                     <div class="modal-content">

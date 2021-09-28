@@ -4,7 +4,7 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <title>PayoutApproval</title>
+        <title>PayoutManagement</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com/css?family=Nunito:200,600" rel="stylesheet">
@@ -47,13 +47,13 @@
         <div class="flex-center position-ref full-height">
             <div class="content">
                 <div class="title">
-                    PayoutApproval
+                    PayoutManagement
                 </div>
                 <div class="subtitle">
-                    @if (Lang::has('PayoutApproval::example.welcome'))
-                        {{ trans('PayoutApproval::example.welcome') }}
+                    @if (Lang::has('PayoutManagement::example.welcome'))
+                        {{ trans('PayoutManagement::example.welcome') }}
                     @else
-                        Welcome, this is PayoutApproval module.
+                        Welcome, this is PayoutManagement module.
                     @endif
                 </div>
             </div>

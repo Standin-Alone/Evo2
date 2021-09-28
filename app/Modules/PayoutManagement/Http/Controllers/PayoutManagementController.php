@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Modules\PayoutApproval\Http\Controllers;
+namespace App\Modules\PayoutManagement\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
-class PayoutApprovalController extends Controller
+class PayoutManagementController extends Controller
 {
 
     /**
@@ -15,6 +15,6 @@ class PayoutApprovalController extends Controller
      */
     public function welcome()
     {
-        return view("PayoutApproval::welcome");
+        return view("PayoutManagement::welcome");
     }
 }
