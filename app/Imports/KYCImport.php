@@ -57,47 +57,77 @@ class KYCImport implements ToCollection,WithStartRow
                 db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider ){
                     
 
-                        $format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[14])->format('Y-m-d');
+                        $format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13])->format('Y-m-d');
 
-                        $uuid                = Uuid::uuid4();
-                        $data_source         = trim($item[0]);    
+                        // this comment is for data with data source
+                        // $data_source         = trim($item[0]);    
+                        // $fintech_provider    = $provider;    
+                        // $rsbsa_no            = trim($item[1]);    
+                        // $first_name          = trim($item[2]);            
+                        // $middle_name         = trim($item[3]);
+                        // $last_name           = trim($item[4]);
+                        // $ext_name            = trim($item[5]);
+                        // $id_number           = trim($item[6]);
+                        // $gov_id              = trim($item[7]);
+                        // $street_purok        = trim($item[8]);
+                        // $barangay            = trim($item[9]);
+                        // $municipality        = trim($item[10]);
+                        // $district            = trim($item[11]);                        
+                        // $province            = trim($item[12]);
+                        // $region              = trim($item[13]);
+                        // $birthdate           = $format_birthday;
+                        // $place_of_birth      = trim($item[15]);
+                        // $mobile_no           = trim($item[16]);
+                        // $sex                 = trim($item[17]);
+                        // $nationality         = trim($item[18]);
+                        // $profession          = trim($item[19]);
+                        // $sourceoffunds       = trim($item[20]);
+                        // $mothers_maiden_name = trim($item[21]);
+                        // $no_parcel           = trim($item[22]);
+                        // $total_farm_area     = trim($item[23]);
+                        // $account             = trim($item[24]);
+                        // $remarks             = is_null($item[24]) ? 'Failed' : trim($item[25]);
+
+
+
+                        $uuid                = Uuid::uuid4();                        
                         $fintech_provider    = $provider;    
-                        $rsbsa_no            = trim($item[1]);    
-                        $first_name          = trim($item[2]);            
-                        $middle_name         = trim($item[3]);
-                        $last_name           = trim($item[4]);
-                        $ext_name            = trim($item[5]);
-                        $id_number           = trim($item[6]);
-                        $gov_id              = trim($item[7]);
-                        $street_purok        = trim($item[8]);
-                        $barangay            = trim($item[9]);
-                        $municipality        = trim($item[10]);
-                        $district            = trim($item[11]);                        
-                        $province            = trim($item[12]);
-                        $region              = trim($item[13]);
+                        $rsbsa_no            = trim($item[0]);    
+                        $first_name          = trim($item[1]);            
+                        $middle_name         = trim($item[2]);
+                        $last_name           = trim($item[3]);
+                        $ext_name            = trim($item[4]);
+                        $id_number           = trim($item[5]);
+                        $gov_id              = trim($item[6]);
+                        $street_purok        = trim($item[7]);
+                        $barangay            = trim($item[8]);
+                        $municipality        = trim($item[9]);
+                        $district            = trim($item[10]);                        
+                        $province            = trim($item[11]);
+                        $region              = trim($item[12]);
                         $birthdate           = $format_birthday;
-                        $place_of_birth      = trim($item[15]);
-                        $mobile_no           = trim($item[16]);
-                        $sex                 = trim($item[17]);
-                        $nationality         = trim($item[18]);
-                        $profession          = trim($item[19]);
-                        $sourceoffunds       = trim($item[20]);
-                        $mothers_maiden_name = trim($item[21]);
-                        $no_parcel           = trim($item[22]);
-                        $total_farm_area     = trim($item[23]);
-                        $account             = trim($item[24]);
-                        $remarks             = is_null($item[24]) ? 'Failed' : trim($item[25]);
+                        $place_of_birth      = trim($item[14]);
+                        $mobile_no           = trim($item[15]);
+                        $sex                 = trim($item[16]);
+                        $nationality         = trim($item[17]);
+                        $profession          = trim($item[18]);
+                        $sourceoffunds       = trim($item[19]);
+                        $mothers_maiden_name = trim($item[20]);
+                        $no_parcel           = trim($item[21]);
+                        $total_farm_area     = trim($item[22]);
+                        $account             = trim($item[23]);
+                        $remarks             = is_null($item[23]) ? 'Failed' : trim($item[24]);
 
                         $check_reg_prov =  db::table('geo_map')->where('prov_name',$province)->where('reg_name',$region)->get();    
 
-                        if(!$check_reg_prov->isEmpty() && !is_null($item[24])){
+                        if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name)){
                         
                         $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
                         $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
                         $insert_kyc = db::table('kyc_profiles')
                                 ->insert([
                                     'kyc_id'              => $uuid,
-                                    'data_source'         => $data_source,
+                                    // 'data_source'         => $data_source,
                                     'fintech_provider'    => $fintech_provider,
                                     'rsbsa_no'            => $rsbsa_no,
                                     'first_name'          => $first_name,

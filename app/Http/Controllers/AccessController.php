@@ -37,19 +37,19 @@ class AccessController extends Controller
         $modules = [];
 
 
-        $get_main_modules = db::table('sys_modules as sm')  
-                            
+        $get_main_modules = db::table('sys_modules as sm')                              
                             ->whereIn('sm.sys_module_id',function($query){
                                     $query->select('sm.sys_module_id') 
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
                                     ->where('sm.status', 1)
-                                    ->whereIn('role_id',[3,7])                                      
+                                    ->whereIn('role_id',[3])                                      
                                     ->get();
                             })                                    
                             ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                     
                             ->get();
                             
+                    
         $get_parent_modules = db::table('sys_modules')
                                     ->where('has_sub',1)    
                                     ->where('status',1)                                    
@@ -61,7 +61,7 @@ class AccessController extends Controller
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
                                     ->where('sm.status', 1)
-                                    ->where('role_id',[3,7])  
+                                    ->whereIn('role_id',[7,7,7])  
                                     ->whereNotNull('parent_module_id')                                                                                          
                                     ->get();
                             })                        

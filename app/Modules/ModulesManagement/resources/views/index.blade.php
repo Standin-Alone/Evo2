@@ -97,10 +97,12 @@
                 $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
                 $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
                 $(".main-module-update-btn").show();
+                $(".add-sub-module-btn").hide();
             }else{                
                 
                 $("input[name='parent_module_id']").val($(this).attr('sys_module_id'));
                 $(".update-modal-dialog").css('max-width','50%')
+                $(".add-sub-module-btn").show();
                 $(".main-module-update-btn").hide();
                 $(".main-module-component").hide();
                 $(".sub-modules-component").show();
@@ -683,7 +685,7 @@
                             {{--modal body start--}}
                             <label class="form-label hide"> ID</label>
                             <input name="id" type="text" class="form-control hide" />
-                            <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddSubModulesModal' >
+                            <button type='button' class='btn btn-lime add-sub-module-btn' data-toggle='modal' data-target='#AddSubModulesModal' >
                                 <i class='fa fa-plus'></i> Add New
                             </button>
                             <br><br>
