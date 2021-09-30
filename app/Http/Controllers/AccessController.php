@@ -68,14 +68,14 @@ class AccessController extends Controller
                                
                             ->get();    
           
-        
+        session(['uuid'=>'68cd7c6f-1111-4617-b977-e6a13ad0664d']);
         session(['role'=>'RFO Program Staff']);
         session(['main_modules'=>$get_main_modules]);        
         session(['parent_modules'=>$get_parent_modules]);
         session(['sub_modules'=>$get_sub_modules]);
         
 
-        echo json_encode($get_main_modules);
+        // echo json_encode($get_main_modules);
      
    
         
@@ -83,7 +83,7 @@ class AccessController extends Controller
 
     // change password of first logged in
     public function firstLoggedIn(){
-        $user_id = '99313468879929344';
+        $user_id = session('uuid');
         $new_pass = request('new_pass');
         $access_model = new AccessModel();
 
@@ -94,7 +94,7 @@ class AccessController extends Controller
     public function checkDefaultPass(){
 
         $default_pass = request('default_pass');
-        $user_id = '99313468879929344';
+        $user_id = session('uuid');
         $access_model = new AccessModel();
 
         return $access_model->check_default_password($user_id,$default_pass);

@@ -15,6 +15,25 @@
         dd{
             font-size: 20
         }
+        td { font-size: 17px; font-weight: 500 }
+
+        
+        #load-datatable > thead > tr > th {
+            color:white;
+            background-color: #008a8a;
+            font-size: 20px;
+            font-family: calibri
+        }
+
+        #load-datatable > thead > tr > th {
+            color:white;
+            font-size: 20px;
+            background-color: #008a8a;
+            font-weight: bold
+        }
+        #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
+            padding: 5px !important;
+        }  
     </style>
 @endsection
 
@@ -47,7 +66,7 @@
                     {data:'shortname',title:'Program'},
                     {data:'email',title:"email",visible:false},
                     {data:'contact_no',title:"contact_no",visible:false},
-                    {data:'reg_name',title:"reg_name",visible:false},
+                    {data:'reg_name',title:"reg_name",visible:true},
                     {data:'prov_name',title:"prov_name",visible:false},
                     {data:'mun_name',title:"mun_name",visible:false},
                     {data:'bgy_name',title:"bgy_name",visible:false},

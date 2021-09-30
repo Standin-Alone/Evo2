@@ -295,20 +295,23 @@ header('Content-Type: text/html');?>
 		});
 
 		
-		// $("#ChangePassModal").modal('show');
-		// $.ajax({
 		
-		// 	type:'post',
-		// 	data:{_token:'{{csrf_token()}}'},
-		// 	success:function(data){
-				
-		// 	},
-		// 	error:function(){
-
-		// 	}
-		// })
+	
 
 	</script>
+
+	@php
+	$check_first_login = DB::table('users')->where('user_id',session('uuid'))->first();	
+	@endphp
+
+	@if($check_first_login->first_login == '1')
+			<script>
+				$("#ChangePassModal").modal('show');
+			</script>	
+	@endif
+
+	
+
 
 </body>
 </html>

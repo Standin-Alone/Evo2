@@ -13,9 +13,8 @@ class AccessModel extends Model
         $change_password = db::table('users')
             ->where('user_id',$user_id)
             ->update([
-                'password' => bcrypt($new_pass),
-                'first_login' => 0
-            
+                'first_login' => '0',
+                'password' => bcrypt($new_pass),                            
             ]);
 
         if($change_password){

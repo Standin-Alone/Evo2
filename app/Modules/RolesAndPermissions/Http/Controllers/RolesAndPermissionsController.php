@@ -32,7 +32,7 @@ class RolesAndPermissionsController extends Controller
     {
         //  
         $record    = array();
-        $get_roles = DB::table('roles')->where('role','<>','Admin')->get();        
+        $get_roles = DB::table('roles')->get();        
 
         foreach($get_roles as $item){
 
@@ -104,8 +104,7 @@ class RolesAndPermissionsController extends Controller
         $get_module_matrix = DB::table('roles as r')                                                                
                                 ->join('sys_access_matrix as sam','r.role_id','sam.role_id')                                
                                 ->join('sys_modules as sm','sm.sys_module_id','sam.sys_module_id')
-                                ->where('r.role_id',$id)                                 
-                                                                
+                                ->where('r.role_id',$id)                                                                                                 
                                 ->groupBy('module')
                                 ->pluck('module');
 

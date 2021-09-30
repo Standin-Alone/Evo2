@@ -176,6 +176,7 @@
             <h4 class="panel-title">KYC</h4>
         </div>
         {{-- KYC FORM PANEL --}}
+       
         <div class="panel-body">
             <div class="panel panel-primary col-md-6">
                 <div class="panel-heading">
@@ -197,12 +198,15 @@
                         </div>
 
 
+                        
                         <div class="col-lg-12">
                             <div class="form-group">
                                 <label>Import Excel</label><span style="color:red">*</span>
                                 <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
                             </div>
                         </div>
+
+
 
                         <div class="col-lg-12">
                             <div class="form-group text-right">
@@ -226,10 +230,8 @@
                 </tbody>
             </table>
     
-    
-
-     
         </div>
+
     </div>
     <!-- end panel -->
 @endsection

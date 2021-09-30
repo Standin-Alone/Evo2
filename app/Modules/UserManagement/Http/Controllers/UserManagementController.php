@@ -48,8 +48,11 @@ class UserManagementController extends Controller
                                 'bgy_name')
                             ->leftjoin('program_permissions as pp', 'u.user_id', 'pp.user_id')
                             ->leftjoin('programs as p', 'p.program_id' , 'pp.program_id')
-                            ->join('geo_map as gm', 'gm.geo_code' , 'u.geo_code')
+                            // ->join('geo_map as gm', 'gm.geo_code' , 'u.geo_code')                                                                                    
+                            ->Join('geo_map as g', 'u.reg', '=', 'g.reg_code')
+                            ->Join('geo_region as gr', 'gr.code_reg', '=', 'g.reg_code')
                             ->join('agency as a', 'a.agency_id' , 'u.agency')
+                            ->groupBy('user_id','reg_code')
                             ->get();
 
         return datatables($get_users)->toJson();

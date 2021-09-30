@@ -11,13 +11,17 @@ use DB;
 class KYCModuleController extends Controller
 {
 
+    public function __constructor(){
+        $this->middleware('session.module');
+    }
     /**
      * Display the module welcome screen
      *
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
+    {   
+        
         return view("KYCModule::index");
     }
 
@@ -33,6 +37,8 @@ class KYCModuleController extends Controller
     }
 
     public function show(){
+        
+
 
         $get_records = db::table('kyc_profiles')
                                 ->select(
@@ -42,6 +48,7 @@ class KYCModuleController extends Controller
                                     'fintech_provider',
                                     'kyc_id'                                 
                                 )->get();
+
         return datatables($get_records)->toJson();
     }
 }
