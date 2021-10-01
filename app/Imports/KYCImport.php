@@ -155,7 +155,10 @@ class KYCImport implements ToCollection,WithStartRow
                                     'no_parcel'           => $no_parcel,
                                     'total_farm_area'     => $total_farm_area,
                                     'account_number'      => DB::raw("AES_ENCRYPT(".$account.",'".$PRIVATE_KEY."')"),
-                                    'remarks'             => $remarks
+                                    'remarks'             => $remarks,
+                                    'uploaded_by_user_id' => session('uuid'),
+                                    'uploaded_by_user_fullname'  => session('first_name').' '.session('last_name')
+                                    
                                 ]);
                     
                             if($insert_kyc){

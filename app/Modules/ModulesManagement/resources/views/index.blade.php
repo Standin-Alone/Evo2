@@ -358,6 +358,8 @@
                                 }).then(()=>{
                                     $("#AddSubModulesModal").modal('hide')
                                      sub_module_table.ajax.reload();
+
+                                     $("#load-datatable").DataTable().ajax.reload();
                                     
                                     
                                 });

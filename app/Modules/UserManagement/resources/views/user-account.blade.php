@@ -176,7 +176,7 @@
           </div>
 
           <div class="u-row-container"
-            style="padding: 0px;background-image: url('{{$message->embed(asset('da-logo.png'))}}');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea">
+            style="padding: 0px;background-image: url('{{url('edcel_images/DA-Logo.png')}}');background-repeat: no-repeat;background-position: center top;background-color: #eaeaea">
             <div class="u-row"
               style="Margin: 0 auto;min-width: 320px;max-width: 600px;overflow-wrap: break-word;word-wrap: break-word;word-break: break-word;background-color: transparent;">
               <div style="border-collapse: collapse;display: table;width: 100%;background-color: transparent;">
@@ -203,7 +203,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-1.png'))}}" alt="Role"
+                                    <img align="center" border="0" src="{{url('edcel_images/image-1.png')}}" alt="Role"
                                       title="Role"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 145px;"
                                       width="145" />
@@ -229,9 +229,7 @@
                                 style="color: #ffffff; line-height: 140%; text-align: center; word-wrap: break-word;">
                                 <p style="font-size: 14px; line-height: 140%;"><strong><span
                                       style="font-size: 24px; line-height: 33.6px;"><span
-                                        style="color: #000000; font-size: 24px; line-height: 33.6px;">VOUCHER MANAGEMENT
-                                        SYSTE</span><span
-                                        style="color: #000000; font-size: 24px; line-height: 33.6px;">M</span></span></strong>
+                                        style="color: #000000; font-size: 24px; line-height: 33.6px;">Interventions Management Platform</span></span></strong>
                                 </p>
                               </div>
 
@@ -329,7 +327,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/image-2.png'))}}" alt="user_icon"
+                                    <img align="center" border="0" src="{{url('edcel_images/image-2.png')}}" alt="user_icon"
                                       title="user_icon"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 45px;"
                                       width="45" />
@@ -395,7 +393,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/key.png'))}}" alt="Dollar" title="Dollar"
+                                    <img align="center" border="0" src="{{url('edcel_images/key.png')}}" alt="Dollar" title="Dollar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 48.5px;"
                                       width="48.5" />
 
@@ -458,7 +456,7 @@
                                 <tr>
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
-                                    <img align="center" border="0" src="{{$message->embed(asset('images/role.png'))}}" alt="Calendar"
+                                    <img align="center" border="0" src="{{url('edcel_images/role.png')}}" alt="Calendar"
                                       title="Calendar"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 41.5px;"
                                       width="41.5" />
@@ -557,7 +555,7 @@
                               <h4
                                 style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: arial,helvetica,sans-serif; font-size: 14px;">
                                                                
-                                Thank you for using Voucher Management System!
+                                Thank you for using Interventions Management Platform!
                               </h4>
                               <br>
                             </td>

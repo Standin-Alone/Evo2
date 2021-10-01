@@ -15,7 +15,7 @@ header('Content-Type: text/html');?>
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8" />
-	<title> @yield('title','Voucher Management Platform')</title>
+	<title> @yield('title','Intervetion Management Platform')</title>
 	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
 	<meta content="" name="description" />
 	<meta content="" name="author" />
@@ -266,7 +266,7 @@ header('Content-Type: text/html');?>
 								swal("Successfully change your Password!", {
                                     icon: "success",
                                 }).then(()=>{                                                        
-									swal("Welcome To Voucher Management System", {
+									swal("Welcome To Intervention Management Platform", {
                                  	   icon: "success",
                                 	}).then(()=>{
 										$("#ChangePassModal").modal('hide');

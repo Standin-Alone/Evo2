@@ -334,6 +334,7 @@
                             success:function(){
                                 load_modules(data_modules);
                                 permission_table.ajax.reload()
+                                $("#load-datatable").DataTable().ajax.reload();
                             }
                         })
                     }
