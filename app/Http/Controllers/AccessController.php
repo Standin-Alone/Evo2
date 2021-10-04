@@ -43,7 +43,7 @@ class AccessController extends Controller
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
                                     ->where('sm.status', 1)
-                                    ->whereIn('role_id',[3])                                      
+                                    ->whereIn('role_id',[3,7])                                      
                                     ->get();
                             })                                    
                             ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                     
@@ -61,14 +61,14 @@ class AccessController extends Controller
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
                                     ->where('sm.status', 1)
-                                    ->whereIn('role_id',[7,7,7])  
+                                    ->whereIn('role_id',[3,7])  
                                     ->whereNotNull('parent_module_id')                                                                                          
                                     ->get();
                             })                        
                                
                             ->get();    
           
-        session(['uuid'=>'68cd7c6f-1111-4617-b977-e6a13ad0664d']);
+        session(['uuid'=>'07c8ced4-1e0d-4a9b-92a8-0ad6ab25b4fe']);
         session(['role'=>'RFO Program Staff']);
         session(['main_modules'=>$get_main_modules]);        
         session(['parent_modules'=>$get_parent_modules]);

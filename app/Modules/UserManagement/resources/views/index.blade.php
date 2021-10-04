@@ -66,7 +66,7 @@
                     {data:'shortname',title:'Program'},
                     {data:'email',title:"email",visible:false},
                     {data:'contact_no',title:"contact_no",visible:false},
-                    {data:'reg_name',title:"reg_name",visible:true},
+                    {data:'reg_name',title:"reg_name",visible:false},
                     {data:'prov_name',title:"prov_name",visible:false},
                     {data:'mun_name',title:"mun_name",visible:false},
                     {data:'bgy_name',title:"bgy_name",visible:false},
@@ -415,6 +415,7 @@
                                         swal("Successfully added new user.", {
                                             icon: "success",
                                         }).then(()=>{
+                                            $("#load-datatable").DataTable().ajax.reload();
                                             $("#AddModal").modal('hide')
                                             $(".add-btn").prop('disabled',false);
                                             $("#AddForm")[0].reset();
@@ -496,6 +497,7 @@
                                     swal("Successfully added new users.", {
                                             icon: "success",
                                     }).then(()=>{
+                                        $("#load-datatable").DataTable().ajax.reload();
                                         $("#ImportModal").modal('hide')
                                         $(".import-btn").prop('disabled',false)
                                         
@@ -614,15 +616,13 @@
 @section('content')
 
 <!-- begin page-header -->
-<h1 class="page-header">User Management<small>header small text goes here...</small></h1>
+<h1 class="page-header">User Management</h1>
 <!-- end page-header -->
 
 <!-- begin panel -->
-<div class="panel panel-inverse">
-    <div class="panel-heading">
-        <h4 class="panel-title">Panel Title here</h4>
-    </div>
-    <div class="panel-body">
+<div class="panel panel-inverse ">
+    <div class="panel-heading ">
+        {{-- <h4 class="panel-title">Panel Title here</h4> --}}
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
             <i class='fa fa-plus'></i> Add New
         </button>
@@ -630,8 +630,10 @@
         <button type='button' class='btn btn-info' data-toggle='modal' data-target='#ImportModal' >
             <i class='fa fa-file-excel'></i> Import File
         </button>
-        <br>
-        <br><br>
+    </div>
+    <div class="panel-body">
+      
+        
         <table id="load-datatable" class="table table-striped table-bordered">            
             <thead>
              
