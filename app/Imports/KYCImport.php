@@ -122,12 +122,20 @@ class KYCImport implements ToCollection,WithStartRow
                         $account             = trim($item[23]);
                         $remarks             = is_null($item[23]) ? 'Failed' : trim($item[24]);
 
-                        $check_reg_prov =  db::table('geo_map')->where('prov_name',$province)->where('reg_name',$region)->get();    
+                        $check_reg_prov =  db::table('geo_map')
+                                                ->where('prov_name',$province)
+                                                ->where('reg_name',$region)
+                                                ->where('bgy_name',$barangay)
+                                                ->where('mun_name',$municipality)
+                                                ->get();    
 
                         if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name)){
-                        
+                            $bgy_code   =  db::table('geo_map')->where('bgy_name',$barangay)->first()->bgy_code;
+                            $mun_code   =  db::table('geo_map')->where('mun_name',$municipality)->first()->mun_code;
                             $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
                             $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
+                            
+                            
 
                       
                     
@@ -148,7 +156,9 @@ class KYCImport implements ToCollection,WithStartRow
                                     'id_number'           => $id_number,
                                     'gov_id_type'         => $gov_id,
                                     'street_purok'        => $street_purok,
+                                    'bgy_code'           => $bgy_code,
                                     'barangay'            => $barangay,
+                                    'mun_code'           => $mun_code,
                                     'municipality'        => $municipality,
                                     'district'            => $district,
                                     'prov_code'           => $prov_code,
@@ -187,6 +197,16 @@ class KYCImport implements ToCollection,WithStartRow
 
                             if($rsbsa_no == ''){
                                 $error_remarks = $error_remarks . ', '.'No rsbsa number';
+                            }
+
+                            if($first_name == '' && $last_name == '' ){
+                                $error_remarks = $error_remarks . ', '.'Incomplete name';
+                            }
+
+
+                            
+                            if($check_reg_prov->isEmpty()){
+                                $error_remarks = $error_remarks . ', '.'Incomplete address';
                             }
 
 

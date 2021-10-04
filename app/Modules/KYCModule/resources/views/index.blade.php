@@ -129,11 +129,15 @@
                                             $("#error-datatable").DataTable({
                                                 data:parses_result['error_data'],
                                                 columns:[
-                                                    {data:'rsbsa_no',title:'RSBSA Number'},
+                                                    {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
                                                     {data:'fintech_provider',title:'Provider',orderable:false},
                                                     {title:'Name',orderable:false,render:function(data,type,row){
                                                         return row.first_name + ' ' + row.last_name;
-                                                    }},
+                                                    }},                                                    
+                                                    {data:'barangay',title:'Barangay',orderable:false},
+                                                    {data:'municipality',title:'Municipality',orderable:false},
+                                                    {data:'province',title:'Province',orderable:false},
+                                                    {data:'region',title:'Region',orderable:false},
                                                     {data:'remarks',title:'Remarks',orderable:false}
                                                     
 
@@ -246,7 +250,7 @@
 
             <!-- #modal-list of not inserted data to database from excel -->
             <div class="modal fade" id="ErrorDataModal"  data-backdrop="static" data-keyboard="false">
-                <div class="modal-dialog" style="max-width: 40%">                    
+                <div class="modal-dialog" style="max-width: 70%">                    
                         <div class="modal-content">
                             <div class="modal-header" style="background-color: #ff5b57">
                                 <h4 class="modal-title update-modal-title" style="color: white">Unsuccessful Imported Data</h4>

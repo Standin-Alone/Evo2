@@ -10,9 +10,16 @@ use Mail;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
+use App\Modules\UserManagement\Models\UserManagement;
+use Yajra\DataTables\Facades\DataTables;
 class UserManagementController extends Controller
 {
+    public function __construct(Request $request)
+    {
+        $this->UserManagementModel = new UserManagement;
 
+        $this->middleware('session.module');
+    }
     /**
      * Display the module welcome screen
      *
@@ -52,7 +59,7 @@ class UserManagementController extends Controller
                             ->Join('geo_map as g', 'u.reg', '=', 'g.reg_code')
                             ->Join('geo_region as gr', 'gr.code_reg', '=', 'g.reg_code')
                             ->join('agency as a', 'a.agency_id' , 'u.agency')
-                            ->groupBy('user_id','reg_code')
+                            ->groupBy('user_id','reg_code')                            
                             ->get();
 
         return datatables($get_users)->toJson();
@@ -228,6 +235,63 @@ class UserManagementController extends Controller
 
         Excel::import(new UsersImport($region,$program), $file);
         
+    }
+
+
+
+
+    public function add_user_role(Request $request){
+        $UserManagementModel = new UserManagement;
+
+        $user_id = $request->select_user;
+        $role_id = $request->select_role;
+        $program_id = $request->select_program;
+        $status = 1;
+
+        $UserManagementModel->add_new_user_role($user_id, $role_id, $program_id, $status);
+
+        $success_response = ["success" => true, "message" => "The add new user role have been submit successfully!"];
+        return response()->json($success_response, 200);
+    }
+
+    public function list_of_users(){
+        $users = $this->UserManagementModel->get_user();
+
+        $programs = $this->UserManagementModel->get_program();
+
+        $roles = $this->UserManagementModel->get_role();
+
+        $agency = $this->UserManagementModel->get_agency();
+        
+        $region = $this->UserManagementModel->get_region();
+
+        $action = request()->get('action');
+
+        if(request()->ajax()){
+            return DataTables::of($this->UserManagementModel->get_program_permission())
+            ->addColumn('fullname_column', function($row){
+                return $row->last_name.' '.$row->first_name.' '.$row->middle_name.' '.$row->ext_name;
+            })
+            ->addColumn('action', function($row){
+                $return = '<a href="#" id="btn_data" type="button" class="btn btn-success" data-id="'.$row->user_id.'" data-toggle="modal" data-target="#ViewModal">
+                            <i class="fa fa-eye"></i> View
+                        </a>';
+
+                return $return;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+        }
+        return view("UserManagement::list-of-users", ['users' => $users, 'roles' => $roles, 'programs' => $programs, 'region' => $region, 'agency' => $agency, 'action' => $action]); 
+    }
+
+    public function user_details($uuid){        
+        // $uuid = "1d78da67-deaf-4100-862e-9d43f0df6b23";
+
+        if(request()->ajax()){
+            return DataTables::of($this->UserManagementModel->show_user_details($uuid))->make(true);
+        }
+        return view("UserManagement::list-of-users"); 
     }
 
     

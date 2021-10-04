@@ -48,7 +48,10 @@ class KYCModuleController extends Controller
                                     db::raw("CONCAT(province,', ',region) as address"),
                                     'fintech_provider',
                                     'kyc_id'                                 
-                                )->get();
+                                )
+                                ->where('uploaded_by_user_id',session('uuid'))
+                                ->orderBy('date_uploaded','DESC')
+                                ->get();
 
         // return datatables($get_records)->toJson();
         return Datatables::of($get_records)->make(true);

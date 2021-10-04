@@ -18,6 +18,10 @@ Route::group([],function(){
     Route::get('/user/filter-province/{region_code}','UserManagementController@filter_province')->name('filter-province');
     Route::get('/user/filter-municipality/{province_code}','UserManagementController@filter_municipality')->name('filter-municipality');
     Route::get('/user/filter-barangay/{region_code}/{province_code}/{municipality_code}','UserManagementController@filter_barangay')->name('filter-barangay');
+
+    Route::get('/user/list-of-users','UserManagementController@list_of_users')->name('list-of-users.index');
+    Route::get('/user/list-of-users/{uuid}','UserManagementController@user_details')->name('list-of-users.user-details');
+    Route::post('/user/add-new-user-role', 'UserManagementController@add_user_role')->name('list-of-users.add_user_role');
 });
 
 
