@@ -8,6 +8,7 @@ use App\Modules\KYCModule\Models\KYCModel;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\KYCImport;
 use DB;
+use Yajra\DataTables\Facades\DataTables;
 class KYCModuleController extends Controller
 {
 
@@ -49,6 +50,8 @@ class KYCModuleController extends Controller
                                     'kyc_id'                                 
                                 )->get();
 
-        return datatables($get_records)->toJson();
+        // return datatables($get_records)->toJson();
+        return Datatables::of($get_records)->make(true);
+        
     }
 }

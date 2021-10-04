@@ -16,8 +16,11 @@ class KYCImport implements ToCollection,WithStartRow
     private $message = '';
     protected $provider;
 
+    private $error_data;
+    
     public function __construct($provider){
         $this->provider = $provider;    
+    
 	}
 
 
@@ -39,13 +42,14 @@ class KYCImport implements ToCollection,WithStartRow
             
         $rows_inserted = 0;
         $provider = $this->provider;
-
+    
+        $error_data = [];
         ini_set("memory_limit", "10056M");
 
         foreach($collection as $key => $item){
             
             // check rsbsa no if exists
-            $rsbsa_no   = $item[1];                
+            $rsbsa_no   = $item[0];                
             $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->get();
 
 
@@ -54,7 +58,7 @@ class KYCImport implements ToCollection,WithStartRow
                 if($check_rsbsa_no->isEmpty()){                
                  
                     // insert to kyc profiles
-                db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider ){
+                    db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data){
                     
 
                         $format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13])->format('Y-m-d');
@@ -122,8 +126,15 @@ class KYCImport implements ToCollection,WithStartRow
 
                         if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name)){
                         
-                        $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
-                        $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
+                            $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
+                            $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
+
+                      
+                    
+
+                    
+
+
                         $insert_kyc = db::table('kyc_profiles')
                                 ->insert([
                                     'kyc_id'              => $uuid,
@@ -164,6 +175,54 @@ class KYCImport implements ToCollection,WithStartRow
                             if($insert_kyc){
                                 ++$rows_inserted;
                             }
+                        }else{  
+
+                            
+                            $error_remarks = '';
+                            // set error remarks
+                            if($account == '')
+                            {
+                                $error_remarks = 'No account number';
+                            }
+
+                            if($rsbsa_no == ''){
+                                $error_remarks = $error_remarks . ', '.'No rsbsa number';
+                            }
+
+
+                            // this data is for not inserted to database
+                            $data = [
+                            'kyc_id'              => $uuid,
+                            // 'data_source'         => $data_source,
+                            'fintech_provider'    => $fintech_provider,
+                            'rsbsa_no'            => $rsbsa_no,
+                            'first_name'          => $first_name,
+                            'middle_name'         => $middle_name,
+                            'last_name'           => $last_name,
+                            'ext_name'            => $ext_name,
+                            'id_number'           => $id_number,
+                            'gov_id_type'         => $gov_id,
+                            'street_purok'        => $street_purok,
+                            'barangay'            => $barangay,
+                            'municipality'        => $municipality,
+                            'district'            => $district,                            
+                            'province'            => $province,                            
+                            'region'              => $region,
+                            'birthdate'           => $birthdate,
+                            'place_of_birth'      => $place_of_birth,
+                            'mobile_no'           => $mobile_no,
+                            'sex'                 => $sex,
+                            'nationality'         => $nationality,
+                            'profession'          => $profession,
+                            'sourceoffunds'       => $sourceoffunds,
+                            'mothers_maiden_name' => $mothers_maiden_name,
+                            'no_parcel'           => $no_parcel,
+                            'total_farm_area'     => $total_farm_area,
+                            'account_number'      => $account,
+                            'remarks'             => $error_remarks,
+                            ];
+                                
+                            array_push($error_data,$data);
                         }
 
                         
@@ -173,7 +232,7 @@ class KYCImport implements ToCollection,WithStartRow
             }
         }
         
-        
+        $this->error_data = $error_data;
         $this->inserted_count = $rows_inserted;   
         $this->total_rows = $collection->count();
         $this->message = 'true';
@@ -192,6 +251,6 @@ class KYCImport implements ToCollection,WithStartRow
     public function getRowCount()
     {
 
-        return json_encode(['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message]);
+        return json_encode(['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data]);
     }
 }

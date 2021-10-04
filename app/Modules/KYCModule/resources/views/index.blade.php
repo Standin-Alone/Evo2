@@ -55,9 +55,9 @@
     <script>
         $(document).ready(function(){
 
-            load_datatable = $("#load-datatable").DataTable({
+                 $("#load-datatable").DataTable({
                                 serverSide:true,
-                                ajax: "{{route('kyc.show')}}",
+                                ajax: {"url":"{{route('kyc.show')}}","type":'get'},
                                 columns:[
                                         {data:'rsbsa_no',title:'RSBSA Number'},
                                         {data:'fintech_provider',title:'Provider',orderable:false},
@@ -67,6 +67,7 @@
                                 ]
 
                             })
+                            
 
             // import file
             $("#ImportForm").validate({
@@ -116,15 +117,34 @@
                                 parses_result = JSON.parse(response)
                                 total_rows_inserted = parses_result['total_rows_inserted'];
                                 total_rows = parses_result['total_rows'];
-                                console.warn(response);
+                                
                                 if(parses_result['message'] == 'true'){
                                     swal(total_rows_inserted + ' out of ' + total_rows + ' rows has been successfully inserted.', {
                                         icon: "success",
-                                    }).then(()=>{                                    
+                                    }).then(()=>{                    
+                                        
+                                        // check if it has error data;
+                                        if(parses_result['error_data'].length > 0 ){
+                                            $("#ErrorDataModal").modal('show');
+                                            $("#error-datatable").DataTable({
+                                                data:parses_result['error_data'],
+                                                columns:[
+                                                    {data:'rsbsa_no',title:'RSBSA Number'},
+                                                    {data:'fintech_provider',title:'Provider',orderable:false},
+                                                    {title:'Name',orderable:false,render:function(data,type,row){
+                                                        return row.first_name + ' ' + row.last_name;
+                                                    }},
+                                                    {data:'remarks',title:'Remarks',orderable:false}
+                                                    
+
+                                                ]
+                                            });
+                                        }
+
                                         $("#ImportForm")[0].reset();
                                         $(".import-btn").prop('disabled',false)      
                                         $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
-                                        load_datatable.ajax.reload();
+                                        $("#load-datatable").DataTable().ajax.reload();
                                     });
                                 }else{
                                     swal("Error!Wrong excel format.", {
@@ -167,7 +187,7 @@
     
     <!-- end breadcrumb -->
     <!-- begin page-header -->
-    <h1 class="page-header">KYC Profiles <small>header small text goes here...</small></h1>
+    <h1 class="page-header">KYC Profiles </h1>
     <!-- end page-header -->
 
     <!-- begin panel -->
@@ -222,9 +242,39 @@
             </div>
 
 
+
+
+            <!-- #modal-list of not inserted data to database from excel -->
+            <div class="modal fade" id="ErrorDataModal"  data-backdrop="static" data-keyboard="false">
+                <div class="modal-dialog" style="max-width: 40%">                    
+                        <div class="modal-content">
+                            <div class="modal-header" style="background-color: #ff5b57">
+                                <h4 class="modal-title update-modal-title" style="color: white">Unsuccessful Imported Data</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                            </div>
+                            <div class="modal-body">
+                                {{--modal body start--}}          
+
+                                <table id="error-datatable" class="table table-hover" style="width:100%">            
+                                    <thead>                                        
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+
+                                {{--modal body end--}}
+                            </div>
+                            <div class="modal-footer">
+                                <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>                                
+                            </div>
+                        </div>                    
+                </div>
+            </div>
+
+
+
             <table id="load-datatable" class="table table-striped table-bordered">            
-                <thead>
-                 
+                <thead>                                    
                 </thead>
                 <tbody>                
                 </tbody>
