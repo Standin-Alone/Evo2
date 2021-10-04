@@ -620,7 +620,7 @@
 <!-- end page-header -->
 
 <!-- begin panel -->
-<div class="panel panel-inverse ">
+<div class="panel panel-success ">
     <div class="panel-heading ">
         {{-- <h4 class="panel-title">Panel Title here</h4> --}}
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >

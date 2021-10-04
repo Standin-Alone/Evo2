@@ -191,7 +191,7 @@
     <!-- end page-header -->
 
     <!-- begin panel -->
-    <div class="panel panel-inverse">
+    <div class="panel panel-success">
         <div class="panel-heading">
             <h4 class="panel-title">KYC</h4>
         </div>
