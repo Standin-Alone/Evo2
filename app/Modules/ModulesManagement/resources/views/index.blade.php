@@ -69,14 +69,14 @@
                         
                         
 
-                        return  "<button type='button' class='btn btn-warning update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateModal'>"+
+                        return  "<button type='button' class='btn btn-outline-warning update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateModal'>"+
                                     "<i class='fa fa-edit'></i> Edit"+
                                 "</button>   "+(
                                 row['status'] == 1 ?
-                                "<button type='button' class='btn btn-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                "<button type='button' class='btn btn-outline-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                     "<i class='fa fa-trash'></i> Disable"+
                                 "</button>  " :
-                                "<button type='button' class='btn btn-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                "<button type='button' class='btn btn-outline-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                     "<i class='fa fa-undo'></i> Enable"+
                                 "</button> ")
                     }
@@ -124,14 +124,14 @@
                                                                     
                                                                     
 
-                                                                    return  "<button type='button' class='btn btn-info update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
+                                                                    return  "<button type='button' class='btn btn-outline-info update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
                                                                                 "<i class='fa fa-edit'></i> Edit"+
                                                                             "</button>   "+(
                                                                             row['status'] == 1 ?
-                                                                            "<button type='button' class='btn btn-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                                                            "<button type='button' class='btn btn-outline-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                                                                 "<i class='fa fa-trash'></i> Disable"+
                                                                             "</button>  " :
-                                                                            "<button type='button' class='btn btn-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                                                            "<button type='button' class='btn btn-outline-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                                                                 "<i class='fa fa-undo'></i> Enable"+
                                                                             "</button> ")
                                                                 }                                                            
@@ -583,11 +583,11 @@
 
 @section('content')
 <!-- begin page-header -->
-<h1 class="page-header">Modules Management<small>setup for the modules of system.</small></h1>
+<h1 class="page-header">Modules Management</h1>
 <!-- end page-header -->
 
 <!-- begin panel -->
-<div class="panel panel-inverse">
+<div class="panel panel-success">
     <div class="panel-heading">
         <h4 class="panel-title">Module Management</h4>
     </div>

@@ -76,14 +76,14 @@
                         
                         
 
-                            return  "<button type='button' class='btn btn-warning view-modal-btn'   user_id="+row['user_id']+" data-toggle='modal' data-target='#ViewModal'>"+
+                            return  "<button type='button' class='btn view-modal-btn btn-outline-warning'   user_id="+row['user_id']+" data-toggle='modal' data-target='#ViewModal'>"+
                                         "<i class='fa fa-edit'></i> Edit"+
                                     "</button>   "+(
                                     row['status'] == 1 ?
-                                    "<button type='button' class='btn btn-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
+                                    "<button type='button' class='btn btn-outline-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
                                         "<i class='fa fa-trash'></i> Disable"+
                                     "</button>  " :
-                                    "<button type='button' class='btn btn-success set-status-btn' id='"+data+"' status='"+row["status"]+"' >"+
+                                    "<button type='button' class='btn btn-outline-success set-status-btn' id='"+data+"' status='"+row["status"]+"' >"+
                                         "<i class='fa fa-undo'></i> Enable"+
                                     "</button> ")
                         }
