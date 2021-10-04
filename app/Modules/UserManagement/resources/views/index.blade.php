@@ -402,8 +402,10 @@
                     .then((confirm) => {
                         id = $('input[name="id"]').val();
                         $(".add-btn").prop('disabled',true);
+                        
                         // check if confirm
                         if (confirm) {                       
+                            $(".add-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Add');                 
                             $.ajax({
                                 url:"{{route('user-add')}}",
                                 type:'post',
@@ -424,7 +426,7 @@
                                         swal("Failed to add new user.", {
                                             icon: "error",
                                         }).then(()=>{
-                                            
+                                            $(".add-btn").html('Add');                                 
                                             $(".add-btn").prop('disabled',false);
                                             
                                         });
