@@ -417,6 +417,7 @@
                                         swal("Successfully added new user.", {
                                             icon: "success",
                                         }).then(()=>{
+                                            $(".add-btn").html('Add'); 
                                             $("#load-datatable").DataTable().ajax.reload();
                                             $("#AddModal").modal('hide')
                                             $(".add-btn").prop('disabled',false);
