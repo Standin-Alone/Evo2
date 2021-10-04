@@ -60,7 +60,13 @@
                                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
                                 columns:[
                                         {data:'rsbsa_no',title:'RSBSA Number'},
-                                        {data:'fintech_provider',title:'Provider',orderable:false},
+                                        {   data:'fintech_provider',
+                                            title:'Provider',
+                                            orderable:false,
+                                            render:function(data,type,row){
+                                                return data == 'UMSI' ? 'USSC' : data;
+                                            }                                    
+                                        },
                                         {data:'full_name',title:'Name',orderable:false},
                                         {data:'address',title:'Address',orderable:false}
                                         
