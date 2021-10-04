@@ -55,7 +55,7 @@
     <script>
         $(document).ready(function(){
 
-                 $("#load-datatable").DataTable({
+                load_datatable = $("#load-datatable").DataTable({
                                 serverSide:true,
                                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
                                 columns:[

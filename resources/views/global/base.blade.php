@@ -111,7 +111,7 @@ header('Content-Type: text/html');?>
 		<div id="header" class="header navbar-default">
 			<!-- begin navbar-header -->
 			<div class="navbar-header">
-				<a href="{{Request::url()}}" class="navbar-brand"> <img src="assets/img/logo/DA-Logo.png" width="30" height="30" style="display: inline-block"  /> <b> Voucher Management Platform</b> | @yield('title')</a>
+				<a href="{{Request::url()}}" class="navbar-brand"> <img src="assets/img/logo/DA-Logo.png" width="30" height="30" style="display: inline-block"  /> <b> Interventions Management Platform</b> </a>
 				<button type="button" class="navbar-toggle" data-click="sidebar-toggled">
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>

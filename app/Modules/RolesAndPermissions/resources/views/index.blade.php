@@ -204,6 +204,8 @@
                         },                        
                   
                     });
+
+                    
                     permission_table.ajax.reload() ;               
                 
                 $('#role_id').val(id);
