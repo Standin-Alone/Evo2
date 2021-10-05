@@ -3,7 +3,7 @@
     <li class="nav-header">{{session('role')}} Navigation </li>
     
 
-    
+@if(session()->has('main_modules'))
     @foreach (session('main_modules') as $item)
 
 
@@ -36,6 +36,7 @@
         </li> 
     @endif
     @endforeach
+@endif
 
 
 

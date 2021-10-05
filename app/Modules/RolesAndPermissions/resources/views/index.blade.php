@@ -206,7 +206,7 @@
                     });
 
                     
-                    permission_table.ajax.reload() ;               
+                            
                 
                 $('#role_id').val(id);
                 $("#role_span").text($(this).closest("tbody tr").find("td:eq(0)").html());

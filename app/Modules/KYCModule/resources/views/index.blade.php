@@ -133,6 +133,7 @@
                                         if(parses_result['error_data'].length > 0 ){
                                             $("#ErrorDataModal").modal('show');
                                             $("#error-datatable").DataTable({
+                                                destroy:true,
                                                 data:parses_result['error_data'],
                                                 columns:[
                                                     {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
@@ -222,7 +223,7 @@
                                 <select class="form-control" name="provider" id="provider" >
                                     <option selected disabled value="">Select Provider</option>                                        
                                         <option  value="SPTI">SPTI</option>
-                                        <option  value="UMSI">UMSI</option>                                    
+                                        <option  value="UMSI">USSC</option>                                    
                                 </select>
                             </div>                              
                         </div>

@@ -39,7 +39,7 @@ class KYCModuleController extends Controller
 
     public function show(){
         
-
+        DB::connection()->disableQueryLog();
 
         $get_records = db::table('kyc_profiles')
                                 ->select(

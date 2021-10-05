@@ -43,7 +43,7 @@ class AccessController extends Controller
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
                                     ->where('sm.status', 1)
-                                    ->whereIn('role_id',[3,7])                                      
+                                    ->whereIn('role_id',[3])                                      
                                     ->get();
                             })                                    
                             ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                     
@@ -61,7 +61,7 @@ class AccessController extends Controller
                                     ->from('sys_modules as sm')
                                     ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
                                     ->where('sm.status', 1)
-                                    ->whereIn('role_id',[3,7])  
+                                    ->whereIn('role_id',[3])  
                                     ->whereNotNull('parent_module_id')                                                                                          
                                     ->get();
                             })                        

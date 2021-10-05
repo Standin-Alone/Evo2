@@ -273,4 +273,6 @@ class KYCImport implements ToCollection,WithStartRow
 
         return json_encode(['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data]);
     }
+
+ 
 }

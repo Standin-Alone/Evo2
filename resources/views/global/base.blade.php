@@ -1,25 +1,26 @@
-@foreach(session('main_modules') as $item)
-	{{-- check if the main modules has sub --}}
-	@if(!is_null($item->parent_module_id))
-		@foreach(session('sub_modules') as $value)
-				@if($value->parent_module_id == $item->parent_module_id) 
-					@if(Route::currentRouteName() != $value->routes)
-						<script>window.location.href = "{{route('error.index')}}"</script>
-					@endif
-				@endif				
-		@endforeach
-	@else
-		@if(Route::currentRouteName() != $item->routes)
-			<script>window.location.href = "{{route('error.index')}}"</script>
+{{-- @if(session()->has('main_modules'))
+	@foreach(session('main_modules') as $item) --}}
+		{{-- check if the main modules has sub --}}
+		{{-- @if(!is_null($item->parent_module_id))
+			@foreach(session('sub_modules') as $value)
+					@if($value->parent_module_id == $item->parent_module_id) 
+						@if(Route::currentRouteName() != $value->routes)
+							<script>window.location.href = "{{route('error.index')}}"</script>
+						@endif
+					@endif				
+			@endforeach
+		@else
+			@if(Route::currentRouteName() != $item->routes)
+				<script>window.location.href = "{{route('error.index')}}"</script>
+			@endif
 		@endif
-	@endif
-@endforeach
-
-
-
-{{-- @if(!(session('main_modules')->where('routes', Route::currentRouteName())->all() || session('sub_modules')->where('routes', Route::currentRouteName())->all()) )	    
-	<script>window.location.href = "{{route('error.index')}}"</script>
+	@endforeach
+@else
+	<script>window.location.href = "{{route('main.page')}}"</script>
 @endif --}}
+
+
+
 
 <?php echo
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
