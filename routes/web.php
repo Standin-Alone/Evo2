@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
+// Route::get('/dashboard', 'HomeController@index')->name('main.home');
 Route::resource('/','AccessController');
 Route::resource('/error','Controller');
 Route::get('/sign-in','AccessController@signIn');
