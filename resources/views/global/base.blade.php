@@ -1,3 +1,22 @@
+@foreach(session('main_modules') as $item)
+	{{-- check if the main modules has sub --}}
+	@if(!is_null($item->parent_module_id))
+		@foreach(session('sub_modules') as $value)
+				@if($value->parent_module_id == $item->parent_module_id) 
+					@if(Route::currentRouteName() != $value->routes)
+						<script>window.location.href = "{{route('error.index')}}"</script>
+					@endif
+				@endif				
+		@endforeach
+	@else
+		@if(Route::currentRouteName() != $item->routes)
+			<script>window.location.href = "{{route('error.index')}}"</script>
+		@endif
+	@endif
+@endforeach
+
+
+
 {{-- @if(!(session('main_modules')->where('routes', Route::currentRouteName())->all() || session('sub_modules')->where('routes', Route::currentRouteName())->all()) )	    
 	<script>window.location.href = "{{route('error.index')}}"</script>
 @endif --}}
@@ -71,7 +90,7 @@ header('Content-Type: text/html');?>
 						<div class="col-lg-12">
 							<div class="form-group">
 								<label>Default Password</label>
-								<input type="password"  name="default_pass" class="form-control"  placeholder="Enter your default password"  required="true">								
+								<input type="password"  name="default_pass" class="form-control"  placeholder="Enter your default password"   required="true">								
 							</div>
 						</div>
 
@@ -79,7 +98,7 @@ header('Content-Type: text/html');?>
 							<div class="form-group">
 
 								<label>New Password</label>
-								<input type="password"  name="new_pass"  id="new_pass" class="form-control"  placeholder="Enter your new password" required="true">
+								<input type="password"  name="new_pass"  id="new_pass" class="form-control"  placeholder="Enter your new password"  required="true">
 							</div>
 						</div>
 
@@ -225,6 +244,12 @@ header('Content-Type: text/html');?>
 	<script>
 
 		$(document).ready(function(){
+			
+			jQuery.validator.addMethod("password_pattern", function(value,element,param){		
+				return value.match(/^(?=.*[A-Za-z])(?=.*[\W])/);
+				
+			},'<div class="text-danger">*Your password is atleast one uppercase,one lowercase and one special character.</div>');
+
 			$("#ChangePassForm").validate({
 
 				rules:{
@@ -233,10 +258,11 @@ header('Content-Type: text/html');?>
 						remote:{
 							url:"{{route('check-default-pass')}}",
 							type:'get'
-						}						
+						},							
 					},
 					new_pass:{
 						required:true,																
+						minlength: 8
 					},
 					confirm_new_pass:{
 						required:true,
@@ -245,15 +271,16 @@ header('Content-Type: text/html');?>
 				},
 				messages:{
 					default_pass:{
-						required:'<div class="text-danger">This field is required</div>',
-						remote: "<div class='text-danger'>Your password doesn't match to your default password.</div>"
+						required:'<div class="text-danger">*This field is required</div>',
+						remote: "<div class='text-danger'>*Your password doesn't match to your default password.</div>",						
 					},
 					new_pass:{
 						required:'<div class="text-danger">This field is required.</div>',						
+						minlength: jQuery.validator.format("<div class='text-danger'>*Enter at least {0} characters</div>")
 					},
 					confirm_new_pass:{
 						required:true,
-						equalTo: "<div class='text-danger'>Your confirm password doesn''t match to your new password.</div>"
+						equalTo: "<div class='text-danger'>*Your confirm password doesn''t match to your new password.</div>"
 					}
 				},
 				submitHandler:function(){

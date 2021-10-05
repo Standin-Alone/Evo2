@@ -196,17 +196,17 @@ class KYCImport implements ToCollection,WithStartRow
                             }
 
                             if($rsbsa_no == ''){
-                                $error_remarks = $error_remarks . ', '.'No rsbsa number';
+                                $error_remarks = ($error_remarks == ''  ? 'No RSBSA number' : $error_remarks.','.'No RSBSA number');
                             }
 
                             if($first_name == '' && $last_name == '' ){
-                                $error_remarks = $error_remarks . ', '.'Incomplete name';
+                                $error_remarks = ($error_remarks == ''  ? 'Incomplete name' : $error_remarks.','.'Incomplete name');
                             }
 
 
                             
                             if($check_reg_prov->isEmpty()){
-                                $error_remarks = $error_remarks . ', '.'Incomplete address';
+                                $error_remarks = ($error_remarks == ''  ? 'Incomplete Address' : $error_remarks.','.'Incomplete Address');
                             }
 
 
