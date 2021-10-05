@@ -52,7 +52,7 @@ class KYCImport implements ToCollection,WithStartRow
             $rsbsa_no   = $item[0];                
             $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->get();
 
-
+            
             if($key != 400){
 
                 if($check_rsbsa_no->isEmpty()){                
@@ -140,7 +140,7 @@ class KYCImport implements ToCollection,WithStartRow
                       
                     
 
-                    
+                        
 
 
                         $insert_kyc = db::table('kyc_profiles')

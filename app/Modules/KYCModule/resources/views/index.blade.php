@@ -78,13 +78,19 @@
             // import file
             $("#ImportForm").validate({
 
-            rules:{                
+            rules:{          
+                provider :{
+                    required:true
+                },
                 file:{
                     required:true,
                     accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                 }
             },
             messages:{                
+                provider:{
+                    required: '<div class="text-danger">Please select provider.</div>',         
+                },
                 file:{
                     required: '<div class="text-danger">Please select file to upload.</div>',
                     accept: '<div class="text-danger">Please upload valid files formats .xlsx, . xls only.</div>'
