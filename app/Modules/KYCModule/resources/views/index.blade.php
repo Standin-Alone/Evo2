@@ -68,9 +68,12 @@
                                             }                                    
                                         },
                                         {data:'full_name',title:'Name',orderable:false},
-                                        {data:'address',title:'Address',orderable:false}
+                                        {data:'address',title:'Address',orderable:false},
+                                        {data:'account_number',title:'Account Number',orderable:false},
+                                        {data:'date_uploaded',title:'Date Uploaded'}
                                         
-                                ]
+                                ],
+                                "order": [[ 5, "desc" ]], 
 
                             })
                             
@@ -100,17 +103,19 @@
                 let fd = this;
                 
                 
-                
+                let get_provider = $("#provider option:selected").val();
+                var spiel = document.createElement('div');
+                    spiel.innerHTML = "Your selected provider is <b>"+$("#provider option:selected").text()+"</b>. Are you sure you want to import this file?";
                 swal({
                 title: "Wait!",
-                text: "Are you sure you want to import this file?",
+                content: spiel,
                 icon: "warning",
                 buttons: true,
                 dangerMode: false,
                 })
                 .then((confirm) => {
                     let fd = new FormData();
-                    let get_provider = $("#provider option:selected").val();
+                    
                     fd.append('provider',get_provider)
                     fd.append('_token','{{csrf_token()}}')                    
                     fd.append('file',$("input[name='file']")[0].files[0])

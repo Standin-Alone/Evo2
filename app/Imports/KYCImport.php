@@ -38,7 +38,7 @@ class KYCImport implements ToCollection,WithStartRow
                         '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
                         '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
 
-        try{
+        // try{
             
         $rows_inserted = 0;
         $provider = $this->provider;
@@ -51,6 +51,7 @@ class KYCImport implements ToCollection,WithStartRow
             // check rsbsa no if exists
             $rsbsa_no   = $item[0];                
             $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->get();
+            
 
             
             if($key != 400){
@@ -127,9 +128,11 @@ class KYCImport implements ToCollection,WithStartRow
                                                 ->where('reg_name',$region)
                                                 ->where('bgy_name',$barangay)
                                                 ->where('mun_name',$municipality)
-                                                ->get();    
+                                                ->get(); 
+                                                
+                        $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->get();
 
-                        if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name)){
+                        if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) && $check_account_number->isEmpty()){
                             $bgy_code   =  db::table('geo_map')->where('bgy_name',$barangay)->first()->bgy_code;
                             $mun_code   =  db::table('geo_map')->where('mun_name',$municipality)->first()->mun_code;
                             $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
@@ -167,7 +170,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'region'              => str_replace("Ñ","N", mb_strtoupper($region,'UTF-8')),
                                     'birthdate'           => $birthdate,
                                     'place_of_birth'      => str_replace("Ñ","N", mb_strtoupper($place_of_birth,'UTF-8')),
-                                    'mobile_no'           => $mobile_no,
+                                    'mobile_no'           => (int) $mobile_no,
                                     'sex'                 => $sex,
                                     'nationality'         => str_replace("Ñ","N", mb_strtoupper($nationality,'UTF-8')),
                                     'profession'          => str_replace("Ñ","N", mb_strtoupper($profession,'UTF-8')),
@@ -205,9 +208,14 @@ class KYCImport implements ToCollection,WithStartRow
 
                             
                             if($check_reg_prov->isEmpty()){
-                                $error_remarks = ($error_remarks == ''  ? 'Incomplete Address' : $error_remarks.','.'Incomplete Address');
+                                $error_remarks = ($error_remarks == ''  ? 'Incomplete or wrong spelling of address' : $error_remarks.','.'Incomplete or wrong spelling of address');
                             }
 
+                            if(!$check_account_number->isEmpty()){
+                                $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
+                            }
+
+                            
 
                             // this data is for not inserted to database
                             $data = [
@@ -255,10 +263,10 @@ class KYCImport implements ToCollection,WithStartRow
         $this->inserted_count = $rows_inserted;   
         $this->total_rows = $collection->count();
         $this->message = 'true';
-    }catch(\Exception $e){
-        $this->message = json_encode($e->getMessage());
-        // $this->message = 'false';
-    }   
+    // }catch(\Exception $e){
+    //     $this->message = json_encode($e->getMessage());
+    //     // $this->message = 'false';
+    // }   
 
     }
 

@@ -30,47 +30,87 @@ class KYCSeeder extends Seeder
         
         $id_number = ['FOR UPDATING','BARANGAY VERIFIED'];
         $gov_id_type = ['VOTERS ID','DRIVERS LICENSE', 'SENIOR CITIZEN ID','OTHERS'];
-        while( $i <= 50000){     
+
+
+        // RIZAL
+        // $barangay = ['Poblacion Itaas','Poblacion Ibaba', 'Kalayaan','Bagumbayan'];
+        // $municipality = 'ANGONO';
+        // $province = 'RIZAL';
+        // $region = 'REGION IV-A CALABARZON';
+        
+        // QUEZON
+        $barangay = ['Dayap','Kanlurang Calutan', 'Silangang Maligaya','Poblacion II'];
+        $municipality = 'AGDANGAN';
+        $province = 'QUEZON';
+        $region = 'REGION IV-A CALABARZON';
+
+
+        // LAGUNA
+        // $barangay = ['San Agustin','San Gregorio', 'San Miguel','Bitin'];
+        // $municipality = 'ALAMINOS';
+        // $province = 'LAGUNA';
+        // $region = 'REGION IV-A CALABARZON';
+
+
+        // CAVITE
+        // $barangay = ['Luksuhin','Sikat', 'Upli','Palumlum'];
+        // $municipality = 'ALFONSO';
+        // $province = 'CAVITE';
+        // $region = 'REGION IV-A CALABARZON';
+        
+
+
+        
+
+        while( $i <= 100){     
             $random_id_number = mt_rand(0, 1);    
             $gov_id_type_number = mt_rand(0, 3);    
+            $bgy_number = mt_rand(0, 3);    
             $uuid = Uuid::uuid4();
             $rsbsa_no = mt_rand(1000, 9999);
+            
+            $check_rsbsa = db::table('kyc_profiles')->where('rsbsa_no','04-56-27-041-'.$rsbsa_no)->get();
+
+            if($check_rsbsa->isEmpty()){ 
+
+                DB::table('kyc_profiles')->insert([
+                    'kyc_id' => $uuid,
+                    'rsbsa_no' => '04-56-27-041-'.$rsbsa_no,
+                    'fintech_provider' => 'SPTI',                
+                    'data_source' => 'FARMING',                
+                    'first_name' => $faker->name,                
+                    'last_name' => $faker->name,                
+                    'id_number' => $id_number[$random_id_number],
+                    'gov_id_type' => $gov_id_type[$gov_id_type_number],
+                    'street_purok' => '',
+                    'barangay' => $barangay[$bgy_number],
+                    'bgy_code' => db::table('geo_map')->where('bgy_name',$barangay[$bgy_number])->first()->bgy_code,
+                    'municipality' => $municipality,
+                    'mun_code' => db::table('geo_map')->where('mun_name',$municipality)->first()->mun_code,
+                    'district' => '',
+                    'prov_code' => db::table('geo_map')->where('prov_name',$province)->first()->prov_code,
+                    'province' => $province,
+                    'reg_code' => db::table('geo_map')->where('reg_name',$region)->first()->reg_code,
+                    'region' => $region,
+                    'birthdate' => $faker->date,
+                    'place_of_birth' => $province.','.$region,
+                    'mobile_no' => $faker->phoneNumber,
+                    'sex' => 'MALE',
+                    'nationality' => 'Filipino',
+                    'profession' => 'Farmers',
+                    'sourceoffunds' => 'Farming',
+                    'mothers_maiden_name' =>$faker->name,
+                    'no_parcel' =>1,
+                    'total_farm_area' => mt_rand(1,9),
+                    'account_number' =>  DB::raw("AES_ENCRYPT(".mt_rand(10000000000,99999999999).",'".$PRIVATE_KEY."')"),
+                    'remarks' => '',                
+                ]);
+
+                $i++;
+            }
 
 
-            DB::table('kyc_profiles')->insert([
-                'kyc_id' => $uuid,
-                'rsbsa_no' => '04-56-27-041-'.$rsbsa_no,
-                'fintech_provider' => 'SPTI',                
-                'data_source' => 'FARMING',                
-                'first_name' => $faker->name,                
-                'last_name' => $faker->name,                
-                'id_number' => $id_number[$random_id_number],
-                'gov_id_type' => $gov_id_type[$gov_id_type_number],
-                'street_purok' => $faker->citySuffix,
-                'barangay' => $faker->state,
-                'municipality' => $faker->state,
-                'district' => $faker->citySuffix,
-                'prov_code' => '00',
-                'province' => $faker->city,
-                'reg_code' => '00',
-                'region' => $faker->city,
-                'birthdate' => $faker->date,
-                'place_of_birth' => $faker->date,
-                'mobile_no' => $faker->phoneNumber,
-                'sex' => 'MALE',
-                'nationality' => 'Filipino',
-                'profession' => 'Farmers',
-                'sourceoffunds' => 'Farming',
-                'mothers_maiden_name' =>$faker->name,
-                'no_parcel' =>1,
-                'total_farm_area' => mt_rand(1,9),
-                'account_number' =>  DB::raw("AES_ENCRYPT(".mt_rand(10000000000,99999999999).",'".$PRIVATE_KEY."')"),
-                'remarks' => '',                
-            ]);
-
-
-
-            $i++;
+            
         }
     }
 }
