@@ -68,7 +68,7 @@ class KYCModuleController extends Controller
         foreach($kyc_import as $item){
             
             $full_name = session('first_name').' '.session('last_name');
-            $role = 'ICTS DMD';    
+            $role = 'RFO Program Focal';
             $region  = $item->region;
 
             // send email to rfo program focals.
