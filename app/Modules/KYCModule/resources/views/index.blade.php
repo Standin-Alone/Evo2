@@ -11,7 +11,8 @@
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
 
     <style>
-        td { font-size: 17px; font-weight: 500 }
+        td { font-size: 17px; font-weight: 500; }
+
 
         
         #load-datatable > thead > tr > th {
@@ -69,7 +70,7 @@
                                         },
                                         {data:'full_name',title:'Name',orderable:false},
                                         {data:'address',title:'Address',orderable:false},
-                                        {data:'account_number',title:'Account Number',orderable:false},
+                                        {data:'account_number',title:'DBP Account Number',orderable:false},
                                         {data:'date_uploaded',title:'Date Uploaded'}
                                         
                                 ],
@@ -123,7 +124,7 @@
                     // check if confirm
                     if (confirm) {         
                         $(".import-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Importing');                 
-                        $.ajax({
+                        $.ajax({                
                             url:"{{route('import-kyc')}}",
                             type:'post',
                             data: fd,
@@ -139,7 +140,7 @@
                                     swal(total_rows_inserted + ' out of ' + total_rows + ' rows has been successfully inserted.', {
                                         icon: "success",
                                     }).then(()=>{                    
-                                        
+                                            
                                         // check if it has error data;
                                         if(parses_result['error_data'].length > 0 ){
                                             $("#ErrorDataModal").modal('show');
@@ -228,6 +229,16 @@
                     @csrf
                     <div class="panel-body border">
 
+
+                        <div class="col-lg-12">
+                            <div class="form-group">
+                                <label>Import Excel</label><span style="color:red">*</span>
+                                <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
+                            </div>
+                        </div>
+
+
+
                         <div class="col-lg-12 ">
                             <div class="form-group">
                                 <label >Select Fintech Provider</label> <span style="color:red">*</span>
@@ -239,17 +250,7 @@
                             </div>                              
                         </div>
 
-
-                        
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <label>Import Excel</label><span style="color:red">*</span>
-                                <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
-                            </div>
-                        </div>
-
-
-
+                                
                         <div class="col-lg-12">
                             <div class="form-group text-right">
                                 <button type='submit' class='btn btn-lime import-btn' >

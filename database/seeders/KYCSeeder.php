@@ -31,34 +31,88 @@ class KYCSeeder extends Seeder
         $id_number = ['FOR UPDATING','BARANGAY VERIFIED'];
         $gov_id_type = ['VOTERS ID','DRIVERS LICENSE', 'SENIOR CITIZEN ID','OTHERS'];
 
+        // REGION IV A SEEDER START HERE
 
-        // RIZAL
-        // $barangay = ['Poblacion Itaas','Poblacion Ibaba', 'Kalayaan','Bagumbayan'];
-        // $municipality = 'ANGONO';
-        // $province = 'RIZAL';
-        // $region = 'REGION IV-A CALABARZON';
+            // RIZAL
+            // $barangay = ['Poblacion Itaas','Poblacion Ibaba', 'Kalayaan','Bagumbayan'];
+            // $municipality = 'ANGONO';
+            // $province = 'RIZAL';
+            // $region = 'REGION IV-A CALABARZON';
+            
+            // QUEZON
+            // $barangay = ['Dayap','Kanlurang Calutan', 'Silangang Maligaya','Poblacion II'];
+            // $municipality = 'AGDANGAN';
+            // $province = 'QUEZON';
+            // $region = 'REGION IV-A CALABARZON';
+
+
+            // LAGUNA
+            // $barangay = ['San Agustin','San Gregorio', 'San Miguel','Bitin'];
+            // $municipality = 'ALAMINOS';
+            // $province = 'LAGUNA';
+            // $region = 'REGION IV-A CALABARZON';
+
+
+            // CAVITE
+            // $barangay = ['Luksuhin','Sikat', 'Upli','Palumlum'];
+            // $municipality = 'ALFONSO';
+            // $province = 'CAVITE';
+            // $region = 'REGION IV-A CALABARZON';    
+
+        // REGION IV A SEEDER END HERE
+
+
+
         
-        // QUEZON
-        $barangay = ['Dayap','Kanlurang Calutan', 'Silangang Maligaya','Poblacion II'];
-        $municipality = 'AGDANGAN';
-        $province = 'QUEZON';
-        $region = 'REGION IV-A CALABARZON';
+        // REGION III SEEDER START HERE
+
+            // BATAAN
+            // $barangay = ['Bangkal','Calaylayan Pob.', 'Capitangan','Gabon'];
+            // $municipality = 'ABUCAY';
+            // $province = 'BATAAN';
+            // $region = 'REGION III CENTRAL LUZON';
+            
+            // BULACAN
+            // $barangay = ['Banaban','Baybay', 'Binagbag','Donacion'];
+            // $municipality = 'ANGAT';
+            // $province = 'BULACAN';
+            // $region = 'REGION III CENTRAL LUZON';
 
 
-        // LAGUNA
-        // $barangay = ['San Agustin','San Gregorio', 'San Miguel','Bitin'];
-        // $municipality = 'ALAMINOS';
-        // $province = 'LAGUNA';
-        // $region = 'REGION IV-A CALABARZON';
+            // NUEVA ECIJA
+            // $barangay = ['Betes','Bibiclat', 'Bucot','La Purisima'];
+            // $municipality = 'ALIAGA';
+            // $province = 'NUEVA ECIJA';
+            // $region = 'REGION III CENTRAL LUZON';
 
 
-        // CAVITE
-        // $barangay = ['Luksuhin','Sikat', 'Upli','Palumlum'];
-        // $municipality = 'ALFONSO';
-        // $province = 'CAVITE';
-        // $region = 'REGION IV-A CALABARZON';
+            // PAMPANGA
+            // $barangay = ['Agapito del Rosario','Anunas', 'Balibago','Capaya'];
+            // $municipality = 'ANGELES CITY';
+            // $province = 'PAMPANGA';
+            // $region = 'REGION III CENTRAL LUZON';    
+
+            // TARLAC
+            // $barangay = ['Baguindoc Baguinloc','Bantog', 'Campos','Carmen'];
+            // $municipality = 'ANAO';
+            // $province = 'TARLAC';
+            // $region = 'REGION III CENTRAL LUZON';    
+
+            // ZAMBALES
+            // $barangay = ['Bangan','Batonlapoc', 'Beneg','Capayawan'];
+            // $municipality = 'BOTOLAN';
+            // $province = 'ZAMBALES';
+            // $region = 'REGION III CENTRAL LUZON';    
+
+            // AURORA
+            // $barangay = ['Buhangin','Calabuanan', 'Obligacion','Pingit'];
+            // $municipality = 'BALER Capital';
+            // $province = 'AURORA';
+            // $region = 'REGION III CENTRAL LUZON';   
         
 
+
+        // REGION III SEEDER END HERE
 
         
 

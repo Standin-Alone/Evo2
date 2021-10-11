@@ -19,6 +19,7 @@ Route::resource('/error','Controller');
 Route::get('/sign-in','AccessController@signIn');
 Route::post('/change-default-pass','AccessController@firstLoggedIn')->name('change-default-pass');
 Route::get('/check-default-pass','AccessController@checkDefaultPass')->name('check-default-pass');
+Route::get('/send_email','HomeController@send_email');
 
 // Route::get('/login','AccessController@index');
 

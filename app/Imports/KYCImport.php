@@ -17,6 +17,7 @@ class KYCImport implements ToCollection,WithStartRow
     protected $provider;
 
     private $error_data;
+    private $region;
     
     public function __construct($provider){
         $this->provider = $provider;    
@@ -38,10 +39,11 @@ class KYCImport implements ToCollection,WithStartRow
                         '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
                         '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
 
-        // try{
+        try{
             
         $rows_inserted = 0;
         $provider = $this->provider;
+        $region_for_mail = '';
     
         $error_data = [];
         ini_set("memory_limit", "10056M");
@@ -50,7 +52,7 @@ class KYCImport implements ToCollection,WithStartRow
             
             // check rsbsa no if exists
             $rsbsa_no   = $item[0];                
-            $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->get();
+            $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->take(1)->get();
             
 
             
@@ -59,7 +61,7 @@ class KYCImport implements ToCollection,WithStartRow
                 if($check_rsbsa_no->isEmpty()){                
                  
                     // insert to kyc profiles
-                    db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data){
+                    db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail){
                     
 
                         $format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13])->format('Y-m-d');
@@ -130,9 +132,13 @@ class KYCImport implements ToCollection,WithStartRow
                                                 ->where('mun_name',$municipality)
                                                 ->get(); 
                                                 
-                        $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->get();
+                        $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get();
 
                         if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) && $check_account_number->isEmpty()){
+
+                            // set region for send email
+                            $region_for_mail =  $region; 
+
                             $bgy_code   =  db::table('geo_map')->where('bgy_name',$barangay)->first()->bgy_code;
                             $mun_code   =  db::table('geo_map')->where('mun_name',$municipality)->first()->mun_code;
                             $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
@@ -263,10 +269,11 @@ class KYCImport implements ToCollection,WithStartRow
         $this->inserted_count = $rows_inserted;   
         $this->total_rows = $collection->count();
         $this->message = 'true';
-    // }catch(\Exception $e){
-    //     $this->message = json_encode($e->getMessage());
-    //     // $this->message = 'false';
-    // }   
+        $this->region = $region_for_mail;
+    }catch(\Exception $e){
+        $this->message = json_encode($e->getMessage());
+        // $this->message = 'false';
+    }   
 
     }
 
@@ -278,7 +285,7 @@ class KYCImport implements ToCollection,WithStartRow
     public function getRowCount()
     {
 
-        return json_encode(['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data]);
+        return json_encode(['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region]);
     }
 
  

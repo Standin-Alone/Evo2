@@ -9,6 +9,11 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\KYCImport;
 use DB;
 use Yajra\DataTables\Facades\DataTables;
+use Carbon\Carbon;
+use File;
+use Mail;
+use Illuminate\Support\Facades\Storage;
+use App\Models\HomeModel;
 class KYCModuleController extends Controller
 {
 
@@ -30,8 +35,49 @@ class KYCModuleController extends Controller
 
         $file = request()->file('file');
         $provider = request('provider');
+      
+        $upload_path = 'temp_excel/kyc';
+  
+
+        $upload_folder  = $upload_path.'/'.Carbon::now()->year;
+
+        if(!File::isDirectory($upload_path)){
+            
+            File::makeDirectory($upload_path, 0775, true);                                
+            $by_year_path = $upload_path.'/'.Carbon::now()->year;
+            if(!File::isDirectory($by_year_path)){
+
+                File::makeDirectory($by_year_path, 0775, true);
+            }
+        }
+
+
+        $get_filename = $file->getClientOriginalName();
+
+        
+        Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($file));
+            
+
         $kyc_import = new KYCImport($provider);
         Excel::import($kyc_import, $file);
+
+        $home_model = new HomeModel;
+        
+       
+        
+        foreach($kyc_import as $item){
+            
+            $full_name = session('first_name').' '.session('last_name');
+            $role = 'ICTS DMD';    
+            $region  = $item->region;
+
+            // send email to rfo program focals.
+            $home_model->send_email($full_name,$role,$region);
+            
+        }
+ 
+      
+        
 
         return $kyc_import->getRowCount();
        
@@ -51,7 +97,7 @@ class KYCModuleController extends Controller
                                 ->select(
                                     'rsbsa_no',
                                     db::raw("CONCAT(first_name,' ',last_name) as full_name"),
-                                    db::raw("CONCAT(province,', ',region) as address"),
+                                    db::raw("CONCAT(IF(street_purok = '-' OR street_purok = '', '' , CONCAT(street_purok,', ')),'BRGY. ',barangay,', ',province,', ',region) as address"),
                                     'fintech_provider',
                                     'kyc_id',
                                     DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
