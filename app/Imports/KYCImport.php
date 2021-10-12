@@ -8,6 +8,7 @@ use Maatwebsite\Excel\Concerns\WithStartRow;
 use DB;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
+use App\Models\GlobalNotificationModel;
 class KYCImport implements ToCollection,WithStartRow
 {
 
@@ -270,9 +271,20 @@ class KYCImport implements ToCollection,WithStartRow
         $this->total_rows = $collection->count();
         $this->message = 'true';
         $this->region = $region_for_mail;
+
+        $role = "ICTS DMD";    
+        $region = $region_for_mail;
+        $message = "You have new ".$rows_inserted." records to approve.";
+
+        // send email to rfo program focals.
+        if($rows_inserted != 0){
+            $gloal_notif_model = new GlobalNotificationModel;
+            $gloal_notif_model->send_email($role,$region,$message);
+        }
+
     }catch(\Exception $e){
-        $this->message = json_encode($e->getMessage());
-        // $this->message = 'false';
+        // $this->message = json_encode($e->getMessage());
+        $this->message = 'false';
     }   
 
     }

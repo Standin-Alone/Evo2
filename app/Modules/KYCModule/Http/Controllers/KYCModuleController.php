@@ -35,6 +35,9 @@ class KYCModuleController extends Controller
 
         $file = request()->file('file');
         $provider = request('provider');
+        $role = '';
+        $region = '';
+        $total_inserted_count = 0;
       
         $upload_path = 'temp_excel/kyc';
   
@@ -61,26 +64,8 @@ class KYCModuleController extends Controller
         $kyc_import = new KYCImport($provider);
         Excel::import($kyc_import, $file);
 
-        $home_model = new HomeModel;
         
-       
-        
-        foreach($kyc_import as $item){
-            
-            $full_name = session('first_name').' '.session('last_name');
-            $role = 'RFO Program Focal';
-            $region  = $item->region;
-
-            // send email to rfo program focals.
-            $home_model->send_email($full_name,$role,$region);
-            
-        }
- 
-      
-        
-
-        return $kyc_import->getRowCount();
-       
+        return $kyc_import->getRowCount();       
     }
 
     public function show(){

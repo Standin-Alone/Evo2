@@ -233,8 +233,11 @@ class UserManagementController extends Controller
         $program = request('import_program');
         $file = request()->file('file');
 
-        Excel::import(new UsersImport($region,$program), $file);
+        $user_import = new UsersImport($region,$program);
+        Excel::import($user_import, $file);
         
+
+        return $user_import->getRowCount();        
     }
 
 

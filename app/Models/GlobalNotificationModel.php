@@ -6,13 +6,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use DB;
 use Mail;
-class HomeModel extends Model
+class GlobalNotificationModel extends Model
 {
     use HasFactory;
-
-
+    
     public function send_email($role,$region,$messages){
-          
+        
+        
+        
         $subject = '';
 
 

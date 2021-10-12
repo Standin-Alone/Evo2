@@ -495,16 +495,68 @@
                                 processData:false,
                                 contentType:false,
                                 success:function(response){             
-                                    //    
+                                    //              
                                     console.warn(response);
-                                    swal("Successfully added new users.", {
-                                            icon: "success",
-                                    }).then(()=>{
+                                    parses_result = JSON.parse(response)
+                                    total_rows_inserted = parses_result['total_rows_inserted'];
+                                    total_rows = parses_result['total_rows'];
+                                
+                                if(parses_result['message'] == 'true'){
+                                    swal(total_rows_inserted + ' out of ' + total_rows + ' rows has been successfully inserted.', {
+                                        icon: "success",
+                                    }).then(()=>{                    
+                                            
+                                        // check if it has error data;
+                                        if(parses_result['error_data'].length > 0 ){
+                                            $("#ErrorDataModal").modal('show');
+                                            $("#error-datatable").DataTable({
+                                                destroy:true,
+                                                data:parses_result['error_data'],
+                                                columns:[
+                                                                                                        
+                                                    {title:'Name',orderable:false,render:function(data,type,row){
+                                                        return row.first_name + ' ' + row.last_name;
+                                                    }},                                                    
+                                                    {data:'agency',title:'Agency'},
+                                                    {data:'email',title:'Email',orderable:false},
+                                                    {data:'contact',title:'Contact',orderable:false}, 
+                                                    {data:'barangay',title:'Email',orderable:false},
+                                                    {data:'province',title:'Province',orderable:false},
+                                                    {data:'municipality',title:'Municipality',orderable:false},
+                                                    {data:'region',title:'Region',orderable:false},
+
+                                                    {data:'remarks',title:'Remarks',orderable:false},
+                                                    
+                                                    
+
+                                                ]
+                                            });
+                                        }
+
+                                        $("#ImportForm")[0].reset();
+                                        $(".import-btn").prop('disabled',false)      
+                                        $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
+                                        $("#load-datatable").DataTable().ajax.reload();
+                                    });
+                                    }else{
+                                        swal("Error!Wrong excel format.", {
+                                                icon: "error",
+                                            });
+                                        $("#ImportForm")[0].reset();
                                         $("#load-datatable").DataTable().ajax.reload();
                                         $("#ImportModal").modal('hide')
                                         $(".import-btn").prop('disabled',false)
+                                    }
+
+
+                                    // swal("Successfully added new users.", {
+                                    //         icon: "success",
+                                    // }).then(()=>{
+                                    //     $("#load-datatable").DataTable().ajax.reload();
+                                    //     $("#ImportModal").modal('hide')
+                                    //     $(".import-btn").prop('disabled',false)
                                         
-                                    });
+                                    // });
                                 },
                                 error:function(response){
                                     $("#ImportModal").modal('hide')
@@ -919,6 +971,14 @@
                         <div class="modal-body">
                             {{--modal body start--}}
                             <label class="form-label hide"> ID</label>                            
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label>File </label>
+                                    <input type="file" class="form-control" accept=".xlsx" name="file">
+                                </div>
+                            </div>
+                           
+
 
                             <div class="col-lg-12">
                                 <div class="form-group">
@@ -944,21 +1004,44 @@
                                 </div>                              
                             </div>    
 
-                            <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label>File </label>
-                                    <input type="file" class="form-control" accept=".xlsx" name="file">
-                                </div>
-                            </div>
                            
                             {{--modal body end--}}
                         </div>
                         <div class="modal-footer">
                             <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <button type="submit" class="btn btn-info import-btn">Import</button>
+                            <button type="submit" class="btn btn-info import-btn"><i class="fas fa-cloud-download-alt "></i>Import</button>
                         </div>
                     </div>
                 </form>
+            </div>
+        </div>
+
+
+
+        <!-- #modal-list of not inserted data to database from excel -->
+        <div class="modal fade" id="ErrorDataModal"  data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="max-width: 70%">                    
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: #ff5b57">
+                            <h4 class="modal-title update-modal-title" style="color: white">Unsuccessful Imported Data</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                        </div>
+                        <div class="modal-body">
+                            {{--modal body start--}}          
+
+                            <table id="error-datatable" class="table table-hover" style="width:100%">            
+                                <thead>                                        
+                                </thead>
+                                <tbody>
+                                </tbody>
+                            </table>
+
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>                                
+                        </div>
+                    </div>                    
             </div>
         </div>
 
