@@ -42,7 +42,7 @@
                     Perhaps, there pages will help find what you're looking for.
                 </div>
                 <div>
-                    <a href="index.html" class="btn btn-success p-l-20 p-r-20">Go Home</a>
+                    <a href="{{route('main.home')}}" class="btn btn-success p-l-20 p-r-20">Go to Home</a>
                 </div>
             </div>
         </div>

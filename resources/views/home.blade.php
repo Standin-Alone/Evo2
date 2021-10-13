@@ -26,10 +26,10 @@
 @section('content')
 <div class="jumbotron jumbotron-fluid">
     <div class="container">
-        <img src="{{url('assets/img/logo/DA-Logo.png')}}" width="20%" height="20%" style="display: inline-block"/>
+        <img src="{{url('assets/img/logo/WELCOME_PAGE_LOGO.jpg')}}" class="img-fluid" style="display: inline-block; width:1000px; height:600px;  margin-top: -50px"/>
         <h2 class="mt-3">Welcome! {{session()->get('first_name')}} {{session()->get('middle_name')}} {{session()->get('last_name')}} {{session()->get('ext_name')}}</h1>
         <h4 class="mt-3">To</h3>
-        <h2 class="mt-3">Interventions Management Platform 2.0</h1>
+        <h2 class="mt-3">Interventions Management Platform</h1>
         <p class="lead"></p>
     </div>
 </div>

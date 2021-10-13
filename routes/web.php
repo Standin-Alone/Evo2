@@ -15,11 +15,14 @@ use Illuminate\Support\Facades\Route;
 
 // Route::get('/dashboard', 'HomeController@index')->name('main.home');
 Route::resource('/','AccessController');
+
+Route::get('/welcome', 'HomeController@index')->name('main.home');
 Route::resource('/error','Controller');
 Route::get('/sign-in','AccessController@signIn');
 Route::post('/change-default-pass','AccessController@firstLoggedIn')->name('change-default-pass');
 Route::get('/check-default-pass','AccessController@checkDefaultPass')->name('check-default-pass');
 Route::get('/send_email','HomeController@send_email');
+Route::get('/error','Controller@error_page')->name('error_page.index');
 
 // Route::get('/login','AccessController@index');
 

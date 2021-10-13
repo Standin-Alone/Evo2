@@ -11,6 +11,11 @@ class Controller extends BaseController
 {
     public function index(){
 
+        return view('home');
+    }
+    
+    public function error_page(){
+
         return view('404_error');
     }
 }

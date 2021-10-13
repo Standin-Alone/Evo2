@@ -42,7 +42,7 @@ class ModulesController extends Controller
              
 
                 if(!$check_module){
-                    Artisan::call("make:module",["name" => trim($module_name[0])]);
+                    // Artisan::call("make:module",["name" => trim($module_name[0])]);
                 }
 
                 if($check_db->isEmpty()){
@@ -82,7 +82,7 @@ class ModulesController extends Controller
 
 
                                 if(!$check_module){
-                                    Artisan::call("make:module",["name" => trim($item)]);
+                                    // Artisan::call("make:module",["name" => trim($item)]);
                                 }                                
                             }
                         }
@@ -112,7 +112,7 @@ class ModulesController extends Controller
                 ]);        
 
             if(!$check_module){
-                Artisan::call("make:module",["name" => trim($module_name)]);
+                // Artisan::call("make:module",["name" => trim($module_name)]);
             }   
             
         }catch(\Exception $e){

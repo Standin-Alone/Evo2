@@ -1,24 +1,10 @@
-{{-- @if(session()->has('main_modules'))
-	@foreach(session('main_modules') as $item) --}}
-		{{-- check if the main modules has sub --}}
-		{{-- @if(!is_null($item->parent_module_id))
-			@foreach(session('sub_modules') as $value)
-					@if($value->parent_module_id == $item->parent_module_id) 
-						@if(Route::currentRouteName() != $value->routes)
-							<script>window.location.href = "{{route('error.index')}}"</script>
-						@endif
-					@endif				
-			@endforeach
-		@else
-			@if(Route::currentRouteName() != $item->routes)
-				<script>window.location.href = "{{route('error.index')}}"</script>
-			@endif
-		@endif
-	@endforeach
+@if(session()->has('main_modules'))
+	@if(!(session('main_modules')->where('routes',Route::currentRouteName())->first() || session('sub_modules')->where('routes',Route::currentRouteName())->first()) || !Route::currentRouteName() == 'main.home' || !Route::currentRouteName() == 'user.profile')		
+		<script>window.location.href = "{{route('error_page.index')}}"</script>
+	@endif
 @else
-	<script>window.location.href = "{{route('main.page')}}"</script>
-@endif --}}
-
+	<script>window.location.href = "{{route('main.home')}}"</script>
+@endif
 
 
 

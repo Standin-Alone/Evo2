@@ -42,7 +42,7 @@ class UserManagementController extends Controller
         $get_users =  db::table('users as u')
                             ->select(
                                 db::raw("CONCAT(first_name,' ',last_name) as full_name"),
-                                'shortname',
+                                'p.shortname',
                                 'pp.id as id',
                                 'u.user_id',
                                 'pp.status',

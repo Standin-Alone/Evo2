@@ -410,7 +410,7 @@
                     if (confirm) {                       
                         $.ajax({
                             url:"{{route('modules.update',['module' => ':id'])}}".replace(':id', id),
-                            type:'PUT',
+                            type:'POST',
                             data:$("#UpdateForm").serialize(),
                             success:function(response){             
                                 //    
@@ -470,7 +470,7 @@
                     if (confirm) {                       
                         $.ajax({
                             url:"{{route('modules.update',['module' => ':id'])}}".replace(':id', id),
-                            type:'PUT',
+                            type:'POST',
                             data:$("#UpdateSubModuleForm").serialize(),
                             success:function(response){             
                                 //    
