@@ -8,9 +8,7 @@
         <span>Home</span>
     </a>        
 </li> 
-    @php
-        echo json_encode(session('main_modules'));   
-    @endphp
+    
 @if(session()->has('main_modules'))
     @foreach (session('main_modules') as $item)
     @if(!is_null($item->parent_module_id) && $item->nav_show == 1)
