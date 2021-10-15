@@ -9,20 +9,20 @@
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
     <style>
         td { font-size: 17px; font-weight: 500; }
 
 
         
-        #load-datatable > thead > tr > th {
+        #file-data-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
             color:white;
             background-color: #008a8a;
             font-size: 20px;
             font-family: calibri
         }
 
-        #load-datatable > thead > tr > th {
+        #file-data-datatable > thead > tr > th  , #load-datatable > thead > tr > th {
             color:white;
             font-size: 20px;
             background-color: #008a8a;
@@ -31,6 +31,37 @@
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
             padding: 5px !important;
         }           
+
+
+        .dt-button{
+            background-color: #00c3ff !important;
+            color: #fff !important;
+            font-size: 14px !important;
+            border-radius: 5px !important;
+            padding-top: 5px !important;
+            padding-bottom: 5px !important;
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            width: 107px;
+            height: 32px;
+        }
+
+        .buttons-print{
+            background-color: #12abda !important;
+            color: #fff !important;
+        }
+        .buttons-excel{
+            background-color: #0cb458 !important;
+            color: #fff !important;
+        }
+        .buttons-csv{
+            background-color: #0cb458 !important;
+            color: #fff !important;
+        }
+        .buttons-pdf{
+            background-color: #e42535 !important;
+            color: #fff !important;
+        }
     </style>
 @endsection
 
@@ -51,14 +82,100 @@
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
 
-
+    
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.3/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
+    <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
 
     <script>
         $(document).ready(function(){
+            // load cards
+            load_cards = ()=>{
 
+                $.ajax({
+                        url:"{{route('kyc-today-reports')}}",
+                        type:'get',
+                        success:function(data){
+                            let result_json = JSON.parse(data);
+                            
+                            $('#spti_value').html(result_json.count_spti);
+                            $('#ussc_value').html(result_json.count_ussc);
+                            $('#files_value').html(result_json.count_files_today);
+                            $('#records_value').html(result_json.count_records_today);
+                            
+                        }                    
+                    })
+            }
+
+            load_cards()
+    
+    
+            $is_uploading = false;
+            // load datatable list of uploaded records
                 load_datatable = $("#load-datatable").DataTable({
+                                destroy:true,
                                 serverSide:true,
                                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List of Uploaded Records',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'List of Uploaded Records',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'List of Uploaded Records',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'List of Uploaded Records',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
                                 columns:[
                                         {data:'rsbsa_no',title:'RSBSA Number'},
                                         {   data:'fintech_provider',
@@ -75,26 +192,121 @@
                                         
                                 ],
                                 "order": [[ 5, "desc" ]], 
+                                
 
                             })
-                            
 
+                    // file data reports datatable
+                    $("#file-data-datatable").DataTable({
+                                destroy:true,
+                                serverSide:true,
+                                ajax: {"url":"{{route('kyc-file-data-reports')}}","type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List of Files Uploaded',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'List of Files Uploaded',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'List of Files Uploaded',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'List of Files Uploaded',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
+                                columns:[
+                                        {data:'region',title:'Region'},
+                                        {data:'province',title:'Province'},
+                                        {data:'file_name',title:'File',orderable:false},
+                                        {data:'total_inserted',title:'Total Records Saved',orderable:false},
+                                        {data:'total_rows',title:'Total Records',orderable:false},
+
+                                        {data:'date_uploaded',title:'Date Uploaded'},
+      
+                                ],                
+
+                            })
+            
+
+                $("#filter-region").change(function(){
+                    $region_code = $("option:selected",this).val();
+                        $("#load-datatable").DataTable({
+                                    destroy:true,
+                                    serverSide:true,
+                                    ajax: {"url":"{{route('kyc-filter-region',['region_code' => ':val'])}}".replace(':val',$region_code),"type":'get'},
+                                    columns:[
+                                            {data:'rsbsa_no',title:'RSBSA Number'},
+                                            {   data:'fintech_provider',
+                                                title:'Provider',
+                                                orderable:false,
+                                                render:function(data,type,row){
+                                                    return data == 'UMSI' ? 'USSC' : data;
+                                                }                                    
+                                            },
+                                            {data:'full_name',title:'Name',orderable:false},
+                                            {data:'address',title:'Address',orderable:false},
+                                            {data:'account_number',title:'DBP Account Number',orderable:false},
+                                            {data:'date_uploaded',title:'Date Uploaded'}
+                                            
+                                    ],
+                                    "order": [[ 5, "desc" ]], 
+
+                        })
+
+                });
             // import file
             $("#ImportForm").validate({
 
-            rules:{          
-                provider :{
-                    required:true
-                },
+            rules:{                      
                 file:{
                     required:true,
                     accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
                 }
             },
-            messages:{                
-                provider:{
-                    required: '<div class="text-danger">Please select provider.</div>',         
-                },
+            messages:{                                
                 file:{
                     required: '<div class="text-danger">Please select file to upload.</div>',
                     accept: '<div class="text-danger">Please upload valid files formats .xlsx, . xls only.</div>'
@@ -104,9 +316,9 @@
                 let fd = this;
                 
                 
-                let get_provider = $("#provider option:selected").val();
+                
                 var spiel = document.createElement('div');
-                    spiel.innerHTML = "Your selected provider is <b>"+$("#provider option:selected").text()+"</b>. Are you sure you want to import this file?";
+                    spiel.innerHTML = "Are you sure you want to import this file?";
                 swal({
                 title: "Wait!",
                 content: spiel,
@@ -116,15 +328,36 @@
                 })
                 .then((confirm) => {
                     let fd = new FormData();
-                    
-                    fd.append('provider',get_provider)
+                                        
                     fd.append('_token','{{csrf_token()}}')                    
                     fd.append('file',$("input[name='file']")[0].files[0])
                     $(".import-btn").prop('disabled',true)
                     // check if confirm
                     if (confirm) {         
+                        // $is_uploading = true;
+                      
                         $(".import-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Importing');                 
-                        $.ajax({                
+                        $.ajax({
+                            xhr: function(){
+                                var xhr = new window.XMLHttpRequest();
+                                
+                                xhr.upload.addEventListener("progress", function(evt){
+                                    console.warn(evt.lengthComputable)
+                                    if(evt.lengthComputable){
+                                        var percentComplete = evt.loaded / evt.total;
+                                        percentComplete = parseInt(percentComplete * 100);
+                                        console.log(percentComplete);
+
+                                        if (percentComplete === 100) {
+
+                                        }
+                                    }
+
+                                    
+                                },false);
+
+                                return xhr;
+                            },
                             url:"{{route('import-kyc')}}",
                             type:'post',
                             data: fd,
@@ -139,8 +372,8 @@
                                 if(parses_result['message'] == 'true'){
                                     swal(total_rows_inserted + ' out of ' + total_rows + ' rows has been successfully inserted.', {
                                         icon: "success",
-                                    }).then(()=>{                    
-                                            
+                                    }).then(()=>{                                                            
+                                        load_cards()
                                         // check if it has error data;
                                         if(parses_result['error_data'].length > 0 ){
                                             $("#ErrorDataModal").modal('show');
@@ -168,8 +401,18 @@
                                         $(".import-btn").prop('disabled',false)      
                                         $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
                                         $("#load-datatable").DataTable().ajax.reload();
+                                        $("#file-data-datatable").DataTable().ajax.reload();
                                     });
-                                }else{
+                                }else if(parses_result['message'] == 'filename error'){
+                                        swal("Error!Wrong file name format.", {
+                                            icon: "error",
+                                            });
+                                            $("#ImportForm")[0].reset();
+                                            $(".import-btn").prop('disabled',false) 
+                                            $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                               
+                                }                                
+                                else{
+                                
                                     swal("Error!Wrong excel format.", {
                                             icon: "error",
                                         });
@@ -196,6 +439,13 @@
                 });
             }
             })
+
+
+            if($is_uploading == true){
+                window.onbeforeunload = function(){
+                   return "Are you sure you want to refresh? You are still uploading the data.";
+                }
+            }
         })
 
     </script>
@@ -207,19 +457,63 @@
 
 
 @section('content')
-    
+
     <!-- end breadcrumb -->
     <!-- begin page-header -->
     <h1 class="page-header">KYC Profiles </h1>
     <!-- end page-header -->
 
+
+    {{-- card start here --}}
+<div class="row">
+    <div class="col-lg-3 col-md-6">
+        <div class="widget widget-stats bg-gradient-orange">
+            <div class="stats-icon stats-icon-lg"><i class="fa fa-file-excel fa-fw"></i></div>
+            <div class="stats-content">
+                <div class="stats-title" style="font-size: 15px">Total Uploaded Files Today:</div>
+                <div class="stats-number" id="files_value">0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="widget widget-stats bg-gradient-green">
+            <div class="stats-icon stats-icon-lg"><i class="fa fa-file-excel fa-fw"></i></div>
+            <div class="stats-content">
+                <div class="stats-title" style="font-size: 15px">Total Uploaded Records Today:</div>
+                <div class="stats-number" id="records_value">0</div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-lg-3 col-md-6">
+        <div class="widget widget-stats bg-gradient-blue">
+            <div class="stats-icon stats-icon-lg"><i class="fa fa-file-excel fa-fw"></i></div>
+            <div class="stats-content">
+                <div class="stats-title" style="font-size: 15px">Total USSC Records Today:</div>
+                <div class="stats-number" id="ussc_value" >0</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+        <div class="widget widget-stats bg-gradient-purple">
+            <div class="stats-icon stats-icon-lg"><i class="fa fa-file-excel fa-fw"></i></div>
+            <div class="stats-content">
+                <div class="stats-title" style="font-size: 15px">Total SPTI  Records Today:</div>
+                <div class="stats-number" id="spti_value" >0</div>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- card end here --}}
     <!-- begin panel -->
     <div class="panel panel-success">
         <div class="panel-heading">
             <h4 class="panel-title">KYC</h4>
         </div>
-        {{-- KYC FORM PANEL --}}
-       
+        {{-- KYC FORM PANEL --}}       
         <div class="panel-body">
             <div class="panel panel-primary col-md-6">
                 <div class="panel-heading">
@@ -236,20 +530,6 @@
                                 <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
                             </div>
                         </div>
-
-
-
-                        <div class="col-lg-12 ">
-                            <div class="form-group">
-                                <label >Select Fintech Provider</label> <span style="color:red">*</span>
-                                <select class="form-control" name="provider" id="provider" >
-                                    <option selected disabled value="">Select Provider</option>                                        
-                                        <option  value="SPTI">SPTI</option>
-                                        <option  value="UMSI">USSC</option>                                    
-                                </select>
-                            </div>                              
-                        </div>
-
                                 
                         <div class="col-lg-12">
                             <div class="form-group text-right">
@@ -265,6 +545,8 @@
             </div>
 
 
+
+        
 
 
             <!-- #modal-list of not inserted data to database from excel -->
@@ -296,12 +578,79 @@
 
 
 
-            <table id="load-datatable" class="table table-striped table-bordered">            
-                <thead>                                    
-                </thead>
-                <tbody>                
-                </tbody>
-            </table>
+    
+        </div>
+
+    </div>
+    <!-- end panel -->
+
+    <div class="panel panel-warning ">
+        <div class="panel-heading">Filter by Region</div>
+        <div class="panel-body border">
+            <div class="form-group">
+              <label for=""></label>
+              <select data-column="2" class="form-control filter-select" name="filter_region" id="filter-region">
+                  <option value="" disabled selected>-- Select Region --</option>                        
+                  @foreach ($get_region as $value)
+                  <option value="{{$value->reg_code}}">{{$value->reg_name}}</option>                        
+                      
+                  @endforeach
+
+              </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- begin File Data Reports panel -->
+         <div class="panel panel-success">
+            <div class="panel-heading">
+                <h4 class="panel-title"> Uploaded Records</h4>
+            </div>
+            {{-- KYC FORM PANEL --}}       
+            <div class="panel-body">    
+            
+
+                <div class="note note-success l-b-15">
+                    <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                    <div class="note-content">
+                      <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
+                    </div>
+                  </div>
+           
+                <table id="load-datatable" class="table table-hover table-bordered">            
+                    <thead>                                    
+                    </thead>
+                    <tbody>                
+                    </tbody>
+                </table>
+                <br><br>
+                <div class="note note-success l-b-15">
+                    <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                    <div class="note-content">
+                      <h4><b>List Of Uploaded Files</b></h4>                      
+                    </div>
+                  </div>
+                <table id="file-data-datatable" class="table table-hover table-bordered">            
+                    <thead>                                    
+                    </thead>
+                    <tbody>                
+                    </tbody>
+                </table>
+        
+            </div>
+    
+        </div>
+        <!-- end panel -->
+
+     <!-- begin File Data Reports panel -->
+     <div class="panel panel-success">
+        <div class="panel-heading">
+            <h4 class="panel-title"> File Data Reports</h4>
+        </div>
+        {{-- KYC FORM PANEL --}}       
+        <div class="panel-body">    
+
+      
     
         </div>
 

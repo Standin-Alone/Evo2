@@ -1,0 +1,5 @@
+<?php
+
+/**
+ *	ReportModule Helpers
+ */

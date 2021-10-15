@@ -23,7 +23,7 @@ class MailController extends Controller
         
         Mail::send('Login::mail.reset_password_mail', ['user_data' => $reset_pwd_data], function($message) use ($reset_pwd_data) {
             $message->to($reset_pwd_data['email'], $reset_pwd_data['username'])
-                    ->subject('Login | Change Password'); 
+                    ->subject('Login | Reset Password'); 
         });
     }
 

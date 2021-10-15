@@ -64,7 +64,13 @@
 <!-- begin panel -->
 <div class="panel panel-inverse mt-5">
     <div class="panel-heading">
-        <h4 class="panel-title">List of Users</h4>
+        @foreach (session()->get('programs_ids') as $prog_id)
+        <input type="hidden" id="detected_program" name="detected_program" value="{{$prog_id}}" />
+        @endforeach
+        <button type="button" id="add-btn" name="add_role_btn" class="btn btn-lime" data-toggle="modal" data-target="#AddModal" >
+            <i class="fa fa-plus"></i> Add Role
+        </button>
+        {{-- <h4 class="panel-title">List of Users</h4> --}}
         {{-- <div class="panel-heading-btn">
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand"></i></a>
         </div> --}}
@@ -73,12 +79,6 @@
         <div class="row">
             @include('UserManagement::components.filter_cards')
         </div>
-        @foreach (session()->get('programs_ids') as $prog_id)
-            <input type="hidden" id="detected_program" name="detected_program" value="{{$prog_id}}" />
-        @endforeach
-        <button type="button" id="add-btn" name="add_role_btn" class="btn btn-lime" data-toggle="modal" data-target="#AddModal" >
-            <i class="fa fa-plus"></i> Add Role
-        </button>
         <br>
         <br><br>
         <table id="user-datatable" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
@@ -87,7 +87,7 @@
                     <th>Fullname</th>
                     <th>Agency</th>
                     <th>Region</th> 
-                    <th>Province</th>      
+                    {{-- <th>Province</th>       --}}
                     <th>Program</th>
                 </tr>
             </thead>
@@ -172,7 +172,7 @@
                                     <select class="form-control" name="select_program" id="select_program">
                                         <option value="">-- Select program --</option>
                                         @foreach ($programs as $p)
-                                            <option value="{{$p->program_id}}">{{$p->description}}</option>
+                                            <option value="{{$p->program_id}}">{{$p->title}}</option>
                                         @endforeach
                                     </select>
                                     <span class="error_msg"></span>

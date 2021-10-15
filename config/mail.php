@@ -46,7 +46,7 @@ return [
         ],
         'from' => [
             'address' => 'support.sadd@da.gov.ph',
-            'name' => 'Department of Agriculture',
+            'name' => 'Department of Agriculture(No-reply)',
         ],
 
         'stream' => [
@@ -56,18 +56,6 @@ return [
                 'verify_peer_name' => false,
             ],
         ],  
-
-        // 'smtp' => [
-        //     'transport' => 'smtp',
-        //     'host' => 'smtp.gmail.com',
-        //     'port' => 587,            
-        //     'encryption' => 'tls',
-        //     'username' =>'developer01000@gmail.com ',
-        //     'password' => 'developerweb01000',
-        //     'timeout' => null,
-        //     'auth_mode' => null,
-        // ],
-
       
         'ses' => [
             'transport' => 'ses',
@@ -109,7 +97,7 @@ return [
 
     'from' => [
         'address' => 'support.sadd@da.gov.ph',
-        'name' => 'Department of Agriculture',
+        'name' => 'Department of Agriculture(No-reply)',
     ],
 
     

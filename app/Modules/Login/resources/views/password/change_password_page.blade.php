@@ -37,10 +37,10 @@
                         {{ method_field("PATCH") }}
 
                         <span class="error_password"></span>
-                        <div class="form-group m-b-15">
+                        {{-- <div class="form-group m-b-15">
                             <input type="password" name="old_password" class="form-control form-control-lg" placeholder="Old Password" />
                             <span class="error_msg"></span>
-                        </div>
+                        </div> --}}
                         <div class="form-group m-b-15">
                             <input type="password" name="new_password" class="form-control form-control-lg" placeholder="New Password" />
                             <span class="error_msg"></span>

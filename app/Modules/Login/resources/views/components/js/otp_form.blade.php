@@ -40,10 +40,10 @@
 					position: 'center',
 					icon: 'success',
 					title: otp_verified_response.message,
-					showConfirmButton: true,
-					// timer: 1500
+					showConfirmButton: false,
+					timer: 1500
 				}).then(function(){ 
-					
+					window.location.href = "{{route('main.home')}}";
 				});
           	},
 			error: function(error_response){

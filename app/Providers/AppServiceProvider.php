@@ -23,6 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        $kernel = app()->make('Illuminate\Contracts\Http\Kernel');
+        $kernel->pushMiddleware(\App\Http\Middleware\EncryptCookies::class);
+        $kernel->pushMiddleware(\Illuminate\Session\Middleware\StartSession::class);
     }
 }

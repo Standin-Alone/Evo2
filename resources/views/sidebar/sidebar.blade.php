@@ -9,9 +9,10 @@
     </a>        
 </li> 
     
+
 @if(session()->has('main_modules'))
     @foreach (session('main_modules') as $item)
-    @if(!is_null($item->parent_module_id) && $item->nav_show == 1)
+    @if(!is_null($item->parent_module_id) )
     
     <li class="has-sub active">
         <a href="javascript:;">

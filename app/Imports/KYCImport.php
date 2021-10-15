@@ -16,14 +16,16 @@ class KYCImport implements ToCollection,WithStartRow
     private $total_rows = 0;
     private $message = '';
     protected $provider;
+    protected $file_name;
 
     private $error_data;
     private $region;
     
-    public function __construct($provider){
-        $this->provider = $provider;    
+    public function __construct($provider, $file_name){
+        $this->provider = $provider;   
+        $this->file_name = $file_name;    
     
-	}
+    }
 
 
 
@@ -44,11 +46,14 @@ class KYCImport implements ToCollection,WithStartRow
             
         $rows_inserted = 0;
         $provider = $this->provider;
+        $file_name = $this->file_name;
+        $collection_count = $collection->count();
         $region_for_mail = '';
-    
+        
         $error_data = [];
         ini_set("memory_limit", "10056M");
-
+                   
+        $get_kyc_file_id = '';
         foreach($collection as $key => $item){
             
             // check rsbsa no if exists
@@ -57,15 +62,31 @@ class KYCImport implements ToCollection,WithStartRow
             
 
             
-            if($key != 400){
+           
 
                 if($check_rsbsa_no->isEmpty()){                
+                        // insert kyc files to database
+                        $check_filename = db::table('kyc_files')->where('file_name',$file_name)->first();
                  
-                    // insert to kyc profiles
-                    db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail){
-                    
+                        
+                        if(!$check_filename){
+                            $get_kyc_file_id = db::table('kyc_files')
+                                ->insertGetId([
+                                    "file_name" => $file_name,
+                                    "total_rows" => $collection_count,
+                                ]);
+                        }else{
+                            $get_kyc_file_id = $check_filename->kyc_file_id;
+                        }
 
-                        $format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13])->format('Y-m-d');
+                    // insert to kyc profiles
+                    db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail,$file_name,$collection_count,$get_kyc_file_id){
+                    
+                        // $format_birthday = str_replace('/','-',$item[13]);
+
+                        $format_birthday = strpos($item[13], '/') || is_int($item[13]) ? \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13]) : $item[13];
+                        //$format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13])->format('Y-m-d');
+                        
 
                         // this comment is for data with data source
                         // $data_source         = trim($item[0]);    
@@ -147,15 +168,15 @@ class KYCImport implements ToCollection,WithStartRow
                             
                             
 
-                      
-                    
-
+               
+                        
                         
 
 
                         $insert_kyc = db::table('kyc_profiles')
                                 ->insert([
                                     'kyc_id'              => $uuid,
+                                    'kyc_file_id'         => $get_kyc_file_id,
                                     // 'data_source'         => $data_source,
                                     'fintech_provider'    => $fintech_provider,
                                     'rsbsa_no'            => $rsbsa_no,
@@ -177,7 +198,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'region'              => str_replace("Ñ","N", mb_strtoupper($region,'UTF-8')),
                                     'birthdate'           => $birthdate,
                                     'place_of_birth'      => str_replace("Ñ","N", mb_strtoupper($place_of_birth,'UTF-8')),
-                                    'mobile_no'           => (int) $mobile_no,
+                                    'mobile_no'           => $mobile_no,
                                     'sex'                 => $sex,
                                     'nationality'         => str_replace("Ñ","N", mb_strtoupper($nationality,'UTF-8')),
                                     'profession'          => str_replace("Ñ","N", mb_strtoupper($profession,'UTF-8')),
@@ -263,7 +284,7 @@ class KYCImport implements ToCollection,WithStartRow
                     });             
                 }     
             
-            }
+            
         }
         
         $this->error_data = $error_data;
@@ -271,6 +292,9 @@ class KYCImport implements ToCollection,WithStartRow
         $this->total_rows = $collection->count();
         $this->message = 'true';
         $this->region = $region_for_mail;
+        
+        // update total inserted in kyc file table
+        db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->update(["total_inserted" => $rows_inserted]);
 
         $role = "ICTS DMD";    
         $region = $region_for_mail;
@@ -281,11 +305,12 @@ class KYCImport implements ToCollection,WithStartRow
             $gloal_notif_model = new GlobalNotificationModel;
             $gloal_notif_model->send_email($role,$region,$message);
         }
+        
 
-    }catch(\Exception $e){
-        // $this->message = json_encode($e->getMessage());
-        $this->message = 'false';
-    }   
+        }catch(\Exception $e){
+            $this->message = json_encode($e->getMessage());
+            // $this->message = 'false';
+        }   
 
     }
 

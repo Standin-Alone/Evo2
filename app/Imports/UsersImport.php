@@ -24,8 +24,8 @@ class UsersImport implements ToCollection,WithStartRow
         $this->region = $region;
         $this->program_id = $program_id;
 
-	}
-	
+    }
+    
 
     /**
     * @param Collection $collection
@@ -52,7 +52,7 @@ class UsersImport implements ToCollection,WithStartRow
             $last_name    = $item[2];
             $ext_name     = $item[3];
             $role         = $item[4];            
-            $agency       = db::table('agency')->where('agency_shortname',$item[5])->first()->agency_id;
+            $agency       = 1;
             $email        = $item[6];
             $contact      = $item[7];
             // $province     = $item[8];
@@ -163,9 +163,9 @@ class UsersImport implements ToCollection,WithStartRow
                     'email'               => $email ,
                     'contact'             => $contact ,
                     'agency'              => db::table('agency')->where('agency_id',$agency)->first()->agency_name,                    
-                    'barangay'            => $barangay,
-                    'municipality'        => $municipality,
-                    'province'            => $province,                            
+                    // 'barangay'            => $barangay,
+                    // 'municipality'        => $municipality,
+                    // 'province'            => $province,                            
                     'region'              => db::table('geo_map')->where('reg_code',$region)->first()->reg_name,
                     'remarks'             => $error_remarks
                 ];

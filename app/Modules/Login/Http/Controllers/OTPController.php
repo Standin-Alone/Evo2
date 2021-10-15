@@ -30,7 +30,6 @@ class OTPController extends Controller
     public function verify_OTP_form(Request $request){
         $input_otp = $request->otp;
         $get_uuid = $request->user_uuid;
-
         $users_otp = $this->otpModel->get_otp_query($get_uuid);
 
         $perm_id = [];
@@ -60,7 +59,6 @@ class OTPController extends Controller
 
                     // Query
                     $getProgramValue = $this->roles_and_perms->get_supplier($uOTP->user_id);
-
                     foreach ($getProgramValue as $key => $value) {
                             $Supplier_programs[] = $value->description;
                             $Supplier_programid[] = $value->program_id;
@@ -88,43 +86,28 @@ class OTPController extends Controller
                     Session::put(['Default_Program_Id'=>$Default_Program_Id]);
                     Session::put(['Default_Program_shortname'=>$Default_Program_shortname]); 
 
+                    Session::put(['disburse_amount'=>5070.00]);
+
                     $private_secret_key = '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E645267556A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E635166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A2443264529482B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B59703373367639792442264428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';                     
                     
                     Session::put(['Download_filename'=>$Download_filename]);   
                     Session::put(['private_secret_key'=>$private_secret_key]);   
+
+                    // USER PROVINCE LIST
+                    $user_prov_list = [];
+
+                    // Query
+                    $getUserProvince = $this->roles_and_perms->get_User_Province($uOTP->user_id);
+                    
+                    foreach ($getUserProvince as $key => $value) {
+                            
+                            $user_prov_list['prov_name'] = $value->prov_name;
+                            $user_prov_list['prov_code'] = $value->prov_code;
+                    }
+
+                    Session::put(['user_prov_list'=>$user_prov_list]); 
+
                 // ==========  Peter Session  ==========
-
-
-
-                // ========== Supplier Session ==========
-                // $supplier = $this->roles_and_perms->get_supplier($get_uuid);
-  
-                // $Supplier_programs = [];
-                // $Supplier_programid = [];
-                // foreach($supplier as $s){
-                //     $Supplier_programs[] = $s->description;
-                //     $Supplier_programid[] = $s->program_id;
-                //     Session::put(['user_fullname', $s->first_name.' '.$s->middle_name.' '.$s->last_name.' '.$s->ext_name]);
-                //     Session::put(['reg_code', $s->reg]);
-                //     Session::put(['Supplier_Bank_name', $s->bank_account_name]);
-                //     Session::put(['uuid', $s->user_id]);
-                //     Session::put(['user_prv_code' => $s->iso_prv]);
-                // }
-                // Session::put(['Supplier_programs' => $Supplier_programs]);
-                // Session::put(['Supplier_programid' => $Supplier_programid]);
-                // ==========  Supplier Session  ==========
-
-                // ==========  session for default programs (latest program)  ==========
-                // $default_programs = $this->roles_and_perms->get_default_program();
-
-                // foreach($default_programs as $dp){
-                //     Session::put(['Default_Program_Desc ' => $dp->description]);
-                //     Session::put(['Default_Program_Id ' => $dp->program_id]);
-                //     Session::put(['Default_Program_shortname ' => $dp->shortname]);
-                // }
-                // ==========  session for default programs (latest program)  ==========
-
-
    
                 //  ==========  session for list of provinces under base on region
                 $provinces_on_region = $this->roles_and_perms->get_reg_and_prov($get_uuid);
@@ -134,9 +117,12 @@ class OTPController extends Controller
 
                 // ==========  group by program with role  ==========  
                 $group_by_progs = $this->roles_and_perms->get_program_with_role($get_uuid);
-
+                
                 Session::put(['progs' => $group_by_progs]);
                 // ==========  group by program with role  ==========  
+
+                $get_reg = $this->roles_and_perms->get_region_geo_map($get_uuid);
+                Session::put(['reg_reg' => $get_reg]);
 
                 $permission_id = $this->roles_and_perms->get_sys_perm();
                
@@ -192,7 +178,7 @@ class OTPController extends Controller
                     // PETER_DEV - ADDITIONAL SESSION
                     Session::put(['user_id'=>$user->user_id]); 
                     Session::put(['user_prv_code'=>$user->iso_prv]);                    
-                    Session::put(['user_fullname'=>$user->first_name.' '.$user->middle_name.' '.$user->last_name]);
+                    Session::put(['user_fullname'=>$user->first_name.' '.$user->middle_name.' '.$user->last_name.' '.$user->ext_name]);
                     Session::put(['reg_code'=>$user->reg]);  
                     Session::put(['Supplier_Bank_name'=>$user->bank_account_name]);  
                     Session::put(['Supplier_Bank_no'=>$user->bank_account_no]); 
@@ -238,12 +224,10 @@ class OTPController extends Controller
                 Session::put(['main_modules'=>$this->roles_and_perms->get_main_module($role_no_sets)]);
                 Session::put(['parent_modules'=>$this->roles_and_perms->get_parent_module()]);
                 Session::put(['sub_modules'=>$this->roles_and_perms->get_sub_module($role_no_sets)]);
- 
-                Session::put(['session_param' => $this->roles_and_perms->get_user_session($uOTP->user_id)]);
 
                 Session::put(['session_param' => $this->roles_and_perms->get_user_session($uOTP->user_id)]);
 
-                $otp_verified_response = ['success'=> true, 'message' => 'OTP Pin is Valid!', 'auth' => false];
+                $otp_verified_response = ['success'=> true, 'message' => 'OTP is Valid!', 'auth' => false];
                 return response()->json($otp_verified_response, 200);
             }
         }

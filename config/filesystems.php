@@ -32,7 +32,7 @@ return [
 
         'local' => [
             'driver' => 'local',
-            'root' => base_path(''),
+            'root' => storage_path('app'),
         ],
 
         'public' => [
@@ -43,7 +43,7 @@ return [
         ],
         'uploads' => [
             'driver' => 'local',
-            'root' => base_path('uploads/transactions'),
+            'root' => base_path('/uploads/transactions'),
             'url' => env('APP_URL').'/uploads/transactions',
             'visibility' => 'public',
         ],
@@ -56,6 +56,13 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+        ],
+
+        'dbp_files' => [
+            'driver' => 'local',
+            'root' => base_path('dbp_files'),
+            'url' => env('APP_URL').'dbp_files',
+            'visibility' => 'public',
         ],
 
     ],

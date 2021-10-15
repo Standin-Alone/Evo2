@@ -11,9 +11,7 @@ use DB;
 use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use File;
-use Mail;
 use Illuminate\Support\Facades\Storage;
-use App\Models\HomeModel;
 class KYCModuleController extends Controller
 {
 
@@ -27,17 +25,14 @@ class KYCModuleController extends Controller
      */
     public function index()
     {   
-        
-        return view("KYCModule::index");
+        $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
+        return view("KYCModule::index",compact('get_region'));
     }
 
     public function import(){        
 
         $file = request()->file('file');
-        $provider = request('provider');
-        $role = '';
-        $region = '';
-        $total_inserted_count = 0;
+        $provider  = '';
       
         $upload_path = 'temp_excel/kyc';
   
@@ -56,16 +51,33 @@ class KYCModuleController extends Controller
 
 
         $get_filename = $file->getClientOriginalName();
-
         
-        Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($file));
+        
+
+        // check file name if it has fintech provider
+        if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
+
+            if(str_contains($get_filename,'USSC')){
+                $provider = 'UMSI';
+            }elseif(str_contains($get_filename,'SPTI') ){
+                $provider = 'SPTI';
+            }
+
+            $kyc_import = new KYCImport($provider,$get_filename);
             
-
-        $kyc_import = new KYCImport($provider);
-        Excel::import($kyc_import, $file);
+            Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($file));
+            
+        
+            Excel::import($kyc_import, $file);
+            return $kyc_import->getRowCount();
+        }else{
+            return json_encode(["message" => 'filename error']);
+        }
+        
+        
 
         
-        return $kyc_import->getRowCount();       
+       
     }
 
     public function show(){
@@ -86,7 +98,7 @@ class KYCModuleController extends Controller
                                     'fintech_provider',
                                     'kyc_id',
                                     DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
-                                    'date_uploaded'                          
+                                    DB::raw('DATE_FORMAT(date_uploaded, "%M %d, %Y") as date_uploaded')                         
                                 )
                                 ->where('uploaded_by_user_id',session('uuid'))
                                 ->orderBy('date_uploaded','DESC')
@@ -96,4 +108,84 @@ class KYCModuleController extends Controller
         return Datatables::of($get_records)->make(true);
         
     }
+
+    // filter region
+    public function filter_region($region_code){
+        DB::connection()->disableQueryLog();
+
+        $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
+                        '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
+                        '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
+                        '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
+                        '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
+
+        $get_records = db::table('kyc_profiles')
+                                ->select(
+                                    'rsbsa_no',
+                                    db::raw("CONCAT(first_name,' ',last_name) as full_name"),
+                                    db::raw("CONCAT(IF(street_purok = '-' OR street_purok = '', '' , CONCAT(street_purok,', ')),'BRGY. ',barangay,', ',province,', ',region) as address"),
+                                    'fintech_provider',
+                                    'kyc_id',
+                                    DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
+                                    DB::raw('DATE_FORMAT(date_uploaded, "%M %d, %Y") as date_uploaded')                        
+                                )
+                                ->where('uploaded_by_user_id',session('uuid'))
+                                ->where('reg_code',$region_code)
+                                ->orderBy('date_uploaded','DESC')
+                                ->get();
+        
+        return Datatables::of($get_records)->make(true);
+    }
+
+    // reports
+    public function file_data_reports(){
+
+            $get_records = db::table('kyc_profiles as kp')
+                                ->select('region','province','file_name','total_rows','total_inserted', DB::raw('DATE_FORMAT(kf.date_uploaded, "%M %d, %Y") as date_uploaded'))
+                                ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                                ->groupBy('region','province')    
+                                ->orderBy('kf.date_uploaded','DESC')                            
+                                ->get();
+
+          return Datatables::of($get_records)->make(true);
+
+    }
+
+    // kyc card summary
+    public function kyc_card_summary_today(){
+
+        $summary = [];
+
+        $count_spti =db::table('kyc_profiles as kp')
+                            ->select(db::raw('count(kyc_id) as count_spti'))
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                            ->where('fintech_provider','SPTI')                                 
+                            ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->pluck('count_spti');
+
+        $count_ussc =db::table('kyc_profiles as kp')
+                            ->select(db::raw('count(kyc_id) as count_ussc'))
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                            ->where('fintech_provider','UMSI')                                 
+                            ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->pluck('count_ussc');
+
+         $count_files_today =db::table('kyc_files')          
+                            ->select(db::raw('count(kyc_file_id) as count_files_stoday'))                               
+                            ->where(db::raw('DATE(date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->pluck('count_files_stoday');
+
+        $count_records_today =db::table('kyc_profiles as kp')          
+                            ->select(db::raw('count(kyc_id) as count_records_stoday'))  
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                             
+                            ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->pluck('count_records_stoday');
+
+
+      return json_encode(["count_spti" => $count_spti, "count_ussc" =>  $count_ussc, "count_files_today" =>  $count_files_today, "count_records_today" =>  $count_records_today]);
+
+}
+    
+
+
 }

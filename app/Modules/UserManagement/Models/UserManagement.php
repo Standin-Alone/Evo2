@@ -36,7 +36,7 @@ class UserManagement extends Model
 
     public function show_user_details($uuid){
         $query = DB::table('program_permissions as pp')
-                        ->select('p.description', 'u.email', 'u.contact_no', 'r.role')
+                        ->select('p.title', 'p.description', 'u.email', 'u.contact_no', 'r.role')
                         ->leftJoin('roles as r', 'pp.role_id', '=', 'r.role_id')
                         ->leftJoin('programs as p','pp.program_id', '=', 'p.program_id')
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
@@ -76,7 +76,7 @@ class UserManagement extends Model
 
     public function get_program(){
         $query = DB::table('programs')
-                        ->select('program_id', 'description')
+                        ->select('program_id', 'title', 'shortname', 'description')
                         ->get();
 
         return $query;

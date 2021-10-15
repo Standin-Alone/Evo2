@@ -54,11 +54,31 @@ class Role_and_Permission extends Model
         return $getDefaultValue;
     }
 
+    // Peter: Province List
+    public function get_User_Province($user_id){
+        $getUserRegion = DB::table('users as u')
+                    ->select(DB::raw("u.reg"))
+                    ->where('u.user_id',$user_id)
+                    ->get();  
+            $user_reg_code = "";
+            foreach($getUserRegion as $key => $row){
+                $user_reg_code = $row->reg;
+            }    
+                
+        $getUserProvince = DB::table('geo_map as geo')
+                    ->select(DB::raw("geo.prov_code,geo.prov_name"))   
+                    ->where('geo.reg_code',$user_reg_code)
+                    ->groupBy('geo.prov_code')
+                    ->get();
+
+        return $getUserProvince;
+    }
+
 
     // Sir AJ session
     public function get_reg_and_prov($uuid){
         $query = DB::table('users as u')
-                        ->select('gr.region', 'g.prov_name')
+                        ->select('gr.region', 'g.prov_name', 'g.prov_code')
                         ->leftJoin('geo_map as g', 'u.reg', '=', 'g.reg_code')
                         ->leftJoin('geo_region as gr', 'gr.code_reg', '=', 'g.reg_code')
                         ->where('u.user_id', '=', $uuid)
@@ -69,11 +89,24 @@ class Role_and_Permission extends Model
         $data = [];
 
         foreach($query as $value){
-            $data[$value->region][] = $value->prov_name;
+            $data[$value->region][$value->prov_code] = $value->prov_name;
         }
 
         return $data;
     } 
+
+    // geo_map
+    public function get_region_geo_map($uuid){
+        $query = DB::table('users as u')
+                        ->select('g.reg_name',)
+                        ->leftJoin('geo_map as g', 'u.reg', '=', 'g.reg_code')
+                        ->leftJoin('geo_region as gr', 'gr.code_reg', '=', 'g.reg_code')
+                        ->where('u.user_id', '=', $uuid)
+                        ->groupBy('g.reg_name')
+                        ->get();
+
+        return $query;
+    }
 
     public function get_supplier_id($uuid){
         $query = DB::table('program_permissions as pp')
@@ -221,7 +254,9 @@ class Role_and_Permission extends Model
                                         ->whereIn('role_id', $role_id)  
                                         ->whereNotNull('parent_module_id')                                                                                          
                                         ->get();
-                                })->get();      
+                                })
+                                ->orderBy('sequence')
+                                ->get();      
 
         return $query;
     }

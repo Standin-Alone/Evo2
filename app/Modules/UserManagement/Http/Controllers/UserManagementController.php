@@ -18,7 +18,7 @@ class UserManagementController extends Controller
     {
         $this->UserManagementModel = new UserManagement;
 
-        // $this->middleware('session.module');
+        $this->middleware('session.module');
     }
     /**
      * Display the module welcome screen
@@ -237,7 +237,7 @@ class UserManagementController extends Controller
         Excel::import($user_import, $file);
         
 
-        return $user_import->getRowCount();        
+        return $user_import->getRowCount();       
     }
 
 

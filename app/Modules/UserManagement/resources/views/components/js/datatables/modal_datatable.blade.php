@@ -10,7 +10,7 @@
                     url: route,
                 },
                 columns: [
-                    {data: 'description', name: 'description'},
+                    {data: 'title', name: 'title'},
                     {data: 'email', name: 'email'},
                     {data: 'contact_no', name: 'contact_no'},
                     {data: 'role', name: 'role'},

@@ -4,6 +4,7 @@ namespace App\Modules\Login\Models;
 
 use Ramsey\Uuid\Uuid;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use App\Modules\Login\Models\OTP;
 use Illuminate\Support\Facades\DB;
 use App\Modules\Login\Models\Login;
@@ -63,7 +64,7 @@ class Login extends Model
                         ->leftJoin('roles as r', 'pp.role_id', '=', 'r.role_id')
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
                         ->where('u.email', '=', $email)
-                        // ->groupBy('u.user_id', 'r.role')
+                        ->groupBy('u.user_id', 'r.role')
                         // ->havingRaw('count(*)>1')
                         ->get();
 
@@ -80,7 +81,7 @@ class Login extends Model
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
                         ->where('pp.user_id', '=', $uuid)
                         ->where('u.user_id', '=', $uuid)
-                        // ->groupBy('u.user_id', 'r.role')
+                        ->groupBy('u.user_id', 'r.role')
                         // ->havingRaw('count(*)>1')
                         ->get();
 
@@ -93,16 +94,31 @@ class Login extends Model
     //     return $query;
     // }
 
-    public function reset_status_active($uuid){
-        $query = DB::table('users')->where('user_id', $uuid)->update(['password_reset_status' => 1]);
+    public function reset_status_active($uuid, $exp_date){
+        $query = DB::table('users')->where('user_id', $uuid)->update(['password_reset_status' => 1, 'password_expired_status' => $exp_date]);
         
         return $query;
     }
 
     public function get_user_id_and_password_status($uuid){
-        $query = DB::table('users')->select('user_id', 'password_reset_status')->where('user_id', '=', $uuid)->get();
+        // $query = DB::table('users')->select('user_id', 'password_reset_status')->where('user_id', '=', $uuid)->get();
+
+        $query = DB::table('users')->select('user_id', 'password_reset_status', 'password_expired_status')->where('user_id', '=', $uuid)->get();
 
         return $query;
+    }
+
+    public function check_password_expiration($exp_date){
+        $pass_start_date = $exp_date;
+        $pass_end_date = 5; //mins
+        $pass_expired_at = Carbon::parse($pass_start_date, 'GMT+8')->addMinutes($pass_end_date);
+
+        // if date_created is 5mins expired
+        if($pass_expired_at->lessThan(Carbon::now('GMT+8'))){
+            return true;
+        }
+        // if not yet expired
+        return false;
     }
 
     public function email_otp($uuid, $email, $username, $firstname, $lastname, $extname, $role_sets, $otp, $date_created){

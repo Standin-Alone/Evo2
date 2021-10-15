@@ -1,0 +1,5 @@
+<?php
+
+/**
+ *	SubmitPayoutFiles Helpers
+ */

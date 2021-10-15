@@ -8,7 +8,7 @@
 @section('page-css')
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
-	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+    <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
 
     <style>
         
@@ -43,12 +43,12 @@
 {{--  import in this section your javascript files  --}}
 @section('page-js')
     <script src="assets/plugins/gritter/js/jquery.gritter.js"></script>
-	<script src="assets/plugins/bootstrap-sweetalert/sweetalert.min.js"></script>
-	<script src="assets/js/demo/ui-modal-notification.demo.min.js"></script>
+    <script src="assets/plugins/bootstrap-sweetalert/sweetalert.min.js"></script>
+    <script src="assets/js/demo/ui-modal-notification.demo.min.js"></script>
     <script src="assets/plugins/DataTables/media/js/jquery.dataTables.js"></script>
-	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
-	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
-	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>
+    <script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
+    <script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
+    <script src="assets/js/demo/table-manage-default.demo.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
@@ -520,9 +520,9 @@
                                                     {data:'agency',title:'Agency'},
                                                     {data:'email',title:'Email',orderable:false},
                                                     {data:'contact',title:'Contact',orderable:false}, 
-                                                    {data:'barangay',title:'Email',orderable:false},
-                                                    {data:'province',title:'Province',orderable:false},
-                                                    {data:'municipality',title:'Municipality',orderable:false},
+                                                    // {data:'barangay',title:'Email',orderable:false},
+                                                    // {data:'province',title:'Province',orderable:false},
+                                                    // {data:'municipality',title:'Municipality',orderable:false},
                                                     {data:'region',title:'Region',orderable:false},
 
                                                     {data:'remarks',title:'Remarks',orderable:false},

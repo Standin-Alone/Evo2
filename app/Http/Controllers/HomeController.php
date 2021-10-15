@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
-use Mail;
+
 class HomeController extends Controller
 {
     public function index(){
@@ -16,7 +16,4 @@ class HomeController extends Controller
         }
         // return view('home');
     }
-
-
-   
 }

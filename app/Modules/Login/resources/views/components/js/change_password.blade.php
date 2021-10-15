@@ -4,15 +4,15 @@
 			errorClass: "invalid",
    			validClass: "valid",
 			rules: {
-            	old_password: {
-                	required: true
-            	},
+            	// old_password: {
+                // 	required: true
+            	// },
 				new_password: {
                 	required: true,
             	},
 			},
 			messages: {
-				old_password: '<div class="text-danger">*The old password field is required!</div>',
+				// old_password: '<div class="text-danger">*The old password field is required!</div>',
 				new_password: '<div class="text-danger">*The new password field is required!</div>',
 			},
 			// Customize placement of created message error labels. 

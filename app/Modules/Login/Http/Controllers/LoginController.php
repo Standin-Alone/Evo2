@@ -33,7 +33,7 @@ class LoginController extends Controller
          * 2.) else return to login page 
          */ 
         if(Session::has('email')){
-            // return redirect()->route("main.home");
+            return redirect()->route("main.home");
         }
         return view("Login::login_page");
     }
@@ -208,7 +208,7 @@ class LoginController extends Controller
                     $date_created = Carbon::now('GMT+8')->toDateTimeString();
 
                     // Change password_reset_status to "1"
-                    $this->loginModel->reset_status_active($uuid);
+                    $this->loginModel->reset_status_active($uuid, $date_created);
 
                     // send reset link to email
                     $this->loginModel->email_reset_link($uuid, $email, $username, $firstname, $lastname, $extname, $role_sets, $date_created);
@@ -236,9 +236,13 @@ class LoginController extends Controller
         $users = $this->loginModel->get_user_id_and_password_status($uuid);
 
         foreach($users as $user){
-            if($user->password_reset_status == 0){
-                abort(404, 'Page not found');
-            }elseif($user->password_reset_status == 1){
+            // $user->password_reset_status == 0
+            if($this->loginModel->check_password_expiration($user->password_expired_status) == true){
+                //update password reset status = '0'
+                DB::table('users')->where('user_id', $uuid)->update(['password_reset_status' => 0]);
+                // return redirect()->route("main.page");
+                return view("Login::404_error");
+            }elseif(($this->loginModel->check_password_expiration($user->password_expired_status) == false) && $user->password_reset_status == 1){
                 return view("Login::password.change_password_page", ['user'=>$user]);
             }
         }
@@ -246,7 +250,8 @@ class LoginController extends Controller
 
     public function update_password(Request $request, $uuid){
         // get request from input form
-        $old_pwd = $request->old_password;
+
+        // $old_pwd = $request->old_password;
         $new_pwd = $request->new_password;
 
         $this->loginModel = new Login;
@@ -259,10 +264,10 @@ class LoginController extends Controller
                 $role = $user_roles->role;
                 $role_sets[] = $role;
             }
-            if(Hash::check($old_pwd, $user_uuid->password)){
+            // if(Hash::check($old_pwd, $user_uuid->password)){
                 // update new user password and reset_password_link_status to "0"
 
-                DB::table('users')->where('user_id', $uuid)->update(['password' => bcrypt($new_pwd), 'password_reset_status' => 0]);
+                DB::table('users')->where('user_id', $uuid)->update(['password' => bcrypt($new_pwd), 'password_reset_status' => 0, 'password_expired_status' => NULL]);
 
                 $uuid = $user_uuid->user_id;
                 $email = $user_uuid->email;
@@ -278,11 +283,11 @@ class LoginController extends Controller
 
                 $success_response = ['success'=> true, 'message' => 'The new password is have been save!', 'auth' => false];
                 return response()->json($success_response, 200);
-            }
-            else{
-                $error_response = ['error'=> true, 'message'=>"The input old password does not match!", 'auth'=>false];
-                return response()->json($error_response, 302);
-            }
+            // }
+            // else{
+            //     $error_response = ['error'=> true, 'message'=>"The input old password does not match!", 'auth'=>false];
+            //     return response()->json($error_response, 302);
+            // }
         }
     }
 

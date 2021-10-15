@@ -68,12 +68,12 @@ class SessionModule
                         if(in_array(5, $v['Permission'])){
                             array_push($data, $key);
                             // Delete Own Content
-                            $action[$key] = 4;
+                            $action[$key] = 5;
                         }
                         if(in_array(6, $v['Permission'])){
                             array_push($data, $key);
                             // Delete Any Content
-                            $action[$key] = 4;
+                            $action[$key] = 6;
                         }
                     }
                 }

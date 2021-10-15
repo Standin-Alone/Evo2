@@ -9,7 +9,7 @@
                 {data: 'fullname_column', name: 'fullname_column'},
                 {data: 'agency_shortname', name: 'agency_shortname'},
                 {data: 'region', name: 'region'},
-                {data: 'prov', name: 'prov'},
+                // {data: 'prov', name: 'prov'},
                 {data: 'action', name: 'action', orderable: true, searchable: true},
             ]
         });

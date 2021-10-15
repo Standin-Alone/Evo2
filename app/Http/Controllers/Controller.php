@@ -11,9 +11,9 @@ class Controller extends BaseController
 {
     public function index(){
 
-        return view('home');
+        return view('auth.login');
     }
-    
+
     public function error_page(){
 
         return view('404_error');

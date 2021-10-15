@@ -34,49 +34,45 @@ class AccessController extends Controller
 
 
         
-        $modules = [];
+        // $modules = [];
 
 
-        $get_main_modules = db::table('sys_modules as sm')                              
-                            ->whereIn('sm.sys_module_id',function($query){
-                                    $query->select('sm.sys_module_id') 
-                                    ->from('sys_modules as sm')
-                                    ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
-                                    ->where('sm.status', 1)
-                                    ->whereIn('role_id',[3])                                      
-                                    ->get();
-                            })                                    
-                            ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                     
-                            ->get();
+        // $get_main_modules = db::table('sys_modules as sm')                              
+        //                     ->whereIn('sm.sys_module_id',function($query){
+        //                             $query->select('sm.sys_module_id') 
+        //                             ->from('sys_modules as sm')
+        //                             ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
+        //                             ->where('sm.status', 1)
+        //                             ->whereIn('role_id',[3])                                      
+        //                             ->get();
+        //                     })                                    
+        //                     ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                     
+        //                     ->get();
                             
                     
-        $get_parent_modules = db::table('sys_modules')
-                                    ->where('has_sub',1)    
-                                    ->where('status',1)                                    
-                                    ->get();
+        // $get_parent_modules = db::table('sys_modules')
+        //                             ->where('has_sub',1)    
+        //                             ->where('status',1)                                    
+        //                             ->get();
 
-        $get_sub_modules = db::table('sys_modules as sm')                            
-                            ->whereIn('sm.sys_module_id',function($query){
-                                    $query->select('sm.sys_module_id') 
-                                    ->from('sys_modules as sm')
-                                    ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
-                                    ->where('sm.status', 1)
-                                    ->whereIn('role_id',[3])  
-                                    ->whereNotNull('parent_module_id')                                                                                          
-                                    ->get();
-                            })                        
+        // $get_sub_modules = db::table('sys_modules as sm')                            
+        //                     ->whereIn('sm.sys_module_id',function($query){
+        //                             $query->select('sm.sys_module_id') 
+        //                             ->from('sys_modules as sm')
+        //                             ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                            
+        //                             ->where('sm.status', 1)
+        //                             ->whereIn('role_id',[7,7,7])  
+        //                             ->whereNotNull('parent_module_id')                                                                                          
+        //                             ->get();
+        //                     })                        
                                
-                            ->get();    
+        //                     ->get();    
           
-        session(['uuid'=>'436bfa53-648c-4c80-81f2-7ff14deaad0f']);
-        session(['username'=> 'sample']);
-        session(['role_name_sets'=> ['ICTS DMD']]);
-        session(['first_name'=> 'John Edcel']);
-        session(['last_name'=> 'Zenarosa']);
-        session(['ext_name'=> 'JR.']);
-        session(['main_modules'=>$get_main_modules]);        
-        session(['parent_modules'=>$get_parent_modules]);
-        session(['sub_modules'=>$get_sub_modules]);
+        
+        // session(['role'=>'RFO Program Staff']);
+        // session(['main_modules'=>$get_main_modules]);        
+        // session(['parent_modules'=>$get_parent_modules]);
+        // session(['sub_modules'=>$get_sub_modules]);
         
 
         // echo json_encode($get_main_modules);

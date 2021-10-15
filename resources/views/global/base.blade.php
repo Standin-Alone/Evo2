@@ -1,11 +1,9 @@
 @if(session()->has('main_modules'))
-	@if(!(session('main_modules')->where('routes',Route::currentRouteName())->first() || session('sub_modules')->where('routes',Route::currentRouteName())->first()) || !Route::currentRouteName() == 'main.home' || !Route::currentRouteName() == 'user.profile')		
+	@if(Route::currentRouteName() == 'user.profile' || Route::currentRouteName() == 'main.home')			
+	@elseif(!(session('main_modules')->where('routes',Route::currentRouteName())->first() || session('sub_modules')->where('routes',Route::currentRouteName())->first()))		
 		<script>window.location.href = "{{route('error_page.index')}}"</script>
 	@endif
-@else
-	<script>window.location.href = "{{route('main.home')}}"</script>
 @endif
-
 
 
 <?php echo
@@ -21,26 +19,27 @@ header('Content-Type: text/html');?>
 <!--<![endif]-->
 <head>
 	<meta charset="utf-8" />
-	<title> @yield('title','Intervetion Management Platform')</title>
+	<title> @yield('title','Interventions Management Platform')</title>
 	<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport" />
-	
 	<meta content="" name="description" />
 	<meta content="" name="author" />
+	<meta name="csrf-token" content="{{ csrf_token() }}" />
 	
 	<!-- ================== BEGIN BASE CSS STYLE ================== -->
-	<link href="http://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
-	<link href="assets/plugins/jquery-ui/jquery-ui.min.css" rel="stylesheet" />
-	<link href="assets/plugins/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet" />
-	<link href="assets/plugins/font-awesome/5.0/css/fontawesome-all.min.css" rel="stylesheet" />
-	<link href="assets/plugins/animate/animate.min.css" rel="stylesheet" />
-	<link href="assets/css/default/style.min.css" rel="stylesheet" />
-	<link href="assets/css/default/style-responsive.min.css" rel="stylesheet" />
-	<link href="assets/css/default/theme/default.css" rel="stylesheet" id="theme" />
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700" rel="stylesheet" />
+	<link href="{{url('assets/plugins/jquery-ui/jquery-ui.min.css')}}" rel="stylesheet" />
+	<link href="{{url('assets/plugins/bootstrap/4.0.0/css/bootstrap.min.css')}}" rel="stylesheet" />
+	<link href="{{url('assets/plugins/font-awesome/5.0/css/fontawesome-all.min.css')}}" rel="stylesheet" />
+	<link href="{{url('assets/plugins/animate/animate.min.css')}}" rel="stylesheet" />
+	<link href="{{url('assets/css/default/style.min.css')}}" rel="stylesheet" />
+	<link href="{{url('assets/css/default/style-responsive.min.css')}}" rel="stylesheet" />
+	<link href="{{url('assets/css/default/theme/default.css')}}" rel="stylesheet" id="theme" />
+	<link href="{{url('assets/css/farmer-module/style.css')}}" rel="stylesheet" />
 	<!-- ================== END BASE CSS STYLE ================== -->
     
 	<!-- ================== BEGIN BASE JS ================== -->
-	<script src="assets/plugins/pace/pace.min.js"></script>
-	<!-- ================== END BASE JS ================== -->
+	<script src="{{url('assets/plugins/pace/pace.min.js')}}"></script>
+
 
 	<style>
 		input.form-control.error{
@@ -78,7 +77,7 @@ header('Content-Type: text/html');?>
 						<div class="col-lg-12">
 							<div class="form-group">
 								<label>Default Password</label>
-								<input type="password"  name="default_pass" class="form-control"  placeholder="Enter your default password"   required="true">								
+								<input type="password"  name="default_pass" class="form-control"  placeholder="Enter your default password"  required="true">								
 							</div>
 						</div>
 
@@ -118,7 +117,7 @@ header('Content-Type: text/html');?>
 		<div id="header" class="header navbar-default">
 			<!-- begin navbar-header -->
 			<div class="navbar-header">
-				<a href="{{Request::url()}}" class="navbar-brand"> <img src="assets/img/logo/DA-Logo.png" width="30" height="30" style="display: inline-block"  /> <b> Interventions Management Platform</b> </a>
+				<a href="{{Request::url()}}" class="navbar-brand"> <img src="{{url('assets/img/logo/DA-Logo.png')}}" width="30" height="30" style="display: inline-block"  /> <b> Interventions Management Platform</b> </a>
 				<button type="button" class="navbar-toggle" data-click="sidebar-toggled">
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
@@ -131,15 +130,13 @@ header('Content-Type: text/html');?>
 			<ul class="navbar-nav navbar-right">							
 				<li class="dropdown navbar-user">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-						<img src="assets/img/user/user-13.jpg" alt="" /> 
-						<span class="d-none d-md-inline">John Doe 
-							
-				</span> <b class="caret"></b>
+						<img src="{{url('assets/img/images/profile/profile-user.png')}}" alt="" /> 
+						<span class="d-none d-md-inline">{{session('first_name')}} {{session('last_name')}}</span> <b class="caret"></b>
 					</a>
 					<div class="dropdown-menu dropdown-menu-right">
-						<a href="javascript:;" class="dropdown-item">Edit Profile</a>																		
+						<a href="{{route('user.profile')}}" class="dropdown-item">Edit Profile</a>																		
 						<div class="dropdown-divider"></div>
-						<a href="javascript:;" class="dropdown-item">Log Out</a>
+						<a href="{{ route('user.logout') }}" class="dropdown-item">Log Out</a>
 					</div>
 				</li>
 			</ul>
@@ -148,35 +145,51 @@ header('Content-Type: text/html');?>
 		<!-- end #header -->
 		
 		<!-- begin #sidebar -->
-		<div id="sidebar" class="sidebar sidebar-transparent gradient-enabled" >
+		<div id="sidebar" class="sidebar">
 			<!-- begin sidebar scrollbar -->
 			<div data-scrollbar="true" data-height="100%">
 				<!-- begin sidebar user -->
 				<ul class="nav">
-					<li class="nav-profile" >
+					<li class="nav-profile">
 						<a href="javascript:;" data-toggle="nav-profile">
 							<div class="cover with-shadow"></div>
 							<div class="image">
-								<img src="assets/img/user/user-13.jpg" alt="" />
+								<img src="{{url('assets/img/images/profile/profile-user.png')}}" alt="" />
 							</div>
 							<div class="info">
-							
-								John Doe
-                                 {{-- {{session('session_name')}} --}}
+								<b class="caret pull-right"></b>
+								{{session('first_name')}} {{session('last_name')}}
 								<small>
-                                    Admin
-                                    {{-- {{session('position')}} --}}
-                                </small>
+									{{session('user_region_name')}}
+								</small>
+								<br/>
 							</div>
 						</a>
-					</li>					
+					</li>
+					<li>
+						<ul class="nav nav-profile">
+							<li class="has-sub {{Route::currentRouteName() == 'user.profile' ? 'active' : null}}">
+								<a href="{{route('user.profile')}}">
+									<span>User Profile</span> 
+								</a>
+							</li>
+                        </ul>
+					</li>
 				</ul>
 				<!-- end sidebar user -->				
-					@include('sidebar.sidebar')								
+
+				{{-- @if(session('role') == 'supplier')
+					@include('sidebar.supplier')				
+				@else
+					@include('sidebar.amas')
+				@endif --}}
+				@include('sidebar.sidebar')
+				
 			</div>
 			<!-- end sidebar scrollbar -->
 		</div>
 		<div class="sidebar-bg" style="background-image: url('assets/img/cover/farmer.jpg');background-position: center;" ></div>
+		{{-- <div class="sidebar-bg" style="background-image: url('{{url('assets/img/cover/farmer.jpg')}}');background-position: center;" ></div> --}}
 		<!-- end #sidebar -->
 		
 		<!-- begin #content -->
@@ -192,19 +205,20 @@ header('Content-Type: text/html');?>
 	</div>
 	<!-- end page container -->
 	
+
 	<!-- ================== BEGIN BASE JS ================== -->
-	<script src="assets/plugins/jquery/jquery-3.2.1.min.js"></script>
-	<script src="assets/plugins/jquery-ui/jquery-ui.min.js"></script>
-	<script src="assets/plugins/bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+	<script src="{{url('assets/plugins/jquery/jquery-3.2.1.min.js')}}"></script>
+	<script src="{{url('assets/plugins/jquery-ui/jquery-ui.min.js')}}"></script>
+	<script src="{{url('assets/plugins/bootstrap/4.0.0/js/bootstrap.bundle.min.js')}}"></script>
 	<!--[if lt IE 9]>
-		<script src="assets/crossbrowserjs/html5shiv.js"></script>
-		<script src="assets/crossbrowserjs/respond.min.js"></script>
-		<script src="assets/crossbrowserjs/excanvas.min.js"></script>
+		<script src="../assets/crossbrowserjs/html5shiv.js"></script>
+		<script src="../assets/crossbrowserjs/respond.min.js"></script>
+		<script src="../assets/crossbrowserjs/excanvas.min.js"></script>
 	<![endif]-->
-	<script src="assets/plugins/slimscroll/jquery.slimscroll.min.js"></script>
-	<script src="assets/plugins/js-cookie/js.cookie.js"></script>
-	<script src="assets/js/theme/default.min.js"></script>
-	<script src="assets/js/apps.min.js"></script>
+	<script src="{{url('assets/plugins/slimscroll/jquery.slimscroll.min.js')}}"></script>
+	<script src="{{url('assets/plugins/js-cookie/js.cookie.js')}}"></script>
+	<script src="{{url('assets/js/theme/default.min.js')}}"></script>
+	<script src="{{url('assets/js/apps.min.js')}}"></script>
 	<!-- ================== END BASE JS ================== -->
         
     @section('page-js')	
@@ -218,7 +232,7 @@ header('Content-Type: text/html');?>
 		$(document).ready(function() {
 			App.init();
 			TableManageDefault.init();
-			
+			// FormPlugins.init();
 		});
 	</script>
 
@@ -232,11 +246,13 @@ header('Content-Type: text/html');?>
 	<script>
 
 		$(document).ready(function(){
-			
+
 			jQuery.validator.addMethod("password_pattern", function(value,element,param){		
 				return value.match(/^(?=.*[A-Za-z])(?=.*[\W])/);
 				
 			},'<div class="text-danger">*Your password is atleast one uppercase,one lowercase and one special character.</div>');
+
+
 
 			$("#ChangePassForm").validate({
 
@@ -246,7 +262,8 @@ header('Content-Type: text/html');?>
 						remote:{
 							url:"{{route('check-default-pass')}}",
 							type:'get'
-						},							
+						},
+						
 					},
 					new_pass:{
 						required:true,																
@@ -281,7 +298,7 @@ header('Content-Type: text/html');?>
 								swal("Successfully change your Password!", {
                                     icon: "success",
                                 }).then(()=>{                                                        
-									swal("Welcome To Intervention Management Platform", {
+									swal("Welcome To Interventions Management Platform", {
                                  	   icon: "success",
                                 	}).then(()=>{
 										$("#ChangePassModal").modal('hide');
@@ -310,10 +327,8 @@ header('Content-Type: text/html');?>
 		});
 
 		
-		
-	
-
 	</script>
+
 
 	@php
 	$check_first_login = DB::table('users')->where('user_id',session('uuid'))->first();	
@@ -324,9 +339,5 @@ header('Content-Type: text/html');?>
 				$("#ChangePassModal").modal('show');
 			</script>	
 	@endif
-
-	
-
-
 </body>
 </html>
