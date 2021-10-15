@@ -642,18 +642,5 @@
         </div>
         <!-- end panel -->
 
-     <!-- begin File Data Reports panel -->
-     <div class="panel panel-success">
-        <div class="panel-heading">
-            <h4 class="panel-title"> File Data Reports</h4>
-        </div>
-        {{-- KYC FORM PANEL --}}       
-        <div class="panel-body">    
 
-      
-    
-        </div>
-
-    </div>
-    <!-- end panel -->
 @endsection
