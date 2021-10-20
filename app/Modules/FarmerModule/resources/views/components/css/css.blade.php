@@ -6,6 +6,13 @@
 <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
 
 <style>
+    table.dataTable td {
+        font-size: 14px !important;
+    }
+    table.dataTable th {
+        font-size: 14px !important;
+    }
+    
     .table-header{
         background-color: #008a8a;
     }

@@ -60,7 +60,7 @@ class Login extends Model
         // $query = DB::select('select * from users where email = ?', [$email]);
 
         $query = DB::table('program_permissions as pp')
-                        ->select('u.user_id', 'u.email', 'u.password', 'u.password_reset_status', 'u.username', 'u.first_name', 'u.last_name', 'u.ext_name', 'r.role')
+                        ->select('u.user_id', 'u.email', 'u.password', 'u.password_reset_status', 'u.username', 'u.first_name', 'u.last_name', 'u.ext_name', 'r.role', 'u.status')
                         ->leftJoin('roles as r', 'pp.role_id', '=', 'r.role_id')
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
                         ->where('u.email', '=', $email)

@@ -16,3 +16,9 @@
 <!-- ================== BEGIN BASE JS ================== -->
 <script src="{{url('/assets/plugins/pace/pace.min.js')}}"></script>
 <!-- ================== END BASE JS ================== -->
+
+<style>
+    #submit-btn{
+        font-size: 14px;
+    }
+</style>

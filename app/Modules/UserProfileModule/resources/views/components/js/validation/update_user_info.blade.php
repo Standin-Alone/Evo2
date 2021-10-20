@@ -28,7 +28,8 @@
     var form_data = $(this);
 
     $("button.btn-prof").attr("disabled", true);
-    $(".btn-prof").text("Processing...");
+    // $(".btn-prof").text("Processing...");
+    $(".btn-prof").html('<span id="submit-btn"><i class="fas fa-spinner fa-pulse"></i> VALIDATING...</span>');
 
     $.ajax({
         headers: {
@@ -39,10 +40,10 @@
         data: form_data.serialize(),
         success: function(success_response){
                 $("button.btn-prof").attr("disabled", true);
-                $(".btn-prof").text("Saving...");
+                $(".btn-prof").html('<span id="submit-btn"><i class="fas fa-spinner fa-pulse"></i> UPDATING...</span>');
                 setTimeout(function(){
                     $("button.btn-prof").attr("disabled", false);
-                    $(".btn-prof").text("Save Profile");
+                    $(".btn-prof").html('<span id="submit-btn">SAVE PROFILE</span>');
                     Swal.fire({
                     position: 'center',
                     icon: 'success',
@@ -58,11 +59,11 @@
             console.log('error');
             setTimeout(function(){
                 $("button.btn-prof").attr("disabled", false);
-                $(".btn-prof").text("Save Profile");
+                $(".btn-prof").html('<span id="submit-btn">SAVE PROFILE</span>');
                 $('span.error_info').empty();
                 $('#user_profile_info')[0].reset();
                 // append() = Inserts content at the end of the selected elements
-                $('span.error_info').append('<div class="alert alert-danger">'+error_response.responseJSON['message']+'</div>');
+                $('span.error_info').append('<div class="alert alert-danger"><span class="close" data-dismiss="alert">×</span>'+error_response.responseJSON['message']+'</div>');
             }, 1500);
         }
     });

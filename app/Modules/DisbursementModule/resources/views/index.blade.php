@@ -94,6 +94,7 @@
                 SpinnerShow('btnApproveDisbursement','btnloadingIcon3');
                 SpinnerShow('btnApproveDisburseSupervisor','btnloadingIcon2');
                 SpinnerShow('btnExportDisbursement','btnloadingIcon5');
+                SpinnerShow('btnApproveDisburseBudget','btnloadingIcon2');
                 $('#DisbursementList-datatable').unbind('click');
                 var table = $('#DisbursementList-datatable').DataTable({ 
                     destroy: true,
@@ -123,19 +124,29 @@
                         }
                     ],
                     footerCallback: function (row, data, start, end, display) { 
-                        var TotalAmount = 0;                                        
+                        var TotalAmount = 0;                                     
                             for (var i = 0; i < data.length; i++) {
                                 var dataval = data[i]['amount'];
                                 TotalAmount += parseInt(dataval);
                             }
                             $('.Disbursement_totalselectedamt').html($.fn.dataTable.render.number(',', '.', 2, '&#8369;').display( TotalAmount ));
                             if(TotalAmount > 0 ){
-                                $('#Disbursement_selectedamt').val(TotalAmount);
-                                SpinnerHide('btnApproveDisbursement','btnloadingIcon3');
-                                SpinnerHide('btnExportDisbursement','btnloadingIcon5');                                
-                            SpinnerHide('btnApproveDisburseSupervisor','btnloadingIcon2');     
-                            }                                         
-                    
+                                if(filterby == 0){
+                                    SpinnerHide('btnApproveDisbursement','btnloadingIcon3');
+                                    SpinnerHide('btnExportDisbursement','btnloadingIcon5');                                
+                                    SpinnerHide('btnApproveDisburseSupervisor','btnloadingIcon2'); 
+                                    SpinnerHide('btnApproveDisburseBudget','btnloadingIcon2');
+                                }else{
+                                    OverlayPanel_out();
+                                    $('[data-dismiss=modal]').prop('disabled',false);
+                                    $('[data-dismiss=modal]').css('cursor','pointer'); 
+                                }
+                                $('#Disbursement_selectedamt').val(TotalAmount);                                
+                            }else{
+                                OverlayPanel_out();
+                                $('[data-dismiss=modal]').prop('disabled',false);
+                                $('[data-dismiss=modal]').css('cursor','pointer');  
+                            }
                     }
         
                 });                 
@@ -143,8 +154,25 @@
 
             $(document).on('click','.btnExportDisbursement',function(){
                 SpinnerShow('btnExportDisbursement','btnloadingIcon5');
-                window.location.href = "{{ route('DisbursementExcel.index') }}";
-                SpinnerHide('btnExportDisbursement','btnloadingIcon5');
+                    // var url = $('.DisbursementModule_downloadfile').attr('href');
+                    //     window.open(url,'_blank');  
+                        // route('download.BeneficiariesExcel'
+                // window.location.href = "{{ route('DisbursementExcel.index') }}";
+                var selected_prov_code = $('.selectProvince').val();
+                $.ajax({
+                    type:'get',
+                    url:"{{ route('download.BeneficiariesExcel') }}",
+                    data:{selected_prov_code:selected_prov_code},
+                    success:function(data){
+                        var url = $('.DisbursementModule_downloadfile').attr('href');
+                        window.open(url,'_blank');  
+                        SpinnerHide('btnExportDisbursement','btnloadingIcon5');        
+                },
+                error: function (textStatus, errorThrown) {
+                        console.log('Err');
+                    }
+                }); 
+                
             });
 
             function getProvinceList(){
@@ -202,7 +230,6 @@
 
             $(document).on('change','.selectProvince',function(){
                 var selected_prv_code = $(this).val();
-                SpinnerShow('selectProvince',selected_prv_code);
                 var table = $('#DisbursementList-datatable').DataTable();
                 table.clear().draw();  
                 $('.selectedbatchall').prop('checked',false); 
@@ -218,7 +245,6 @@
                 if(filter2 === true) {filterby = 1;}
                 DisbursementApprovalList(selected_prv_code,filterby);
                 getFundSource();
-                SpinnerHide('selectProvince',selected_prv_code);
             });
 
             $(document).on('change','.selectFundsource',function(event){
@@ -232,6 +258,7 @@
             $(document).on('click','.btnApproveDisbursement, .btnApproveDisburseSupervisor',function(){
                 SpinnerShow('btnApproveDisbursement','btnloadingIcon3');
                 SpinnerShow('btnApproveDisburseSupervisor','btnloadingIcon2');
+                SpinnerShow('btnExportDisbursement','btnloadingIcon5');
                 Swal.fire({
                     title: 'Are you sure',
                     text: "You want to Approve the Beneficiaries?",
@@ -274,9 +301,8 @@
                                     if(filter1 === true) {filterby = 0;}
                                     if(filter2 === true) {filterby = 1;}
                                     DisbursementApprovalList(selected_prv_code,filterby);
+                                    $('#ApprovedDisbursementList-datatable').DataTable().ajax.reload(); 
                                     DisbursementList();
-                                    SpinnerHide('btnApproveDisbursement','btnloadingIcon3');
-                                    SpinnerHide('btnApproveDisburseSupervisor','btnloadingIcon2');
                             },
                             error: function (textStatus, errorThrown) {
                                     console.log('Err');
@@ -317,7 +343,6 @@
                         selected_fund_source = $('#selectedFundSource').val();
                         selected_fund_amount = $('#selectedFundAmount').val();
                         total_amount = $('#Disbursement_selectedamt').val();
-                        // return console.log(selected_fund_amount+' - '+total_amount);
                         if(selected_prv_code != "" && selected_fund_source !=""){
                             if(parseInt(selected_fund_amount) >= parseInt(total_amount)){
                                 $.ajax({
@@ -372,8 +397,7 @@
                         }
                         
                     }else{
-                        SpinnerHide('btnApproveDisburseBudget','btnloadingIcon2');
-                        
+                        SpinnerHide('btnApproveDisburseBudget','btnloadingIcon2');                        
                     }
                 });
             }); 
@@ -612,6 +636,7 @@
            $(document).on('click','#customRadio1,#customRadio2',function(){
                 getProvinceList();
                 getFundSource();
+                DisbursementApprovalList("",0);                
            });
 
            function getNewlyUploadedBeneficiaries(){
@@ -623,10 +648,8 @@
                 "bPaginate": false,
                 "bFilter": false,
                 "bInfo": false,
-                // scrollY: "200px",
                 ajax: "{{ route('get.NewlyUploaded') }}",
                 columns: [                         
-                        // {data: 'province', name: 'province', title:'PROVINCE'},
                         {data: "province",name: "province",
                         render: function(data,type,row) {
                             @if (session('role_id') == 4)
@@ -664,10 +687,8 @@
                 "bPaginate": false,
                 "bFilter": false,
                 "bInfo": false,
-                // scrollY: "200px",
                 ajax: "{{ route('get.BeneficiariesforApproval') }}",
                 columns: [ 
-                        // {data: 'province', name: 'province', title:'PROVINCE'},
                         {data: "province",name: "province",
                         render: function(data, type, row) {
                             @if (session('role_id') != 4)
@@ -679,7 +700,7 @@
                         {data: 'approved_batch_seq', name: 'approved_batch_seq', title:'BATCH NUMBER'},
                         {data: 'total_records', name: 'total_records',render: $.fn.dataTable.render.number( ',', '.', 0,  ).display, title: 'TOTAL RECORDS'},
                         {data: 'amount', name: 'amount',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title: 'TOTAL AMOUNT'},
-                        {data: 'isapproved', name: 'isapproved',  title:'ENDORSEMENT',
+                        {data: 'isapproved', name: 'isapproved',  title:'ENDORSER',
                             render: function(data, type, row) {
                                 if(row.isapproved == 1){
                                     return '<span class="fa fa-2x fa-check-circle text-primary"></span>';
@@ -687,7 +708,7 @@
                                 return '<span class="fa fa-2x fa-circle"></span>';
                             }
                         },
-                        {data: 'approved_by_b', name: 'approved_by_b',  title:'BUDGET',
+                        {data: 'approved_by_b', name: 'approved_by_b',  title:'REVIEWER',
                             render: function(data, type, row) {
                                 if(row.approved_by_b == 1){
                                     return '<span class="fa fa-2x fa-check-circle text-primary"></span>';
@@ -695,7 +716,7 @@
                                 return '<span class="fa fa-2x fa-circle"></span>';
                             }
                         },
-                        {data: 'approved_by_d', name: 'approved_by_d',  title:'DISBURSEMENT',
+                        {data: 'approved_by_d', name: 'approved_by_d',  title:'APPROVER',
                             render: function(data, type, row) {
                                 if(row.approved_by_d == 1){
                                     return '<span class="fa fa-2x fa-check-circle text-primary"></span>';
@@ -729,7 +750,6 @@
                 "bPaginate": false,
                 "bFilter": false,
                 "bInfo": false,
-                // scrollY: "200px",
                 ajax: "{{ route('get.DisbursementTotalApproved') }}",
                 columns: [ 
                     {data: 'province', name: 'province', title:'PROVINCE'},
@@ -775,7 +795,6 @@
                     url:"{{ route('get.FilteredProvinceList') }}" + '?selected_prv_code=' + selected_prv_code,
                     success:function(data){                    
                         $('.option_prov_code').remove();
-                        // <option class="option_prov_code" value="" selected>Select Province</option>
                         $('.selectProvince').append($('<option class="option_prov_code" value="" selected>Select Province</option>'));
                         for(var i=0;i<data.length;i++){                   
                                 $('.selectProvince').append($('<option>', {class:'option_prov_code',value:data[i].prov_code, text:data[i].prov_name}));
@@ -797,6 +816,7 @@
 <div id="overlay"></div>
 <!-- <img src='{{url('assets/img/images/image-1.png')}}' alt='' /> -->
 <!-- STORE DATA OBJECT -->
+
 <input type="hidden" id="selectedProgramDesc" value="{{session('Default_Program_Desc')}}">
 <input type="hidden" id="selectedProgramId" value="{{session('Default_Program_Id')}}">
 <input type="hidden" id="selectedkycid" value="0">
@@ -805,10 +825,11 @@
 <input type="hidden" id="selectedProgramId" value="">
 <input type="hidden" id="selectedFundSource" value="">
 <input type="hidden" id="selectedFundAmount" value="0">
+<a href="{{route('generate.BeneficiariesExcel')}}" class="DisbursementModule_downloadfile" style="display:none;"></a>
 <div class="row">
     <div class="col-md-8">
         <div class="input-group">
-            <h1 class="page-header">Batch Management</h1>                                  
+            <h1 class="page-header">Batch Management</h1>                       
         </div>
     </div>
     <div class="col-md-4">

@@ -194,15 +194,10 @@
                     url:"{{ route('validate.HeadApprovalPin') }}",
                     data:{folder_filename:folder_filename,filename:filename,filetype:filetype,_token:_token},
                         success:function(data){                         
-                                $('.errormsg').css('display','none');                                
-                                Swal.fire({
-                                    allowOutsideClick: false,
-                                    title:'Please wait..',
-                                    text:'downloading file in progress.',
-                                    icon:'info'
-                                });
-                                $('#HeadApprovalList-datatable').unbind('click');
-                                window.location = $('.HeadApproval_downloadfile').attr('href');
+                                $('.errormsg').css('display','none');   
+                                var url = $('.HeadApproval_downloadfile').attr('href');
+                                window.open(url,'_blank');
+                                $('#HeadApprovalList-datatable').DataTable().ajax.reload(); 
                                 HeadApprovalList();
                                 SpinnerHide('btnDownloadZipFile',filename);                      
                         },

@@ -63,13 +63,15 @@
             ajax: "{{route('user.show')}}",
             columns:[
                     {data:'full_name',title:'Name'},
+                    {data:'role',title:"Role"},
                     {data:'shortname',title:'Program'},
                     {data:'email',title:"email",visible:false},
                     {data:'contact_no',title:"contact_no",visible:false},
-                    {data:'reg_name',title:"reg_name",visible:false},
+                    {data:'reg_name',title:"Region"},
                     {data:'prov_name',title:"prov_name",visible:false},
                     {data:'mun_name',title:"mun_name",visible:false},
                     {data:'bgy_name',title:"bgy_name",visible:false},
+                   
                     {data:'id',
                         title:"Actions",
                         render: function(data,type,row){       
@@ -80,10 +82,10 @@
                                         "<i class='fa fa-edit'></i> Edit"+
                                     "</button>   "+(
                                     row['status'] == 1 ?
-                                    "<button type='button' class='btn btn-outline-danger set-status-btn ' id='"+data+"' status='"+row["status"]+"' >"+
+                                    "<button type='button' class='btn btn-outline-danger set-status-btn ' id='"+row['user_id']+"' status='"+row["status"]+"' >"+
                                         "<i class='fa fa-trash'></i> Disable"+
                                     "</button>  " :
-                                    "<button type='button' class='btn btn-outline-success set-status-btn' id='"+data+"' status='"+row["status"]+"' >"+
+                                    "<button type='button' class='btn btn-outline-success set-status-btn' id='"+row['user_id']+"' status='"+row["status"]+"' >"+
                                         "<i class='fa fa-undo'></i> Enable"+
                                     "</button> ")
                         }
@@ -97,7 +99,7 @@
             
             let currentRow = $(this).closest('tr');
             let id =  $(this).attr('user_id');
-            
+            let full_name = load_datatable.row(currentRow).data()['full_name'];
             let email = load_datatable.row(currentRow).data()['email'];
             let contact = load_datatable.row(currentRow).data()['contact_no'];
             let program = load_datatable.row(currentRow).data()['shortname'];
@@ -106,6 +108,8 @@
             let mun_name = load_datatable.row(currentRow).data()['mun_name'];
             let prov_name = load_datatable.row(currentRow).data()['prov_name'];
             let bgy_name = load_datatable.row(currentRow).data()['bgy_name'];
+
+            let role = load_datatable.row(currentRow).data()['role'];
          
             $("#user_id").val(id);
             
@@ -117,6 +121,9 @@
             $("#mun_name").text(mun_name);
             $("#prov_name").text(prov_name);
             $("#bgy_name").text(bgy_name);
+
+            $("#name").text(full_name);
+            $("#role_view").text(role);
 
       
 
@@ -149,7 +156,7 @@
                                     icon: "success",
                                 }).then(()=>{                    
                                     
-                                    load_datatable.ajax.reload();
+                                    $("#load-datatable").DataTable().ajax.reload();
                                     
                                 });
                             },
@@ -653,6 +660,22 @@
 
                 }
             });
+
+
+            // filter by region
+            $("#filter-region").change(function(){
+                    region_code = $("option:selected",this).val();
+                    region_name = $("option:selected",this).text();
+                 
+                    if(region_code == ""){
+                        $("#load-datatable").DataTable().column(4).search('').draw();
+                        
+                    }else{
+                        $("#load-datatable").DataTable().column(4).search(region_name).draw();
+                        
+                    }
+                     
+                });
             
         })
 
@@ -687,7 +710,25 @@
         </button>
     </div>
     <div class="panel-body">
-      
+
+   
+        <div class="panel panel-primary ">
+            <div class="panel-heading">Filter by Region</div>
+            <div class="panel-body border">
+                <div class="form-group">
+                <label for=""></label>
+                <select  class="form-control filter-select" name="filter_region" id="filter-region">
+                    <option value=""  selected>-- Select Region --</option>                        
+                    @foreach ($get_regions as $value)
+                    <option value="{{$value->reg_code}}">{{$value->reg_name}}</option>                        
+                        
+                    @endforeach
+
+                </select>
+                </div>
+            </div>
+        </div>
+
         
         <table id="load-datatable" class="table table-striped table-bordered">            
             <thead>
@@ -862,7 +903,7 @@
                                 <div class="note-icon"><i class="fas fa-user"></i></div>
                                 <div class="note-content">
                                     <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="name">John Edcel Zenarosa</label>
-                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role">CO Banner Program</label>
+                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role_view">CO Banner Program</label>
                                 </div>
                             </div>
 

@@ -136,10 +136,10 @@
         <table id="rfo-program-focal-datatable" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Province</th>
-                    <th>No of Uploaded KYC</th>
-                    <th>No of Disbursed</th>
-                    <th>Total Disbursed Amount</th>
+                    <th>PROVINCE</th>
+                    <th>NO. OF UPLOADED KYC</th>
+                    <th>NO. OF DISBURSED</th>
+                    <th>TOTAL DISBURSED AMOUNT</th>
                 </tr>
             </thead>
             <tbody>
@@ -155,17 +155,22 @@
         <hr>
         <br>
         <span class="mt-5">
-            <b> Report by Approval Level </b>
+            <div class="note note-primary">
+                <div class="note-icon"><i class="far fa-file-alt"></i></div>
+                <div class="note-content mt-2 mb-2">
+                  <h4><b> REPORTS BY APPROVAL LEVEL </b></h4>
+                </div>
+            </div>
         </span>
         <br>
         <table id="co-program-focal-report_approval" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Province</th>
-                    <th>Total uploaded</th>
-                    <th>Generate Beneficiaries</th>
-                    <th>Budget</th>
-                    <th>Disbursement</th>
+                    <th>PROVINCE</th>
+                    <th>TOTAL UPLOADED</th>
+                    <th>GENERATE BENEFECIARIES</th>
+                    <th>BUDGET</th>
+                    <th>DISBURSEMENT</th>
                     {{-- <th>Final Approval</th> --}}
                 </tr>
             </thead>
@@ -185,21 +190,26 @@
 @else
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">By CO Program Focal Summary</h4>
+        <h4 class="panel-title">BY CO PROGRAM FOCAL SUMMARY</h4>
     </div>
     <div class="panel-body">
         <br>
         <span class="mt-5">
-            <b> By Region </b>
+            <div class="note note-primary">
+                <div class="note-icon"><i class="far fa-file-alt"></i></div>
+                <div class="note-content mt-2 mb-2">
+                  <h4><b> BY REGION </b></h4>
+                </div>
+            </div>
         </span>
         <br>
         <table id="co-program-focal-datatable-by-region" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Region</th>
-                    <th>No of Uploaded KYC</th>
-                    <th>No of Disbursed</th>
-                    <th>Total Disbursed Amount</th>
+                    <th>REGION</th>
+                    <th>NO. OF UPLOADED KYC</th>
+                    <th>NO. OF DISBURSED</th>
+                    <th>TOTAL DISBURSED AMOUNT</th>
                 </tr>
             </thead>
             <tbody>
@@ -215,17 +225,22 @@
         <hr>
         <br>
         <span class="mt-5">
-            <b> By Region and Province </b>
+            <div class="note note-primary">
+                <div class="note-icon"><i class="far fa-file-alt"></i></div>
+                <div class="note-content mt-2 mb-2">
+                  <h4><b> BY REGION AND PROVINCE </b></h4>
+                </div>
+            </div>
         </span>
         <br>
         <table id="co-program-focal-datatable" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Region</th>
-                    <th>Province</th>
-                    <th>No of Uploaded KYC</th>
-                    <th>No of Disbursed</th>
-                    <th>Total Disbursed Amount</th>
+                    <th>REGION</th>
+                    <th>PROVINCE</th>
+                    <th>NO. OF UPLOADED KYC</th>
+                    <th>NO. OF DISBURSED</th>
+                    <th>TOTAL DISBURSED AMOUNT</th>
                 </tr>
             </thead>
             <tbody>
@@ -242,19 +257,24 @@
         <hr>
         <br>
         <span class="mt-5">
-            <b> By Region, Province. Municipality, and Barangay </b>
+            <div class="note note-primary">
+                <div class="note-icon"><i class="far fa-file-alt"></i></div>
+                <div class="note-content mt-2 mb-2">
+                  <h4><b> BY REGION, PROVINCE, MUNICIPALITY AND BARANGAY </b></h4>
+                </div>
+            </div>
         </span>
         <br>
         <table id="co-program-focal-datatable-by-region-province-municipality-and-barangay" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Region</th>
-                    <th>Province</th>
-                    <th>Municipality</th>
-                    <th>Barangay</th>
-                    <th>No of Uploaded KYC</th>
-                    <th>No of Disbursed</th>
-                    <th>Total Disbursed Amount</th>
+                    <th>REGION</th>
+                    <th>PROVINCE</th>
+                    <th>MUNICIPALITY</th>
+                    <th>BARANGAY</th>
+                    <th>NO. OF UPLOADED KYC</th>
+                    <th>NO. OF DISBURSED</th>
+                    <th>TOTAL DISBURSED AMOUNT</th>
                 </tr>
             </thead>
             <tbody>
@@ -273,17 +293,22 @@
         <hr>
         <br>
         <span class="mt-5">
-            <b> Report by Approval Level </b>
+            <div class="note note-primary">
+                <div class="note-icon"><i class="far fa-file-alt"></i></div>
+                <div class="note-content mt-2 mb-2">
+                  <h4><b>REPORT BY APPROVAL LEVEL</b></h4>
+                </div>
+            </div>
         </span>
         <br>
         <table id="co-program-focal-report_approval" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Province</th>
-                    <th>Total uploaded</th>
-                    <th>Generate Beneficiaries</th>
-                    <th>Budget</th>
-                    <th>Disbursement</th>
+                    <th>PROVINCE</th>
+                    <th>TOTAL UPLOADED</th>
+                    <th>GENERATE BENEFECIARIES</th>
+                    <th>BUDGET</th>
+                    <th>DISBURSEMENT</th>
                     {{-- <th>Final Approval</th> --}}
                 </tr>
             </thead>
@@ -314,9 +339,9 @@
             <thead class="table-header">
                 <tr>
                     <th></th>
-                    <th>No of Uploaded KYC</th>
-                    <th>No of Disbursed</th>
-                    <th>Total Disbursed Amount</th>
+                    <th>NO. OF UPLOADED KYC</th>
+                    <th>NO. OF DISBURSED</th>
+                    <th>TOTAL DISBURSED AMOUNT</th>
                 </tr>
             </thead>
             <tbody>

@@ -28,8 +28,8 @@
 		var form_data = $(this);
 
         $("button.btn-change-pass").attr("disabled", true);
-        $(".btn-change-pass").text("Processing...");
-
+		$(".btn-change-pass").html('<span id="submit-btn"><i class="fas fa-spinner fa-pulse"></i> VALIDATING...</span>');
+		
 		$.ajax({
 			headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -38,9 +38,11 @@
 			url: route,
 			data: form_data.serialize(),
 			success: function(success_response){
+				$("button.btn-change-pass").attr("disabled", true);
+				$(".btn-change-pass").html('<span id="submit-btn"><i class="fas fa-spinner fa-pulse"></i> SAVING...</span>');
                 setTimeout(function(){
 					$("button.btn-change-pass").attr("disabled", false);
-					$(".btn-change-pass").text("Confirm new password");
+                	$(".btn-change-pass").html('<span id="submit-btn">SAVE NEW PASSWORD</span>');
                     Swal.fire({
 					position: 'center',
 					icon: 'success',
@@ -51,17 +53,7 @@
                         window.location = "{{route('main.page')}}";
                     });
                 }, 1500);
-          	},
-			error: function(error_response){
-                setTimeout(function(){
-					$("button.btn-change-pass").attr("disabled", false);
-					$(".btn-change-pass").text("Confirm new password");
-                    $('span.error_password').empty();
-				    $('#change_password_form')[0].reset();
-				    // append() = Inserts content at the end of the selected elements
-				    $('span.error_password').append('<div class="alert alert-danger">'+error_response.responseJSON['message']+'</div>');
-                }, 1500);
-			}
+          	}
 		});
 	});
 </script>

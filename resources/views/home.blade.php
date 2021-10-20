@@ -24,12 +24,12 @@
 </script>
 
 @section('content')
-<div class="jumbotron jumbotron-fluid">
-    <div class="container">
-        <img src="{{url('assets/img/logo/WELCOME_PAGE_LOGO.jpg')}}" class="img-fluid" style="display: inline-block; width:1050px; height:600px;  margin-top: -50px"/>
-        <h2 class="mt-3">Welcome! {{session()->get('first_name')}} {{session()->get('middle_name')}} {{session()->get('last_name')}} {{session()->get('ext_name')}}</h1>
-        <h4 class="mt-3">To</h3>
-        <h2 class="mt-3">Interventions Management Platform </h1>
+<div class="jumbotron jumbotron-fluid" style="background-color: transparent !important;">
+<img src="{{url('assets/img/logo/WELCOME_PAGE_LOGO.png')}}" class="" style=" width:35%; height:auto; display: block;margin-left: auto;margin-right: auto;"/>
+    <div class="container" style="margin-top: -3px;">
+        <h3 class="">Welcome!  <span class="text-success">{{session()->get('first_name')}} {{session()->get('middle_name')}} {{session()->get('last_name')}} {{session()->get('ext_name')}}</span></h3>
+        <h5 class="">To</h5>
+        <h3 class="">Interventions Management Platform </h3>
         <p class="lead"></p>
     </div>
 </div>

@@ -5,7 +5,7 @@
         var table = $('#interv-datatable').DataTable({
             destroy: true,
             processing: true,
-            serverSide: true,
+            serverSide: false,
                 ajax: {
                     url: route,
                 },

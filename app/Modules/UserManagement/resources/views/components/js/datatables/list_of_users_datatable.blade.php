@@ -2,9 +2,10 @@
     $(function() {
         var table = $('#user-datatable').DataTable({
             processing: true,
-            serverSide: true,
+            serverSide: false,
             responsive: true,
             ajax: "{{route('list-of-users.index')}}",
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
             columns: [
                 {data: 'fullname_column', name: 'fullname_column'},
                 {data: 'agency_shortname', name: 'agency_shortname'},

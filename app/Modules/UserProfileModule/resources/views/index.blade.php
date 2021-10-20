@@ -64,7 +64,7 @@
     <div class="col-lg-6">
         <div class="panel panel-inverse">
             <div class="panel-heading">
-                <h4 class="panel-title">Edit Info</h4>
+                <h4 class="panel-title">EDIT INFO</h4>
             </div>
             <div class="panel-body">
                 {{-- <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
@@ -77,26 +77,26 @@
 
                     <span class="error_info"></span>
                     <div class="form-group m-b-15">
-                        <label for="">Email</label>
+                        <label for=""><span class="text-danger">*</span> EMAIL</label>
                         <input type="email" name="email" class="form-control form-control-lg" placeholder="Email" />
                         <span class="error_msg"></span>
                     </div>
 
                     <div class="form-group m-b-15">
-                        <label for="">Contact No.</label>
+                        <label for=""><span class="text-danger">*</span> CONTACT NO.</label>
                         <input type="number" name="contact" class="form-control form-control-lg" placeholder="Contact No." />
                         {{-- <span class="error_msg"></span> --}}
                     </div>
 
                     <div class="">
-                    <button type="submit" class="btn btn-success btn-block btn-lg btn-prof" id="btn_info_load" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Updating Info">Save Profile</button>
+                    <button type="submit" id="submit-btn" class="btn btn-success btn-block btn-lg btn-prof" id="btn_info_load" data-loading-text="<i class='fa fa-circle-o-notch fa-spin'></i> Updating Info">Save Profile</button>
                     </div>
                 </form>
             </div>
         </div>
         <div class="panel panel-inverse">
             <div class="panel-heading">
-                <h4 class="panel-title">Password</h4>
+                <h4 class="panel-title">CHANGE PASSWORD</h4>
             </div>
             <div class="panel-body">
                 {{-- <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
@@ -109,25 +109,25 @@
     
                     <span class="error_password"></span>
                     <div class="form-group m-b-15">
-                        <label for="">Current Password</label>
+                        <label for=""><span class="text-danger">*</span> CURRENT PASSWORD</label>
                         <input type="password" name="current_password" class="form-control form-control-lg" placeholder="Current Password" />
                         <span class="error_msg"></span>
                     </div>
     
                     <div class="form-group m-b-15">
-                        <label for="">New Password</label>
+                        <label for=""><span class="text-danger">*</span> NEW PASSWORD</label>
                         <input type="password" name="new_password" class="form-control form-control-lg" placeholder="New Password" />
                         <span class="error_msg"></span>
                     </div>
     
                     <div class="form-group m-b-15">
-                        <label for="">Confirm Password</label>
+                        <label for=""><span class="text-danger">*</span> CONFIRM PASSWORD</label>
                         <input type="password" name="confirm_password" class="form-control form-control-lg" placeholder="Confirm Password" />
                         <span class="error_msg"></span>
                     </div>
     
                     <div class="">
-                        <button type="submit" class="btn btn-success btn-block btn-lg btn-pass">Change password</button>
+                        <button type="submit" id="submit-btn" class="btn btn-success btn-block btn-lg btn-pass">CHANGE PASSWORD</button>
                     </div>
                 </form>
             </div>
@@ -136,7 +136,7 @@
     <div class="col-lg-6">
         <div class="panel panel-inverse">
             <div class="panel-heading">
-                <h4 class="panel-title">User</h4>
+                <h4 class="panel-title">USER</h4>
             </div>
             <div class="panel-body">
                 {{-- <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
@@ -153,10 +153,10 @@
                 <table id="profile-datatable" class="table table-bordered table-hover mt-5 mb-5 text-center display responsive nowrap" style="width:100%;">
                     <thead class="table-header">
                       <tr>
-                        <th scope="col">Program</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Contact No.</th>
-                        <th scope="col">Role</th>
+                        <th scope="col">PROGRAM</th>
+                        <th scope="col">EMAIL</th>
+                        <th scope="col">CONTACT NO.</th>
+                        <th scope="col">ROLE</th>
                       </tr>
                     </thead>
                     <tbody>

@@ -70,9 +70,11 @@ class UsersImport implements ToCollection,WithStartRow
 
             $check_email = db::table('users')->where('email',$email)->get();
 
-     
+            
        
-            if($check_email->isEmpty() 
+            if(
+                 $check_email->isEmpty() 
+                && (Str::contains(strtolower($email),'@gmail.com') || Str::contains(strtolower($email),'@yahoo.com') || Str::contains(strtolower($email),'@da.gov.ph'))                                                
                 && $first_name   != '' 
                 && $last_name    != ''
                 && $role         != ''
@@ -80,6 +82,7 @@ class UsersImport implements ToCollection,WithStartRow
                 && $email        != ''
                 && $contact      != ''
                 && $geo_map
+                 
                 ){
 
                 $user_id        = Uuid::uuid4();
@@ -139,6 +142,13 @@ class UsersImport implements ToCollection,WithStartRow
                 {
                     $error_remarks = 'Email is already use.';
                 }
+
+                if(!(Str::contains(strtolower($email),'@gmail') || Str::contains(strtolower($email),'@yahoo.com') || Str::contains(strtolower($email),'@da.gov.ph')))
+                {
+                    
+                    $error_remarks = ($error_remarks == ''  ? 'You can use gmail, yahoo or da.gov.ph email only.' : $error_remarks.','.'You can use gmail, yahoo or da.gov.ph email only.');
+                }
+
 
              
                 if($first_name == '' || $last_name == ''){

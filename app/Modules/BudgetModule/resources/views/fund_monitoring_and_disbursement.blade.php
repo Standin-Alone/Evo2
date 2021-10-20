@@ -42,7 +42,7 @@
 <!-- begin breadcrumb -->
 <ol class="breadcrumb pull-right">
     <li class="breadcrumb-item"><a href="{{route('main.home')}}">Home</a></li>
-    <li class="breadcrumb-item active">Monitoring and Disbursement</li>
+    <li class="breadcrumb-item active">Fund Monitoring and Disbursement</li>
 </ol>
 
 <div class="row mt-5">
@@ -52,7 +52,7 @@
 <!-- begin panel -->
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">Fund Monitoring and Disbursement</h4>
+        <h4 class="panel-title">FUND MONITORING AND DISBURSEMENT</h4>
     </div>
     <div class="panel-body">
         <br>
@@ -62,15 +62,15 @@
         <table id="disbursement_table" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
             <thead class="table-header">
                 <tr>          
-                    <th>Program</th>
+                    <th>PROGRAM</th>
                     {{-- <th>Particulars</th> --}}
-                    <th>Region</th>
+                    <th>REGION</th>
                     {{-- group by program_id and region. SUM(amount) on fund_source table--}}
-                    <th>Total amount</th>
+                    <th>TOTAL AMOUNT</th>
                     {{-- group by program_id, SUM(amount) on excel_export table --}}
-                    <th>Disburse amount</th>
+                    <th>DISBURSE AMOUNT</th>
                     {{-- (Total amount subtract to Disburse amount)  --}}
-                    <th>Remaining amount</th>
+                    <th>REMAINING AMOUNT</th>
                     {{-- <th>View Fund Source Breakdown</th> --}}
                 </tr>
             </thead>
@@ -83,7 +83,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content  style="width:100%;">
                     <div class="modal-header" style="background-color: #008a8a">
-                        <h4 class="modal-title" style="color: white">Computation of remaining amount</h4>
+                        <h4 class="modal-title" style="color: white">DISBURSE BREAKDOWN</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                     </div>
                     <div class="modal-body">
@@ -91,8 +91,8 @@
                         <table id="rffa_disbursement_breakdown_link"class="table table-bordered table-hover mt-5 mb-5 text-center" style="width:100%;">
                             <thead  class="table-header">
                               <tr>
-                                <th scope="col" style="color: white">Program</th>
-                                <th scope="col" style="color: white">Amount</th>
+                                <th scope="col" style="color: white">PROGRAM</th>
+                                <th scope="col" style="color: white">AMOUNT</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -105,7 +105,7 @@
                         {{--modal body end--}}
                     </div>
                     <div class="modal-footer">
-                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">CLOSE</a>
                     </div>
                 </div>
             </div>

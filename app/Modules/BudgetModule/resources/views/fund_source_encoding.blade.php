@@ -62,7 +62,7 @@
 <!-- begin panel -->
 <div class="panel panel-inverse mt-5">
     <div class="panel-heading">
-        <h4 class="panel-title">Fund Source Encoding</h4>
+        <h4 class="panel-title">FUND SOURCE ENCODING</h4>
     </div>
     <div class="panel-body">
         <form id="fund_encoding_ors" method="POST" action="{{route('submit_encoding_form')}}" class="form-control-with-bg">
@@ -73,7 +73,7 @@
                 <!-- begin col-8 -->
                 <div class="col-md-8 offset-md-2">
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">Program</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> PROGRAM</label>
                         <div class="col-md-6">
                             <select class="form-control" name="select_program" id="select_program">
                                 <option value="">-- Select program --</option>
@@ -86,7 +86,7 @@
                     </div>
 
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">UACS</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> UACS</label>
                         <div class="col-md-6">
                             <input type="number" name="uacs" placeholder="input uacs..." class="form-control" />
                             <span class="error_msg"></span>
@@ -94,7 +94,7 @@
                     </div>
 
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">GFI</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> GFI</label>
                         <div class="col-md-6">
                             <select class="form-control" name="select_gfi" id="select_gfi">
                                 <option value="">-- Select GFI --</option>
@@ -106,7 +106,7 @@
                     </div>
 
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">Region</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> REGION</label>
                         <div class="col-md-6">
                             <select class="form-control" name="select_region" id="select_region">
                                 <option value="">-- Select region --</option>
@@ -128,7 +128,7 @@
                     </div> --}}
 
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">No. of Farmers</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> NO. OF FARMERS</label>
                         <div class="col-md-6">
                             <input id="no_of_farmers" type="number" name="no_of_farmers" placeholder="" class="form-control" />
                             <span class="error_msg"></span>
@@ -136,7 +136,7 @@
                     </div>
 
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">Amount</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> AMOUNT</label>
                         <div class="col-md-6">
                             <input id="amount" type="text" name="amount" placeholder="0.00" class="form-control" />
                             <span class="error_msg"></span>
@@ -144,12 +144,12 @@
                     </div>
 
                     <div class="form-group row m-b-10">
-                        <label class="col-md-3 text-md-right col-form-label">Particulars</label>
+                        <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> PARTICULARS</label>
                         <div class="col-md-6">
                             <textarea class="form-control" rows="3" name="particulars"></textarea>
                             <span class="error_msg"></span>
                             <br>
-                            <button type="submit" name="create_fund_btn" class="btn btn-block btn-danger" disabled>Submit</button>
+                            <button type="submit" name="create_fund_btn" class="btn btn-block btn-danger" disabled>SUBMIT</button>
                             <span class='text-danger alert_note'></span> 
                         </div>
                     </div>

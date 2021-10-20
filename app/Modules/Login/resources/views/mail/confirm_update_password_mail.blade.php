@@ -580,7 +580,7 @@
 
                                                             <h4
                                                                 style="margin: 0px; color: #000000; line-height: 140%; text-align: left; word-wrap: break-word; font-weight: normal; font-family: arial,helvetica,sans-serif; font-size: 14px;">
-                                                                You have successfully changed your password and may now
+                                                                You have successfully reset your password and may now
                                                                 proceed logging your account on our
                                                                 system.<br /><br />Thank you for using Interventions Management Platform!
                                                             </h4>

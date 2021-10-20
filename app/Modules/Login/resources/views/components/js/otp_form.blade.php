@@ -50,7 +50,7 @@
 				$('span.error_otp').empty();
 				$('#otp_form')[0].reset();
 				// append() = Inserts content at the end of the selected elements
-				$('span.error_otp').append('<div class="alert alert-danger">'+error_response.responseJSON['message']+'</div>');
+				$('span.error_otp').append('<div class="alert alert-danger"><span class="close" data-dismiss="alert">×</span>'+error_response.responseJSON['message']+'</div>');
 			}
 		});
 	});

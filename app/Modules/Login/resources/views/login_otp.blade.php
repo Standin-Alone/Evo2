@@ -41,7 +41,7 @@
                             <span class="error_msg"></span>
                         </div>
                         <div class="login-buttons">
-                            <button type="submit" class="btn btn-success btn-block btn-lg">Submit</button>
+                            <button type="submit" id="submit-btn" class="btn btn-success btn-block btn-lg">SUBMIT</button>
                         </div>
                     </form>
                     <br>
@@ -54,7 +54,7 @@
                          @endforeach
                         <div class="col-md-12">
                             <p>If you haven't received the OTP in your email, resend the code.</p>
-                            <button type="submit" class="btn btn-outline-success btn-block btn-lg btn-resend-otp">Resend OTP</button>
+                            <button type="submit" id="submit-btn" class="btn btn-outline-success btn-block btn-lg btn-resend-otp">RESEND OTP</button>
                             <small class="form-text">*Note: The OTP pin will be expire on 24hrs.</small>
                         </div>
                     </form>

@@ -20,10 +20,14 @@ Route::group([],function(){
     Route::get('/DisbursementTotalApproved', 'DisbursementModuleController@getDisbursementTotalApproved')->name('get.DisbursementTotalApproved');
 
     Route::get('/NewlyUploaded', 'DisbursementModuleController@getNewlyUploaded')->name('get.NewlyUploaded');
+
+    Route::get('/BeneficiariesExcel', 'DisbursementModuleController@downloadBeneficiariesExcel')->name('download.BeneficiariesExcel');
+    Route::get('/GenerateBeneficiariesExcel', 'DisbursementModuleController@GenerateBeneficiariesExcel')->name('generate.BeneficiariesExcel');
    
     Route::post('/DisbursementApproval', 'DisbursementModuleController@approveDisbursement')->name('approve.Disbursement');
     Route::post('/DisbursementBeneficiariesRemove', 'DisbursementModuleController@removeDisbursementBeneficiaries')->name('remove.DisbursementBeneficiaries');
-    Route::post('/DisbursementBeneficiariesActivate', 'DisbursementModuleController@activateDisbursementBeneficiaries')->name('activate.DisbursementBeneficiaries');
+    Route::post('/DisbursementBeneficiariesActivate', 'DisbursementModuleController@activateDisbursementBeneficiaries')->name('activate.DisbursementBeneficiaries');    
 });
+
 
 

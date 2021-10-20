@@ -285,7 +285,7 @@ class ReportModule extends Model
         $query = DB::table('supplier')->get();
 
         $supplier = $query->sortBy('supplier_name')->pluck('supplier_name')->unique();
-        dd($supplier);
+
         return ['supplier' => $supplier];
     }
 

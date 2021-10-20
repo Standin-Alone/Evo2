@@ -11,6 +11,53 @@
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
     <style>
+
+table.dataTable td {
+        font-size: 14px !important;
+    }
+    table.dataTable th {
+        font-size: 14px !important;
+    }
+    
+    /* MODIFY DATATABLE WRAPPER/MOBILE VIEW NAVAGATE ROW ICON */
+    .dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child::before{
+        /* background: #008a8a !important; */
+        background: #008a8a !important;
+        border-radius: 10px !important;
+        border: none !important;
+        top: 18px !important;
+        left: 5px !important;
+        line-height: 16px !important;
+        box-shadow: none !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+        height: 16px !important;
+        width: 16px !important;
+        text-align: center !important;
+        text-indent: 0 !important;
+        font-size: 14px !important;
+    }
+    
+    .dataTables_wrapper table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td:first-child:before, 
+    .dataTables_wrapper table.dataTable.dtr-inline.collapsed>tbody>tr.parent>th:first-child:before{
+        /* background: #008a8a !important; */
+        background: #b31515 !important;
+        border-radius: 10px !important;
+        border: none !important;
+        top: 18px !important;
+        left: 5px !important;
+        line-height: 16px !important;
+        box-shadow: none !important;
+        color: #fff !important;
+        font-weight: 700 !important;
+        height: 16px !important;
+        width: 16px !important;
+        text-align: center !important;
+        text-indent: 0 !important;
+        font-size: 14px !important;
+    }
+
+    
         td { font-size: 17px; font-weight: 500; }
 
 
@@ -22,17 +69,36 @@
             font-family: calibri
         }
 
+    
+
         #file-data-datatable > thead > tr > th  , #load-datatable > thead > tr > th {
             color:white;
             font-size: 20px;
             background-color: #008a8a;
             font-weight: bold
         }
+
+
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
             padding: 5px !important;
         }           
 
+              
+        #files-summary-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
+            color:white;
+            background-color: #008a8a;
+            font-size: 20px;
+            font-family: calibri
+        }
 
+
+        #file-data-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
+            background-color: white;
+        }
+
+        #files-summary-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
+            background-color: white;
+        }
         .dt-button{
             background-color: #00c3ff !important;
             color: #fff !important;
@@ -92,7 +158,9 @@
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
 
     <script>
+     
         $(document).ready(function(){
+
             // load cards
             load_cards = ()=>{
 
@@ -117,6 +185,7 @@
             $is_uploading = false;
             // load datatable list of uploaded records
                 load_datatable = $("#load-datatable").DataTable({
+                                pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
                                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
@@ -188,7 +257,8 @@
                                         {data:'full_name',title:'Name',orderable:false},
                                         {data:'address',title:'Address',orderable:false},
                                         {data:'account_number',title:'DBP Account Number',orderable:false},
-                                        {data:'date_uploaded',title:'Date Uploaded'}
+                                        {data:'date_uploaded',title:'Date Uploaded'},
+                                        {data:'region',title:'Region',visible:false}
                                         
                                 ],
                                 "order": [[ 5, "desc" ]], 
@@ -196,8 +266,83 @@
 
                             })
 
+                    // summary files report
+                     $("#files-summary-datatable").DataTable({
+                                pageLength : 5,
+                                destroy:true,
+                                serverSide:true,
+                                ajax: {"url":"{{route('kyc-summary-files-report')}}","type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List of Uploaded Records',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'List of Uploaded Records',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'List of Uploaded Records',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'List of Uploaded Records',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
+                                columns:[
+                                        {data:'total_files',title:'Total Files',orderable:false},                                 
+                                        {data:'total_inserted',title:'Total Records Saved'},                                                                                
+                                        {data:'date_uploaded',title:'Date Uploaded'},
+                            
+                                        
+                                ],
+             
+                                
+
+                            });
+                    
                     // file data reports datatable
                     $("#file-data-datatable").DataTable({
+                                pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
                                 ajax: {"url":"{{route('kyc-file-data-reports')}}","type":'get'},
@@ -270,32 +415,19 @@
 
                             })
             
-
+                // filter by region
                 $("#filter-region").change(function(){
-                    $region_code = $("option:selected",this).val();
-                        $("#load-datatable").DataTable({
-                                    destroy:true,
-                                    serverSide:true,
-                                    ajax: {"url":"{{route('kyc-filter-region',['region_code' => ':val'])}}".replace(':val',$region_code),"type":'get'},
-                                    columns:[
-                                            {data:'rsbsa_no',title:'RSBSA Number'},
-                                            {   data:'fintech_provider',
-                                                title:'Provider',
-                                                orderable:false,
-                                                render:function(data,type,row){
-                                                    return data == 'UMSI' ? 'USSC' : data;
-                                                }                                    
-                                            },
-                                            {data:'full_name',title:'Name',orderable:false},
-                                            {data:'address',title:'Address',orderable:false},
-                                            {data:'account_number',title:'DBP Account Number',orderable:false},
-                                            {data:'date_uploaded',title:'Date Uploaded'}
-                                            
-                                    ],
-                                    "order": [[ 5, "desc" ]], 
-
-                        })
-
+                    region_code = $("option:selected",this).val();
+                    region_name = $("option:selected",this).text();
+                 
+                    if(region_code == ""){
+                        $("#file-data-datatable").DataTable().column(0).search('').draw();
+                        $("#load-datatable").DataTable().column(6).search('').draw();                   
+                    }else{
+                        $("#file-data-datatable").DataTable().column(0).search(region_name).draw();
+                        $("#load-datatable").DataTable().column(6).search(region_name).draw();                   
+                    }
+                     
                 });
             // import file
             $("#ImportForm").validate({
@@ -335,29 +467,11 @@
                     // check if confirm
                     if (confirm) {         
                         // $is_uploading = true;
-                      
+                        $(window).on('beforeunload', function(e){
+                            return e.originalEvent.returnValue = "Your message here";
+                        });
                         $(".import-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Importing');                 
-                        $.ajax({
-                            xhr: function(){
-                                var xhr = new window.XMLHttpRequest();
-                                
-                                xhr.upload.addEventListener("progress", function(evt){
-                                    console.warn(evt.lengthComputable)
-                                    if(evt.lengthComputable){
-                                        var percentComplete = evt.loaded / evt.total;
-                                        percentComplete = parseInt(percentComplete * 100);
-                                        console.log(percentComplete);
-
-                                        if (percentComplete === 100) {
-
-                                        }
-                                    }
-
-                                    
-                                },false);
-
-                                return xhr;
-                            },
+                        $.ajax({                      
                             url:"{{route('import-kyc')}}",
                             type:'post',
                             data: fd,
@@ -397,16 +511,19 @@
                                             });
                                         }
 
+                                        $(window).unbind('beforeunload');
                                         $("#ImportForm")[0].reset();
                                         $(".import-btn").prop('disabled',false)      
                                         $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
                                         $("#load-datatable").DataTable().ajax.reload();
                                         $("#file-data-datatable").DataTable().ajax.reload();
+                                        $("#files-summary-datatable").DataTable().ajax.reload();
                                     });
                                 }else if(parses_result['message'] == 'filename error'){
                                         swal("Error!Wrong file name format.", {
                                             icon: "error",
                                             });
+                                            $(window).unbind('beforeunload');
                                             $("#ImportForm")[0].reset();
                                             $(".import-btn").prop('disabled',false) 
                                             $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                               
@@ -416,6 +533,7 @@
                                     swal("Error!Wrong excel format.", {
                                             icon: "error",
                                         });
+                                    $(window).unbind('beforeunload');
                                     $("#ImportForm")[0].reset();
                                     $(".import-btn").prop('disabled',false) 
                                     $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');   
@@ -424,6 +542,7 @@
                             },
                             error:function(response){
                                 console.warn(response);
+                                $(window).unbind('beforeunload');
                                 $("#ImportForm")[0].reset();
                                 $(".import-btn").prop('disabled',false)
                                 $(".import-btn").html('<i class="fas fa-cloud-download-alt"></i> Import');   
@@ -465,6 +584,8 @@
 
 
     {{-- card start here --}}
+@foreach($action as $value)
+    @if($value->permission == "View Content")
 <div class="row">
     <div class="col-lg-3 col-md-6">
         <div class="widget widget-stats bg-gradient-orange">
@@ -475,6 +596,8 @@
             </div>
         </div>
     </div>
+
+
 
     <div class="col-lg-3 col-md-6">
         <div class="widget widget-stats bg-gradient-green">
@@ -507,139 +630,165 @@
         </div>
     </div>
 </div>
+    @endif
+@endforeach
 {{-- card end here --}}
     <!-- begin panel -->
-    <div class="panel panel-success">
-        <div class="panel-heading">
-            <h4 class="panel-title">KYC</h4>
-        </div>
-        {{-- KYC FORM PANEL --}}       
-        <div class="panel-body">
-            <div class="panel panel-primary col-md-6">
-                <div class="panel-heading">
-                    <h4 class="panel-title">Import KYC Profiles</h4>
-                </div>
-                <form id="ImportForm" method="POST">
-                    @csrf
-                    <div class="panel-body border">
-
-
-                        <div class="col-lg-12">
-                            <div class="form-group">
-                                <label>Import Excel</label><span style="color:red">*</span>
-                                <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
-                            </div>
-                        </div>
-                                
-                        <div class="col-lg-12">
-                            <div class="form-group text-right">
-                                <button type='submit' class='btn btn-lime import-btn' >
-                                    <i class='fa fa-cloud-download-alt'></i> Import
-                                </button>      
-                            </div>
-                        </div>                        
-                    </div>
-                
-                </form>
-                <br>
-            </div>
-
-
-
-        
-
-
-            <!-- #modal-list of not inserted data to database from excel -->
-            <div class="modal fade" id="ErrorDataModal"  data-backdrop="static" data-keyboard="false">
-                <div class="modal-dialog" style="max-width: 70%">                    
-                        <div class="modal-content">
-                            <div class="modal-header" style="background-color: #ff5b57">
-                                <h4 class="modal-title update-modal-title" style="color: white">Unsuccessful Imported Data</h4>
-                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
-                            </div>
-                            <div class="modal-body">
-                                {{--modal body start--}}          
-
-                                <table id="error-datatable" class="table table-hover" style="width:100%">            
-                                    <thead>                                        
-                                    </thead>
-                                    <tbody>
-                                    </tbody>
-                                </table>
-
-                                {{--modal body end--}}
-                            </div>
-                            <div class="modal-footer">
-                                <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>                                
-                            </div>
-                        </div>                    
-                </div>
-            </div>
-
-
-
     
-        </div>
-
-    </div>
-    <!-- end panel -->
-
-    <div class="panel panel-warning ">
-        <div class="panel-heading">Filter by Region</div>
-        <div class="panel-body border">
-            <div class="form-group">
-              <label for=""></label>
-              <select data-column="2" class="form-control filter-select" name="filter_region" id="filter-region">
-                  <option value="" disabled selected>-- Select Region --</option>                        
-                  @foreach ($get_region as $value)
-                  <option value="{{$value->reg_code}}">{{$value->reg_name}}</option>                        
-                      
-                  @endforeach
-
-              </select>
-            </div>
-        </div>
-    </div>
-
-    <!-- begin File Data Reports panel -->
-         <div class="panel panel-success">
+    @foreach($action as $value)
+        @if($value->permission == "Create New Content")
+    
+        <div class="panel panel-success">
             <div class="panel-heading">
-                <h4 class="panel-title"> Uploaded Records</h4>
+                <h4 class="panel-title">KYC</h4>
             </div>
             {{-- KYC FORM PANEL --}}       
-            <div class="panel-body">    
+            <div class="panel-body">
+                <div class="panel panel-primary col-md-6">
+                    <div class="panel-heading">
+                        <h4 class="panel-title">Import KYC Profiles</h4>
+                    </div>
+                    <form id="ImportForm" method="POST">
+                        @csrf
+                        <div class="panel-body border">
+
+
+                            <div class="col-lg-12">
+                                <div class="form-group">
+                                    <label>Import Excel</label><span style="color:red">*</span>
+                                    <input type="file" name="file" accept=".xlsx" class="form-control" required="true">
+                                </div>
+                            </div>
+                                    
+                            <div class="col-lg-12">
+                                <div class="form-group text-right">
+                                    <button type='submit' class='btn btn-lime import-btn' >
+                                        <i class='fa fa-cloud-download-alt'></i> Import
+                                    </button>      
+                                </div>
+                            </div>                        
+                        </div>
+                    
+                    </form>
+                    <br>
+                </div>
+
+
+
             
 
-                <div class="note note-success l-b-15">
-                    <div class="note-icon"><i class="fa fa-file-excel"></i></div>
-                    <div class="note-content">
-                      <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
+
+                <!-- #modal-list of not inserted data to database from excel -->
+                <div class="modal fade" id="ErrorDataModal"  data-backdrop="static" data-keyboard="false">
+                    <div class="modal-dialog" style="max-width: 70%">                    
+                            <div class="modal-content">
+                                <div class="modal-header" style="background-color: #ff5b57">
+                                    <h4 class="modal-title update-modal-title" style="color: white">Unsuccessful Imported Data</h4>
+                                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                                </div>
+                                <div class="modal-body">
+                                    {{--modal body start--}}          
+
+                                    <table id="error-datatable" class="table table-hover" style="width:100%">            
+                                        <thead>                                        
+                                        </thead>
+                                        <tbody>
+                                        </tbody>
+                                    </table>
+
+                                    {{--modal body end--}}
+                                </div>
+                                <div class="modal-footer">
+                                    <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>                                
+                                </div>
+                            </div>                    
                     </div>
-                  </div>
-           
-                <table id="load-datatable" class="table table-hover table-bordered">            
-                    <thead>                                    
-                    </thead>
-                    <tbody>                
-                    </tbody>
-                </table>
-                <br><br>
-                <div class="note note-success l-b-15">
-                    <div class="note-icon"><i class="fa fa-file-excel"></i></div>
-                    <div class="note-content">
-                      <h4><b>List Of Uploaded Files</b></h4>                      
-                    </div>
-                  </div>
-                <table id="file-data-datatable" class="table table-hover table-bordered">            
-                    <thead>                                    
-                    </thead>
-                    <tbody>                
-                    </tbody>
-                </table>
+                </div>
+
+
+
         
             </div>
-    
+
         </div>
+        <!-- end panel -->
+        @endif
+    @endforeach
+  
+
+
+
+    @foreach($action as $value)
+        @if($value->permission == "View Content")
+   
+            <div class="panel panel-inverse ">
+                <div class="panel-heading">Filter by Region</div>
+                <div class="panel-body border">
+                    <div class="form-group">
+                    <label for=""></label>
+                    <select  class="form-control filter-select" name="filter_region" id="filter-region">
+                        <option value=""  selected>-- Select Region --</option>                        
+                        @foreach ($get_region as $value)
+                        <option value="{{$value->reg_code}}">{{$value->reg_name}}</option>                        
+                            
+                        @endforeach
+
+                    </select>
+                    </div>
+                </div>
+            </div>
+
+                
+
+        <div class="note note-success l-b-15">
+            <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                <div class="note-content">
+                    <h4><b>List Of Uploaded Files</b></h4>                      
+                </div>
+        </div>
+            <table id="file-data-datatable" class="table table-hover table-bordered">            
+                <thead>                                    
+                </thead>
+                <tbody>                
+                </tbody>
+            </table>
+
+        <br><br>
+        <div class="note note-success l-b-15">
+            <div class="note-icon"><i class="fa fa-users"></i></div>
+            <div class="note-content">
+                <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
+            </div>
+            </div>
+           
+            <table id="load-datatable" class="table table-hover table-bordered">            
+                <thead>                                    
+                </thead>
+                <tbody>                
+                </tbody>
+            </table>
+
+        <br><br>
+        <div class="note note-success l-b-15">
+            <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                <div class="note-content">
+                    <h4><b>Summary Of Uploaded Files and Records</b></h4>                      
+                </div>
+        </div>
+            <table id="files-summary-datatable" class="table table-hover table-bordered">            
+                <thead>                                    
+                </thead>
+                <tbody>                
+                </tbody>
+            </table>
+        </div>
+        
+        @endif
+    @endforeach
+        
+
+
+        {{-- </div> --}}
         <!-- end panel -->
 
 

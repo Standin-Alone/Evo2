@@ -28,7 +28,8 @@
 		var form_data = $(this);
 
         $("button.btn-rst-pass-link").attr("disabled", true);
-        $(".btn-rst-pass-link").text("Processing...");
+        // $(".btn-rst-pass-link").text("Processing...");
+		$(".btn-rst-pass-link").html('<span id="submit-btn"><i class="fas fa-spinner fa-pulse"></i> SENDING...</span>');
 
 		$.ajax({
 			headers: {
@@ -40,7 +41,7 @@
 			success: function(success_response){
                 setTimeout(function(){
 					$("button.btn-rst-pass-link").attr("disabled", false);
-					$(".btn-rst-pass-link").text("Send Reset Password Link");
+					$(".btn-rst-pass-link").html('<span id="submit-btn">SEND RESET PASSWORD LINK</span>');
                     // console.log(success_response);
                     Swal.fire({
                         position: 'center',
@@ -56,11 +57,11 @@
 			error: function(error_response){
                 setTimeout(function(){
 					$("button.btn-rst-pass-link").attr("disabled", false);
-					$(".btn-rst-pass-link").text("Send Reset Password Link");
+					$(".btn-rst-pass-link").html('<span id="submit-btn">SEND RESET PASSWORD LINK</span>');
 				    $('span.error_email').empty();
 				    $('#reset_form')[0].reset();
 				    // append() = Inserts content at the end of the selected elements
-				    $('span.error_email').append('<div class="alert alert-danger">'+error_response.responseJSON['message']+'</div>');
+				    $('span.error_email').append('<div class="alert alert-danger"><span class="close" data-dismiss="alert">×</span>'+error_response.responseJSON['message']+'</div>');
 			    }, 1500);
             }
 		});

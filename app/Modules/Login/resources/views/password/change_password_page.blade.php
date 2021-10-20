@@ -1,5 +1,5 @@
 @extends('Login::layouts.template')
-@section('title', "Change Password")
+@section('title', "Reset Password")
 
 @section('content')
 	<!-- begin #page-loader -->
@@ -46,7 +46,7 @@
                             <span class="error_msg"></span>
                         </div>
                         <div class="login-buttons">
-                            <button type="submit" class="btn btn-success btn-block btn-lg btn-change-pass">Confirm new password</button>
+                            <button type="submit" id="submit-btn" class="btn btn-success btn-block btn-lg btn-change-pass">SAVE NEW PASSWORD</button>
                         </div>
                         <hr />
                         <p class="text-center text-grey-darker">

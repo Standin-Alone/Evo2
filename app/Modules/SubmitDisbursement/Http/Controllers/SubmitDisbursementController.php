@@ -46,7 +46,7 @@ class SubmitDisbursementController extends Controller
             $getData = "";
             if ($request->ajax()) {
                 $getData = DB::table('kyc_profiles as kyc')
-                    ->select(DB::raw("kyc.date_uploaded,kyc.approved_date,kyc.approved_batch_seq,sum(".session("disburse_amount").") as amount"))
+                    ->select(DB::raw("kyc.date_uploaded,kyc.approved_date,kyc.approved_batch_seq,sum(".session("disburse_amount").") as amount,format(count(kyc.kyc_id),0) as total_records"))
                     ->leftjoin('dbp_batch as dbp','dbp.dbp_batch_id','kyc.dbp_batch_id')
                     ->where('kyc.reg_code',$session_reg_code)
                     ->where('kyc.prov_code',$request->selected_prv_code)  
@@ -198,7 +198,7 @@ class SubmitDisbursementController extends Controller
                         'province'=>$row->province,
                         'beneficiary_telnum'=>"", // TEMPORARY NO VALUE
                         'contact_num'=>$row->mobile_no,
-                        'message'=>$row->remarks,
+                        'message'=>"",
                         'remitter_name_1'=>$row->da_shortname,
                         'remitter_name_2'=>"DEPT", // DEFAULT VALUE
                         'remitter_name_3'=>"OF", // DEFAULT NO VALUE
@@ -226,12 +226,12 @@ class SubmitDisbursementController extends Controller
                 if($key == 0){
                     $text_content = 'PHP'.'|'.Carbon::parse(Carbon::now('GMT+8'))->format('m/d/Y').'|'.'IMC'.'|'.$row->account_number.'|'.$disburse_amount.'|'.$row->rsbsa_no.'|'.
                     $row->fintech_provider.'|'.$row->firstname.'|'.$middle_name.'|'.$row->last_name.'|'.$row->street.'|'.$row->municipality.'|'.
-                    $row->province.'|'.''.'|'.$row->mobile_no.'|'.$row->remarks.'|'.$row->da_shortname.'|'.'DEPT'.'|'.
+                    $row->province.'|'.''.'|'.$row->mobile_no.'||'.$row->da_shortname.'|'.'DEPT'.'|'.
                     'OF'.'|'.'DARRFA'.'|'.''.'|'.$row->address.'|'.$row->city_municipality.'|'.$row->da_province;
                 }else{
                     $text_content = $text_content.$text_nextline.'PHP'.'|'.Carbon::parse(Carbon::now('GMT+8'))->format('m/d/Y').'|'.'IMC'.'|'.$row->account_number.'|'.$disburse_amount.'|'.$row->rsbsa_no.'|'.
                     $row->fintech_provider.'|'.$row->firstname.'|'.$middle_name.'|'.$row->last_name.'|'.$row->street.'|'.$row->municipality.'|'.
-                    $row->province.'|'.''.'|'.$row->mobile_no.'|'.$row->remarks.'|'.$row->da_shortname.'|'.'DEPT'.'|'.
+                    $row->province.'|'.''.'|'.$row->mobile_no.'||'.$row->da_shortname.'|'.'DEPT'.'|'.
                     'OF'.'|'.'DARRFA'.'|'.''.'|'.$row->address.'|'.$row->city_municipality.'|'.$row->da_province;
                 } 
                 $total_records += 1;
@@ -381,17 +381,13 @@ class SubmitDisbursementController extends Controller
                 DB::table('kyc_profiles')
                 ->where('approved_batch_seq', $batch_id)
                 ->update(['dbp_batch_id' => $dbp_batch_id]); 
+
+                DB::table('dbp_batch')
+                ->where('dbp_batch_id', $dbp_batch_id)
+                ->update(['approver_id' => session('user_id'),'approver_fullname' => session('user_fullname'), 'date_approved' => Carbon::now('GMT+8')]);
             // });
             $path = session('Default_Program_shortname').'/'.now('GMT+8')->format('Y').'/'.$reg_shortname.'/'.$header_prov_code.'/'.$folder_file_name;
-            Storage::disk('dbp_files')->put($path.'/'.$program_File_Name.'.txt', $text_content);
-
-            $role = session('role_name_sets');
-            $role_name = $role[0];
-            $session_reg_code = sprintf("%02d", session('reg_code'));
-            $message = 'RFO Disbursement Officer have new generated textfile '.$program_File_Name.'. ';
-            $message = $message.'for more details just click the provided link to direct access the system.';
-            $global_model = new GlobalNotificationModel;                
-            return $global_model->send_email($role_name,$session_reg_code,$message);  
+            return Storage::disk('dbp_files')->put($path.'/'.$program_File_Name.'.txt', $text_content);          
             
         } catch (\Throwable $th) {
             DB::table('excel_export')
@@ -459,7 +455,7 @@ class SubmitDisbursementController extends Controller
             if ($request->ajax()) {
                 $getData = DB::table('dbp_batch as dbp')
                 ->select(DB::raw("dbp.created_at,dbp.folder_file_name,ifnull(dbp.approver_id,'') as approver_id,
-                (case when isfinalsubmit='1' then folder_file_name else dbp.name end) as name,dbp.total_records,
+                (case when isfinalsubmit='1' then folder_file_name else dbp.name end) as name,
                 (case when isfinalsubmit='1' then '(.zip)' else '(.txt)' end) as filetype,dbp.isdownloaded,dbp.isdownloadedxls,
                 dbp.total_amount,dbp.total_records,isfinalsubmit,(case when isfinalsubmit='1' then folder_file_name else name end) as groupfile"))
                 ->where('dbp.reg_code',session('reg_code'))

@@ -33,13 +33,25 @@
                                 i : 0;
                     };
 
-                    // quantity column[5]: get it's total sum
-                    total_amount = api
+                    // Sub Total
+                    pageTotal = api
+                    .column( 1, { page: 'current'} )
+                    .data()
+                    .reduce( function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0 );
+
+                    // Grand Total
+                    grandTotal = api
                             .column( 1 )
                             .data()
                             .reduce( function (a, b) {
                                         return (a)*1 + (b)*1;}, 0 );
-                            $( api.column( 1 ).footer() ).html("Total Disbursed Amount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display(total_amount) );
+
+                    pageTotal = $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display( pageTotal );
+                    grandTotal = $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display( grandTotal );
+                    
+                    $( api.column( 1 ).footer() ).html(" Grand Total of Disbursed Amount:&nbsp;&nbsp;"+$.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display(grandTotal) );
 
                 }
 

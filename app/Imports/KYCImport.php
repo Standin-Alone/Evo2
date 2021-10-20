@@ -198,7 +198,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'region'              => str_replace("Ñ","N", mb_strtoupper($region,'UTF-8')),
                                     'birthdate'           => $birthdate,
                                     'place_of_birth'      => str_replace("Ñ","N", mb_strtoupper($place_of_birth,'UTF-8')),
-                                    'mobile_no'           => $mobile_no,
+                                    'mobile_no'           => (int)$mobile_no,
                                     'sex'                 => $sex,
                                     'nationality'         => str_replace("Ñ","N", mb_strtoupper($nationality,'UTF-8')),
                                     'profession'          => str_replace("Ñ","N", mb_strtoupper($profession,'UTF-8')),
@@ -206,7 +206,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'mothers_maiden_name' => str_replace("Ñ","N", mb_strtoupper($mothers_maiden_name == '' ? 'NMMN' : $mothers_maiden_name,'UTF-8')),
                                     'no_parcel'           => $no_parcel,
                                     'total_farm_area'     => $total_farm_area,
-                                    'account_number'      => DB::raw("AES_ENCRYPT('".$account."','".$PRIVATE_KEY."')"),
+                                    'account_number'      => DB::raw("AES_ENCRYPT(".$account.",'".$PRIVATE_KEY."')"),
                                     'remarks'             => mb_strtoupper($remarks),
                                     'uploaded_by_user_id' => session('uuid'),
                                     'uploaded_by_user_fullname'  => str_replace("Ñ","N", mb_strtoupper(session('first_name'),'UTF-8')).' '.str_replace("Ñ","N", mb_strtoupper(session('last_name'),'UTF-8'))
@@ -294,7 +294,10 @@ class KYCImport implements ToCollection,WithStartRow
         $this->region = $region_for_mail;
         
         // update total inserted in kyc file table
-        db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->update(["total_inserted" => $rows_inserted]);
+        if($rows_inserted != 0){
+            $get_total_inserted = db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->first()->total_inserted;
+            db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->update(["total_inserted" => $get_total_inserted + $rows_inserted]);
+        }
 
         $role = "ICTS DMD";    
         $region = $region_for_mail;

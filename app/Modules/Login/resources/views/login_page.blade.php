@@ -59,7 +59,7 @@
                          </div>
  
                          <div class="login-buttons">
-                             <button type="submit" class="btn btn-success btn-block btn-lg btn-log"><i></i> Sign me in</button>
+                             <button type="submit" id="submit-btn" class="btn btn-success btn-block btn-lg btn-log"><i></i> SIGN ME IN</button>
                          </div>
                          {{-- <div class="m-t-20 m-b-40 p-b-40 text-inverse">
                              Not a member yet? Click <a href="register_v3.html" class="text-success">here</a> to register.

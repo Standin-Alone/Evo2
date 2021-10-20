@@ -1,0 +1,20 @@
+#map_canvas{
+    width: 100%;
+    /* max-width: 500px; */
+    height: 400px;
+    background-color: grey;
+}
+
+
+/* Marker Content */
+#markerContent{
+    width: 250px;
+}
+
+#contentHeading{
+    font-size: 16px;
+}
+
+#view_btn_site{
+    float:right;
+}

@@ -6,7 +6,8 @@
 		var form_data = $(this);
 
 		$("button.btn-resend-otp").attr("disabled", true);
-        $(".btn-resend-otp").text("Re-sending...");
+        // $(".btn-resend-otp").text("Re-sending...");
+		$(".btn-resend-otp").html('<span><i id="submit-btn" class="fas fa-spinner fa-pulse"></i> RE-SENDING...</span>');
 
 		$.ajax({
 			headers: {
@@ -18,7 +19,7 @@
 			success: function(reset_otp_mail_success){
 				setTimeout(function(){
 					$("button.btn-resend-otp").attr("disabled", false);
-					$(".btn-resend-otp").text("Resend OTP");
+					$(".btn-resend-otp").html('<span id="submit-btn">RESEND OTP</span>');
 					Swal.fire({
 						position: 'center',
 						icon: 'success',

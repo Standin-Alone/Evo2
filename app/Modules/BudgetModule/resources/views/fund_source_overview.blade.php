@@ -47,7 +47,7 @@
 <!-- begin breadcrumb -->
 <ol class="breadcrumb pull-right">
     <li class="breadcrumb-item"><a href="{{route('main.home')}}">Home</a></li>
-    <li class="breadcrumb-item active">Fund Source Overview</li>
+    <li class="breadcrumb-item active">Fund Overview</li>
 </ol>
 
 <div class="row mt-5">
@@ -57,7 +57,7 @@
 <!-- begin panel -->
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">Fund Source Overview</h4>
+        <h4 class="panel-title">FUND OVERVIEW</h4>
     </div>
     <div class="panel-body">
         <br>
@@ -67,14 +67,14 @@
         <table id="overview_table" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
             <thead class="table-header">
                 <tr>          
-                    <th>Program</th>
+                    <th>PROGRAM</th>
                     <th>UACS</th>
                     <th>GFI</th>
-                    <th>Region</th>
-                    <th>Particulars</th>
-                    <th>Target of beneficiaries</th>
-                    <th>Amount</th>
-                    <th>Action</th>                   
+                    <th>REGION</th>
+                    <th>PARTICULARS</th>
+                    <th>TARGET OF BENEFECIARIES</th>
+                    <th>AMOUNT</th>
+                    <th>ACTION</th>                   
                 </tr>
             </thead>
             <tbody>
@@ -94,7 +94,7 @@
 
             <div class="modal-content" style="width:100%;">
                 <div class="modal-header" style="background-color: #f59c1a">
-                    <h4 class="modal-title" style="color: white">Edit Category</h4>
+                    <h4 class="modal-title" style="color: white">EDIT FUND</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
                         style="color: white">×</button>
                 </div>
@@ -105,7 +105,7 @@
 
                     <div class="col-lg-12">
                         <div class="form-group row m-b-10">
-                            <label class="col-md-3 text-md-right col-form-label">UACS</label>
+                            <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> UACS</label>
                             <div class="col-md-6">
                                 <input type="number" id="uacs" name="uacs" placeholder="input uacs..." class="form-control" />
                                 <span class="error_msg"></span>
@@ -113,7 +113,7 @@
                         </div>
 
                         <div class="form-group row m-b-10">
-                            <label class="col-md-3 text-md-right col-form-label">GFI</label>
+                            <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> GFI</label>
                             <div class="col-md-6">
                                 <select class="form-control" name="select_gfi" id="select_gfi">
                                     <option value="">-- Select GFI --</option>
@@ -125,7 +125,7 @@
                         </div>
     
                         <div class="form-group row m-b-10">
-                            <label class="col-md-3 text-md-right col-form-label">Region</label>
+                            <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> REGION</label>
                             <div class="col-md-6">
                                 <input type="hidden" id="select_region_hidden" name="select_region_hidden" value="">
                                 <select class="form-control" name="select_region" id="select_region">
@@ -139,7 +139,7 @@
                         </div>
 
                         <div class="form-group row m-b-10">
-                            <label class="col-md-3 text-md-right col-form-label">No. of Farmers</label>
+                            <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> NO. OF FARMERS</label>
                             <div class="col-md-6">
                                 <input id="no_of_farmers" type="number" name="no_of_farmers" placeholder="" class="form-control" />
                                 <span class="error_msg"></span>
@@ -147,7 +147,7 @@
                         </div>
 
                         <div class="form-group row m-b-10">
-                            <label class="col-md-3 text-md-right col-form-label">Amount</label>
+                            <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> AMOUNT</label>
                             <div class="col-md-6">
                                 <input id="amount" type="text" name="amount" placeholder="" class="form-control" />
                                 <span class="error_msg"></span>
@@ -155,7 +155,7 @@
                         </div>
 
                         <div class="form-group row m-b-10">
-                            <label class="col-md-3 text-md-right col-form-label">Particulars</label>
+                            <label class="col-md-3 text-md-right col-form-label"><span class="text-danger">*</span> PARTICULARS</label>
                             <div class="col-md-6">
                                 <textarea class="form-control" rows="3" id="particulars" name="particulars"></textarea>
                                 <span class="error_msg"></span>
@@ -165,8 +165,8 @@
                     {{--modal body end--}}
                 </div>
                 <div class="modal-footer">
-                    <a href="javascript:;" class="btn btn-danger" data-dismiss="modal">Close</a>
-                    <button type="submit" class="btn btn-lime">Update</button>
+                    <a href="javascript:;" class="btn btn-danger" data-dismiss="modal">CLOSE</a>
+                    <button type="submit" class="btn btn-lime">UPDATE</button>
                     {{-- <a id="EditBTN" href="javascript:;" class="btn btn-success">Update</a> --}}
                 </div>
             </div>

@@ -43,7 +43,7 @@
                             <span class="error_msg"></span>
                         </div>
                         <div class="login-buttons">
-                            <button type="submit" class="btn btn-success btn-block btn-lg btn-rst-pass-link">Send Reset Password Link</button>
+                            <button type="submit" id="submit-btn" class="btn btn-success btn-block btn-lg btn-rst-pass-link">SEND RESET LINK PASSWORD</button>
                         </div>
                         <hr />
                         <p class="text-center text-grey-darker">

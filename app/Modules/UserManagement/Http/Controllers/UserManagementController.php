@@ -42,19 +42,23 @@ class UserManagementController extends Controller
         $get_users =  db::table('users as u')
                             ->select(
                                 db::raw("CONCAT(first_name,' ',last_name) as full_name"),
+                                'role',
                                 'p.shortname',
                                 'pp.id as id',
                                 'u.user_id',
-                                'pp.status',
+                                'u.status',
                                 'email',
                                 'contact_no',
                                 'agency_shortname as agency',                                
                                 'reg_name',
                                 'prov_name',
                                 'mun_name',
-                                'bgy_name')
+                                'bgy_name',
+
+                                )
                             ->leftjoin('program_permissions as pp', 'u.user_id', 'pp.user_id')
                             ->leftjoin('programs as p', 'p.program_id' , 'pp.program_id')
+                            ->join('roles as r', 'r.role_id' , 'pp.role_id')
                             // ->join('geo_map as gm', 'gm.geo_code' , 'u.geo_code')                                                                                    
                             ->Join('geo_map as g', 'u.reg', '=', 'g.reg_code')
                             ->Join('geo_region as gr', 'gr.code_reg', '=', 'g.reg_code')
@@ -71,9 +75,9 @@ class UserManagementController extends Controller
         
         
 
-        db::table('program_permissions')
-            ->where('id',$id)
-            ->update(['status'=>$status == 1 ? '0' : '1']);
+        db::table('users')
+            ->where('user_id',$id)
+            ->update(['status'=> $status == 1 ? '0' : '1']);
         
 
     }

@@ -1,0 +1,319 @@
+/* MODIFY DATATABLE HEADER STYLE */
+.table > thead > tr > th, .table> tfoot > tr > th {
+    background-color: #008a8a !important;
+    color: #fff !important;
+    font-weight: normal !important;    
+}
+.dataTables_scrollBody {
+    background-color: #f8f9fa !important;
+}
+
+.checkbox.checkbox-css input:checked + label::after, .checkbox.checkbox-css label::before{
+    position: absolute !important;
+    left: 75px !important;
+    top: 7px !important;
+    width: 16px !important;
+    height: 16px !important;
+    content: '' !important;
+}
+
+/* MODIFY DATATABLE HOVER */
+.table > tbody > tr:hover td{
+    background-color: #d9e0e7 !important;
+}
+
+/* MODIFY DATATABLE PRINT STYLE */
+.buttons-csv, .buttons-excel, .buttons-pdf, .buttons-print{
+    background-color: #008a8a !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    border-radius: 5px !important;
+    font-family: inherit !important;
+}
+
+/* MODIFY GROUP HEADER ON DATATABLE TO HIDE PLUS(+) ICON */
+.dtrg-group.dtrg-level-0 > td::before{
+    display: none !important;
+}
+
+/* MODIFY GROUP HEADER ON DATATABLE STYLE */
+table.dataTable tr.dtrg-group.dtrg-level-0 td{
+    font-size: 12px !important;
+    font-weight: normal !important;
+    background-color: #fafafa !important;
+}
+
+/* MODIFY GROUP HEADER ON DATATABLE STYLE */
+table.dataTable.dtr-inline.collapsed > tbody > tr:first-child td,table.dataTable.dtr-inline.collapsed > tbody > tr:last-child td{
+    font-size: 12px !important;
+    font-weight: normal !important;
+}
+
+/* MODIFY CURSOR FOR THE FIRST COLUMN ON DATATABLE */
+table.dataTable tbody tr td:first-child, input[type=checkbox], .checkbox.checkbox-css input:checked + label::after, .checkbox.checkbox-css label::before,.lblselectall,
+.form-check-input, .form-check-label, select, label[for=cssCheckbox1] {
+    cursor: pointer !important;
+}
+
+input[type=checkbox] {
+    width: 1.5em !important;
+    height: 1.5em !important;
+    margin-top: 0 !important;
+    vertical-align: top !important;
+    background-color: #fff !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+    background-size: contain !important;
+    border-color: #32a932 !important;
+    color-adjust: exact !important;
+}
+
+/* MODIFY DUPLICATE SORTING ICON HIDE */
+table.dataTable thead .sorting {
+    background-image: url("") !important;
+}
+
+/* MODIFY ROW SELECTION ON DATATABLE WITH CHECKBOX */
+.selected{
+    background-color: #ffc107 !important; 
+}
+
+/* FONT LIBRARIES */
+@import url('https://fonts.googleapis.com/css?family=Open+Sans&display=swap');
+
+
+/* MODIFY DATATABLE WRAPPER/MOBILE VIEW NAVAGATE ROW ICON */
+.dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child::before, 
+.dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > th:first-child::before{
+    background: #008a8a !important;
+    border-radius: 10px !important;
+    border: none !important;
+    top: 18px !important;
+    left: 5px !important;
+    line-height: 16px !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    font-weight: 700 !important;
+    height: 16px !important;
+    width: 16px !important;
+    text-align: center !important;
+    text-indent: 0 !important;
+    font-size: 14px !important;
+}
+
+/* CARD STYLE FOR VIEW APPROVAL STATUS ================================================================== START  */
+.container {
+    margin-top: 50px;
+    margin-bottom: 50px
+}
+
+.card {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-orient: vertical;
+    -webkit-box-direction: normal;
+    -ms-flex-direction: column;
+    flex-direction: column;
+    min-width: 0;
+    word-wrap: break-word;
+    background-color: #fff;
+    background-clip: border-box;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 0.10rem
+}
+
+.card-header:first-child {
+    border-radius: calc(0.37rem - 1px) calc(0.37rem - 1px) 0 0
+}
+
+.card-header {
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 0;
+    background-color: #fff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1)
+}
+
+.track {
+    position: relative;
+    background-color: #ddd;
+    height: 7px;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    margin-bottom: 60px;
+    margin-top: 50px
+}
+
+.track .step {
+    -webkit-box-flex: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    width: 25%;
+    margin-top: -18px;
+    text-align: center;
+    position: relative
+}
+
+.track .step.active:before {
+    background: #17a2b8
+}
+
+.track .step::before {
+    height: 7px;
+    position: absolute;
+    content: "";
+    width: 100%;
+    left: 0;
+    top: 18px
+}
+
+.track .step.active .icon {
+    background: #007bff;
+    color: #fff
+}
+
+.track .icon {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    line-height: 40px;
+    position: relative;
+    border-radius: 100%;
+    background: #ddd
+}
+
+.track .step.active .text {
+    font-weight: 400;
+    color: #000
+}
+
+.track .text {
+    display: block;
+    margin-top: 7px
+}
+
+.itemside {
+    position: relative;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    width: 100%
+}
+
+.itemside .aside {
+    position: relative;
+    -ms-flex-negative: 0;
+    flex-shrink: 0
+}
+
+.img-sm {
+    width: 80px;
+    height: 80px;
+    padding: 7px
+}
+
+ul.row,
+ul.row-sm {
+    list-style: none;
+    padding: 0
+}
+
+.itemside .info {
+    padding-left: 15px;
+    padding-right: 7px
+}
+
+.itemside .title {
+    display: block;
+    margin-bottom: 5px;
+    color: #212529
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 1rem
+}
+
+.btn-warning {
+    color: #ffffff;
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 1px
+}
+
+.btn-warning:hover {
+    color: #ffffff;
+    background-color: #007bff;
+    border-color: #007bff;
+    border-radius: 1px
+}
+/* CARD STYLE FOR VIEW APPROVAL STATUS ================================================================== END  */
+
+/* CAROUSEL FOR VIEW ATTACHMENT IMAGES ================================================================== START  */
+.carousel-inner img {
+    width: 100%;
+    height: 100%;
+}
+
+.carousel-control-prev-icon, .carousel-control-next-icon {
+    height: 40px;
+    width: 40px;
+    outline: black;
+    background-color: rgba(0, 0, 0, 0.3);
+    background-size: 100%, 100%;
+    border-radius: 50%;
+}
+/* CAROUSEL FOR VIEW ATTACHMENT IMAGES ================================================================== START  */
+
+/* BLACK SCREEN STYLE FOR BEFORE AND AFTER ACTIONS */
+#overlay {
+    position: absolute;
+    display: none;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 900;
+    cursor: not-allowed;
+    overflow-y: auto;
+  }
+
+  @media only screen and (max-device-width: 480px){
+      .panel-title-main{
+        display: none !important;
+      }
+      .panel-title-sub{
+        display: block !important;
+      }
+  }
+
+  .widget-scroll {
+    height:100px;
+    overflow:auto;  
+    margin-top:20px;
+  }
+
+  .loading-logo{
+    background: url("../img/images/da-loading.gif") !important;
+    background-repeat: no-repeat !important;
+    position:absolute;
+    width:356px;
+    height:356px;
+    /* top:50%;
+    left:50%;
+    right:50%;
+    bottom:50%; */
+    /* margin: -128px 0 0 -128px; */
+    /* z-index:1000; */
+  }
+
+  
+
+
+
+

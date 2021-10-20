@@ -1,0 +1,23 @@
+input[placeholder="Email Address"] { 
+    text-align: left;
+}
+input[placeholder="Password"] { 
+    text-align: left;
+}
+input[placeholder="Old Password"] { 
+    text-align: left;
+}
+input[placeholder="New Password"] { 
+    text-align: left;
+}
+input[placeholder="Input OTP"] { 
+    text-align: left;
+}
+input.invalid
+{
+    border-color: #e93030;
+}
+input.valid
+{
+    border-color: #5ac032;
+}

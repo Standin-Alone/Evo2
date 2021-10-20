@@ -75,15 +75,4 @@
 
         amount_breakdown_result_datatable(fund_id, title);
     });
-
-    // function amount_breakdown_result_datatable(fund_id, title){
-    //     console.log(title);
-    // }
-
-    // $(document).on('click', '#btn_data', function () {
-    //     $('#prog_description').text($(this).data('description'));
-    //     $('#prog_email').text($(this).data('email'));
-    //     $('#prog_contact_no').text($(this).data('contact_no'));
-    //     $('#prog_role').text($(this).data('role'));
-    // });
 </script>

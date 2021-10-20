@@ -73,7 +73,7 @@ class BudgetModuleController extends Controller
                 if($request->ajax()){
                     return DataTables::of( $this->RffaBudgetModel->rffa_disbursement($request->get('programs_ids')))
                     ->addColumn('disbursement_amount', function($row){
-                        $return = '<a href="#" data-id="'.$row->fund_id.'" data-title="'.$row->title.'" id="rffa_fund_btn_data" data-toggle="modal" data-target="#view_computation">'.number_format($row->disbursement_amount, 2, '.', ',').'
+                        $return = '<a href="#" data-id="'.$row->fund_id.'" data-title="'.$row->title.'" id="rffa_fund_btn_data" data-toggle="modal" data-target="#view_computation">&#8369;'.number_format($row->disbursement_amount, 2, '.', ',').'
                                    </a>';
         
                         return $return;

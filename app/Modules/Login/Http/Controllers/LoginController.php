@@ -2,15 +2,16 @@
 
 namespace App\Modules\Login\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use App\Modules\Login\Models\OTP;
+use Illuminate\Support\Facades\DB;
+use App\Modules\Login\Models\Login;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\DB;
 use App\Modules\Login\Http\Controllers\MailController;
-use App\Modules\Login\Models\OTP;
-use App\Modules\Login\Models\Login;
-use Carbon\Carbon;
 
 class LoginController extends Controller
 {
@@ -67,90 +68,105 @@ class LoginController extends Controller
 
                     // get user otp queries
                     $users_otp = $this->otpModel->get_otp_query($user->user_id);
-    
-                    /**
-                     * check the user_otp table if there's a record of the given user_id
-                     * 1.) if true proceed checking the otp date expiration.
-                     * 2.) if there is no existing data proceed generating new otp.
-                     */
-                    if(($check_otp_user_records == true)){
-                    // if(($check_otp_user_records->isEmpty())){
-                        $check = new OTP;
 
-                        foreach($users_otp as $uOTP){
-                            if($check->check_otp_expiration($uOTP->date_created) == true){
-                                $this->otpModel->update_otp_status_to_deactive($user->user_id);
+                    // Check if status is Active
+                    if($user->status == 1){
+                        /**
+                         * check the user_otp table if there's a record of the given user_id
+                         * 1.) if true proceed checking the otp date expiration.
+                         * 2.) if there is no existing data proceed generating new otp.
+                         */
+                        if(($check_otp_user_records == true)){
+                            // if(($check_otp_user_records->isEmpty())){
+                                $check = new OTP;
+        
+                                foreach($users_otp as $uOTP){
+                                    if($check->check_otp_expiration($uOTP->date_created) == true){
+                                        $this->otpModel->update_otp_status_to_deactive($user->user_id);
+                                        $generate_otp = $this->otpModel->generate_otp($user->user_id);
+                                        $otp = $generate_otp['otp'];
+                                        $date_created = $generate_otp['date_created'];
+            
+                                        // send otp to email
+                                        $this->loginModel->email_otp(
+                                                                $user->user_id, 
+                                                                $email,
+                                                                $user->username,
+                                                                $user->first_name,
+                                                                $user->last_name, 
+                                                                $user->ext_name,
+                                                                $role_sets,
+                                                                $otp,
+                                                                $date_created
+                                                            );
+                
+                                        $otp_mail_success = ['success'=>true, 'message'=>'OTP has been send through your email: "'.$email.'"', 'uuid'=>$user->user_id, 'auth'=>false];
+                                        return response()->json($otp_mail_success, 200);
+                                    }
+                                    else{
+                                        if($uOTP->status == "1"){
+                                            $this->otpModel->update_otp_status_to_deactive($user->user_id);
+        
+                                            $generate_otp = $this->otpModel->generate_otp($user->user_id);
+                                            $otp = $generate_otp['otp'];
+                                            $date_created = $generate_otp['date_created'];
+                
+                                            // send otp to email
+                                            $this->loginModel->email_otp(
+                                                                    $user->user_id, 
+                                                                    $email,
+                                                                    $user->username,
+                                                                    $user->first_name,
+                                                                    $user->last_name, 
+                                                                    $user->ext_name,
+                                                                    $role_sets,
+                                                                    $otp,
+                                                                    $date_created
+                                                                );
+                                                                
+                                            $otp_mail_success = ['success'=>true, 'message'=>'OTP has been send through your email: '."\r\n".''."\r\n".' Please check your email: "'.$user->email.'" ', 'uuid'=>$user->user_id, 'auth'=>false];
+                                            return response()->json($otp_mail_success, 200);
+                                        }
+                                        else{
+                                            $otp_mail_success = ['success'=>true, 'message'=>'Your OTP is not yet used. '."\r\n".''."\r\n".' Please check your email: "'.$user->email.'" ', 'uuid'=>$user->user_id, 'auth'=>false];
+                                            return response()->json($otp_mail_success, 200);
+                                        }
+                                    }
+                                }
+                            }
+                            else{
                                 $generate_otp = $this->otpModel->generate_otp($user->user_id);
                                 $otp = $generate_otp['otp'];
                                 $date_created = $generate_otp['date_created'];
-    
+        
                                 // send otp to email
                                 $this->loginModel->email_otp(
                                                         $user->user_id, 
-                                                        $email, 
-                                                        $user->username, 
-                                                        $user->first_name, 
+                                                        $email,
+                                                        $user->username,
+                                                        $user->first_name,
                                                         $user->last_name, 
-                                                        $user->ext_name, 
-                                                        $role_sets, 
-                                                        $otp, 
+                                                        $user->ext_name,
+                                                        $role_sets,
+                                                        $otp,
                                                         $date_created
                                                     );
-        
+            
                                 $otp_mail_success = ['success'=>true, 'message'=>'OTP has been send through your email: "'.$email.'"', 'uuid'=>$user->user_id, 'auth'=>false];
                                 return response()->json($otp_mail_success, 200);
                             }
-                            else{
-                                if($uOTP->status == "1"){
-                                    $this->otpModel->update_otp_status_to_deactive($user->user_id);
-
-                                    $generate_otp = $this->otpModel->generate_otp($user->user_id);
-                                    $otp = $generate_otp['otp'];
-                                    $date_created = $generate_otp['date_created'];
-        
-                                    // send otp to email
-                                    $this->loginModel->email_otp(
-                                                            $user->user_id, 
-                                                            $email, 
-                                                            $user->username, 
-                                                            $user->first_name, 
-                                                            $user->last_name, 
-                                                            $user->ext_name, 
-                                                            $role_sets, 
-                                                            $otp, 
-                                                            $date_created
-                                                        );
-
-                                    $otp_mail_success = ['success'=>true, 'message'=>'OTP has been send through your email: '."\r\n".''."\r\n".' Please check your email: "'.$user->email.'" ', 'uuid'=>$user->user_id, 'auth'=>false];
-                                    return response()->json($otp_mail_success, 200);
-                                }
-                                else{
-                                    $otp_mail_success = ['success'=>true, 'message'=>'Your OTP is not yet used. '."\r\n".''."\r\n".' Please check your email: "'.$user->email.'" ', 'uuid'=>$user->user_id, 'auth'=>false];
-                                    return response()->json($otp_mail_success, 200);
-                                }
-                            }
-                        }
-                    }
-                    else{
-                        $generate_otp = $this->otpModel->generate_otp($user->user_id);
-                        $otp = $generate_otp['otp'];
-                        $date_created = $generate_otp['date_created'];
-
-                        // send otp to email
-                        $this->loginModel->email_otp(
-                                                $user->user_id, 
-                                                $email, 
-                                                $user->username, 
-                                                $user->first_name, 
-                                                $user->last_name, 
-                                                $user->ext_name, 
-                                                $role_sets, 
-                                                $otp, 
-                                                $date_created
-                                            );
-    
-                        $otp_mail_success = ['success'=>true, 'message'=>'OTP has been send through your email: "'.$email.'"', 'uuid'=>$user->user_id, 'auth'=>false];
-                        return response()->json($otp_mail_success, 200);
+                    // Check if status is InActive
+                    }elseif($user->status == 0){
+                        Auth::logout();
+                        Session::flush();
+                        $error_response = ['error'=> true, 'message'=>'Error! The account is <b>"INACTIVE"</b>. Please contact your administrator.', 'auth'=>false];
+                        return response()->json($error_response, 302);
+                    // Check if Status is Block
+                    }elseif($user->status == 2){
+                        Auth::logout();
+                        Session::flush();
+                        $error_response = ['error'=> true, 'message'=>'Error! The account is <b>"BLOCK"</b>. Please contact your administrator.', 'auth'=>false];
+                        return response()->json($error_response, 302);
                     }
                 }   
                 else{
@@ -244,6 +260,8 @@ class LoginController extends Controller
                 return view("Login::404_error");
             }elseif(($this->loginModel->check_password_expiration($user->password_expired_status) == false) && $user->password_reset_status == 1){
                 return view("Login::password.change_password_page", ['user'=>$user]);
+            }elseif($user->password_expired_status == null && $user->password_reset_status == 0){
+                return view("Login::404_error");
             }
         }
     }

@@ -33,7 +33,8 @@
 		var form_data = $(this);
 
 		$("button.btn-log").attr("disabled", true);
-        $(".btn-log").text("Processing...");
+        // $(".btn-log").text("Processing...");
+		$(".btn-log").html('<span><i class="fas fa-spinner fa-pulse"></i></span>');
 
 		$.ajax({
 			headers: {
@@ -49,7 +50,7 @@
 				
 				setTimeout(function(){
 					$("button.btn-log").attr("disabled", false);
-					$(".btn-log").text("Sign me in");
+					$(".btn-log").html('<span id="submit-btn">SIGN ME IN</span>');
 					Swal.fire({
 					position: 'center',
 					icon: 'success',
@@ -63,12 +64,12 @@
 			error: function(error_response){
 				setTimeout(function(){
 					$("button.btn-log").attr("disabled", false);
-					$(".btn-log").text("Sign me in");
+					$(".btn-log").html('<span id="submit-btn">SIGN ME IN</span>');
 					$('span.error_email_pass').empty();
 					$('#login_form')[0].reset();
 					// append() = Inserts content at the end of the selected elements
 					// stay on the same page and shows error
-					$('span.error_email_pass').append('<div class="alert alert-danger">'+error_response.responseJSON['message']+'</div>');
+					$('span.error_email_pass').append('<div class="alert alert-danger"><span class="close" data-dismiss="alert">×</span>'+error_response.responseJSON['message']+'</div>');
 				}, 1500);
 			}
 		});

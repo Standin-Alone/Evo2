@@ -50,20 +50,20 @@
 <!-- begin panel -->
 <div class="panel panel-inverse mt-5">
     <div class="panel-heading">
-        <h4 class="panel-title">Fund Source Breakdown</h4>
+        <h4 class="panel-title">FUND SOURCE BREAKDOWN</h4>
     </div>
     <div class="panel-body mt-5">
         <table id="fund_source_breakdown_tbl" class="table table-striped table-bordered table-hover text-center mt-5" style="width:100%;">            
             <thead class="table-header">
                 <tr>      
                     {{-- <th> Fund Source </th>--}}
-                    <th> Reference No. </th>
-                    <th> Supplier </th>
-                    <th> Program </th>
-                    <th> Item </th>
-                    <th> Quantity </th>
-                    <th> Amount </th>
-                    <th> Total Amount </th>
+                    <th> REFERNECE NO. </th>
+                    <th> SUPPLIER </th>
+                    <th> PROGRAM </th>
+                    <th> ITEM </th>
+                    <th> QUANTITY </th>
+                    <th> AMOUNT </th>
+                    <th> TOTAL AMOUNT </th>
                 </tr>
             </thead>
             <tbody>

@@ -53,15 +53,15 @@
                         render: function(data, type, row) {
                             $button1 = "";
                             $button2 = "";
-                            if(row.approver_id != ""){
+                            // if(row.approver_id != ""){
                                 if(row.isdownloaded === 1){
                                     $button1 = '<a href="javascript:;"  data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.txt)"  class="btn btn-xs btn-outline-danger btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Re-Download (.txt)</a>'; 
                                 }else{
                                     $button1 = '<a href="javascript:;"  data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.txt)"  class="btn btn-xs btn-outline-info btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.txt)</a>';
                                 } 
-                            }else{
-                                $button1 = '<span class="btn btn-xs btn-outline-default" disabled data-toggle="tooltip" data-placement="top" title="For Review and Approve by Regional Director"><i class="fas fa-spinner fa-spin pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.txt)</span>'; 
-                            }
+                            // }else{
+                            //     $button1 = '<span class="btn btn-xs btn-outline-default" disabled data-toggle="tooltip" data-placement="top" title="For Review and Approve by Regional Director"><i class="fas fa-spinner fa-spin pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.txt)</span>'; 
+                            // }
                             
                             
                             if(row.isdownloadedxls === 1){
@@ -88,7 +88,7 @@
                         {data: 'approved_date', name: 'approved_date', title:'APPROVED DATE'},
                         {data: 'approved_batch_seq', name: 'approved_batch_seq', title:'DISBURSEMENT BATCH NO.'},
                         {data: 'amount', name: 'amount',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title:'TOTAL AMOUNT'},   
-                        {data: 'total_records', name: 'total_records',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title:'TOTAL RECORDS'}, 
+                        {data: 'total_records', name: 'total_records', title:'TOTAL RECORDS'}, 
                         {data: 'approved_batch_seq', name: 'approved_batch_seq',  title:'ACTION',
                             render: function(data, type, row) {
                                 return '<a href="javascript:;" data-selectedbatchid="'+row.approved_batch_seq+'" class="btn btn-xs btn-outline-info SubmitDisbursement_btnGenerate"><i class="fas fa-spinner fa-spin '+row.approved_batch_seq+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-file-excel"></span> Generate</a>';
@@ -270,16 +270,11 @@
                     url:"{{ route('validate.SubmitDisbursementPin') }}",
                     data:{folder_filename:folder_filename,filename:filename,filetype:filetype,_token:_token},
                         success:function(data){                         
-                            window.location = $('.SubmitDisbursement_downloadfile').attr('href');
-                                Swal.fire({
-                                    allowOutsideClick: false,
-                                    title:'Please wait..',
-                                    text:'downloading file in progress.',
-                                    icon:'info'
-                                });
-                                SpinnerHide('btnDownloadFile',filename); 
-                                generatedSubmitDisbursementlist(); 
-                                                                            
+                            var url = $('.SubmitDisbursement_downloadfile').attr('href');
+                            window.open(url,'_blank');                                                       
+                            $('#generatedSubmitDisbursementlist-datatable').DataTable().ajax.reload();     
+                            generatedSubmitDisbursementlist();   
+                            SpinnerHide('btnDownloadFile',filename);                                                                       
                         },
                         error: function (textStatus, errorThrown) {
                             console.log('Err');
