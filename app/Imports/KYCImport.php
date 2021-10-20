@@ -206,7 +206,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'mothers_maiden_name' => str_replace("Ñ","N", mb_strtoupper($mothers_maiden_name == '' ? 'NMMN' : $mothers_maiden_name,'UTF-8')),
                                     'no_parcel'           => $no_parcel,
                                     'total_farm_area'     => $total_farm_area,
-                                    'account_number'      => DB::raw("AES_ENCRYPT(".$account.",'".$PRIVATE_KEY."')"),
+                                    'account_number'      => DB::raw("AES_ENCRYPT('".$account."','".$PRIVATE_KEY."')"),
                                     'remarks'             => mb_strtoupper($remarks),
                                     'uploaded_by_user_id' => session('uuid'),
                                     'uploaded_by_user_fullname'  => str_replace("Ñ","N", mb_strtoupper(session('first_name'),'UTF-8')).' '.str_replace("Ñ","N", mb_strtoupper(session('last_name'),'UTF-8'))
