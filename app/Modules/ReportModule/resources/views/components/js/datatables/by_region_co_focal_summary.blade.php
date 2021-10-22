@@ -68,10 +68,10 @@
                     ],
             ajax: "{{route('reports.by_region_co_program_focal')}}",
             columns: [
-                {data: 'region', name: 'region'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'region', name: 'region', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                 var api = this.api(), data;

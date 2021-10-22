@@ -123,7 +123,7 @@ function OverlayPanel_in(){
 }
 
 function OverlayPanel_out(){    
-    // swal.close();
+    swal.close();
 }
 
 

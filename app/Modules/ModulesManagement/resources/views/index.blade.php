@@ -90,10 +90,11 @@
             $('.update-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(0)').text());            
             // check if has sub modules
             if($(this).attr('has_sub')!= 1){
+            
                 $(".update-modal-dialog").css('max-width','30%')
                 $(".main-module-component").show();
                 $(".sub-modules-component").hide();                
-                $("#UpdateForm  input[name='id']").val($(this).attr('sys_module_id'));
+                $('#update-id').val($(this).attr('sys_module_id'));
                 $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
                 $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
                 $(".main-module-update-btn").show();
@@ -290,16 +291,16 @@
                                     });
 
                                 }else{
-
+                                    $('.add-btn').removeAttr('disabled');
                                     swal("This module is already exist.", {
                                             icon: "error",
                                         });
 
-                                        $('.add-btn').prop('disabled','false');
+                                        
                                 }
                             },
                             error:function(response){
-                                $('.add-btn').prop('disabled','false');
+                                $('.add-btn').removeAttr('disabled');
                                 console.warn(response)
                             }
                         })
@@ -308,7 +309,7 @@
                         swal("Operation Cancelled.", {
                             icon: "error",
                         });
-                        $('.add-btn').prop('disabled','false');
+                        $('.add-btn').removeAttr('disabled');
                     }
                 });
                 
@@ -396,6 +397,7 @@
                 }
             },
             submitHandler: function(e) { 
+              
                 swal({
                     title: "Wait!",
                     text: "Are you sure you want to update this module?",
@@ -404,13 +406,13 @@
                     dangerMode: false,
                 })
                 .then((confirm) => {
-                    id = $('input[name="id"]').val();
+                    id = $('#update-id').val();
                     
                     // check if confirm
                     if (confirm) {                       
                         $.ajax({
                             url:"{{route('modules.update',['module' => ':id'])}}".replace(':id', id),
-                            type:'POST',
+                            type:'PUT',
                             data:$("#UpdateForm").serialize(),
                             success:function(response){             
                                 //    
@@ -470,7 +472,7 @@
                     if (confirm) {                       
                         $.ajax({
                             url:"{{route('modules.update',['module' => ':id'])}}".replace(':id', id),
-                            type:'POST',
+                            type:'PUT',
                             data:$("#UpdateSubModuleForm").serialize(),
                             success:function(response){             
                                 //    
@@ -676,7 +678,7 @@
         <!-- #modal-EDIT Main Modal and Sub Modules -->
         <div class="modal fade" id="UpdateModal"  data-backdrop="static" data-keyboard="false">
             <div class="modal-dialog update-modal-dialog" style="max-width: 100%">
-                <form id="UpdateForm" method="PUT" >
+                <form id="UpdateForm" method="PUT"  >
                     @csrf
                     <div class="modal-content">
                         <div class="modal-header" style="background-color: #f59c1a">
@@ -686,7 +688,7 @@
                         <div class="modal-body">
                             {{--modal body start--}}
                             <label class="form-label hide"> ID</label>
-                            <input name="id" type="text" class="form-control hide" />
+                            <input name="id" type="text" class="form-control hide" id="update-id" />
                             <button type='button' class='btn btn-lime add-sub-module-btn' data-toggle='modal' data-target='#AddSubModulesModal' >
                                 <i class='fa fa-plus'></i> Add New
                             </button>

@@ -212,8 +212,12 @@ class UserManagementController extends Controller
     public function update(){
         try{
             $id = request('id');
-            $email = request('email');
+            $email = request('email');   
             $contact = request('contact');
+            $role = request('role');
+
+            $old_email = db::table('users')
+                            ->where('user_id',$id)->first()->email;
             $update_info = db::table('users')
                             ->where('user_id',$id)
                             ->update([
@@ -222,6 +226,11 @@ class UserManagementController extends Controller
                             ]);
 
             if($update_info){
+
+                Mail::send('UserManagement::update-email', ["username" => $email,"role" => $role,"old_email" => $old_email], function ($message) use ($email) {
+                    $message->to($email)->subject('Updated User Account');                
+                });
+
                 return 'true';
             }else{
                 return 'false';
@@ -289,7 +298,8 @@ class UserManagementController extends Controller
             ->rawColumns(['action'])
             ->make(true);
         }
-        return view("UserManagement::list-of-users", ['users' => $users, 'roles' => $roles, 'programs' => $programs, 'region' => $region, 'agency' => $agency, 'action' => $action]); 
+        // return view("UserManagement::list-of-users", ['users' => $users, 'roles' => $roles, 'programs' => $programs, 'region' => $region, 'agency' => $agency, 'action' => $action]); 
+        return view("UserManagement::list-of-users")->with('users', $users)->with('roles', $roles)->with('programs', $programs)->with('region', $region)->with('agency', $agency)->with('action', $action); 
     }
 
     public function user_details($uuid){        

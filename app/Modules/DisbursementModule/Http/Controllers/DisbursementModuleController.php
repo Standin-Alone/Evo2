@@ -39,7 +39,6 @@ class DisbursementModuleController extends Controller
             $filterby = $request->filterby;
             $getData = "";
             if ($request->ajax()) {
-                if($filterby == 0){
                     $getData = DB::table('kyc_profiles as kyc')
                         ->select(DB::raw("kyc.kyc_id,kyc.dbp_batch_id,kyc.rsbsa_no,concat(kyc.last_name,' ,',kyc.first_name,' ', ifnull(kyc.middle_name,'')) as fullname,kyc.fund_id,
                             AES_DECRYPT(kyc.account_number,'".session('private_secret_key')."') as account_number,kyc.barangay,kyc.municipality,kyc.prov_code,kyc.province,
@@ -64,16 +63,6 @@ class DisbursementModuleController extends Controller
                             }
                         })
                         ->get();
-                }else{
-                    $getData = DB::table('kyc_profiles as kyc')
-                        ->select(DB::raw("kyc.kyc_id,kyc.dbp_batch_id,kyc.rsbsa_no,concat(kyc.last_name,' ,',kyc.first_name,' ', ifnull(kyc.middle_name,'')) as fullname,kyc.fund_id,
-                            AES_DECRYPT(kyc.account_number,'".session('private_secret_key')."') as account_number,kyc.barangay,kyc.municipality,kyc.prov_code,kyc.province,
-                            kyc.reg_code,kyc.region,kyc.birthdate,kyc.mobile_no,kyc.sex,kyc.date_uploaded,".session("disburse_amount")." as amount,kyc.isremove"))
-                        ->where('kyc.reg_code',$session_reg_code)   
-                        ->where('kyc.prov_code',$request->selected_prv_code) 
-                        ->where('kyc.isremove',$request->filterby)  
-                        ->get();
-                }
                 
                 return Datatables::of($getData)->make(true);
             }
@@ -101,11 +90,11 @@ class DisbursementModuleController extends Controller
                     ->update(['isremove' => 1,'date_removed'=>Carbon::now('GMT+8'),
                 'removed_by_id'=>session('user_id'),'removed_by_fullname'=>session('user_fullname')]);
 
-                if(session('role_id') != 4){
-                    DB::table('fund_source')
-                        ->where('fund_id',$request->fund_id) 
-                        ->where('total_liquidated','>',0)  
-                        ->update(['total_liquidated' => DB::raw('total_liquidated - '.session("disburse_amount").'')]);
+                if(session('role_id') == 10){
+                    return DB::table('fund_source')
+                            ->where('fund_id',$request->fund_id) 
+                            ->where('total_liquidated','>',0)  
+                            ->update(['total_liquidated' => DB::raw('total_liquidated - '.session("disburse_amount"))]);
                 }
                 
 
@@ -128,10 +117,16 @@ class DisbursementModuleController extends Controller
                     'status'=> "ACTIVATED",
                 ]);
     
-                return DB::table('kyc_profiles')
-                ->where('kyc_id',$request->kyc_id)   
-                ->update(['isremove' => 0,'date_removed'=>null,
-                'removed_by_id'=>null,'removed_by_fullname'=>null]);
+                DB::table('kyc_profiles')
+                    ->where('kyc_id',$request->kyc_id)   
+                    ->update(['isremove' => 0,'date_removed'=>null,'removed_by_id'=>null,'removed_by_fullname'=>null]);               
+
+                if(session('role_id') == 10){                    
+                    return DB::table('fund_source')
+                        ->where('fund_id',$request->fund_id) 
+                        ->update(['total_liquidated' => DB::raw('total_liquidated + '.session("disburse_amount"))]);
+                        
+                }
             });
         } catch (\Throwable $th) {
             return dd($th);
@@ -331,7 +326,7 @@ class DisbursementModuleController extends Controller
         try {
             $session_reg_code = sprintf("%02d", session('reg_code'));
             $getProvince = DB::table('fund_source as fs')
-            ->select(DB::raw("fs.fund_id,fs.program_id,(fs.amount-fs.total_liquidated) as amount,concat(fs.gfi,' (',(format(fs.amount-fs.total_liquidated,2)),')') as gfi_name"))
+            ->select(DB::raw("fs.fund_id,fs.program_id,(fs.amount-fs.total_liquidated) as amount,concat(fs.gfi,' (',(format(fs.amount-fs.total_liquidated,2)),')') as gfi_name,format((fs.amount-fs.total_liquidated),2) as remaining"))
             ->leftjoin('program_permissions as pp','pp.program_id','fs.program_id')
             ->where('fs.reg',$session_reg_code)
             ->where('pp.user_id',session('user_id'))

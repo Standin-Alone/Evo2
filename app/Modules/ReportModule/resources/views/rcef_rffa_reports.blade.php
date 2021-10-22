@@ -157,7 +157,7 @@
         <span class="mt-5">
             <div class="note note-primary">
                 <div class="note-icon"><i class="far fa-file-alt"></i></div>
-                <div class="note-content mt-2 mb-2">
+                <div class="note-content">
                   <h4><b> REPORTS BY APPROVAL LEVEL </b></h4>
                 </div>
             </div>
@@ -197,7 +197,7 @@
         <span class="mt-5">
             <div class="note note-primary">
                 <div class="note-icon"><i class="far fa-file-alt"></i></div>
-                <div class="note-content mt-2 mb-2">
+                <div class="note-content">
                   <h4><b> BY REGION </b></h4>
                 </div>
             </div>
@@ -227,7 +227,7 @@
         <span class="mt-5">
             <div class="note note-primary">
                 <div class="note-icon"><i class="far fa-file-alt"></i></div>
-                <div class="note-content mt-2 mb-2">
+                <div class="note-content">
                   <h4><b> BY REGION AND PROVINCE </b></h4>
                 </div>
             </div>
@@ -259,7 +259,7 @@
         <span class="mt-5">
             <div class="note note-primary">
                 <div class="note-icon"><i class="far fa-file-alt"></i></div>
-                <div class="note-content mt-2 mb-2">
+                <div class="note-content">
                   <h4><b> BY REGION, PROVINCE, MUNICIPALITY AND BARANGAY </b></h4>
                 </div>
             </div>
@@ -295,7 +295,7 @@
         <span class="mt-5">
             <div class="note note-primary">
                 <div class="note-icon"><i class="far fa-file-alt"></i></div>
-                <div class="note-content mt-2 mb-2">
+                <div class="note-content">
                   <h4><b>REPORT BY APPROVAL LEVEL</b></h4>
                 </div>
             </div>

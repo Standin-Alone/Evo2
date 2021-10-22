@@ -48,7 +48,7 @@ return [
             'url' => env('DATABASE_URL'),
             'host' => 'localhost',
             'port' => 3306,
-            'database' => 'vmp_dev_db',
+            'database' => 'vmp_db',
             'username' => 'root',
             'password' => '',
             'unix_socket' => env('DB_SOCKET', ''),

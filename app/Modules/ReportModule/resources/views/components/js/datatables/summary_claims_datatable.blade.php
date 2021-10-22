@@ -64,14 +64,14 @@
 						}
 				],
             columns: [
-                {data: 'supplier_name', name: 'supplier_name'},
-                {data: 'description', name: 'description'},
-                {data: 'item_name', name: 'item_name'},
-                {data: 'quantity', name: 'quantity'},
-                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display},
-                {data: 'total_amount', name: 'total_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display},
-                {data: 'transac_by_fullname', name: 'transac_by_fullname'},
-                {data: 'transac_date', name: 'transac_date', orderable: true, searchable: true},
+                {data: 'supplier_name', name: 'supplier_name', orderable: false, searchable: true},
+                {data: 'description', name: 'description', orderable: false, searchable: true},
+                {data: 'item_name', name: 'item_name', orderable: false, searchable: true},
+                {data: 'quantity', name: 'quantity', orderable: false, searchable: true},
+                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, orderable: false, searchable: true},
+                {data: 'total_amount', name: 'total_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, orderable: false, searchable: true},
+                {data: 'transac_by_fullname', name: 'transac_by_fullname', orderable: false, searchable: true},
+                {data: 'transac_date', name: 'transac_date', orderable: false, searchable: true},
             ],
             "columnDefs": [
                             { "visible": false, "targets": 0 }

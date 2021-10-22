@@ -2,8 +2,9 @@
     $(function() {
         var table = $('#user-datatable').DataTable({
             processing: true,
-            serverSide: false,
+            serverSide: true,
             responsive: true,
+            paging: true,
             ajax: "{{route('list-of-users.index')}}",
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
             columns: [

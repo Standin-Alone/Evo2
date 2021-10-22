@@ -68,11 +68,11 @@
                     ],
                 ajax: "{{route('reports.by_approval')}}",
                 columns: [
-                    {data: 'province', name: 'province'},
-                    {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                    {data: 'generate_beneficiaries' ,name: 'generate_beneficiaries'},
-                    {data: 'approve_by_budget', name: 'approve_by_budget'},
-                    {data: 'approve_by_disburse', name: 'approve_by_disburse'},
+                    {data: 'province', name: 'province', orderable: false, searchable: true},
+                    {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                    {data: 'generate_beneficiaries' ,name: 'generate_beneficiaries', orderable: false, searchable: true},
+                    {data: 'approve_by_budget', name: 'approve_by_budget', orderable: false, searchable: true},
+                    {data: 'approve_by_disburse', name: 'approve_by_disburse', orderable: false, searchable: true},
                 ],
                 "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;

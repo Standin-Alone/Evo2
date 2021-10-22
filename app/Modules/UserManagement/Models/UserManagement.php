@@ -14,6 +14,7 @@ class UserManagement extends Model
         $region = session()->get('region');
 
         $query = DB::table('program_permissions as pp')
+                        ->select('u.user_id', 'u.first_name','u.last_name','u.middle_name','u.ext_name','a.agency_shortname','gr.region')
                         ->leftJoin('roles as r', 'pp.role_id', '=', 'r.role_id')
                         ->leftJoin('programs as p','pp.program_id', '=', 'p.program_id')
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
@@ -95,13 +96,14 @@ class UserManagement extends Model
     public function get_region(){
         $region = session()->get('region');
 
-        $query = DB::table('geo_map')
-                        ->select('reg_code', 'reg_name')
+        $query = DB::table('geo_map as gm')
+                        ->select('gr.code_reg', 'gr.region')
+                        ->leftJoin('geo_region as gr', 'gr.code_reg', '=', 'gm.reg_code')
                         ->when($region, function($query, $region){
                             if($region != 13){
-                                $query->where('reg_code', '=', $region)->groupBy('reg_name');
+                                $query->where('gr.code_reg', '=', $region)->groupBy('gr.code_reg');
                             }else{
-                                $query->groupBy('reg_name');
+                                $query->groupBy('gr.code_reg');
                             }
                         })
                         ->get();

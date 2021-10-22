@@ -38,12 +38,7 @@ class ModulesController extends Controller
             
             if($has_sub != 1){
 
-
-             
-
-                if(!$check_module){
-                    // Artisan::call("make:module",["name" => trim($module_name[0])]);
-                }
+            
 
                 if($check_db->isEmpty()){
                     db::table('sys_modules')
@@ -53,24 +48,33 @@ class ModulesController extends Controller
                 return 'true';                
             }else{
                 $get_last_id = 0;
+                $get_main_module = '';
                 foreach($module_name as $key => $item){
-
+            
                     if($key == 0){
+                        $check_mainmodule = db::table("sys_modules")->where('module',trim($item))->get();
+                        if($check_mainmodule->isEmpty()){
+                            
                         $get_last_id =  db::table('sys_modules')
                                             ->insertGetId([
                                                 "module" => $item,
                                                 "has_sub" => 1
                                             
                                             ]);
+                            $get_main_module = $item;
+                        }
+                        
                     }else{
+                        
+                        $get_last_id = db::table("sys_modules")->where('module',trim($get_main_module))->first()->sys_module_id;
+                        $subtract_key = $key - 1;
                         foreach($route as $route_key => $route_item){
-
-                            if($route_key == $key - 1 ){
-                                
-                                $check_module =  L5Modular::exists(trim($item));
+                            
+                            if($route_key == $subtract_key){                                
                                 $check_submodule = db::table("sys_modules")->where('module',trim($item))->get();
-                                
+                             
                                 if($check_submodule->isEmpty()){
+                                    
                                 db::table('sys_modules')
                                     ->insert([
                                         "module"           => $item,
@@ -80,15 +84,12 @@ class ModulesController extends Controller
                                     
                                 }
 
-
-                                if(!$check_module){
-                                    // Artisan::call("make:module",["name" => trim($item)]);
-                                }                                
+                                                            
                             }
                         }
                     }
                 }
-                
+       
             }
          
             
@@ -124,9 +125,10 @@ class ModulesController extends Controller
     public function update($id){
         $module_name = request('module_name');
         $route       = request('route');
+        $get_id = request('id');
         
         db::table('sys_modules')
-            ->where('sys_module_id',$id)
+            ->where('sys_module_id',$get_id)
             ->update(['module'=>$module_name,'routes'=>$route]);
     }
 
@@ -160,5 +162,8 @@ class ModulesController extends Controller
         
         
     }
+
+
+
 
 }

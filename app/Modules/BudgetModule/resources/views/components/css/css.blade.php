@@ -86,4 +86,12 @@
         text-indent: 0 !important;
         font-size: 14px !important;
     }
+    table.dataTable thead .sorting_asc:after {
+        content: none !important;
+        /* cursor: default !important; */
+
+    }
+    table.dataTable thead .sorting_asc{
+        cursor: default !important;
+    }
 </style>

@@ -102,8 +102,7 @@ class KYCModuleController extends Controller
                                     DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
                                     DB::raw('DATE_FORMAT(date_uploaded, "%M %d, %Y") as date_uploaded'),
                                     'region'                      
-                                )
-                                ->where('uploaded_by_user_id',session('uuid'))
+                                )                                
                                 ->orderBy('date_uploaded','DESC')
                                 ->get();
 
@@ -127,9 +126,13 @@ class KYCModuleController extends Controller
     public function file_data_reports(){
 
             $get_records = db::table('kyc_profiles as kp')
-                                ->select('region','province','file_name','total_rows','total_inserted', DB::raw('DATE_FORMAT(kf.date_uploaded, "%M %d, %Y") as date_uploaded'))
+                                ->select('region',
+                                        'province',
+                                        'file_name',
+                                        DB::raw("IF(fintech_provider = 'UMSI','USSC',fintech_provider) as fintech_provider"),
+                                        'total_rows','total_inserted', DB::raw('DATE_FORMAT(kf.date_uploaded, "%M %d, %Y") as date_uploaded'))
                                 ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
-                                ->groupBy('region','province')    
+                                ->groupBy('region','province','file_name')    
                                 ->orderBy('kf.date_uploaded','DESC')                            
                                 ->get();
 
@@ -137,7 +140,7 @@ class KYCModuleController extends Controller
 
     }
 
-    // kyc card summary
+    // kyc card summary TODAY
     public function kyc_card_summary_today(){
 
         $summary = [];
@@ -169,7 +172,62 @@ class KYCModuleController extends Controller
 
 
       return json_encode(["count_spti" => $count_spti, "count_ussc" =>  $count_ussc, "count_files_today" =>  $count_files_today, "count_records_today" =>  $count_records_today]);
-}
+    }   
 
 
+    // Report View Start here
+    public function report_index(){    
+        $action = session('check_module_path'); 
+        $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
+        return view("KYCModule::reports.kyc-report",compact('get_region','action'));
+    }
+
+
+
+    // kyc card summary
+    public function kyc_card_summary_all(){
+
+        $summary = [];
+
+        $count_spti =db::table('kyc_profiles as kp')
+                            ->select(db::raw('count(kyc_id) as count_spti'))
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                            ->where('fintech_provider','SPTI')                                 
+                            
+                            ->pluck('count_spti');
+
+        $count_ussc =db::table('kyc_profiles as kp')
+                            ->select(db::raw('count(kyc_id) as count_ussc'))
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                            ->where('fintech_provider','UMSI')                                                             
+                            ->pluck('count_ussc');
+
+         $count_files =db::table('kyc_files')          
+                            ->select(db::raw('count(kyc_file_id) as count_files'))                               
+                            ->where(db::raw('DATE(date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->pluck('count_files');
+
+        $count_records =db::table('kyc_profiles as kp')          
+                            ->select(db::raw('count(kyc_id) as count_records'))  
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                                                         
+                            ->pluck('count_records');
+
+
+      return json_encode(["count_spti" => $count_spti, "count_ussc" =>  $count_ussc, "count_files" =>  $count_files, "count_records" =>  $count_records]);
+    }   
+
+
+    public function region_fintech_reports(){
+        $get_records = db::table('kyc_profiles as kp')
+                                ->select('region',
+                                        DB::raw("IF(fintech_provider = 'UMSI','USSC',fintech_provider) as fintech_provider"),
+                                        DB::raw('count(kyc_id) as total_records_uploaded')
+                                        
+                                    )
+                                ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                                ->groupBy('region','fintech_provider')    
+                                ->orderBy('kf.date_uploaded','DESC')                            
+                                ->get();
+            return Datatables::of($get_records)->make(true);
+    }
 }

@@ -13,7 +13,8 @@ class GlobalNotificationModel extends Model
     public function send_email($role,$region,$messages){
 
         $subject = '';
-
+        $role_name = session('role_name_sets');
+        $role_name = $role_name[0];
         // subject per role
         if($role == 'ICTS DMD'){
             $subject =  "For Endorsement";
@@ -35,7 +36,7 @@ class GlobalNotificationModel extends Model
             foreach($get_emails as $item){
                 $to_email = $item;
 
-                Mail::send('notification.upload_mail',["email_message" => $messages, "subject" => $subject,'role' => $role], function ($message) use ($to_email,$subject) {
+                Mail::send('notification.upload_mail',["email_message" => $messages, "subject" => $subject,'role' => $role_name], function ($message) use ($to_email,$subject) {
                     $message->to($to_email)
                             ->subject($subject);                            
                 });                         
@@ -55,7 +56,7 @@ class GlobalNotificationModel extends Model
             foreach($get_emails as $item){
                 $to_email = $item;
 
-                Mail::send('notification.upload_mail',["email_message" => $messages, "subject" => $subject,'role' => $role], function ($message) use ($to_email,$subject) {
+                Mail::send('notification.upload_mail',["email_message" => $messages, "subject" => $subject,'role' => $role_name], function ($message) use ($to_email,$subject) {
                     $message->to($to_email)
                             ->subject($subject);                            
                 });                         
@@ -76,7 +77,7 @@ class GlobalNotificationModel extends Model
             foreach($get_emails as $item){
                 $to_email = $item;
 
-                Mail::send('notification.upload_mail',["email_message" => $messages, "subject" => $subject,'role' => $role], function ($message) use ($to_email,$subject) {
+                Mail::send('notification.upload_mail',["email_message" => $messages, "subject" => $subject,'role' => $role_name], function ($message) use ($to_email,$subject) {
                     $message->to($to_email)
                             ->subject($subject);                            
                 });                         

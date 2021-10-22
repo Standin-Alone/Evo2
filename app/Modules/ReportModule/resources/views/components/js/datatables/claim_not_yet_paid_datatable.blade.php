@@ -70,14 +70,14 @@
             ajax: "{{route('report.claimed_not_yet_paid')}}",
             
             columns: [
-                {data: 'supplier_name', name: 'supplier_name'},
-                {data: 'description', name: 'description'},
-                {data: 'reg_name', name: 'reg_name'},
-                {data: 'prov_name', name: 'prov_name'},
-                {data: 'quantity', name: 'quantity'},
-                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display},
-                {data: 'total_amount', name: 'total_amount', render: $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display, orderable: true, searchable: true},
-                {data: 'payout_status', name: 'payout_status'},
+                {data: 'supplier_name', name: 'supplier_name', orderable: false, searchable: true},
+                {data: 'description', name: 'description', orderable: false, searchable: true},
+                {data: 'reg_name', name: 'reg_name', orderable: false, searchable: true},
+                {data: 'prov_name', name: 'prov_name', orderable: false, searchable: true},
+                {data: 'quantity', name: 'quantity', orderable: false, searchable: true},
+                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
+                {data: 'total_amount', name: 'total_amount', render: $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
+                {data: 'payout_status', name: 'payout_status', orderable: false, searchable: true},
             ],
             "columnDefs": [
                             { "visible": false, "targets": 0,}

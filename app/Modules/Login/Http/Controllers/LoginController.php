@@ -39,6 +39,10 @@ class LoginController extends Controller
         return view("Login::login_page");
     }
 
+    public function go_to_login(){
+        return redirect()->route("main.page");
+    }
+
     /**
      * Action: when user click "Sign me in"
      */

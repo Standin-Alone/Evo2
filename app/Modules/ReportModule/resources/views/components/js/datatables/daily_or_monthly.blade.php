@@ -73,10 +73,10 @@
 
             },
             columns: [
-                {data: 'this_month', name: 'this_month'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'this_month', name: 'this_month', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -188,10 +188,10 @@
                     ],
                     ajax: "{{route('reports.rffa_monthly')}}",
                     columns: [
-                        {data: 'month', name: 'month'},
-                        {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                        {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                        {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                        {data: 'month', name: 'month', orderable: false, searchable: true},
+                        {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                        {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                        {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
                     ],
                     "footerCallback": function ( row, data, start, end, display ) {
                         var api = this.api(), data;
@@ -313,10 +313,10 @@
                     // data:{start_date: start_date, end_date: end_date},
             },
             columns: [
-                {data: 'today', name: 'today'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'today', name: 'today', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -435,10 +435,10 @@
                     // data:{start_date: start_date, end_date: end_date},
             },
             columns: [
-                {data: 'yesterday', name: 'yesterday'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'yesterday', name: 'yesterday', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -557,10 +557,10 @@
 
             },
             columns: [
-                {data: 'last_7_days', name: 'last_7_days'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'last_7_days', name: 'last_7_days', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -679,10 +679,10 @@
 
             },
             columns: [
-                {data: 'last_30_days', name: 'last_30_days'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'last_30_days', name: 'last_30_days', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -801,10 +801,10 @@
 
             },
             columns: [
-                {data: 'this_month', name: 'this_month'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'this_month', name: 'this_month', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -923,10 +923,10 @@
 
             },
             columns: [
-                {data: 'last_month', name: 'last_month'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'last_month', name: 'last_month', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -1037,10 +1037,10 @@
                     data:{start_date: start_date, end_date: end_date},
             },
             columns: [
-                {data: 'day', name: 'day'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'day', name: 'day', orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;

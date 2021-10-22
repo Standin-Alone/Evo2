@@ -20,7 +20,7 @@
           <select data-column="2" class="form-control filter-select" name="filter_region" id="filter_region">
               <option value="">-- Select Region --</option>
                 @foreach ($region as $r)
-                    <option value="{{$r->reg_name}}">{{$r->reg_name}}</option>
+                    <option value="{{$r->region}}">{{$r->region}}</option>
                 @endforeach
           </select>
         </div>

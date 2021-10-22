@@ -70,9 +70,9 @@
             ajax: "{{route('report.total_ready_vouchers')}}",
             
             columns: [
-                {data: 'reg_name', name: 'reg_name'},
-                {data: 'prov_name', name: 'prov_name'},
-                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, orderable: true, searchable: true},
+                {data: 'reg_name', name: 'reg_name', orderable: false, searchable: true},
+                {data: 'prov_name', name: 'prov_name', orderable: false, searchable: true},
+                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, orderable: false, searchable: true},
             ],
             "order": [[ 0, "asc" ], [ 1, "asc" ]],
             rowGroup: {

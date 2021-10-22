@@ -69,13 +69,13 @@
                     ],
                 ajax: "{{route('reports.co_program_focal_summary_by_region_province_municipality_and_barangay')}}",
                 columns: [
-                    {data: 'region', name: 'region'},
-                    {data: 'province', name: 'province'},
-                    {data: 'municipality', name: 'municipality'},
-                    {data: 'barangay', name: 'barangay'},
-                    {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                    {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                    {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                    {data: 'region', name: 'region', orderable: false, searchable: true},
+                    {data: 'province', name: 'province', orderable: false, searchable: true},
+                    {data: 'municipality', name: 'municipality', orderable: false, searchable: true},
+                    {data: 'barangay', name: 'barangay', orderable: false, searchable: true},
+                    {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                    {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                    {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
                 ],
                 "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;

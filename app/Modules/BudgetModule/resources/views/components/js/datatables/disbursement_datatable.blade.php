@@ -8,32 +8,24 @@
                 responsive: true,
                 ajax: "{{route('fund_moni_and_disb')}}",
                 columns: [
-                    {data: 'title', name: 'title'},
+                    {data: 'title', name: 'title', orderable: false, searchable: true},
                     // {data: 'description', name: 'description'},
                     // {data: 'particulars', name: 'particulars'},
-                    {data: 'region', name: 'region'},
-                    {data: 'total_amount', name: 'total_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display,
+                    {data: 'region', name: 'region', orderable: false, searchable: true},
+                    {data: 'total_amount', name: 'total_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true,
                         render: function(data, type, row, meta){
                             if (type === 'display') {
                                 return '&#8369; '+number_format(data, 2, '.', ',');
                             }
                         }
                     },
-
-                    {data: 'disbursement_amount', name: 'disbursement_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display,
-                        // render: function(data, type, row, meta){
-                        //     if (type === 'display') {
-                        //         return '&#8369; '+number_format(data, 2, '.', ',');
-                        //     }
-                        // }
-                    },
-
-                    {data: 'remaining_amount', name: 'remaining_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display,
+                    {data: 'disbursement_amount', name: 'disbursement_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
+                    {data: 'remaining_amount', name: 'remaining_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true,
                         render: function(data, type, row, meta){
                             if (type === 'display') {
                                 return '&#8369; '+number_format(data, 2, '.', ',');
                             }
-                        }
+                        }, 
                     },
 
                     // {data: 'action', name: 'action', orderable: true, searchable: true},

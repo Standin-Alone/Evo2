@@ -4,14 +4,13 @@ use Illuminate\Support\Facades\Route;
 /**
  * Login
  */
-Route::prefix('/login')->group(function () {
-    Route::get('/', 'LoginController@index')->name('main.page');
-    Route::post('/verify', 'LoginController@login_action')->name('user.login');
-    Route::get('/otp_page_form/{uuid}', 'OTPController@otp_page')->name('otp_page');
-    Route::post('/otp_page_form/otp_verify', 'OTPController@verify_OTP_form')->name('form.check_otp_verification');
-    Route::patch('/otp_page_form/reset_otp', 'OTPController@resend_otp')->name('reset_otp_link');
-});
+Route::get('/', 'LoginController@go_to_login');
 
+Route::get('/login', 'LoginController@index')->name('main.page');
+Route::post('/login/verify', 'LoginController@login_action')->name('user.login');
+Route::get('/login/otp_page_form/{uuid}', 'OTPController@otp_page')->name('otp_page');
+Route::post('/login/otp_page_form/otp_verify', 'OTPController@verify_OTP_form')->name('form.check_otp_verification');
+Route::patch('/login/otp_page_form/reset_otp', 'OTPController@resend_otp')->name('reset_otp_link');
 
 /**
  * Password

@@ -115,7 +115,7 @@
                             render: function(data, type, row) {
                                 if(row.isremove == 1){
                                     return '<a href="javascript:;" data-selectedkycid="'+row.kyc_id+'" class="btn btn-xs btn-outline-info btnDisbursementkycDetails" data-toggle="tooltip" data-placement="top" title="View Details"><i class="fas fa-spinner fa-spin '+row.kyc_id+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-eye"></span></a>|'+
-                                '<a href="javascript:;" data-selectedkycid="'+row.kyc_id+'" class="btn btn-xs btn-outline-danger btnDisbursementkycActivate" data-toggle="tooltip" data-placement="top" title="Activate"><i class="fas fa-spinner fa-spin '+row.kyc_id+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-check-circle"></span></a>';
+                                '<a href="javascript:;" data-selectedkycid="'+row.kyc_id+'" data-selectedfundid="'+row.fund_id+'" class="btn btn-xs btn-outline-danger btnDisbursementkycActivate" data-toggle="tooltip" data-placement="top" title="Activate"><i class="fas fa-spinner fa-spin '+row.kyc_id+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-check-circle"></span></a>';
                                 }else{
                                     return '<a href="javascript:;" data-selectedkycid="'+row.kyc_id+'" class="btn btn-xs btn-outline-info btnDisbursementkycDetails" data-toggle="tooltip" data-placement="top" title="View Details"><i class="fas fa-spinner fa-spin '+row.kyc_id+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-eye"></span></a>|'+
                                     '<a href="javascript:;" data-selectedkycid="'+row.kyc_id+'" data-selectedfundid="'+row.fund_id+'" class="btn btn-xs btn-outline-danger btnDisbursementkycRemove" data-toggle="tooltip" data-placement="top" title="Remove"><i class="fas fa-spinner fa-spin '+row.kyc_id+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-trash"></span></a>';
@@ -142,11 +142,10 @@
                                     $('[data-dismiss=modal]').css('cursor','pointer'); 
                                 }
                                 $('#Disbursement_selectedamt').val(TotalAmount);                                
-                            }else{
-                                OverlayPanel_out();
-                                $('[data-dismiss=modal]').prop('disabled',false);
-                                $('[data-dismiss=modal]').css('cursor','pointer');  
                             }
+                            OverlayPanel_out();
+                            $('[data-dismiss=modal]').prop('disabled',false);
+                            $('[data-dismiss=modal]').css('cursor','pointer');
                     }
         
                 });                 
@@ -198,8 +197,9 @@
                     url:"{{ route('get.DisbursementFundSource') }}",
                     success:function(data){                    
                         $('.option_fund_id').remove();
-                        for(var i=0;i<data.length;i++){                   
-                                $('.selectFundsource').append($('<option class="option_fund_id" data-selectedfundamt='+data[i].amount+' value='+data[i].fund_id+'>'+data[i].gfi_name+'</option>'));
+                        for(var i=0;i<data.length;i++){             
+                            $('.selectFundsource').append($('<option class="option_fund_id" value="">Select Fund Source</option>'));      
+                                $('.selectFundsource').append($('<option class="option_fund_id" data-selectedfundamt='+data[i].amount+' value='+data[i].fund_id+'>'+data[i].remaining+'</option>'));
                             }           
                 },
                 error: function (textStatus, errorThrown) {
@@ -434,7 +434,7 @@
                         $.ajax({
                             type:'post',
                             url:"{{ route('remove.DisbursementBeneficiaries') }}",
-                            data:{kyc_id:kyc_id,fund_id:fund_id,remarks:remarks,_token:_token},
+                            data:{kyc_id:kyc_id,fund_id:fund_id,remarks,_token:_token},
                             success:function(data){                         
                                 Swal.fire({
                                     allowOutsideClick: false,
@@ -484,6 +484,7 @@
 
             $(document).on('click','.btnDisbursementkycActivate',function(){
                 var kyc_id = $(this).data('selectedkycid'),
+                    fund_id = $(this).data('selectedfundid'),
                     _token = $("input[name=token]").val();
                 SpinnerShow('btnDisbursementkycActivate',kyc_id);
                 Swal.fire({
@@ -500,7 +501,7 @@
                         $.ajax({
                             type:'post',
                             url:"{{ route('activate.DisbursementBeneficiaries') }}",
-                            data:{kyc_id:kyc_id,_token:_token},
+                            data:{kyc_id:kyc_id,fund_id:fund_id,_token:_token},
                             success:function(data){ 
                                 Swal.fire({
                                     allowOutsideClick: false,
@@ -913,7 +914,7 @@
                             </select>
                             @if (session('role_id') == 8)
                             <select id="default_DisbursementFundSource" class="form-control selectFundsource" name="DisbursementFundSource" data-size="10" data-style="btn-white" value="{{ old('DisbursementFundSource') }}" style="margin-left:5px;">
-                                <option value="" selected>Select Fund Source</option>
+                                <!-- <option value="" selected>Select Fund Source</option> -->
                             </select>
                             <a href="{{ route('fund_encoding') }}" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Add Fund Source"><i class="fa fa-plus-circle"></i></a>
                             @endif

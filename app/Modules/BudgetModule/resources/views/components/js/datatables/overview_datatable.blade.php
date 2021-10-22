@@ -7,20 +7,20 @@
             responsive: true,
             ajax: "{{route('fund_overview')}}",
             columns: [
-                {data: 'title', name: 'title'},
+                {data: 'title', name: 'title', orderable: false, searchable: true},
                 // {data: 'description', name: 'description'},
-                {data: 'uacs', name: 'uacs'},
-                {data: 'gfi', name: 'gfi'},
-                {data: 'region', name: 'region'},
-                {data: 'particulars', name: 'particulars'},
-                {data: 'target_of_benefeciaries', name: 'target_of_benefeciaries'},
-                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, 
+                {data: 'uacs', name: 'uacs', orderable: false, searchable: true},
+                {data: 'gfi', name: 'gfi', orderable: false, searchable: true},
+                {data: 'region', name: 'region', orderable: false, searchable: true},
+                {data: 'particulars', name: 'particulars', orderable: false, searchable: true},
+                {data: 'target_of_benefeciaries', name: 'target_of_benefeciaries', orderable: false, searchable: true},
+                {data: 'amount', name: 'amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display,  orderable: false, searchable: true, 
                     render: function(data, type, row, meta){
                         if (type === 'display') {
                             return '&#8369; '+number_format(data, 2, '.', ',');
                         }
                     }},
-                {data: 'action', name: 'action', orderable: true, searchable: true},
+                {data: 'action', name: 'action', orderable: false, searchable: true},
             ],
         });
     });

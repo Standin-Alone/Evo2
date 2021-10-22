@@ -124,6 +124,8 @@
 
             $("#name").text(full_name);
             $("#role_view").text(role);
+            $("#update-role").val(role);
+            
 
       
 
@@ -613,9 +615,18 @@
 
                     $("i").removeClass('hide');
                     $(".update-btn").prop('disabled',true);   
-                    $(".update-btn").html('<i class="fas fa-circle-notch fa-spin"></i> updating');   
+                    
 
-                    if (confirm) {                       
+                    swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to update this records?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                    })
+                    .then((confirm) => {
+                        $(".update-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Updating');   
+                        if (confirm) {                       
                             $.ajax({
                                 url:"{{route('user-update')}}",
                                 type:'post',
@@ -641,7 +652,7 @@
                                         }).then(()=>{
                                             
                                             $(".update-btn").prop('disabled',false);
-                                            $(".update-btn").text('update');   
+                                            $(".update-btn").text('Update');   
                                             
                                         });
                                     }
@@ -652,11 +663,13 @@
                             })
                             
                         } else {
-                            $(".add-btn").prop('disabled',false);
+                            $(".update-btn").prop('disabled',false);
                             swal("Operation Cancelled.", {
                                 icon: "error",
                             });
                         }
+                    });
+                  
 
                 }
             });
@@ -668,10 +681,10 @@
                     region_name = $("option:selected",this).text();
                  
                     if(region_code == ""){
-                        $("#load-datatable").DataTable().column(4).search('').draw();
+                        $("#load-datatable").DataTable().column(5).search('').draw();
                         
                     }else{
-                        $("#load-datatable").DataTable().column(4).search(region_name).draw();
+                        $("#load-datatable").DataTable().column(5).search(region_name).draw();
                         
                     }
                      
@@ -939,6 +952,7 @@
                                 </div>
                             </div>
 
+                            <input type="text" id="update-role" name="role" class="form-control hide"   required="true" >                                              
 
                             <div class="col-lg-12 row">                            
                                 <div class="form-group">
@@ -990,7 +1004,7 @@
                         </div>
                         <div class="modal-footer">
                             <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <a id="EditBTN" href="javascript:;" class="btn btn-success">Update</a>
+                            <button type="submit" href="javascript:;" class="btn btn-success">Update</button>
                         </div>
                     </div>
                 </form>

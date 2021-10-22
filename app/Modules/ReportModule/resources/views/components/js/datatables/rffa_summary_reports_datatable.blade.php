@@ -69,10 +69,10 @@
                     ],
                 ajax: "{{route('reports.rcef_rffa')}}",
                 columns: [
-                    {data: 'province', name: 'province'},
-                    {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                    {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                    {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                    {data: 'province', name: 'province', orderable: false, searchable: true},
+                    {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                    {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                    {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
                 ],
                 "footerCallback": function ( row, data, start, end, display ) {
                     var api = this.api(), data;
@@ -162,11 +162,11 @@
                     ],
             ajax: "{{route('reports.rcef_rffa')}}",
             columns: [
-                {data: 'region', name: 'region'},
-                {data: 'province', name: 'province'},
-                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc'},
-                {data: 'no_of_disbursed', name: 'no_of_disbursed'},
-                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display},
+                {data: 'region', name: 'region', orderable: false, searchable: true},
+                {data: 'province', name: 'province' , orderable: false, searchable: true},
+                {data: 'no_of_uploads_kyc', name: 'no_of_uploads_kyc', orderable: false, searchable: true},
+                {data: 'no_of_disbursed', name: 'no_of_disbursed', orderable: false, searchable: true},
+                {data: 'total_disbursed_amount', name: 'total_disbursed_amount', render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;').display, orderable: false, searchable: true},
             ],
             "footerCallback": function ( row, data, start, end, display ) {
                 var api = this.api(), data;

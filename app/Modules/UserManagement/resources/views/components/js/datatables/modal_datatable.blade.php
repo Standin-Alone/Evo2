@@ -1,11 +1,11 @@
 <script type="text/javascript">
     function interv_data(uuid){
         var route = "{{route('list-of-users.index')}}"+"/"+uuid;
-        console.log(route);
+
         var table = $('#interv-datatable').DataTable({
             destroy: true,
             processing: true,
-            serverSide: false,
+            serverSide: true,
                 ajax: {
                     url: route,
                 },
