@@ -203,7 +203,7 @@ table.dataTable td {
                                             buttons: [
                                                 {
                                                     text: '<i class="fas fa-print"></i> PRINT',
-                                                    title: 'Report: List of Uploaded Records',
+                                                    title: 'Report: List Of Uploaded KYC Profiles',
                                                     extend: 'print',
                                                     footer: true,
                                                     exportOptions: {
@@ -220,7 +220,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> EXCEL',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'List Of Uploaded KYC Profiles',
                                                     extend: 'excelHtml5',
                                                     footer: true,
                                                     exportOptions: {
@@ -229,7 +229,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> CSV',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'List Of Uploaded KYC Profiles',
                                                     extend: 'csvHtml5',
                                                     footer: true,
                                                     fieldSeparator: ';',
@@ -239,7 +239,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-pdf"></i> PDF',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'List Of Uploaded KYC Profiles',
                                                     extend: 'pdfHtml5',
                                                     footer: true,
                                                     message: '',
@@ -286,7 +286,7 @@ table.dataTable td {
                                             buttons: [
                                                 {
                                                     text: '<i class="fas fa-print"></i> PRINT',
-                                                    title: 'Report: List of Uploaded Records',
+                                                    title: 'Report: Summary Of Uploaded Files and Records',
                                                     extend: 'print',
                                                     footer: true,
                                                     exportOptions: {
@@ -303,7 +303,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> EXCEL',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'Summary Of Uploaded Files and Records',
                                                     extend: 'excelHtml5',
                                                     footer: true,
                                                     exportOptions: {
@@ -312,7 +312,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> CSV',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'Summary Of Uploaded Files and Records',
                                                     extend: 'csvHtml5',
                                                     footer: true,
                                                     fieldSeparator: ';',
@@ -322,7 +322,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-pdf"></i> PDF',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'Summary Of Uploaded Files and Records',
                                                     extend: 'pdfHtml5',
                                                     footer: true,
                                                     message: '',

@@ -76,7 +76,7 @@ table.dataTable td {
         }           
 
               
-        #files-summary-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
+        #file-summary-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
             color:white;
             background-color: #008a8a;
             font-size: 20px;
@@ -88,7 +88,7 @@ table.dataTable td {
             background-color: white;
         }
 
-        #files-summary-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
+        #file-summary-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
             background-color: white;
         }
         .dt-button{
@@ -191,7 +191,7 @@ table.dataTable td {
                                             buttons: [
                                                 {
                                                     text: '<i class="fas fa-print"></i> PRINT',
-                                                    title: 'Report: List of Uploaded Records',
+                                                    title: 'Report: List Of Uploaded KYC Profiles',
                                                     extend: 'print',
                                                     footer: true,
                                                     exportOptions: {
@@ -208,7 +208,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> EXCEL',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'List Of Uploaded KYC Profiles',
                                                     extend: 'excelHtml5',
                                                     footer: true,
                                                     exportOptions: {
@@ -217,7 +217,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> CSV',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'List Of Uploaded KYC Profiles',
                                                     extend: 'csvHtml5',
                                                     footer: true,
                                                     fieldSeparator: ';',
@@ -227,7 +227,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-pdf"></i> PDF',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'List Of Uploaded KYC Profiles',
                                                     extend: 'pdfHtml5',
                                                     footer: true,
                                                     message: '',
@@ -260,7 +260,7 @@ table.dataTable td {
                             })
 
                     // summary files report
-                     $("#files-summary-datatable").DataTable({
+                     $("#file-summary-datatable").DataTable({
                                 pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
@@ -275,7 +275,7 @@ table.dataTable td {
                                             buttons: [
                                                 {
                                                     text: '<i class="fas fa-print"></i> PRINT',
-                                                    title: 'Report: List of Uploaded Records',
+                                                    title: 'Report: Summary Of Uploaded Files and Records',
                                                     extend: 'print',
                                                     footer: true,
                                                     exportOptions: {
@@ -292,7 +292,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> EXCEL',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'Summary Of Uploaded Files and Records',
                                                     extend: 'excelHtml5',
                                                     footer: true,
                                                     exportOptions: {
@@ -301,7 +301,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-excel"></i> CSV',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'Summary Of Uploaded Files and Records',
                                                     extend: 'csvHtml5',
                                                     footer: true,
                                                     fieldSeparator: ';',
@@ -311,7 +311,7 @@ table.dataTable td {
                                                 }, 
                                                 {
                                                     text: '<i class="far fa-file-pdf"></i> PDF',
-                                                    title: 'List of Uploaded Records',
+                                                    title: 'Summary Of Uploaded Files and Records',
                                                     extend: 'pdfHtml5',
                                                     footer: true,
                                                     message: '',
@@ -513,7 +513,7 @@ table.dataTable td {
                                         $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Import');                                 
                                         $("#load-datatable").DataTable().ajax.reload();
                                         $("#file-data-datatable").DataTable().ajax.reload();
-                                        $("#files-summary-datatable").DataTable().ajax.reload();
+                                        $("#file-summary-datatable").DataTable().ajax.reload();
                                     });
                                 }else if(parses_result['message'] == 'filename error'){
                                         swal("Error!Wrong file name format.", {
@@ -776,7 +776,7 @@ table.dataTable td {
                         <h4><b>Summary Of Uploaded Files and Records</b></h4>                      
                     </div>
             </div>
-                <table id="files-summary-datatable" class="table table-hover table-bordered" width="100%">            
+                <table id="file-summary-datatable" class="table table-hover table-bordered" width="100%">            
                     <thead>                                    
                     </thead>
                     <tbody>                
