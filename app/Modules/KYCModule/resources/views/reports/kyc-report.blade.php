@@ -10,6 +10,8 @@
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
+
+    
     <style>
 
 table.dataTable td {
@@ -155,6 +157,11 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
 
+    {{-- date range picker --}}
+    <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.css" />
+
     <script>
      
         $(document).ready(function(){
@@ -184,8 +191,8 @@ table.dataTable td {
             // load datatable list of uploaded records
                 load_datatable = $("#load-datatable").DataTable({
                                 pageLength : 5,
-                                destroy:true,
-                                serverSide:true,
+                                destroy:true,                                
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -265,10 +272,10 @@ table.dataTable td {
                             })
 
                     // summary files report
-                     $("#files-summary-datatable").DataTable({
+                     $("#file-summary-datatable").DataTable({
                                 pageLength : 5,
-                                destroy:true,
-                                serverSide:true,
+                                destroy:true,                                
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc-summary-files-report')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -341,8 +348,8 @@ table.dataTable td {
                     // file data reports datatable
                     $("#file-data-datatable").DataTable({
                                 pageLength : 5,
-                                destroy:true,
-                                serverSide:true,
+                                destroy:true,                                
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc-file-data-reports')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -419,6 +426,7 @@ table.dataTable td {
                                 pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc-region-fintech-reports')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -508,9 +516,102 @@ table.dataTable td {
                 });
             
 
+             
+
 
             
         })
+    </script>
+
+    <script>
+           //filter by date range 
+           $(function() {
+
+            var start = moment().subtract(29, 'days');
+            var end = moment();
+
+            function cb(start, end) {
+            $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            }
+
+            $('#reportrange').daterangepicker({
+            startDate: start,
+            endDate: end,
+            ranges: {
+            'Today': [moment(), moment()],
+            'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+            'This Month': [moment().startOf('month'), moment().endOf('month')],
+            'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+            }
+            }, cb);
+
+            cb(start, end);
+
+            });
+        
+        $.fn.dataTable.ext.search.push(
+                function( settings, data, dataIndex ) {
+                    var min = new Date($("input[name=daterangepicker_start]").val()).toLocaleDateString();
+                    var max = new Date($("input[name=daterangepicker_end]").val()).toLocaleDateString();
+                    var date = new Date( data[5] ).toLocaleDateString();
+                    var date_file_data_datable = new Date( data[5] ).toLocaleDateString();
+                    var date_file_summary_datatable = new Date( data[2] ).toLocaleDateString();
+                    // alert(data[5]);
+            
+                    if (
+                        ( min === null && max === null ) ||
+                        ( min === null && date <= max ) ||
+                        ( min <= date   && max === null ) ||
+                        ( min <= date   && date <= max )
+                    ) {
+                        return true;
+                    }
+
+
+                    if (
+                        ( min === null && max === null ) ||
+                        ( min === null && date_file_data_datable <= max ) ||
+                        ( min <= date_file_data_datable   && max === null ) ||
+                        ( min <= date_file_data_datable   && date_file_data_datable <= max )
+                    ) {
+                        return true;
+                    }
+
+
+                    if (
+                        ( min === null && max === null ) ||
+                        ( min === null && date_file_summary_datatable <= max ) ||
+                        ( min <= date_file_summary_datatable   && max === null ) ||
+                        ( min <= date_file_summary_datatable   && date_file_summary_datatable <= max )
+                    ) {
+                        return true;
+                    }
+
+
+
+                    return false;
+                }
+            );
+
+        $(document).ready(function(){
+           
+
+    
+            let table =  $("#load-datatable").DataTable();
+            let file_data_datable =  $("#file-data-datatable").DataTable();
+            let  file_summary_datatable =  $("#file-summary-datatable").DataTable();
+
+           
+            // filter function
+            $('#reportrange').on('apply.daterangepicker', function(ev, picker) {                                
+                file_data_datable.draw();
+                table.draw();
+                file_summary_datatable.draw();
+            });
+        })
+            
 
     </script>
 @endsection
@@ -584,8 +685,14 @@ table.dataTable td {
 
     @foreach($action as $value)
         @if($value->permission == "View Content")
-   
-            <div class="panel panel-inverse ">
+        <div class="panel panel-success">
+            <div class="panel-heading">
+                <h4 class="panel-title">Filter</h4>
+            </div>
+            {{-- KYC FORM PANEL --}}       
+            <div class="panel-body">
+        <div class="row">            
+            <div class="panel panel-primary col-md-6" >
                 <div class="panel-heading">Filter by Region</div>
                 <div class="panel-body border">
                     <div class="form-group">
@@ -602,6 +709,26 @@ table.dataTable td {
                 </div>
             </div>
 
+
+            
+            <div class="panel panel-primary col-md-6">
+                <div class="panel-heading">Filter by Date</div>
+                <div class="panel-body border" style="padding:32px">
+                    <div class="form-group">
+                    <label for=""></label>
+                        <div id="reportrange" class="pull-left" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                            <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;
+                            <span></span> <b class="caret"></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+            </div>
+        </div>
+        
+
                 
 
         <div class="note note-success l-b-15">
@@ -610,7 +737,7 @@ table.dataTable td {
                     <h4><b>List Of Uploaded Files</b></h4>                      
                 </div>
         </div>
-            <table id="file-data-datatable" class="table table-hover table-bordered reports">            
+            <table id="file-data-datatable" class="table table-hover table-bordered reports" width="100%">            
                 <thead>                                    
                 </thead>
                 <tbody>                
@@ -625,7 +752,7 @@ table.dataTable td {
             </div>
             </div>
            
-            <table id="load-datatable" class="table table-hover table-bordered reports">            
+            <table id="load-datatable" class="table table-hover table-bordered reports" width="100%">            
                 <thead>                                    
                 </thead>
                 <tbody>                
@@ -639,7 +766,7 @@ table.dataTable td {
                     <h4><b>Summary Of Uploaded Files and Records</b></h4>                      
                 </div>
         </div>
-            <table id="files-summary-datatable" class="table table-hover table-bordered reports">            
+            <table id="file-summary-datatable" class="table table-hover table-bordered reports" width="100%">            
                 <thead>                                    
                 </thead>
                 <tbody>                
@@ -653,7 +780,7 @@ table.dataTable td {
                         <h4><b>List of Total Records Uploaded By Region and Fintech Partners</b></h4>                      
                     </div>
             </div>
-                <table id="region-fintech-datatable" class="table table-hover table-bordered reports">            
+                <table id="region-fintech-datatable" class="table table-hover table-bordered reports" width="100%">            
                     <thead>                                    
                     </thead>
                     <tbody>                

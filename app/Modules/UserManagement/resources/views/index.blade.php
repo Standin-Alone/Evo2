@@ -34,6 +34,44 @@
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
             padding: 5px !important;
         }  
+
+        /* MODIFY DATATABLE WRAPPER/MOBILE VIEW NAVAGATE ROW ICON */
+        .dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child::before{
+            /* background: #008a8a !important; */
+            background: #008a8a !important;
+            border-radius: 10px !important;
+            border: none !important;
+            top: 18px !important;
+            left: 5px !important;
+            line-height: 16px !important;
+            box-shadow: none !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            height: 16px !important;
+            width: 16px !important;
+            text-align: center !important;
+            text-indent: 0 !important;
+            font-size: 14px !important;
+        }
+        
+        .dataTables_wrapper table.dataTable.dtr-inline.collapsed>tbody>tr.parent>td:first-child:before, 
+        .dataTables_wrapper table.dataTable.dtr-inline.collapsed>tbody>tr.parent>th:first-child:before{
+            /* background: #008a8a !important; */
+            background: #b31515 !important;
+            border-radius: 10px !important;
+            border: none !important;
+            top: 18px !important;
+            left: 5px !important;
+            line-height: 16px !important;
+            box-shadow: none !important;
+            color: #fff !important;
+            font-weight: 700 !important;
+            height: 16px !important;
+            width: 16px !important;
+            text-align: center !important;
+            text-indent: 0 !important;
+            font-size: 14px !important;
+        }
     </style>
 @endsection
 
@@ -60,6 +98,7 @@
     $(document).ready(function(){
         load_datatable = $("#load-datatable").DataTable({
             serverSide:true,
+            responsive:true,
             ajax: "{{route('user.show')}}",
             columns:[
                     {data:'full_name',title:'Name'},
@@ -743,7 +782,7 @@
         </div>
 
         
-        <table id="load-datatable" class="table table-striped table-bordered">            
+        <table id="load-datatable" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
             <thead>
              
             </thead>

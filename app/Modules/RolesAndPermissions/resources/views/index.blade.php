@@ -361,7 +361,7 @@
     </div>
     <div class="panel-body">        
         {{-- table --}}
-        <table id="load-datatable" class="table table-hover" style="width:100%">            
+        <table id="load-datatable" class="table table-hover text-center" style="width:100%">            
             <thead>
                 <tr>                    
                     <th >Roles</th>

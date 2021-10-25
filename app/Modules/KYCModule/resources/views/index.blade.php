@@ -69,15 +69,7 @@ table.dataTable td {
             font-family: calibri
         }
 
-    
-
-        #file-data-datatable > thead > tr > th  , #load-datatable > thead > tr > th {
-            color:white;
-            font-size: 20px;
-            background-color: #008a8a;
-            font-weight: bold
-        }
-
+ 
 
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
             padding: 5px !important;
@@ -188,6 +180,7 @@ table.dataTable td {
                                 pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -271,6 +264,7 @@ table.dataTable td {
                                 pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc-summary-files-report')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -345,6 +339,7 @@ table.dataTable td {
                                 pageLength : 5,
                                 destroy:true,
                                 serverSide:true,
+                                responsive:true,
                                 ajax: {"url":"{{route('kyc-file-data-reports')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -740,50 +735,56 @@ table.dataTable td {
             </div>
 
                 
-
-        <div class="note note-success l-b-15">
-            <div class="note-icon"><i class="fa fa-file-excel"></i></div>
-                <div class="note-content">
-                    <h4><b>List Of Uploaded Files</b></h4>                      
-                </div>
+    {{-- <div class="panel panel-success">
+        <div class="panel-heading">
+            <h4 class="panel-title">KYC</h4>
         </div>
-            <table id="file-data-datatable" class="table table-hover table-bordered">            
-                <thead>                                    
-                </thead>
-                <tbody>                
-                </tbody>
-            </table>
-
-        <br><br>
-        <div class="note note-success l-b-15">
-            <div class="note-icon"><i class="fa fa-users"></i></div>
-            <div class="note-content">
-                <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
-            </div>
-            </div>
            
-            <table id="load-datatable" class="table table-hover table-bordered">            
-                <thead>                                    
-                </thead>
-                <tbody>                
-                </tbody>
-            </table>
+        <div class="panel-body">             --}}
+            <div class="note note-success l-b-15">
+                <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                    <div class="note-content">
+                        <h4><b>List Of Uploaded Files</b></h4>                      
+                    </div>
+            </div>
+                <table id="file-data-datatable" class="table table-hover table-bordered" width="100%">            
+                    <thead>                                    
+                    </thead>
+                    <tbody>                
+                    </tbody>
+                </table>
 
-        <br><br>
-        <div class="note note-success l-b-15">
-            <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+            <br><br>
+            <div class="note note-success l-b-15">
+                <div class="note-icon"><i class="fa fa-users"></i></div>
                 <div class="note-content">
-                    <h4><b>Summary Of Uploaded Files and Records</b></h4>                      
+                    <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
                 </div>
-        </div>
-            <table id="files-summary-datatable" class="table table-hover table-bordered">            
-                <thead>                                    
-                </thead>
-                <tbody>                
-                </tbody>
-            </table>
-        </div>
-        
+                </div>
+            
+                <table id="load-datatable" class="table table-hover table-bordered" width="100%">            
+                    <thead>                                    
+                    </thead>
+                    <tbody>                
+                    </tbody>
+                </table>
+
+            <br><br>
+            <div class="note note-success l-b-15">
+                <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                    <div class="note-content">
+                        <h4><b>Summary Of Uploaded Files and Records</b></h4>                      
+                    </div>
+            </div>
+                <table id="files-summary-datatable" class="table table-hover table-bordered" width="100%">            
+                    <thead>                                    
+                    </thead>
+                    <tbody>                
+                    </tbody>
+                </table>
+            </div>
+        {{-- </div>
+    </div> --}}
         @endif
     @endforeach
         

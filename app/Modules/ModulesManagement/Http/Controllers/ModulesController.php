@@ -61,12 +61,15 @@ class ModulesController extends Controller
                                                 "has_sub" => 1
                                             
                                             ]);
+                                            
                             $get_main_module = $item;
+                            
                         }
                         
                     }else{
                         
                         $get_last_id = db::table("sys_modules")->where('module',trim($get_main_module))->first()->sys_module_id;
+                        // dd($get_last_id);
                         $subtract_key = $key - 1;
                         foreach($route as $route_key => $route_item){
                             
@@ -87,8 +90,10 @@ class ModulesController extends Controller
                                                             
                             }
                         }
+                        
                     }
                 }
+                return 'true';
        
             }
          

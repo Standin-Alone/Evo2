@@ -285,6 +285,7 @@
                                         icon: "success",
                                     }).then(()=>{
                                         $("#AddModal").modal('hide')
+                                        $("#AddForm")[0].reset();
                                         module_table.ajax.reload();
                                         $('.add-btn').prop('disabled','false');
                                         
@@ -359,7 +360,7 @@
                                 }).then(()=>{
                                     $("#AddSubModulesModal").modal('hide')
                                      sub_module_table.ajax.reload();
-
+                                     $("#AddSubModulesForm")[0].reset();
                                      $("#load-datatable").DataTable().ajax.reload();
                                     
                                     

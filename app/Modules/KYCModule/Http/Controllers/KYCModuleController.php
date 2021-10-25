@@ -114,7 +114,7 @@ class KYCModuleController extends Controller
     // summary files report
     public function summary_files_report(){
         $get_records = db::table('kyc_files')
-                                ->select(DB::raw('SUM(total_inserted) as total_inserted'),DB::raw('count(kyc_file_id) as total_files'),'date_uploaded')                        
+                                ->select(DB::raw('SUM(total_inserted) as total_inserted'),DB::raw('count(kyc_file_id) as total_files'),DB::raw('DATE_FORMAT(date_uploaded, "%M %d, %Y") as date_uploaded'))                        
                                 ->groupBy(DB::raw('DATE(date_uploaded)'))    
                                 ->orderBy('date_uploaded','DESC')                            
                                 ->get();
