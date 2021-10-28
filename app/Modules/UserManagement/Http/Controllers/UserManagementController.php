@@ -72,14 +72,21 @@ class UserManagementController extends Controller
 
     public function destroy($id){
         $status = request('status');
+                
+        db::table('users')
+            ->where('user_id',$id)
+            ->update(['status'=> $status == 1 ? '0' : '1']);        
+    }
+
+    public function block($id){
+        $status = request('status');
         
         
 
         db::table('users')
             ->where('user_id',$id)
-            ->update(['status'=> $status == 1 ? '0' : '1']);
+            ->update(['status'=> $status == 2 ? '1' : '2']);
         
-
     }
 
     public function email(){

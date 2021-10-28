@@ -7,6 +7,7 @@ Route::group([],function(){
     Route::get('/user','UserManagementController@index')->name('user.index');
     Route::get('/user/show','UserManagementController@show')->name('user.show');
     Route::get('/user/destroy/{id}','UserManagementController@destroy')->name('user.destroy');
+    Route::get('/user/block/{id}','UserManagementController@block')->name('user.block');
     Route::get('/user-email','UserManagementController@email');
 
     Route::post('/user/add','UserManagementController@store')->name('user-add');

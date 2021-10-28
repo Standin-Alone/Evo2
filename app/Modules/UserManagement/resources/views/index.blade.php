@@ -126,6 +126,13 @@
                                     "</button>  " :
                                     "<button type='button' class='btn btn-outline-success set-status-btn' id='"+row['user_id']+"' status='"+row["status"]+"' >"+
                                         "<i class='fa fa-undo'></i> Enable"+
+                                    "</button> ")+(
+                                    row['status'] == 2 ?
+                                    "<button type='button' class='btn btn-outline-success set-block-btn ' id='"+row['user_id']+"' status='"+row["status"]+"' >"+
+                                        "<i class='fa fa-trash'></i> Unblock"+
+                                    "</button>  " :
+                                    "<button type='button' class='btn btn-outline-primary set-block-btn' id='"+row['user_id']+"' status='"+row["status"]+"' >"+
+                                        "<i class='fa fa-ban'></i> Block"+
                                     "</button> ")
                         }
                     }
@@ -193,7 +200,53 @@
                             data:{'_token':'{{csrf_token()}}','status':status},
                             success:function(response){             
                                 //    
+                                
                                 swal("Successfully "+(status == 1 ? 'disable' : 'enable')+" the user.", {
+                                    icon: "success",
+                                }).then(()=>{                    
+                                    
+                                    $("#load-datatable").DataTable().ajax.reload();
+                                    
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+        }); 
+
+
+        // set block btn
+        $("#load-datatable").on('click','.set-block-btn',function(){
+            id = $(this).attr('id');
+            status = $(this).attr('status');
+                                    
+            swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to "+ (status == 1 ? 'unblocked' : 'blocked')+" this user?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    $('#add-btn').prop('disabled','true');
+                    // check if confirm
+                    if (confirm) {                       
+                        $.ajax({
+                            url:'{{route("user.block",["id"=>":id"])}}'.replace(':id',id),
+                            type:'get',
+                            data:{'_token':'{{csrf_token()}}','status':status},
+                            success:function(response){             
+                                //    
+                                
+                                swal("Successfully "+(status == 2 ? 'unblocked' : 'blocked')+" the user.", {
                                     icon: "success",
                                 }).then(()=>{                    
                                     
