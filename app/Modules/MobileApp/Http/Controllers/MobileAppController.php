@@ -26,7 +26,11 @@ class MobileAppController extends Controller
         $password   = request('password');
         $random_otp = mt_rand(100000, 999999);
     
-        $authenticate = db::table('users')->where('username', $username)->get();
+        $authenticate = db::table('users as u')
+                                ->join('program_permissions as pp', 'u.user_id', 'pp.user_id')
+                                ->where('username', $username)
+                                ->whereNotNull('other_info')
+                                ->get();
         $get_password = db::table('users')->where('username', $username)->value('password');
 
         
