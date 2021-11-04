@@ -254,7 +254,7 @@ table.dataTable td {
                                         {data:'region',title:'Region',visible:false}
                                         
                                 ],
-                                "order": [[ 5, "desc" ]], 
+                                order: [[ 5, "desc" ]], 
                                 
 
                             })
@@ -329,6 +329,7 @@ table.dataTable td {
                             
                                         
                                 ],
+                                order: [[ 2, "desc" ]]         
              
                                 
 
@@ -407,7 +408,8 @@ table.dataTable td {
 
                                         {data:'date_uploaded',title:'Date Uploaded'},
       
-                                ],                
+                                ],       
+                                order: [[ 6, "desc" ]]         
 
                             })
             

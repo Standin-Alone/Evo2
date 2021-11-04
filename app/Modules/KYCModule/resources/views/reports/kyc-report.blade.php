@@ -266,7 +266,7 @@ table.dataTable td {
                                         {data:'region',title:'Region',visible:false}
                                         
                                 ],
-                                "order": [[ 5, "desc" ]], 
+                                order: [[ 5, "desc" ]], 
                                 
 
                             })
@@ -340,6 +340,7 @@ table.dataTable td {
                             
                                         
                                 ],
+                                order: [[ 2, "desc" ]]         
              
                                 
 
@@ -410,13 +411,15 @@ table.dataTable td {
                                 columns:[
                                         {data:'region',title:'Region'},
                                         {data:'province',title:'Province'},
+                                        {data:'fintech_provider',title:'Fintech Provider'},
                                         {data:'file_name',title:'File',orderable:false},
                                         {data:'total_inserted',title:'Total Records Saved',orderable:false},
                                         {data:'total_rows',title:'Total Records',orderable:false},
 
                                         {data:'date_uploaded',title:'Date Uploaded'},
       
-                                ],                
+                                ],             
+                                order: [[ 6, "desc" ]]            
 
                             })
             
