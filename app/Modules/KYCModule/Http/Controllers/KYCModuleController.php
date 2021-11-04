@@ -150,28 +150,28 @@ class KYCModuleController extends Controller
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','SPTI')                                 
                             ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
-                            ->pluck('count_spti');
+                            ->value('count_spti');
 
         $count_ussc =db::table('kyc_profiles as kp')
                             ->select(db::raw('count(kyc_id) as count_ussc'))
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','UMSI')                                 
                             ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
-                            ->pluck('count_ussc');
+                            ->value('count_ussc');
 
          $count_files_today =db::table('kyc_files')          
                             ->select(db::raw('count(kyc_file_id) as count_files_stoday'))                               
                             ->where(db::raw('DATE(date_uploaded)'),db::raw('CURDATE()'))                                 
-                            ->pluck('count_files_stoday');
+                            ->value('count_files_stoday');
 
         $count_records_today =db::table('kyc_profiles as kp')          
                             ->select(db::raw('count(kyc_id) as count_records_stoday'))  
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                             
                             ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
-                            ->pluck('count_records_stoday');
+                            ->value('count_records_stoday');
 
 
-      return json_encode(["count_spti" => $count_spti, "count_ussc" =>  $count_ussc, "count_files_today" =>  $count_files_today, "count_records_today" =>  $count_records_today]);
+      return json_encode(["count_spti" => number_format((float)$count_spti), "count_ussc" =>  number_format((float)$count_ussc), "count_files_today" =>  number_format((float)$count_files_today), "count_records_today" =>  number_format((float)$count_records_today)]);
     }   
 
 
@@ -194,26 +194,26 @@ class KYCModuleController extends Controller
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','SPTI')                                 
                             
-                            ->pluck('count_spti');
+                            ->value('count_spti');
 
         $count_ussc =db::table('kyc_profiles as kp')
                             ->select(db::raw('count(kyc_id) as count_ussc'))
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','UMSI')                                                             
-                            ->pluck('count_ussc');
+                            ->value('count_ussc');
 
          $count_files =db::table('kyc_files')          
                             ->select(db::raw('count(kyc_file_id) as count_files'))                               
                             ->where(db::raw('DATE(date_uploaded)'),db::raw('CURDATE()'))                                 
-                            ->pluck('count_files');
+                            ->value('count_files');
 
         $count_records =db::table('kyc_profiles as kp')          
                             ->select(db::raw('count(kyc_id) as count_records'))  
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                                                         
-                            ->pluck('count_records');
+                            ->value('count_records');
 
 
-      return json_encode(["count_spti" => $count_spti, "count_ussc" =>  $count_ussc, "count_files" =>  $count_files, "count_records" =>  $count_records]);
+      return json_encode(["count_spti" => number_format((float)$count_spti), "count_ussc" =>  number_format((float)$count_ussc), "count_files" =>  number_format((float)$count_files), "count_records" =>  number_format((float)$count_records)]);
     }   
 
 

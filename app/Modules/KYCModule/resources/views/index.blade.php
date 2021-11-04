@@ -323,9 +323,9 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[
-                                        {data:'total_files',title:'Total Files',orderable:false},                                 
-                                        {data:'total_inserted',title:'Total Records Saved'},                                                                                
-                                        {data:'date_uploaded',title:'Date Uploaded'},
+                                        {data:'total_files',title:'Total Files',render: $.fn.dataTable.render.number(','),title:'Total Records Saved'},                                 
+                                        {data:'total_inserted',render: $.fn.dataTable.render.number(','),title:'Total Records Saved'},                                                                                
+                                        {data:'date_uploaded',render: $.fn.dataTable.render.number(','),title:'Date Uploaded'},
                             
                                         
                                 ],
@@ -403,8 +403,8 @@ table.dataTable td {
                                         {data:'province',title:'Province'},
                                         {data:'fintech_provider',title:'Fintech Provider'},
                                         {data:'file_name',title:'File',orderable:false},
-                                        {data:'total_inserted',title:'Total Records Saved',orderable:false},
-                                        {data:'total_rows',title:'Total Records',orderable:false},
+                                        {data:'total_inserted',title:'Total Records Saved',render: $.fn.dataTable.render.number(','),orderable:false},
+                                        {data:'total_rows',title:'Total Records',render: $.fn.dataTable.render.number(','),orderable:false},
 
                                         {data:'date_uploaded',title:'Date Uploaded'},
       
