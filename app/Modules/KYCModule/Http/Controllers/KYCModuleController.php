@@ -100,7 +100,7 @@ class KYCModuleController extends Controller
                                     'fintech_provider',
                                     'kyc_id',
                                     DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
-                                    DB::raw('DATE_FORMAT(date_uploaded, "%M %d, %Y") as date_uploaded'),
+                                    DB::raw('date_uploaded'),
                                     'region'                      
                                 )                                
                                 ->orderBy('date_uploaded','DESC')
@@ -114,7 +114,7 @@ class KYCModuleController extends Controller
     // summary files report
     public function summary_files_report(){
         $get_records = db::table('kyc_files')
-                                ->select(DB::raw('SUM(total_inserted) as total_inserted'),DB::raw('count(kyc_file_id) as total_files'),DB::raw('DATE_FORMAT(date_uploaded, "%M %d, %Y") as date_uploaded'))                        
+                                ->select(DB::raw('SUM(total_inserted) as total_inserted'),DB::raw('count(kyc_file_id) as total_files'),'date_uploaded')                        
                                 ->groupBy(DB::raw('DATE(date_uploaded)'))    
                                 ->orderBy('date_uploaded','DESC')                            
                                 ->get();
@@ -130,7 +130,7 @@ class KYCModuleController extends Controller
                                         'province',
                                         'file_name',
                                         DB::raw("IF(fintech_provider = 'UMSI','USSC',fintech_provider) as fintech_provider"),
-                                        'total_rows','total_inserted', DB::raw('DATE_FORMAT(kf.date_uploaded, "%M %d, %Y") as date_uploaded'))
+                                        'total_rows','total_inserted','kf.date_uploaded as date_uploaded')
                                 ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                                 ->groupBy('region','province','file_name')    
                                 ->orderBy('kf.date_uploaded','DESC')                            
