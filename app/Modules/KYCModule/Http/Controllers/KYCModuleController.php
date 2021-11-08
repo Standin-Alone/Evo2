@@ -230,4 +230,47 @@ class KYCModuleController extends Controller
                                 ->get();
             return Datatables::of($get_records)->make(true);
     }
+
+    // list of generated disbursements
+    public function disbursement_generated_reports(){
+        $get_records = db::table('dbp_batch as db')
+                                ->select(DB::raw('DISTINCT name'),
+                                            'gr.region',
+                                            'db.created_at as generated_at',
+                                            'total_amount',
+                                            'created_by_fullname as generated_by',
+                                            'approver_fullname as approved_by',
+                                            'date_approved',
+                                            'db.dbp_batch_id'
+                                            )
+                                ->join('kyc_profiles as kp','db.dbp_batch_id','kp.dbp_batch_id')                                
+                                ->join('geo_region as gr','gr.code_reg','db.reg_code')                                                                
+                                ->orderBy('db.created_at','desc')                                
+                                ->get();
+        return Datatables::of($get_records)->make(true);
+    }
+
+    // show more generated disbursement details
+    public function disbursement_generated_show_more($dbp_batch_id){
+        $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
+        '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
+        '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
+        '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
+        '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
+        
+        $get_records = db::table('kyc_profiles')
+                                ->select(
+                                    'rsbsa_no',
+                                    db::raw("CONCAT(first_name,' ',last_name) as full_name"),
+                                    db::raw("CONCAT(IF(street_purok = '-' OR street_purok = '', '' , CONCAT(street_purok,', ')),'BRGY. ',barangay,', ',province,', ',region) as address"),
+                                    'fintech_provider',
+                                    'kyc_id',
+                                    DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
+                                    DB::raw('date_uploaded'),
+                                    'region'                      
+                                )  
+                                ->where('dbp_batch_id',$dbp_batch_id)                                                                                                               
+                                ->get();
+        return Datatables::of($get_records)->make(true);
+    }
 }

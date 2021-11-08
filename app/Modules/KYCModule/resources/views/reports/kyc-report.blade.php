@@ -492,11 +492,189 @@ table.dataTable td {
                                         {data:'fintech_provider',title:'Fintech Provider',orderable:false},
                                         {data:'total_records_uploaded',title:'Total Records Uploaded',orderable:false},                                                                                
       
-                                ],                
+                                ],            
+                                    
 
                             })
 
+
+            
+
+                  // list of generated disbursement report
+
+                  $("#disbursement-generated-datatable").DataTable({
+                                pageLength : 5,
+                                destroy:true,
+                                serverSide:true,
+                                responsive:true,
+                                ajax: {"url":"{{route('disbursement-generated-reports')}}","type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List of Generated Disbursement',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'List of Generated Disbursement',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'List of Generated Disbursement',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'List of Generated Disbursement',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
+                                columns:[
+                                        {data:'region',title:'Region'},                                        
+                                        {data:'name',title:'Name',orderable:false},
+                                        {data:'total_amount',title:'Total Amount',render: $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display,orderable:false},                                                                                
+                                        {data:'generated_by',title:'Generated By',orderable:false},                                                                                
+                                        {data:'generated_at',title:'Date Generated'},                                                                                
+                                        {data:'approved_by',title:'Approved By',orderable:false},                                                                                
+                                        {data:'date_approved',title:'Date Approved'}, 
+                                        {data:'dbp_batch_id',title:'Action',
+                                        render:function(data){
+
+                                            return "<button type='button' class='btn view-modal-btn btn-outline-primary'   dbp_batch_id="+data+" data-toggle='modal' data-target='#ViewModal'>"+
+                                                        "<i class='fa fa-edit'></i> Show More"+
+                                                    "</button>"
+                                        }
+
+                                        
+                                        ,orderable:false}, 
+
+                                ],                
+                                order: [[ 4, "desc" ]]     
+                            })
                             
+                // show more details button
+                $("#disbursement-generated-datatable").on('click','.view-modal-btn',function(){
+                    dbp_batch_id = $(this).attr('dbp_batch_id');
+                    $("#disbursement-generated-show-more-datatable").DataTable({
+                                pageLength : 5,
+                                destroy:true,                                
+                                responsive:true,
+                                ajax: {"url":"{{route('disbursement-generated-show-more',['dbp_batch_id'=>':id'])}}".replace(':id',dbp_batch_id),"type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List Of Generated Disbursement KYC Profiles',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'List Of Generated Disbursement KYC Profiles',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'List Of Generated Disbursement KYC Profiles',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'List Of Generated Disbursement KYC Profiles',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
+                                columns:[
+                                        {data:'rsbsa_no',title:'RSBSA Number'},
+                                        {   data:'fintech_provider',
+                                            title:'Provider',
+                                            orderable:false,
+                                            render:function(data,type,row){
+                                                return data == 'UMSI' ? 'USSC' : data;
+                                            }                                    
+                                        },
+                                        {data:'full_name',title:'Name',orderable:false},
+                                        {data:'address',title:'Address',orderable:false},
+                                        {data:'account_number',title:'DBP Account Number',orderable:false},
+                                        {data:'date_uploaded',title:'Date Uploaded'},
+                                        {data:'region',title:'Region',visible:false}
+                                        
+                                ],
+                                order: [[ 5, "desc" ]], 
+                                
+
+                            })
+
+                        })
+
+
                 // filter by region
                 $("#filter-region").change(function(){
                     region_code = $("option:selected",this).val();
@@ -507,12 +685,14 @@ table.dataTable td {
                         $("#file-data-datatable").DataTable().column(0).search('').draw(); // List  Of Uploaded Files
                         $("#load-datatable").DataTable().column(6).search('').draw();         //List Of Uploaded KYC Profiles          
                         $("#region-fintech-datatable").DataTable().column(0).search('').draw(); //List of Total Records Uploaded By Region and Fintech Partners
+                        $("#disbursement-generated-datatable").DataTable().column(0).search('').draw(); //List of Generated Disbursement
                     }
                     // filter by value
                     else{
                         $("#file-data-datatable").DataTable().column(0).search(region_name).draw(); // List Of Uploaded Files
                         $("#load-datatable").DataTable().column(6).search(region_name).draw();    //List Of Uploaded KYC Profiles               
                         $("#region-fintech-datatable").DataTable().column(0).search(region_name).draw(); //List of Total Records Uploaded By Region and Fintech Partners
+                        $("#disbursement-generated-datatable").DataTable().column().search(region_name).draw(); //List of Generated Disbursement
 
                     }
                      
@@ -789,17 +969,77 @@ table.dataTable td {
                     <tbody>                
                     </tbody>
                 </table>
-            </div>
-
-
-        </div>
-
         <br><br>
+                <div class="note note-success l-b-15">
+                    <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                        <div class="note-content">
+                            <h4><b>List of Generated Disbursement</b></h4>                      
+                        </div>
+                </div>
+                    <table id="disbursement-generated-datatable" class="table table-hover table-bordered reports" width="100%">            
+                        <thead>                                    
+                        </thead>
+                        <tbody>                
+                        </tbody>
+                    </table>                    
+
+            </div>
+        </div>
+        <br><br>
+  
       
         
         @endif
     @endforeach
         
+
+
+
+      <!-- #modal-view -->
+      <div class="modal fade" id="ViewModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="width: 100%">
+                <div class="modal-header" style="background-color: #007BFF">
+                    <h4 class="modal-title" style="color: white">View Profile</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                </div>
+                <form id="UpdateForm" method="post">
+                    @csrf
+                    
+                    <div class="modal-body">
+                        {{--modal body start--}}
+                        <h2 id="ViewCategName" align="center"></h2>
+
+                        
+                        <div class="note note-success">
+                            <div class="note-icon"><i class="fas fa-user"></i></div>
+                            <div class="note-content">
+                                <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="generated_by">John Edcel Zenarosa</label>
+                                <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="name">CO Banner Program</label>
+                            </div>
+                        </div>
+
+                        <table id="disbursement-generated-show-more-datatable" class="table table-hover table-bordered reports" style="width:100%">            
+                            <thead>                                    
+                            </thead>
+                            <tbody>                
+                            </tbody>
+                        </table>  
+                    
+                  
+
+            
+
+                            
+                        {{--modal body end--}}
+                    </div>
+                    <div class="modal-footer">
+                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>   
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
 
         {{-- </div> --}}
