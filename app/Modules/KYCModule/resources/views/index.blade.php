@@ -323,7 +323,7 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[
-                                        {data:'total_files',title:'Total Files',render: $.fn.dataTable.render.number(','),title:'Total Records Saved'},                                 
+                                        {data:'total_files',render: $.fn.dataTable.render.number(','),title:'Total Files Saved'},                                 
                                         {data:'total_inserted',render: $.fn.dataTable.render.number(','),title:'Total Records Saved'},                                                                                
                                         {data:'date_uploaded',title:'Date Uploaded'},
                             
