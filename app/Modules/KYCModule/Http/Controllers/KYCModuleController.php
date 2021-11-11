@@ -241,7 +241,8 @@ class KYCModuleController extends Controller
                                             'created_by_fullname as generated_by',
                                             'approver_fullname as approved_by',
                                             'date_approved',
-                                            'db.dbp_batch_id'
+                                            'db.dbp_batch_id',
+                                            DB::raw("(select COUNT(kyc_id) from kyc_profiles as kps where kps.dbp_batch_id = db.dbp_batch_id) as total_beneficiaries")                     
                                             )
                                 ->join('kyc_profiles as kp','db.dbp_batch_id','kp.dbp_batch_id')                                
                                 ->join('geo_region as gr','gr.code_reg','db.reg_code')                                                                
@@ -258,7 +259,7 @@ class KYCModuleController extends Controller
         '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
         '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
         
-        $get_records = db::table('kyc_profiles')
+        $get_records = db::table('kyc_profiles as kp')
                                 ->select(
                                     'rsbsa_no',
                                     db::raw("CONCAT(first_name,' ',last_name) as full_name"),
@@ -267,7 +268,7 @@ class KYCModuleController extends Controller
                                     'kyc_id',
                                     DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
                                     DB::raw('date_uploaded'),
-                                    'region'                      
+                                    'region'                                    
                                 )  
                                 ->where('dbp_batch_id',$dbp_batch_id)                                                                                                               
                                 ->get();
