@@ -53,6 +53,34 @@ class KYCImport implements ToCollection,WithStartRow
         $error_data = [];        
         ini_set('memory_limit', '-1');
         $get_kyc_file_id = '';
+
+              // insert kyc files to database
+              $check_filename = db::table('kyc_files')->where('file_name',$file_name)->whereColumn('total_inserted','total_rows')->first();
+                 
+                        
+              if($check_filename){
+                  $get_kyc_file_id = db::table('kyc_files')
+                      ->insertGetId([
+                          "file_name" => $file_name,
+                          "total_rows" => $collection_count,
+                      ]);
+              }else{
+                    $check_filename_again = db::table('kyc_files')->where('file_name',$file_name)->first();
+                    if(!$check_filename_again){
+                        $get_kyc_file_id = db::table('kyc_files')
+                            ->insertGetId([
+                                "file_name" => $file_name,
+                                "total_rows" => $collection_count,
+                            ]);
+
+                    }else{
+                        $get_kyc_file_id = $check_filename_again->kyc_file_id;
+                    }
+                  
+              }
+
+
+              
         foreach($collection as $key => $item){
             
             // check rsbsa no if exists
@@ -64,20 +92,7 @@ class KYCImport implements ToCollection,WithStartRow
            
 
                 if($check_rsbsa_no->isEmpty()){                
-                        // insert kyc files to database
-                        $check_filename = db::table('kyc_files')->where('file_name',$file_name)->first();
-                 
-                        
-                        if(!$check_filename){
-                            $get_kyc_file_id = db::table('kyc_files')
-                                ->insertGetId([
-                                    "file_name" => $file_name,
-                                    "total_rows" => $collection_count,
-                                ]);
-                        }else{
-                            $get_kyc_file_id = $check_filename->kyc_file_id;
-                        }
-
+                  
                     // insert to kyc profiles
                     db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail,$file_name,$collection_count,$get_kyc_file_id){
                     
@@ -294,10 +309,16 @@ class KYCImport implements ToCollection,WithStartRow
         $this->region = $region_for_mail;
         
         // update total inserted in kyc file table
-        if($rows_inserted != 0){
-            $get_total_inserted = db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->first()->total_inserted;
+        if($rows_inserted != 0 ) {
+            $get_total_inserted = db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->orderBy('date_uploaded','DESC')->first()->total_inserted;
             db::table('kyc_files')->where('kyc_file_id',$get_kyc_file_id)->update(["total_inserted" => $get_total_inserted + $rows_inserted]);
         }
+
+        
+    
+        
+
+
 
         $role = "ICTS DMD";    
         $region = $region_for_mail;
