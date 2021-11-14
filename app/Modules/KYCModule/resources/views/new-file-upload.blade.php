@@ -375,6 +375,20 @@ table.dataTable td {
                                             $("body").find("a").unbind("click");                                                                                          
                                         }
                                         
+                                    },
+                                    error:function(error){
+
+                                        console.log(error)
+
+                                        swal("Error!Something went wrong", {
+                                                            icon: "error",
+                                                        });
+                                                        
+                                        $("#ingest-file-datatable").DataTable().ajax.reload();
+                                        $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
+                                            $(".ingest-btn").prop('disabled',false)    
+                                            $("body").find("*").removeAttr("disabled");
+                                            $("body").find("a").unbind("click");        
                                     }
                                 });
 

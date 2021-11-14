@@ -313,6 +313,7 @@ class KYCModuleController extends Controller
             if(is_file($item_file)){
             $get_filename = $item_file->getClientOriginalName();
             $check_file_exist = db::table('ingest_files')->where('file_name',$get_filename)->take(1)->get();
+            
             if($check_file_exist->isEmpty()){
 
 
@@ -342,7 +343,16 @@ class KYCModuleController extends Controller
 
                 foreach($check_file_exist as $val){
                     if($val->status == '0'){
-                        $result = json_encode(["message" => 'Some files is already exist.']);
+                        $check_filename = db::table('kyc_files')->where('file_name',$get_filename)->whereColumn('total_inserted','total_rows')->first();
+
+                        if($check_filename){
+                            db::table('ingest_files')->insert(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
+                            Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));                            
+                            $result = json_encode(["message" => 'true']);
+                        }else{
+                            $result = json_encode(["message" => 'Some files is already exist.']);
+                        }
+                        
                     }else{
                         Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
                         $result = json_encode(["message" => 're-upload']);
@@ -422,7 +432,7 @@ class KYCModuleController extends Controller
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
                 $import_file = $kyc_import->newResult();
                 if($import_file){
-
+                    
                     if(count($import_file['error_data']) == 0){
 
                         db::table('ingest_files')
