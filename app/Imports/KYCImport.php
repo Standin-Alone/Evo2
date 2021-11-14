@@ -50,9 +50,8 @@ class KYCImport implements ToCollection,WithStartRow
         $collection_count = $collection->count();
         $region_for_mail = '';
         
-        $error_data = [];
-        ini_set("memory_limit", "10056M");
-                   
+        $error_data = [];        
+        ini_set('memory_limit', '-1');
         $get_kyc_file_id = '';
         foreach($collection as $key => $item){
             
@@ -275,6 +274,7 @@ class KYCImport implements ToCollection,WithStartRow
                             'total_farm_area'     => $total_farm_area,
                             'account_number'      => $account,
                             'remarks'             => $error_remarks,
+                            'file_name'             => $file_name,
                             ];
                                 
                             array_push($error_data,$data);
@@ -304,10 +304,10 @@ class KYCImport implements ToCollection,WithStartRow
         $message = "You have new ".$rows_inserted." records to approve.";
 
         // send email to rfo program focals.
-        if($rows_inserted != 0){
-            $gloal_notif_model = new GlobalNotificationModel;
-            $gloal_notif_model->send_email($role,$region,$message);
-        }
+        // if($rows_inserted != 0){
+        //     $global_notif_model = new GlobalNotificationModel;
+        //     $global_notif_model->send_email($role,$region,$message);
+        // }
         
 
         }catch(\Exception $e){
@@ -325,8 +325,14 @@ class KYCImport implements ToCollection,WithStartRow
     public function getRowCount()
     {
 
-        return json_encode(['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region]);
+        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region];
     }
 
+
+    public function newResult()
+    {
+
+        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region];
+    }
  
 }

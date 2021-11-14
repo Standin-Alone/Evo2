@@ -12,6 +12,7 @@ use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use File;
 use Illuminate\Support\Facades\Storage;
+use App\Imports\ConsolidateKycImport;
 class KYCModuleController extends Controller
 {
 
@@ -28,6 +29,13 @@ class KYCModuleController extends Controller
  
         $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
         return view("KYCModule::index",compact('get_region','action'));
+    }
+
+    public function uploading_index()
+    {   $action = session('check_module_path');
+ 
+        $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
+        return view("KYCModule::new-file-upload",compact('get_region','action'));
     }
 
     // import function of kyc profiles
@@ -274,4 +282,196 @@ class KYCModuleController extends Controller
                                 ->get();
         return Datatables::of($get_records)->make(true);
     }
+
+    // upload file only to the server
+    public function upload_file_only(){
+        $file = request()->file('file');
+        $provider  = '';
+        $result  = '';
+        $upload_path = 'temp_excel/kyc';
+  
+
+        $upload_folder  = $upload_path.'/'.Carbon::now()->year;
+
+        if(!File::isDirectory($upload_path)){
+            
+            File::makeDirectory($upload_path, 0775, true);                                
+            $by_year_path = $upload_path.'/'.Carbon::now()->year;
+            if(!File::isDirectory($by_year_path)){
+
+                File::makeDirectory($by_year_path, 0775, true);
+            }
+        }
+
+
+ 
+        
+        foreach($file as $key => $item_file){
+         
+
+
+            if(is_file($item_file)){
+            $get_filename = $item_file->getClientOriginalName();
+            $check_file_exist = db::table('ingest_files')->where('file_name',$get_filename)->take(1)->get();
+            if($check_file_exist->isEmpty()){
+
+
+                
+                db::table('ingest_files')->insert(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
+
+                    
+                // check file name if it has fintech provider
+                if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
+
+                    if(str_contains($get_filename,'USSC')){
+                        $provider = 'UMSI';
+                    }elseif(str_contains($get_filename,'SPTI') ){
+                        $provider = 'SPTI';
+                    }   
+                
+                
+                Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                    
+                
+                    
+                $result =  json_encode(["message" => 'true']);
+                }else{
+                    $result = json_encode(["message" => 'filename error']);
+                }
+            }else{
+
+                foreach($check_file_exist as $val){
+                    if($val->status == '0'){
+                        $result = json_encode(["message" => 'Some files is already exist.']);
+                    }else{
+                        Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                        $result = json_encode(["message" => 're-upload']);
+                    }
+
+                }
+                
+                
+            }
+        
+
+            }
+        }
+
+        return $result;
+    }
+
+    // get list of files to ingest
+    public function get_to_ingest_files(){
+        $get_records = db::table('ingest_files as if')
+                            ->select('if.file_name',DB::raw('IF(total_inserted is NULL,0,total_inserted) as total_inserted'),DB::raw('IF(total_rows is NULL,0,total_rows) as total_rows'),'if.date_created','ingest_file_id')
+                            ->leftJoin('kyc_files as kf','kf.file_name','if.file_name')
+                            ->where('created_by_user_id',session('user_id'))
+                            ->where('if.status','1')
+                            ->get();
+
+        return Datatables::of($get_records)->make(true);                
+    }
+
+
+    // ingest file
+    public function ingest_file(){
+        
+        $file_name = request('file_name');
+        $provider  = '';
+        $result = '';
+        $upload_path = 'temp_excel/kyc';
+        
+        $count_error = 0;
+
+        $upload_folder  = $upload_path.'/'.Carbon::now()->year;
+
+        if(!File::isDirectory($upload_path)){
+            
+            File::makeDirectory($upload_path, 0775, true);                                
+            $by_year_path = $upload_path.'/'.Carbon::now()->year;
+            if(!File::isDirectory($by_year_path)){
+
+                File::makeDirectory($by_year_path, 0775, true);
+            }
+        }
+
+        $error_storage = [];
+    foreach($file_name as $item_filename){
+
+        $count = '';
+
+        $get_filename = $item_filename;
+
+        
+        $check_file = db::table('kyc_files')->where('file_name',$get_filename)->whereColumn('total_inserted','total_rows')->take(1)->get();
+
+        // check file if the file is already uploaded
+        // if(!$check_file){
+            // check file name if it has fintech provider
+            if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
+
+                if(str_contains($get_filename,'USSC')){
+                    $provider = 'UMSI';
+                }elseif(str_contains($get_filename,'SPTI') ){
+                    $provider = 'SPTI';
+                }
+    
+                $kyc_import = new KYCImport($provider,$get_filename);
+                
+                                                    
+                Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
+                $import_file = $kyc_import->newResult();
+                if($import_file){
+
+                    if(count($import_file['error_data']) == 0){
+
+                        db::table('ingest_files')
+                            ->where('file_name',$get_filename)
+                            ->update(['status'=>'0']);
+                            
+                        
+                    }else{
+
+                  
+
+
+                        
+                        
+                        if(count($error_storage) > 0){
+                            $error_storage = array_merge($error_storage[0], $import_file['error_data']);                        
+
+                        }else{
+                            array_push($error_storage, $import_file['error_data'] );                        
+                        }   
+
+
+
+                        
+                        
+                    }
+
+
+              
+                }                        
+            }else{
+                $count_error++;
+                echo  json_encode(["message" => 'filename error']);
+                
+            }
+        // }
+    }
+
+    if($count_error == 0){
+        echo  json_encode(["message" => 'true','error_data' => $error_storage]);
+    
+    }else{
+        echo  json_encode(["message" => 'false']);
+    }
+        
+
+    }
+
+
+
+
 }
