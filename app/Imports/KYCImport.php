@@ -55,17 +55,23 @@ class KYCImport implements ToCollection,WithStartRow
         $get_kyc_file_id = '';
 
               // insert kyc files to database
-              $check_filename = db::table('kyc_files')->where('file_name',$file_name)->whereColumn('total_inserted','total_rows')->first();
+              $check_filename = db::table('kyc_files')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
                  
-                        
-              if($check_filename){
-                  $get_kyc_file_id = db::table('kyc_files')
-                      ->insertGetId([
-                          "file_name" => $file_name,
-                          "total_rows" => $collection_count,
-                      ]);
+              
+              if($check_filename){ 
+
+                $validate_filename = db::table('kyc_files')->where('kyc_file_id',$check_filename->kyc_file_id)->whereColumn('total_inserted','total_rows')->orderBy('date_uploaded','DESC')->first();
+                    if($validate_filename){
+                        $get_kyc_file_id = db::table('kyc_files')
+                        ->insertGetId([
+                            "file_name" => $file_name,
+                            "total_rows" => $collection_count,
+                        ]);
+                    }else{
+                        $get_kyc_file_id = $check_filename->kyc_file_id;
+                    }                  
               }else{
-                    $check_filename_again = db::table('kyc_files')->where('file_name',$file_name)->first();
+                    $check_filename_again = db::table('kyc_files')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
                     if(!$check_filename_again){
                         $get_kyc_file_id = db::table('kyc_files')
                             ->insertGetId([
@@ -94,42 +100,12 @@ class KYCImport implements ToCollection,WithStartRow
                 if($check_rsbsa_no->isEmpty()){                
                   
                     // insert to kyc profiles
-                    db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail,$file_name,$collection_count,$get_kyc_file_id){
+                    // db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail,$file_name,$collection_count,$get_kyc_file_id){
                     
-                        // $format_birthday = str_replace('/','-',$item[13]);
+  
 
                         $format_birthday = strpos($item[13], '/') || is_int($item[13]) ? \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13]) : $item[13];
-                        //$format_birthday = \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13])->format('Y-m-d');
-                        
 
-                        // this comment is for data with data source
-                        // $data_source         = trim($item[0]);    
-                        // $fintech_provider    = $provider;    
-                        // $rsbsa_no            = trim($item[1]);    
-                        // $first_name          = trim($item[2]);            
-                        // $middle_name         = trim($item[3]);
-                        // $last_name           = trim($item[4]);
-                        // $ext_name            = trim($item[5]);
-                        // $id_number           = trim($item[6]);
-                        // $gov_id              = trim($item[7]);
-                        // $street_purok        = trim($item[8]);
-                        // $barangay            = trim($item[9]);
-                        // $municipality        = trim($item[10]);
-                        // $district            = trim($item[11]);                        
-                        // $province            = trim($item[12]);
-                        // $region              = trim($item[13]);
-                        // $birthdate           = $format_birthday;
-                        // $place_of_birth      = trim($item[15]);
-                        // $mobile_no           = trim($item[16]);
-                        // $sex                 = trim($item[17]);
-                        // $nationality         = trim($item[18]);
-                        // $profession          = trim($item[19]);
-                        // $sourceoffunds       = trim($item[20]);
-                        // $mothers_maiden_name = trim($item[21]);
-                        // $no_parcel           = trim($item[22]);
-                        // $total_farm_area     = trim($item[23]);
-                        // $account             = trim($item[24]);
-                        // $remarks             = is_null($item[24]) ? 'Failed' : trim($item[25]);
 
 
 
@@ -164,7 +140,7 @@ class KYCImport implements ToCollection,WithStartRow
                         $check_reg_prov =  db::table('geo_map')
                                                 ->where('prov_name',$province)
                                                 ->where('reg_name',$region)
-                                                ->where('bgy_name',$barangay)
+                                                // ->where('bgy_name',$barangay)
                                                 ->where('mun_name',$municipality)
                                                 ->get(); 
                                                 
@@ -296,7 +272,7 @@ class KYCImport implements ToCollection,WithStartRow
                         }
 
                         
-                    });             
+                    // });             
                 }     
             
             
