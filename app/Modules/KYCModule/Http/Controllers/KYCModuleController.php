@@ -376,7 +376,8 @@ class KYCModuleController extends Controller
                             ->select('if.file_name',DB::raw('IF(total_inserted is NULL,0,total_inserted) as total_inserted'),DB::raw('IF(total_rows is NULL,0,total_rows) as total_rows'),'if.date_created','ingest_file_id')
                             ->leftJoin('kyc_files as kf','kf.file_name','if.file_name')
                             ->where('created_by_user_id',session('user_id'))
-                            ->where('if.status','1')
+                            ->where('if.status','1')                        
+                            ->orderBy('if.date_created','DESC')                            
                             ->get();
 
         return Datatables::of($get_records)->make(true);                

@@ -673,7 +673,7 @@ table.dataTable td {
 
             <div class="modal-footer">
                 
-                    <a href="javascript:;" class="btn btn-primary ingest-btn">Ingest</a>                                
+                    <button class="btn btn-primary ingest-btn">Ingest</button>                                
                 </div>
         </div>
         <!-- end panel -->

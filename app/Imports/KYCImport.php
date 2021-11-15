@@ -97,7 +97,7 @@ class KYCImport implements ToCollection,WithStartRow
             
            
 
-                if($check_rsbsa_no->isEmpty()){                
+                        
                   
                     // insert to kyc profiles
                     // db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail,$file_name,$collection_count,$get_kyc_file_id){
@@ -140,21 +140,21 @@ class KYCImport implements ToCollection,WithStartRow
                         $check_reg_prov =  db::table('geo_map')
                                                 ->where('prov_name',$province)
                                                 ->where('reg_name',$region)
-                                                // ->where('bgy_name',$barangay)
-                                                ->where('mun_name',$municipality)
-                                                ->get(); 
+                                                ->where('bgy_name',$barangay)
+                                                ->where('mun_name',$municipality)                                                
+                                                ->first(); 
                                                 
                         $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get();
 
-                        if(!$check_reg_prov->isEmpty() && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) && $check_account_number->isEmpty()){
+                        if($check_rsbsa_no->isEmpty() && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) && $check_account_number->isEmpty()){
 
                             // set region for send email
                             $region_for_mail =  $region; 
 
-                            $bgy_code   =  db::table('geo_map')->where('bgy_name',$barangay)->first()->bgy_code;
-                            $mun_code   =  db::table('geo_map')->where('mun_name',$municipality)->first()->mun_code;
-                            $prov_code   =  db::table('geo_map')->where('prov_name',$province)->first()->prov_code;
-                            $reg_code   =  db::table('geo_map')->where('reg_name',$region)->first()->reg_code;
+                            $bgy_code   =  $check_reg_prov->bgy_code;
+                            $mun_code   =  $check_reg_prov->mun_code;
+                            $prov_code   =  $check_reg_prov->prov_code;
+                            $reg_code   =  $check_reg_prov->reg_code;
                             
                             
 
@@ -225,7 +225,7 @@ class KYCImport implements ToCollection,WithStartRow
 
 
                             
-                            if($check_reg_prov->isEmpty()){
+                            if(!$check_reg_prov){
                                 $error_remarks = ($error_remarks == ''  ? 'Incomplete or wrong spelling of address' : $error_remarks.','.'Incomplete or wrong spelling of address');
                             }
 
@@ -273,7 +273,7 @@ class KYCImport implements ToCollection,WithStartRow
 
                         
                     // });             
-                }     
+        
             
             
         }
