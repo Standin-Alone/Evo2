@@ -3,12 +3,14 @@
 namespace App\Imports;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Session;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use DB;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use App\Models\GlobalNotificationModel;
+
 class KYCImport implements ToCollection,WithStartRow
 {
 
@@ -43,7 +45,9 @@ class KYCImport implements ToCollection,WithStartRow
                         '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
 
         try{
-            
+        
+
+
         $rows_inserted = 0;
         $provider = $this->provider;
         $file_name = $this->file_name;
@@ -55,9 +59,13 @@ class KYCImport implements ToCollection,WithStartRow
         $get_kyc_file_id = '';
 
               // insert kyc files to database
+                
+
               $check_filename = db::table('kyc_files')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
-                 
               
+              
+              
+
               if($check_filename){ 
 
                 $validate_filename = db::table('kyc_files')->where('kyc_file_id',$check_filename->kyc_file_id)->whereColumn('total_inserted','total_rows')->orderBy('date_uploaded','DESC')->first();
@@ -85,14 +93,20 @@ class KYCImport implements ToCollection,WithStartRow
                   
               }
 
-
+    
               
         foreach($collection as $key => $item){
-            
+        
+               
+            // progress_bar
+           
+       
+
             // check rsbsa no if exists
             $rsbsa_no   = $item[0];                
-            $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->take(1)->get();
+            $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->first();
             
+
 
             
            
@@ -138,20 +152,23 @@ class KYCImport implements ToCollection,WithStartRow
                         $remarks             = is_null($item[23]) ? 'Failed' : trim($item[24]);
 
                         $check_reg_prov =  db::table('geo_map')
+                                                // ->where('bgy_name',$barangay)
                                                 ->where('prov_name',$province)
-                                                ->where('reg_name',$region)
-                                                ->where('bgy_name',$barangay)
+                                                ->where('reg_name',$region)                                                
                                                 ->where('mun_name',$municipality)                                                
                                                 ->first(); 
                                                 
-                        $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get();
-
-                        if($check_rsbsa_no->isEmpty() && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) && $check_account_number->isEmpty()){
-
+                        // $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get(); for encryption of accout number
+                        $check_account_number = db::table('kyc_profiles')->where('account_number',$account)->first();
+          
+                     
+                        if(!$check_rsbsa_no && !$check_account_number  && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
+                            // Session::put('progress',$key+1);
+                            // Session::save();
                             // set region for send email
                             $region_for_mail =  $region; 
 
-                            $bgy_code   =  $check_reg_prov->bgy_code;
+                            // $bgy_code   =  $check_reg_prov->bgy_code; for checking of barangay
                             $mun_code   =  $check_reg_prov->mun_code;
                             $prov_code   =  $check_reg_prov->prov_code;
                             $reg_code   =  $check_reg_prov->reg_code;
@@ -161,8 +178,8 @@ class KYCImport implements ToCollection,WithStartRow
                
                         
                         
-
-
+                        
+                        // this variable is for inserting of kyc profiles to database
                         $insert_kyc = db::table('kyc_profiles')
                                 ->insert([
                                     'kyc_id'              => $uuid,
@@ -177,7 +194,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'id_number'           => $id_number,
                                     'gov_id_type'         => $gov_id,
                                     'street_purok'        => str_replace("Ñ","N", mb_strtoupper($street_purok,'UTF-8')),
-                                    'bgy_code'            => $bgy_code,
+                                    // 'bgy_code'            => $bgy_code,
                                     'barangay'            => str_replace("Ñ","N", mb_strtoupper($barangay,'UTF-8')) ,
                                     'mun_code'            => $mun_code,
                                     'municipality'        => str_replace("Ñ","N", mb_strtoupper($municipality,'UTF-8')),
@@ -196,14 +213,20 @@ class KYCImport implements ToCollection,WithStartRow
                                     'mothers_maiden_name' => str_replace("Ñ","N", mb_strtoupper($mothers_maiden_name == '' ? 'NMMN' : $mothers_maiden_name,'UTF-8')),
                                     'no_parcel'           => $no_parcel,
                                     'total_farm_area'     => $total_farm_area,
-                                    'account_number'      => DB::raw("AES_ENCRYPT('".$account."','".$PRIVATE_KEY."')"),
+                                    // 'account_number'   => DB::raw("AES_ENCRYPT('".$account."','".$PRIVATE_KEY."')"),
+                                    'account_number'      => $account,
                                     'remarks'             => mb_strtoupper($remarks),
                                     'uploaded_by_user_id' => session('uuid'),
                                     'uploaded_by_user_fullname'  => str_replace("Ñ","N", mb_strtoupper(session('first_name'),'UTF-8')).' '.str_replace("Ñ","N", mb_strtoupper(session('last_name'),'UTF-8'))
                                 ]);
-                    
+                                
+                            // this condition is for counting of rows inserted in kyc profiles
                             if($insert_kyc){
+                                
+                                
                                 ++$rows_inserted;
+                                Session::put(['progress' => ($rows_inserted  / $collection->count() ) * 100]);
+                                Session::save(); 
                             }
                         }else{  
 
@@ -229,7 +252,7 @@ class KYCImport implements ToCollection,WithStartRow
                                 $error_remarks = ($error_remarks == ''  ? 'Incomplete or wrong spelling of address' : $error_remarks.','.'Incomplete or wrong spelling of address');
                             }
 
-                            if(!$check_account_number->isEmpty()){
+                            if($check_account_number){
                                 $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
                             }
 
@@ -275,7 +298,6 @@ class KYCImport implements ToCollection,WithStartRow
                     // });             
         
             
-            
         }
         
         $this->error_data = $error_data;
@@ -306,12 +328,14 @@ class KYCImport implements ToCollection,WithStartRow
         //     $global_notif_model->send_email($role,$region,$message);
         // }
         
-
+       
         }catch(\Exception $e){
             $this->message = json_encode($e->getMessage());
             // $this->message = 'false';
         }   
-
+        $response = \Response::make();
+        $response->header('Content-Type', 'application/json');
+        return $response;
     }
 
     public function startRow():int
@@ -328,8 +352,9 @@ class KYCImport implements ToCollection,WithStartRow
 
     public function newResult()
     {
-
-        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region];
+        $response = \Response::make( ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region]);
+        $response->header('Content-Type', 'application/json');
+        return $response;        
     }
  
 }

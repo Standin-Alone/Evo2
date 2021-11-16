@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use File;
 use Illuminate\Support\Facades\Storage;
 use App\Imports\ConsolidateKycImport;
+use Illuminate\Support\Facades\Session;
 class KYCModuleController extends Controller
 {
 
@@ -33,6 +34,8 @@ class KYCModuleController extends Controller
 
     public function uploading_index()
     {   $action = session('check_module_path');
+        session()->put('progress',0);
+        session()->save();
  
         $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
         return view("KYCModule::new-file-upload",compact('get_region','action'));
@@ -387,6 +390,8 @@ class KYCModuleController extends Controller
     // ingest file
     public function ingest_file(){
         
+        Session::put(['progress' => 0]);
+        Session::save(); 
         $file_name = request('file_name');
         $provider  = '';
         $result = '';
@@ -432,9 +437,10 @@ class KYCModuleController extends Controller
                                                     
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
                 $import_file = $kyc_import->newResult();
-                if($import_file){
-                    
-                    if(count($import_file['error_data']) == 0){
+                if($import_file->getOriginalContent()['error_data']){
+                    dd();
+                    // check if import file has errors
+                    if(count($import_file->getOriginalContent()['error_data']) == 0){
 
                         db::table('ingest_files')
                             ->where('file_name',$get_filename)
@@ -443,22 +449,12 @@ class KYCModuleController extends Controller
                         
                     }else{
 
-                  
-
-
-                        
-                        
                         if(count($error_storage) > 0){
-                            $error_storage = array_merge($error_storage[0], $import_file['error_data']);                        
+                            $error_storage = array_merge($error_storage[0], $import_file->getOriginalContent()['error_data']);                        
 
                         }else{
-                            array_push($error_storage, $import_file['error_data'] );                        
-                        }   
-
-
-
-                        
-                        
+                            array_push($error_storage, $import_file->getOriginalContent()['error_data'] );                        
+                        }  
                     }
 
 
@@ -467,6 +463,7 @@ class KYCModuleController extends Controller
             }else{
                 $count_error++;
                 echo  json_encode(["message" => 'filename error']);
+                // $response = \Response::make(["message" => 'filename error']);
                 
             }
         // }
@@ -474,11 +471,16 @@ class KYCModuleController extends Controller
 
     if($count_error == 0){
         echo  json_encode(["message" => 'true','error_data' => $error_storage]);
+        // $response = \Response::make(["message" => 'true','error_data' => $error_storage]);
     
     }else{
         echo  json_encode(["message" => 'false']);
+        // $response = \Response::make(["message" => 'false']);
     }
-        
+    
+ 
+    // $response->header('Content-Type', 'application/json');
+    // return $response;
 
     }
 

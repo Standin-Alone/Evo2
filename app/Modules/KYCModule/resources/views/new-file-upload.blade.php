@@ -162,19 +162,24 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
-
+    
 
      	<!-- ================== BEGIN PAGE LEVEL JS ================== -->
          <script src="assets/plugins/dropzone/min/dropzone.min.js"></script>
 	<script src="assets/plugins/highlight/highlight.common.js"></script>
 	<script src="assets/js/demo/render.highlight.js"></script>
+    
 	<!-- ================== END PAGE LEVEL JS ================== -->
+
+    {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/pgv/backend-script.js"></script> --}}
 
 
     <script>
-     
+        
         $(document).ready(function(){
-            
+      
+        
 
             $("#ingest-file-datatable").DataTable({
                                 pageLength : 5,
@@ -265,6 +270,11 @@ table.dataTable td {
                 $(this).closest('tbody tr').toggleClass('selected');
             })
 
+
+        
+         
+         
+
             $(document).on('click','.ingest-btn',function(){
                 file_name = [];
 
@@ -273,10 +283,10 @@ table.dataTable td {
                     file_name.push($(this).val());
                 })
 
+              
 
 
-
-
+                
 
                 if(file_name.length > 0 ){
                         
@@ -294,8 +304,21 @@ table.dataTable td {
                         dangerMode: false,
                         })
                         .then((confirm) => {
-                            
+                    
                             if(confirm){
+                                window.onbeforeunload = function(){
+                                return "Are you sure you want to refresh? You are still uploading the data.";
+                                }   
+
+                                
+                                setInterval(function(){
+                                        $.getJSON("{{route('get-progress')}}", function(data) {
+                                            console.warn(data[0]);
+                                        
+                                            $(".progress-load").css("width",data[0]+'%')
+                                        });
+                                    }, 2);
+                                
                                 $(".ingest-btn").prop('disabled',true);
                                 $(".ingest-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Ingesting');                 
                                 $.ajax({                      
@@ -305,10 +328,12 @@ table.dataTable td {
                                     beforeSend: function () {
                                         $("body").find("*").attr("disabled", "disabled");
                                         $("body").find("a").click(function (e) { e.preventDefault(); });
+
+                                      
                                     },
                                     success:function(response){
                                         parses_result = JSON.parse(response)
-                                        
+                                        window.onbeforeunload = null;
                                         if(parses_result['message'] == 'true'){
                                      
 
@@ -372,7 +397,8 @@ table.dataTable td {
                                             $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
                                             $(".ingest-btn").prop('disabled',false)    
                                             $("body").find("*").removeAttr("disabled");
-                                            $("body").find("a").unbind("click");                                                                                          
+                                            $("body").find("a").unbind("click");  
+                                            window.onbeforeunload = null;                                                                                        
                                         }
                                         
                                     },
@@ -388,7 +414,8 @@ table.dataTable td {
                                         $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
                                             $(".ingest-btn").prop('disabled',false)    
                                             $("body").find("*").removeAttr("disabled");
-                                            $("body").find("a").unbind("click");        
+                                            $("body").find("a").unbind("click");       
+                                            window.onbeforeunload = null; 
                                     }
                                 });
 
@@ -421,6 +448,12 @@ table.dataTable td {
 
             });
 
+            // check if the page is reloading when user ingest
+   
+                
+                  
+     
+
             $("#ImportForm").validate({
 
                         rules:{                      
@@ -437,9 +470,8 @@ table.dataTable td {
                         },
                         submitHandler: function(){
                             let fd = this;
-                            
-                            
-                            
+                   
+                                
                             var spiel = document.createElement('div');
                                 spiel.innerHTML = "Are you sure you want to upload these files?";
                             swal({
@@ -584,7 +616,7 @@ table.dataTable td {
             <div class="panel-body">
             <div class="alert alert-warning fade show">
                     
-                    <strong>REMINDER!</strong>
+                    <strong>REMINDER {{session('progress')}} ! </strong>
                     Please don't  <a href="#" class="alert-link">CLOSE or RELOAD</a> the page when ingesting;
                    
                 </div>
@@ -670,9 +702,13 @@ table.dataTable td {
                     </tbody>
                 </table>
 
-
+                <div class="progress rounded-corner progress-striped active ">
+                    <div class="progress-bar bg-purple progress-load" style="width:0%" >
+                      Uploading
+                    </div>
+                  </div>
             <div class="modal-footer">
-                
+              
                     <button class="btn btn-primary ingest-btn">Ingest</button>                                
                 </div>
         </div>
