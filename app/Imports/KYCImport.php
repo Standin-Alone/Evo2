@@ -10,7 +10,9 @@ use DB;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use App\Models\GlobalNotificationModel;
-
+use Workerman\Worker;
+use PHPSocketIO\SocketIO;
+use LRedis;
 class KYCImport implements ToCollection,WithStartRow
 {
 
@@ -37,14 +39,18 @@ class KYCImport implements ToCollection,WithStartRow
     public function collection(Collection $collection)
     {
         //      
+        $redis = LRedis::connection();
 
+        
+     
+            try{
         $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
                         '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
                         '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
                         '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
                         '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
 
-        try{
+       
         
 
 
@@ -53,7 +59,7 @@ class KYCImport implements ToCollection,WithStartRow
         $file_name = $this->file_name;
         $collection_count = $collection->count();
         $region_for_mail = '';
-        
+        $compute_percentage = (1 / $collection_count ) * 100;
         $error_data = [];        
         ini_set('memory_limit', '-1');
         $get_kyc_file_id = '';
@@ -64,6 +70,7 @@ class KYCImport implements ToCollection,WithStartRow
               $check_filename = db::table('kyc_files')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
               
               
+                          
               
 
               if($check_filename){ 
@@ -93,13 +100,13 @@ class KYCImport implements ToCollection,WithStartRow
                   
               }
 
-    
+        $sum_percentage = 0;
               
         foreach($collection as $key => $item){
         
-               
+            
             // progress_bar
-           
+            
        
 
             // check rsbsa no if exists
@@ -107,9 +114,10 @@ class KYCImport implements ToCollection,WithStartRow
             $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->first();
             
 
-
-            
-           
+            // calculate the progress of importing;
+            $sum_percentage += $compute_percentage;
+            $redis->publish('mychannel', session('uuid'));
+            // $redis->publish('message:'.session('uuid'), round($sum_percentage,2).'%');
 
                         
                   
@@ -163,8 +171,7 @@ class KYCImport implements ToCollection,WithStartRow
           
                      
                         if(!$check_rsbsa_no && !$check_account_number  && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
-                            // Session::put('progress',$key+1);
-                            // Session::save();
+                         
                             // set region for send email
                             $region_for_mail =  $region; 
 
@@ -223,10 +230,9 @@ class KYCImport implements ToCollection,WithStartRow
                             // this condition is for counting of rows inserted in kyc profiles
                             if($insert_kyc){
                                 
-                                
+                               
                                 ++$rows_inserted;
-                                Session::put(['progress' => ($rows_inserted  / $collection->count() ) * 100]);
-                                Session::save(); 
+                            
                             }
                         }else{  
 
@@ -240,6 +246,10 @@ class KYCImport implements ToCollection,WithStartRow
 
                             if($rsbsa_no == ''){
                                 $error_remarks = ($error_remarks == ''  ? 'No RSBSA number' : $error_remarks.','.'No RSBSA number');
+                            }
+
+                            if($check_rsbsa_no ){
+                                $error_remarks = ($error_remarks == ''  ? 'Duplicate RSBSA number' : $error_remarks.','.'Duplicate RSBSA number');
                             }
 
                             if($first_name == '' && $last_name == '' ){
@@ -328,14 +338,14 @@ class KYCImport implements ToCollection,WithStartRow
         //     $global_notif_model->send_email($role,$region,$message);
         // }
         
-       
-        }catch(\Exception $e){
-            $this->message = json_encode($e->getMessage());
-            // $this->message = 'false';
-        }   
-        $response = \Response::make();
-        $response->header('Content-Type', 'application/json');
-        return $response;
+    }catch(\Exception $e){
+        $this->message = json_encode($e->getMessage());
+        // $this->message = 'false';
+    }   
+      
+   
+
+        
     }
 
     public function startRow():int
@@ -352,9 +362,9 @@ class KYCImport implements ToCollection,WithStartRow
 
     public function newResult()
     {
-        $response = \Response::make( ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region]);
-        $response->header('Content-Type', 'application/json');
-        return $response;        
+         
+       
+        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region];
     }
  
 }
