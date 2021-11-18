@@ -14,11 +14,18 @@ use File;
 use Illuminate\Support\Facades\Storage;
 use App\Imports\ConsolidateKycImport;
 use Illuminate\Support\Facades\Session;
+use App\Events\ProgressEvent;
+
+
+use App\Modules\KYCModule\Events\Progress;
+use Event;
+
 class KYCModuleController extends Controller
 {
 
     public function __construct(){
         $this->middleware('session.module');
+     
     }
     /**
      * Display the module welcome screen
@@ -35,8 +42,15 @@ class KYCModuleController extends Controller
     public function uploading_index()
     {   $action = session('check_module_path');
         session()->put('progress',0);
-        session()->save();
- 
+        session()->save();     
+   
+       
+        // $io->on('connection', function ($socket) use ($io) {
+        //      $socket->broadcast->emit('progress','sample');
+        //     $socket->on('progress', function ($data) use ($socket) {
+           
+        //     });
+        // });
         $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
         return view("KYCModule::new-file-upload",compact('get_region','action'));
     }
@@ -388,8 +402,11 @@ class KYCModuleController extends Controller
 
 
     // ingest file
-    public function ingest_file(){
+    public function ingest_file(Request $request){
+   
         
+        
+
         Session::put(['progress' => 0]);
         Session::save(); 
         $file_name = request('file_name');
@@ -437,10 +454,11 @@ class KYCModuleController extends Controller
                                                     
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
                 $import_file = $kyc_import->newResult();
-                if($import_file->getOriginalContent()['error_data']){
-                    dd();
+                
+                if($import_file){
+                    
                     // check if import file has errors
-                    if(count($import_file->getOriginalContent()['error_data']) == 0){
+                    if(count($import_file['error_data']) == 0){
 
                         db::table('ingest_files')
                             ->where('file_name',$get_filename)
@@ -450,10 +468,10 @@ class KYCModuleController extends Controller
                     }else{
 
                         if(count($error_storage) > 0){
-                            $error_storage = array_merge($error_storage[0], $import_file->getOriginalContent()['error_data']);                        
+                            $error_storage = array_merge($error_storage[0], $import_file['error_data']);                        
 
                         }else{
-                            array_push($error_storage, $import_file->getOriginalContent()['error_data'] );                        
+                            array_push($error_storage, $import_file['error_data'] );                        
                         }  
                     }
 

@@ -6,6 +6,7 @@
 
 {{-- import in this section your css files --}}
 @section('page-css')
+    <link href="assets/plugins/animate/animate.min.css" rel="stylesheet" />
     <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
@@ -162,10 +163,14 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.html5.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
+
+    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    
+    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
     
 
-     	<!-- ================== BEGIN PAGE LEVEL JS ================== -->
-         <script src="assets/plugins/dropzone/min/dropzone.min.js"></script>
+    <!-- ================== BEGIN PAGE LEVEL JS ================== -->
+    <script src="assets/plugins/dropzone/min/dropzone.min.js"></script>
 	<script src="assets/plugins/highlight/highlight.common.js"></script>
 	<script src="assets/js/demo/render.highlight.js"></script>
     
@@ -173,13 +178,36 @@ table.dataTable td {
 
     {{-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/pgv/backend-script.js"></script> --}}
-
+    
 
     <script>
-        
+        // start websocket
+         var socket = io('127.0.0.1:3000',{ transports: ['websocket','polling'],allowEIO3:true});
+   
+        //  connect to websocket
+        socket.on("connect", function() {
+                //  get progress of uploading
+
+            socket.on("my_channel", function(channel_by_user_id){
+     
+                    socket.on("progress:"+channel_by_user_id, function(data){
+                        $(".progress-load").html(data)
+                        $(".progress-load").css('width',data)
+                
+                        console.warn(data)
+                        
+                    });
+               
+                
+            });
+        });
+
+
+
+
         $(document).ready(function(){
       
-        
+    
 
             $("#ingest-file-datatable").DataTable({
                                 pageLength : 5,
@@ -244,7 +272,14 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[
-                                        {data:'ingest_file_id',title:'Select Checkbox to Ingest',render:function(data,type,row){
+                                        {data:'ingest_file_id',title:
+                                        '<div class="checkbox checkbox-css">'+
+                                                            '<input type="checkbox" id="check-all"    value="all"  />"'+
+                                                            '<label for="checkbox"></label>'+
+                                                        '</div>'   +
+                                        'Select Checkbox to Ingest'
+                                        
+                                        ,render:function(data,type,row){
 
                                             return   '<div class="checkbox checkbox-css">'+
                                                             '<input type="checkbox" id="checkbox'+row['ingest_file_id']+'"   class="permission_chk"  value="'+row['file_name']+'"  />"'+
@@ -310,14 +345,7 @@ table.dataTable td {
                                 return "Are you sure you want to refresh? You are still uploading the data.";
                                 }   
 
-                                
-                                setInterval(function(){
-                                        $.getJSON("{{route('get-progress')}}", function(data) {
-                                            console.warn(data[0]);
-                                        
-                                            $(".progress-load").css("width",data[0]+'%')
-                                        });
-                                    }, 2);
+                          
                                 
                                 $(".ingest-btn").prop('disabled',true);
                                 $(".ingest-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Ingesting');                 
@@ -341,7 +369,9 @@ table.dataTable td {
                                                     icon: "success",
                                                 }).then(()=>{                                                            
                                                                      
-                                                           
+                                                    
+                                                $(".progress-load").css('width','0%')    
+                                        
                                             if(parses_result['error_data'].length != 0){
 
                                                 console.warn(parses_result['error_data'].length)
@@ -404,7 +434,7 @@ table.dataTable td {
                                     },
                                     error:function(error){
 
-                                        console.log(error)
+                                  
 
                                         swal("Error!Something went wrong", {
                                                             icon: "error",
@@ -702,8 +732,8 @@ table.dataTable td {
                     </tbody>
                 </table>
 
-                <div class="progress rounded-corner progress-striped active ">
-                    <div class="progress-bar bg-purple progress-load" style="width:0%" >
+                <div class="progress rounded-corner  active  ">
+                    <div class="progress-bar bg-green progress-bar-striped progress-bar-animated  progress-load" style="width:0%" >
                       Uploading
                     </div>
                   </div>
