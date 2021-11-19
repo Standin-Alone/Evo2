@@ -184,7 +184,7 @@ table.dataTable td {
     <script>
 
 
-        var socket = io('127.0.0.1:3000',{ transports: ['websocket','polling'],allowEIO3:true});
+        var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
       
         if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
             socket.emit('reset-progress', {room:"{{session('uuid')}}", reset : 'true'})        
@@ -303,14 +303,8 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[
-                                        {data:'ingest_file_id',title:
-                                        '<div class="checkbox checkbox-css">'+
-                                                            '<input type="checkbox" id="check-all"    value="all"  />"'+
-                                                            '<label for="checkbox"></label>'+
-                                                        '</div>'   +
-                                        'Select Checkbox to Ingest',
-                                        orderable:false,
-                                        
+                                        {data:'ingest_file_id',title:'&nbsp;'                               
+                                        orderable:false,                                        
                                         render:function(data,type,row){
 
                                             return   '<div class="checkbox checkbox-css">'+
@@ -325,16 +319,10 @@ table.dataTable td {
                                      
                             
                                         
-                                ],     
-                                select: {
-        style: 'os',
-        selector: 'td:first-child'
-    },                   
-                                order: [[ 4, "desc" ]]         
-             
-                                
-
+                                ],                     
+                                order: [[ 4, "desc" ]]                                                  
                             });
+
 
             $("#ingest-file-datatable").on('change','input[type=checkbox]',function(){
                 
@@ -345,7 +333,7 @@ table.dataTable td {
         
          
          
-
+            // ingest files
             $(document).on('click','.ingest-btn',function(){
                 file_name = [];
 
@@ -388,13 +376,7 @@ table.dataTable td {
                                 $.ajax({                      
                                     url:"{{route('ingest-file')}}",
                                     type:'post',
-                                    data: payload,
-                                    beforeSend: function () {
-                                        $("body").find("*").attr("disabled", "disabled");
-                                        $("body").find("a").click(function (e) { e.preventDefault(); });
-
-                                      
-                                    },
+                                    data: payload,                                 
                                     success:function(response){
                                         parses_result = JSON.parse(response)
                                         window.onbeforeunload = null;
@@ -449,9 +431,7 @@ table.dataTable td {
 
                                             $("#ingest-file-datatable").DataTable().ajax.reload();
                                             $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
-                                            $(".ingest-btn").prop('disabled',false)
-                                            $("body").find("*").removeAttr("disabled");
-                                            $("body").find("a").unbind("click");                                              
+                                            $(".ingest-btn").prop('disabled',false)                                                                        
                                             });
 
                                               
@@ -461,9 +441,7 @@ table.dataTable td {
                                                         });
                                             $("#ingest-file-datatable").DataTable().ajax.reload();
                                             $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
-                                            $(".ingest-btn").prop('disabled',false)    
-                                            $("body").find("*").removeAttr("disabled");
-                                            $("body").find("a").unbind("click");  
+                                            $(".ingest-btn").prop('disabled',false)                                            
                                             window.onbeforeunload = null;                                                                                        
                                         }
                                         
@@ -478,10 +456,9 @@ table.dataTable td {
                                                         
                                         $("#ingest-file-datatable").DataTable().ajax.reload();
                                         $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
-                                            $(".ingest-btn").prop('disabled',false)    
-                                            $("body").find("*").removeAttr("disabled");
-                                            $("body").find("a").unbind("click");       
-                                            window.onbeforeunload = null; 
+                                        $(".ingest-btn").prop('disabled',false)    
+                                        
+                                        window.onbeforeunload = null; 
                                     }
                                 });
 
@@ -490,9 +467,10 @@ table.dataTable td {
                                 swal("Operation cancelled.", {
                                                             icon: "error",
                                                         });
-                                $("body").find("*").removeAttr("disabled");
-                                $("body").find("a").unbind("click");    
-
+                                
+                                $(".ingest-btn").html('<i class="fas fa-cloud-download-alt "></i> Ingest');                                               
+                                $(".ingest-btn").prop('disabled',false)   
+                                window.onbeforeunload = null; 
                             }
 
                             
@@ -505,9 +483,7 @@ table.dataTable td {
                     swal("Please select files first.", {
                             icon: "warning",
                         });
-
-                    $("body").find("*").removeAttr("disabled");
-                    $("body").find("a").unbind("click");  
+                    
                 }
 
                 
