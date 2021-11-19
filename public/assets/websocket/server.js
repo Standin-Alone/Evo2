@@ -9,29 +9,86 @@ var redis_adapter = require('@socket.io/redis-adapter');
 
 
 var sredis = require('socket.io-redis');
-io.adapter(sredis({ host: '127.0.0.1', port: 6379 }));
+const { Socket } = require('dgram');
 
 
- pubClient =  redis.createClient(6379,'127.0.0.1');
+io.on('connection', function(socket){
 
- pubClient.on('connect', function (err) {
+
+
+    
+    socket.on('message',function(data){
+     
+      io.emit('progress',data);
    
-   console.warn('connection');
-   pubClient.psubscribe('my_channel:*');  
- 
-    pubClient.on("message", function (pattern,channel, my_channel) {
-      console.warn(pattern)
-      // pubClient.subscribe('message:'+my_channel)
-      // pubClient.on("message:"+my_channel, function (channel, data) {
- 
-      //   io.emit('progress:'+my_channel,data);
-      // });
-   
-    });
- }).on('error', function (error) {
-  console.log(error);
+      
+    })
+    
+  });
+
+
+
+http.listen(3000, '127.0.0.1', function(data) {
+
+  console.log('Listening on Port 3000');
 });
-;
+
+
+
+
+//  pubClient.on('connect', function (err) {
+   
+ 
+  
+
+//   pubClient.subscribe('channel');
+   
+//    pubClient.on("message", function (channel, my_channel) {
+
+    
+        
+
+ 
+
+
+//   pubClient.psubscribe('messages:'+my_channel,function(message_channel){
+//     pubClient.on("pmessage", function (pattern,channel, message) {
+
+
+       
+//         //Send this event to everyone in the room.
+//         if(message == '100%'){
+          
+
+            
+    
+
+//         }
+        
+//         io.emit('client_room', my_channel);
+        
+//         if(JSON.parse(message).channel == my_channel){
+//           console.warn(my_channel);
+//           io.emit('progress:'+my_channel, {channel : JSON.parse(message).channel , message: JSON.parse(message).percentage});
+//         }
+        
+        
+//      })
+
+      
+      
+      
+//     });
+    
+//   });
+
+
+   
+    
+//  }).on('error', function (error) {
+//   console.log(error);
+// });
+// ;
 
 
 // io.on('connection', function(socket) {
@@ -43,11 +100,6 @@ io.adapter(sredis({ host: '127.0.0.1', port: 6379 }));
 //   })
 
 // });
-
-http.listen(3000, '127.0.0.1', function(data) {
-
-  console.log('Listening on Port 3000');
-});
 
 
 

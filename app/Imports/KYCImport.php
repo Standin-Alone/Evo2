@@ -12,6 +12,8 @@ use Carbon\Carbon;
 use App\Models\GlobalNotificationModel;
 use Workerman\Worker;
 use PHPSocketIO\SocketIO;
+use ElephantIO\Client;
+use ElephantIO\Engine\SocketIO\Version2X;
 use LRedis;
 class KYCImport implements ToCollection,WithStartRow
 {
@@ -37,11 +39,7 @@ class KYCImport implements ToCollection,WithStartRow
     * @param Collection $collection
     */
     public function collection(Collection $collection)
-    {
-        //      
-        $redis = LRedis::connection();
-
-        
+    { 
      
             try{
         $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
@@ -101,7 +99,28 @@ class KYCImport implements ToCollection,WithStartRow
               }
 
         $sum_percentage = 0;
-              
+
+
+        $options = [
+            'context' => [
+                'ssl' => [
+                    'verify_peer' => false,
+                     'verify_peer_name' => false
+                ]
+            ]
+          ];
+            //      
+            $client = new Client(new Version2X('http://127.0.0.1:3000',$options));
+    
+            $client->initialize();
+            
+    
+
+ 
+
+            
+
+            
         foreach($collection as $key => $item){
         
             
@@ -116,8 +135,10 @@ class KYCImport implements ToCollection,WithStartRow
 
             // calculate the progress of importing;
             $sum_percentage += $compute_percentage;
-            $redis->publish('mychannel', session('uuid'));
-            // $redis->publish('message:'.session('uuid'), round($sum_percentage,2).'%');
+            
+            
+            $client->emit('message', ['room' => session('uuid'), 'percentage' => round($sum_percentage,2).'%']);
+            
 
                         
                   
@@ -234,6 +255,7 @@ class KYCImport implements ToCollection,WithStartRow
                                 ++$rows_inserted;
                             
                             }
+
                         }else{  
 
                             
@@ -337,6 +359,8 @@ class KYCImport implements ToCollection,WithStartRow
         //     $global_notif_model = new GlobalNotificationModel;
         //     $global_notif_model->send_email($role,$region,$message);
         // }
+
+        $client->close();
         
     }catch(\Exception $e){
         $this->message = json_encode($e->getMessage());

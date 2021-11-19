@@ -164,9 +164,10 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
 
-    <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+    {{-- <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script> --}}
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> --}}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.0/socket.io.js"></script>
     
-    <script src="https://cdn.socket.io/4.3.2/socket.io.min.js" integrity="sha384-KAZ4DtjNhLChOB/hxXuKqhMLYvx3b5MlT55xPEiNmREKRzeEm+RVPlTnAn0ajQNs" crossorigin="anonymous"></script>
     
 
     <!-- ================== BEGIN PAGE LEVEL JS ================== -->
@@ -181,33 +182,63 @@ table.dataTable td {
     
 
     <script>
+
+
+        var socket = io('127.0.0.1:3000',{ transports: ['websocket','polling'],allowEIO3:true});
+      
+        if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+            socket.emit('reset-progress', {room:"{{session('uuid')}}", reset : 'true'})        
+        } 
+
+
+
         // start websocket
-         var socket = io('127.0.0.1:3000',{ transports: ['websocket','polling'],allowEIO3:true});
+         
    
         //  connect to websocket
+        
+        
         socket.on("connect", function() {
                 //  get progress of uploading
+                console.warn('connected');
 
-            socket.on("my_channel", function(channel_by_user_id){
-     
-                    socket.on("progress:"+channel_by_user_id, function(data){
-                        $(".progress-load").html(data)
-                        $(".progress-load").css('width',data)
-                
-                        console.warn(data)
-                        
-                    });
+                                  
+                socket.on('progress',function(data){
+                   
+                    if(data.room == "{{session('uuid')}}"){
+                      
+                        if(data.percentage == '100%'){
+                            $(".progress-load").css('width','0%')
+                        }else{
+                            $(".progress-load").css('width',data.percentage)
+                            $(".progress-load").html(data.percentage)
+
+                        }
+                    }
                
                 
-            });
+                    
+                })
+       
+
+                
+            socket.emit('room',"{{session('uuid')}}"); 
+
+          
+            
+          
         });
+
 
 
 
 
         $(document).ready(function(){
       
-    
+            
+            $("#check-all").click(function(){
+                $("input[type=check-all]").prop('checked',this.checked);
+            })
 
             $("#ingest-file-datatable").DataTable({
                                 pageLength : 5,
@@ -277,9 +308,10 @@ table.dataTable td {
                                                             '<input type="checkbox" id="check-all"    value="all"  />"'+
                                                             '<label for="checkbox"></label>'+
                                                         '</div>'   +
-                                        'Select Checkbox to Ingest'
+                                        'Select Checkbox to Ingest',
+                                        orderable:false,
                                         
-                                        ,render:function(data,type,row){
+                                        render:function(data,type,row){
 
                                             return   '<div class="checkbox checkbox-css">'+
                                                             '<input type="checkbox" id="checkbox'+row['ingest_file_id']+'"   class="permission_chk"  value="'+row['file_name']+'"  />"'+
@@ -293,7 +325,11 @@ table.dataTable td {
                                      
                             
                                         
-                                ],                        
+                                ],     
+                                select: {
+        style: 'os',
+        selector: 'td:first-child'
+    },                   
                                 order: [[ 4, "desc" ]]         
              
                                 
@@ -403,7 +439,7 @@ table.dataTable td {
                                                                         
                                                                         console.warn(group);
                                                                             if(last != group && group != null){
-                                                                                $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white" ><td colspan="8" >'+group+'</td></tr>')
+                                                                                $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
                                                                                 last = group;
                                                                             }
                                                                     });
@@ -732,9 +768,9 @@ table.dataTable td {
                     </tbody>
                 </table>
 
-                <div class="progress rounded-corner  active  ">
+                <div class="progress rounded-corner  active  " style="height:50px">
                     <div class="progress-bar bg-green progress-bar-striped progress-bar-animated  progress-load" style="width:0%" >
-                      Uploading
+          
                     </div>
                   </div>
             <div class="modal-footer">
