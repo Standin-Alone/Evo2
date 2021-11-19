@@ -207,13 +207,13 @@ table.dataTable td {
                    
                     if(data.room == "{{session('uuid')}}"){
                       
-                        if(data.percentage == '100%'){
-                            $(".progress-load").css('width','0%')
-                        }else{
+                        // if(data.percentage == '100%'){
+                        //     $(".progress-load").css('width','0%')
+                        // }else{
                             $(".progress-load").css('width',data.percentage)
                             $(".progress-load").html(data.percentage)
 
-                        }
+                        // }
                     }
                
                 

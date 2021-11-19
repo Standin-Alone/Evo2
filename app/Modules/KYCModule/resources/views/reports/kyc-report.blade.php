@@ -565,7 +565,8 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[
-                                        {data:'region',title:'Region'},                                        
+                                        {data:'region',title:'Region'},
+                                        {data:'prov_name',title:'Province'},                                        
                                         {data:'name',title:'Name',orderable:false},
                                         
                                         {data:'total_amount',title:'Total Amount',render: $.fn.dataTable.render.number(',', '.', 2, '&#8369;').display,orderable:false},                                                                                
@@ -597,9 +598,9 @@ table.dataTable td {
                                                 i : 0;
                                     };
                                     
-                                    total_beneficiaries = api.column( 7 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );
+                                    total_beneficiaries = api.column( 8 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );
                                     console.warn($.fn.dataTable.render.number(',').display(total_beneficiaries));
-                                    $( api.column( 7 ).footer() ).html("Overall Total no. of Beneficiaries:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_beneficiaries) );
+                                    $( api.column( 8 ).footer() ).html("Overall Total no. of Beneficiaries:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_beneficiaries) );
                                             
                                 },
 
@@ -1004,6 +1005,7 @@ table.dataTable td {
                         </tbody>
                         <tfoot style="background-color: white" >
                           
+                                <th></th>
                                 <th></th>
                                 <th></th>
                                 <th></th>

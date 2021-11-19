@@ -261,6 +261,7 @@ class KYCModuleController extends Controller
         $get_records = db::table('dbp_batch as db')
                                 ->select(DB::raw('DISTINCT name'),
                                             'gr.region',
+                                            'gm.prov_name',
                                             'db.created_at as generated_at',
                                             'total_amount',
                                             'created_by_fullname as generated_by',
@@ -269,8 +270,9 @@ class KYCModuleController extends Controller
                                             'db.dbp_batch_id',
                                             DB::raw("(select COUNT(kyc_id) from kyc_profiles as kps where kps.dbp_batch_id = db.dbp_batch_id) as total_beneficiaries")                     
                                             )
-                                ->join('kyc_profiles as kp','db.dbp_batch_id','kp.dbp_batch_id')                                
+                                ->join('kyc_profiles as kp','db.dbp_batch_id','kp.dbp_batch_id')                                                                
                                 ->join('geo_region as gr','gr.code_reg','db.reg_code')                                                                
+                                ->join('geo_map as gm','gr.code_reg','gm.reg_code')                                                                
                                 ->orderBy('db.created_at','desc')                                
                                 ->get();
         return Datatables::of($get_records)->make(true);
@@ -481,7 +483,7 @@ class KYCModuleController extends Controller
             }else{
                 $count_error++;
                 echo  json_encode(["message" => 'filename error']);
-                // $response = \Response::make(["message" => 'filename error']);
+             
                 
             }
         // }
@@ -489,16 +491,13 @@ class KYCModuleController extends Controller
 
     if($count_error == 0){
         echo  json_encode(["message" => 'true','error_data' => $error_storage]);
-        // $response = \Response::make(["message" => 'true','error_data' => $error_storage]);
+        
     
     }else{
         echo  json_encode(["message" => 'false']);
-        // $response = \Response::make(["message" => 'false']);
+        
     }
     
- 
-    // $response->header('Content-Type', 'application/json');
-    // return $response;
 
     }
 

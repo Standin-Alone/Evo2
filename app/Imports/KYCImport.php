@@ -41,7 +41,7 @@ class KYCImport implements ToCollection,WithStartRow
     public function collection(Collection $collection)
     { 
      
-            try{
+        try{
         $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
                         '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
                         '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
@@ -59,7 +59,7 @@ class KYCImport implements ToCollection,WithStartRow
         $region_for_mail = '';
         $compute_percentage = (1 / $collection_count ) * 100;
         $error_data = [];        
-        ini_set('memory_limit', '-1');
+
         $get_kyc_file_id = '';
 
               // insert kyc files to database
@@ -109,10 +109,12 @@ class KYCImport implements ToCollection,WithStartRow
                 ]
             ]
           ];
-            //      
-            $client = new Client(new Version2X('http://127.0.0.1:3000',$options));
+
+
+        //Initialize socket io
+        $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
     
-            $client->initialize();
+        $client->initialize();
             
     
 
@@ -136,7 +138,7 @@ class KYCImport implements ToCollection,WithStartRow
             // calculate the progress of importing;
             $sum_percentage += $compute_percentage;
             
-            
+            // emit to the socket io server
             $client->emit('message', ['room' => session('uuid'), 'percentage' => round($sum_percentage,2).'%']);
             
 
@@ -328,8 +330,17 @@ class KYCImport implements ToCollection,WithStartRow
 
                         
                     // });             
-        
-            
+            $is_reset = false;;
+
+            $client->of('reset',function($data){
+                $is_reset = $data;
+                
+
+            });
+
+            if($is_reset == 'true'){
+                break;
+            }
         }
         
         $this->error_data = $error_data;
