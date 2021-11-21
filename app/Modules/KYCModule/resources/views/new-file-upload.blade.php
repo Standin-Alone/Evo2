@@ -182,8 +182,9 @@ table.dataTable td {
     
 
     <script>
-
-
+        // for https websocket
+        // var socket = io('https://devsysadd.da.gov.ph:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized:false});
+        // for http websocket
         var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
       
         if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
