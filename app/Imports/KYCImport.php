@@ -10,11 +10,9 @@ use DB;
 use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use App\Models\GlobalNotificationModel;
-use Workerman\Worker;
-use PHPSocketIO\SocketIO;
 use ElephantIO\Client;
 use ElephantIO\Engine\SocketIO\Version2X;
-use LRedis;
+
 class KYCImport implements ToCollection,WithStartRow
 {
 
@@ -23,13 +21,15 @@ class KYCImport implements ToCollection,WithStartRow
     private $message = '';
     protected $provider;
     protected $file_name;
+    protected $client;
 
     private $error_data;
     private $region;
     
-    public function __construct($provider, $file_name){
+    public function __construct($provider, $file_name,$client){
         $this->provider = $provider;   
         $this->file_name = $file_name;    
+        $this->client = $client;    
     
     }
 
@@ -42,6 +42,23 @@ class KYCImport implements ToCollection,WithStartRow
     { 
      
         try{
+
+        //     $options = [
+        //         'context' => [
+        //             'ssl' => [
+        //                 'verify_peer' => false,
+        //                  'verify_peer_name' => false
+        //             ]
+        //             ]];
+        //        //Initialize socket io
+        // $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
+    
+        // $client->initialize();
+            
+    
+ 
+
+
         $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
                         '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
                         '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
@@ -101,30 +118,14 @@ class KYCImport implements ToCollection,WithStartRow
         $sum_percentage = 0;
 
 
-        $options = [
-            'context' => [
-                'ssl' => [
-                    'verify_peer' => false,
-                     'verify_peer_name' => false
-                ]
-            ]
-          ];
 
-
-        //Initialize socket io
-        $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
-    
-        $client->initialize();
-            
-    
-
- 
+     
 
             
 
-            
         foreach($collection as $key => $item){
         
+     
             
             // progress_bar
             
@@ -139,8 +140,10 @@ class KYCImport implements ToCollection,WithStartRow
             $sum_percentage += $compute_percentage;
             
             // emit to the socket io server
-            $client->emit('message', ['room' => session('uuid'), 'percentage' => round($sum_percentage,2).'%']);
+         
             
+            $this->client->emit('message', ['room' => session('uuid'), 'percentage' => round($sum_percentage,2).'%']);
+      
 
                         
                   
@@ -330,17 +333,7 @@ class KYCImport implements ToCollection,WithStartRow
 
                         
                     // });             
-            $is_reset = false;;
-
-            $client->of('reset',function($data){
-                $is_reset = $data;
-                
-
-            });
-
-            if($is_reset == 'true'){
-                break;
-            }
+           
         }
         
         $this->error_data = $error_data;
@@ -371,7 +364,9 @@ class KYCImport implements ToCollection,WithStartRow
         //     $global_notif_model->send_email($role,$region,$message);
         // }
 
-        $client->close();
+      
+
+        $this->client->close();
         
     }catch(\Exception $e){
         $this->message = json_encode($e->getMessage());
@@ -379,7 +374,7 @@ class KYCImport implements ToCollection,WithStartRow
     }   
       
    
-
+    
         
     }
 

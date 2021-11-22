@@ -166,7 +166,7 @@ table.dataTable td {
 
     {{-- <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script> --}}
     {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.0/socket.io.js"></script>
     
     
 
@@ -186,11 +186,12 @@ table.dataTable td {
         // var socket = io('https://devsysadd.da.gov.ph:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized:false});
         // for http websocket
         var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
-      
-        if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
-            socket.emit('reset-progress', {room:"{{session('uuid')}}", reset : 'true'})        
-        } 
+        var get_width = 0;
 
+   
+       
+
+        
 
 
         // start websocket
@@ -205,16 +206,17 @@ table.dataTable td {
 
                                   
                 socket.on('progress',function(data){
-                   
+                    // console.warn(data);
                     if(data.room == "{{session('uuid')}}"){
                       
-                        // if(data.percentage == '100%'){
-                        //     $(".progress-load").css('width','0%')
-                        // }else{
+                        if(data.percentage == '100%'){
+                            $(".progress-load").css('width','0%')
+                            $(".progress-load").html('0%')
+                        }else{
                             $(".progress-load").css('width',data.percentage)
                             $(".progress-load").html(data.percentage)
 
-                        // }
+                        }
                     }
                
                 
@@ -226,6 +228,19 @@ table.dataTable td {
             socket.emit('room',"{{session('uuid')}}"); 
 
           
+            if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+          
+          
+                    console.warn('connected client side');
+                    socket.emit('reset',['true']); 
+          
+                
+        
+            
+                $(".progress-load").css('width','0%')    
+            }
+
+
             
           
         });
@@ -304,7 +319,7 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[
-                                        {data:'ingest_file_id',title:'&nbsp;'                               
+                                        {data:'ingest_file_id',title:'&nbsp;',                           
                                         orderable:false,                                        
                                         render:function(data,type,row){
 
@@ -337,7 +352,7 @@ table.dataTable td {
             // ingest files
             $(document).on('click','.ingest-btn',function(){
                 file_name = [];
-
+           
                 $("input[type=checkbox]:checked").each(function(){
                 
                     file_name.push($(this).val());
@@ -377,7 +392,7 @@ table.dataTable td {
                                 $.ajax({                      
                                     url:"{{route('ingest-file')}}",
                                     type:'post',
-                                    data: payload,                                 
+                                    data: payload,                                                   
                                     success:function(response){
                                         parses_result = JSON.parse(response)
                                         window.onbeforeunload = null;
@@ -746,7 +761,7 @@ table.dataTable td {
                 </table>
 
                 <div class="progress rounded-corner  active  " style="height:50px">
-                    <div class="progress-bar bg-green progress-bar-striped progress-bar-animated  progress-load" style="width:0%" >
+                    <div class="progress-bar bg-green progress-bar-striped progress-bar-animated  progress-load"  >
           
                     </div>
                   </div>

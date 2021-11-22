@@ -12,13 +12,11 @@ use Yajra\DataTables\Facades\DataTables;
 use Carbon\Carbon;
 use File;
 use Illuminate\Support\Facades\Storage;
-use App\Imports\ConsolidateKycImport;
 use Illuminate\Support\Facades\Session;
-use App\Events\ProgressEvent;
 
+use ElephantIO\Client;
+use ElephantIO\Engine\SocketIO\Version2X;
 
-use App\Modules\KYCModule\Events\Progress;
-use Event;
 
 class KYCModuleController extends Controller
 {
@@ -405,12 +403,29 @@ class KYCModuleController extends Controller
 
     // ingest file
     public function ingest_file(Request $request){
-   
+
+        $options = [
+            'context' => [
+                'ssl' => [
+                    'verify_peer' => false,
+                     'verify_peer_name' => false
+                ]
+                ]];
+        $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
+    
+        $client->initialize();
+            
         
+        
+        
+            
+        
+      
         
 
-        Session::put(['progress' => 0]);
-        Session::save(); 
+  
+        
+
         $file_name = request('file_name');
         $provider  = '';
         $result = '';
@@ -451,14 +466,14 @@ class KYCModuleController extends Controller
                     $provider = 'SPTI';
                 }
     
-                $kyc_import = new KYCImport($provider,$get_filename);
+                $kyc_import = new KYCImport($provider,$get_filename,$client);
                 
                                                     
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
                 $import_file = $kyc_import->newResult();
                 
                 if($import_file){
-                    
+                    var_dump($import_file);
                     // check if import file has errors
                     if(count($import_file['error_data']) == 0){
 
@@ -479,7 +494,9 @@ class KYCModuleController extends Controller
 
 
               
-                }                        
+                }else{
+                    return 'false';
+                }
             }else{
                 $count_error++;
                 echo  json_encode(["message" => 'filename error']);
