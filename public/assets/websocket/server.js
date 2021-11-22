@@ -6,16 +6,25 @@ var io = require('socket.io')(http);
 
 io.on('connection', function(socket){
 
-
-
+  socket.setMaxListeners(0);
+  console.warn('connected server side');
     
-    socket.on('message',function(data){
-     
-      io.emit('progress',data);
+    socket.on('reset',  function(reload){
+      console.warn(reload[0]);  
+
+        socket.on('message',  function(data){
+          console.warn(reload[0]); 
+        if(reload[0] == 'false'){          
+          io.emit('progress',data);
+        }else{
+          console.warn('Finish');
+        }
+  
+      });
    
       
     })
-    
+ 
   });
 
 
@@ -40,7 +49,7 @@ http.listen(7980, '127.0.0.1', function(data) {
 // var privateKey  = fs.readFileSync('/etc/letsencrypt/live/devsysadd.da.gov.ph/privkey.pem', 'utf8');
 // var certificate = fs.readFileSync('/etc/letsencrypt/live/devsysadd.da.gov.ph/cert.pem', 'utf8');
 // var chain = fs.readFileSync('/etc/letsencrypt/live/devsysadd.da.gov.ph/chain.pem', 'utf8');
-// var credentials = {key: privateKey, cert: certificate,ca:chain};
+// var credentials = {key: privateKey, cert: certificate};
 
 
 
