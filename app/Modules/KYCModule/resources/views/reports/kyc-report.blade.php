@@ -490,7 +490,7 @@ table.dataTable td {
                                 columns:[
                                         {data:'region',title:'Region'},                                        
                                         {data:'fintech_provider',title:'Fintech Provider',orderable:false},
-                                        {data:'total_records_uploaded',title:'Total Records Uploaded',orderable:false},                                                                                
+                                        {data:'total_records_uploaded',title:'Total Records Uploaded',render: $.fn.dataTable.render.number(','),orderable:false},                                                                                
       
                                 ],            
                                     

@@ -109,11 +109,7 @@ class KYCModuleController extends Controller
         
         DB::connection()->disableQueryLog();
 
-        $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
-                        '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
-                        '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
-                        '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
-                        '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
+
 
         $get_records = db::table('kyc_profiles')
                                 ->select(
@@ -122,7 +118,7 @@ class KYCModuleController extends Controller
                                     db::raw("CONCAT(IF(street_purok = '-' OR street_purok = '', '' , CONCAT(street_purok,', ')),'BRGY. ',barangay,', ',province,', ',region) as address"),
                                     'fintech_provider',
                                     'kyc_id',
-                                    DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
+                                    'account_number',                                    
                                     DB::raw('date_uploaded'),
                                     'region'                      
                                 )                                
@@ -278,11 +274,7 @@ class KYCModuleController extends Controller
 
     // show more generated disbursement details
     public function disbursement_generated_show_more($dbp_batch_id){
-        $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
-        '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
-        '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
-        '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
-        '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
+  
         
         $get_records = db::table('kyc_profiles as kp')
                                 ->select(
@@ -291,7 +283,7 @@ class KYCModuleController extends Controller
                                     db::raw("CONCAT(IF(street_purok = '-' OR street_purok = '', '' , CONCAT(street_purok,', ')),'BRGY. ',barangay,', ',province,', ',region) as address"),
                                     'fintech_provider',
                                     'kyc_id',
-                                    DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."') as account_number"),
+                                    'account_number',                         
                                     DB::raw('date_uploaded'),
                                     'region'                                    
                                 )  
@@ -392,7 +384,7 @@ class KYCModuleController extends Controller
         $get_records = db::table('ingest_files as if')
                             ->select('if.file_name',DB::raw('IF(total_inserted is NULL,0,total_inserted) as total_inserted'),DB::raw('IF(total_rows is NULL,0,total_rows) as total_rows'),'if.date_created','ingest_file_id')
                             ->leftJoin('kyc_files as kf','kf.file_name','if.file_name')
-                            ->where('created_by_user_id',session('user_id'))
+                            ->where('created_by_user_id',session('user_id'))                         
                             ->where('if.status','1')                        
                             ->orderBy('if.date_created','DESC')                            
                             ->get();
@@ -419,7 +411,7 @@ class KYCModuleController extends Controller
         
         
             
-        
+        $client->emit('reset',['false']);
       
         
 
@@ -473,7 +465,7 @@ class KYCModuleController extends Controller
                 $import_file = $kyc_import->newResult();
                 
                 if($import_file){
-                    var_dump($import_file);
+                
                     // check if import file has errors
                     if(count($import_file['error_data']) == 0){
 

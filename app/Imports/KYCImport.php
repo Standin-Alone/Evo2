@@ -82,7 +82,7 @@ class KYCImport implements ToCollection,WithStartRow
               // insert kyc files to database
                 
 
-              $check_filename = db::table('kyc_files')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
+              $check_filename = db::table('kyc_files')->select('kyc_file_id')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
               
               
                           
@@ -90,7 +90,7 @@ class KYCImport implements ToCollection,WithStartRow
 
               if($check_filename){ 
 
-                $validate_filename = db::table('kyc_files')->where('kyc_file_id',$check_filename->kyc_file_id)->whereColumn('total_inserted','total_rows')->orderBy('date_uploaded','DESC')->first();
+                $validate_filename = db::table('kyc_files')->select('kyc_file_id')->where('kyc_file_id',$check_filename->kyc_file_id)->whereColumn('total_inserted','total_rows')->orderBy('date_uploaded','DESC')->first();
                     if($validate_filename){
                         $get_kyc_file_id = db::table('kyc_files')
                         ->insertGetId([
@@ -101,7 +101,7 @@ class KYCImport implements ToCollection,WithStartRow
                         $get_kyc_file_id = $check_filename->kyc_file_id;
                     }                  
               }else{
-                    $check_filename_again = db::table('kyc_files')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
+                    $check_filename_again = db::table('kyc_files')->select('kyc_file_id')->where('file_name',$file_name)->orderBy('date_uploaded','DESC')->first();
                     if(!$check_filename_again){
                         $get_kyc_file_id = db::table('kyc_files')
                             ->insertGetId([
@@ -133,7 +133,7 @@ class KYCImport implements ToCollection,WithStartRow
 
             // check rsbsa no if exists
             $rsbsa_no   = $item[0];                
-            $check_rsbsa_no = db::table('kyc_profiles')->where('rsbsa_no',trim($rsbsa_no))->first();
+            // $check_rsbsa_no = db::table('kyc_profiles')->select('rsbsa_no')->where('rsbsa_no',trim($rsbsa_no))->first();
             
 
             // calculate the progress of importing;
@@ -186,17 +186,19 @@ class KYCImport implements ToCollection,WithStartRow
                         $remarks             = is_null($item[23]) ? 'Failed' : trim($item[24]);
 
                         $check_reg_prov =  db::table('geo_map')
+                                                ->select('reg_code','prov_code','mun_code')
                                                 // ->where('bgy_name',$barangay)
                                                 ->where('prov_name',$province)
                                                 ->where('reg_name',$region)                                                
-                                                ->where('mun_name',$municipality)                                                
+                                                ->where('mun_name',$municipality)   
+                                                ->take(1)                                             
                                                 ->first(); 
                                                 
                         // $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get(); for encryption of accout number
-                        $check_account_number = db::table('kyc_profiles')->where('account_number',$account)->first();
+                        // $check_account_number = db::table('kyc_profiles')->select('account_number')->where('account_number',$account)->first();
           
-                     
-                        if(!$check_rsbsa_no && !$check_account_number  && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
+                        // !$check_rsbsa_no && !$check_account_number  &&
+                        if( $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
                          
                             // set region for send email
                             $region_for_mail =  $region; 
@@ -275,9 +277,9 @@ class KYCImport implements ToCollection,WithStartRow
                                 $error_remarks = ($error_remarks == ''  ? 'No RSBSA number' : $error_remarks.','.'No RSBSA number');
                             }
 
-                            if($check_rsbsa_no ){
-                                $error_remarks = ($error_remarks == ''  ? 'Duplicate RSBSA number' : $error_remarks.','.'Duplicate RSBSA number');
-                            }
+                            // if($check_rsbsa_no ){
+                            //     $error_remarks = ($error_remarks == ''  ? 'Duplicate RSBSA number' : $error_remarks.','.'Duplicate RSBSA number');
+                            // }
 
                             if($first_name == '' && $last_name == '' ){
                                 $error_remarks = ($error_remarks == ''  ? 'Incomplete name' : $error_remarks.','.'Incomplete name');
@@ -289,9 +291,9 @@ class KYCImport implements ToCollection,WithStartRow
                                 $error_remarks = ($error_remarks == ''  ? 'Incomplete or wrong spelling of address' : $error_remarks.','.'Incomplete or wrong spelling of address');
                             }
 
-                            if($check_account_number){
-                                $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
-                            }
+                            // if($check_account_number){
+                            //     $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
+                            // }
 
                             
 

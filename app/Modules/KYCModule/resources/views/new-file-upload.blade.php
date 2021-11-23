@@ -232,7 +232,7 @@ table.dataTable td {
           
           
                     console.warn('connected client side');
-                    socket.emit('reset',['true']); 
+                    socket.emit('reset',['false']); 
           
                 
         
@@ -359,7 +359,7 @@ table.dataTable td {
                 })
 
               
-
+                
 
                 
 
