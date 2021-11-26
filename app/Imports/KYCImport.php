@@ -43,27 +43,16 @@ class KYCImport implements ToCollection,WithStartRow
      
         try{
 
-        //     $options = [
-        //         'context' => [
-        //             'ssl' => [
-        //                 'verify_peer' => false,
-        //                  'verify_peer_name' => false
-        //             ]
-        //             ]];
-        //        //Initialize socket io
-        // $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
-    
-        // $client->initialize();
-            
+
     
  
 
 
-        $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
-                        '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
-                        '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
-                        '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
-                        '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
+        // $PRIVATE_KEY =  '3273357538782F413F4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125442A462D4A614E64526755'.
+        //                 '6A586E327235753778214125442A472D4B6150645367566B59703373367639792F423F4528482B4D6251655468576D5A7134743777217A25432646294A404E63'.
+        //                 '5166546A576E5A7234753777217A25432A462D4A614E645267556B58703273357638792F413F4428472B4B6250655368566D597133743677397A244326452948'.
+        //                 '2B4D6251655468576D5A7134743777397A24432646294A404E635266556A586E3272357538782F4125442A472D4B6150645367566B5970337336763979244226'.
+        //                 '4428472B4B6250655368566D5971337436773979244226452948404D635166546A576E5A7234753778214125432A462D4A614E645267556B5870327335763879';
 
        
         
@@ -133,7 +122,7 @@ class KYCImport implements ToCollection,WithStartRow
 
             // check rsbsa no if exists
             $rsbsa_no   = $item[0];                
-            // $check_rsbsa_no = db::table('kyc_profiles')->select('rsbsa_no')->where('rsbsa_no',trim($rsbsa_no))->first();
+            $check_rsbsa_no = db::table('kyc_profiles')->select('rsbsa_no')->where('rsbsa_no',trim($rsbsa_no))->first();
             
 
             // calculate the progress of importing;
@@ -195,10 +184,10 @@ class KYCImport implements ToCollection,WithStartRow
                                                 ->first(); 
                                                 
                         // $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get(); for encryption of accout number
-                        // $check_account_number = db::table('kyc_profiles')->select('account_number')->where('account_number',$account)->first();
+                        $check_account_number = db::table('kyc_profiles')->select('account_number')->where('account_number',$account)->first();
           
-                        // !$check_rsbsa_no && !$check_account_number  &&
-                        if( $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
+     
+                        if(!$check_rsbsa_no && !$check_account_number  && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
                          
                             // set region for send email
                             $region_for_mail =  $region; 
@@ -277,9 +266,9 @@ class KYCImport implements ToCollection,WithStartRow
                                 $error_remarks = ($error_remarks == ''  ? 'No RSBSA number' : $error_remarks.','.'No RSBSA number');
                             }
 
-                            // if($check_rsbsa_no ){
-                            //     $error_remarks = ($error_remarks == ''  ? 'Duplicate RSBSA number' : $error_remarks.','.'Duplicate RSBSA number');
-                            // }
+                            if($check_rsbsa_no ){
+                                $error_remarks = ($error_remarks == ''  ? 'Duplicate RSBSA number' : $error_remarks.','.'Duplicate RSBSA number');
+                            }
 
                             if($first_name == '' && $last_name == '' ){
                                 $error_remarks = ($error_remarks == ''  ? 'Incomplete name' : $error_remarks.','.'Incomplete name');
@@ -291,9 +280,9 @@ class KYCImport implements ToCollection,WithStartRow
                                 $error_remarks = ($error_remarks == ''  ? 'Incomplete or wrong spelling of address' : $error_remarks.','.'Incomplete or wrong spelling of address');
                             }
 
-                            // if($check_account_number){
-                            //     $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
-                            // }
+                            if($check_account_number){
+                                $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
+                            }
 
                             
 
@@ -361,10 +350,10 @@ class KYCImport implements ToCollection,WithStartRow
         $message = "You have new ".$rows_inserted." records to approve.";
 
         // send email to rfo program focals.
-        // if($rows_inserted != 0){
-        //     $global_notif_model = new GlobalNotificationModel;
-        //     $global_notif_model->send_email($role,$region,$message);
-        // }
+        if($rows_inserted != 0){
+            $global_notif_model = new GlobalNotificationModel;
+            $global_notif_model->send_email($role,$region,$message);
+        }
 
       
 
