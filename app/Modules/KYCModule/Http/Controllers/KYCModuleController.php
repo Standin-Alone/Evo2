@@ -272,6 +272,8 @@ class KYCModuleController extends Controller
         return Datatables::of($get_records)->make(true);
     }
 
+
+
     // show more generated disbursement details
     public function disbursement_generated_show_more($dbp_batch_id){
   
@@ -291,6 +293,26 @@ class KYCModuleController extends Controller
                                 ->get();
         return Datatables::of($get_records)->make(true);
     }
+
+
+
+    public function list_of_generated_disbursement_by_file_name(){
+
+
+        $get_records = db::table('kyc_profiles as kp')
+                            ->select('kf.file_name','db.approved_batch_seq as batch_number')
+                            ->join('kyc_files as kf','kf.kyc_file_id','kp.kyc_file_id')
+                            ->join('dbp_batch as db','kp.dbp_batch_id','db.dbp_batch_id')                                                        
+                            ->get();
+        return json_encode($get_records);
+    }
+
+
+
+
+
+
+
 
     // upload file only to the server
     public function upload_file_only(){
