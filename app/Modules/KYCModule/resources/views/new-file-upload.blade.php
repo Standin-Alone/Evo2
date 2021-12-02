@@ -185,8 +185,8 @@ table.dataTable td {
         // for https websocket
         // var socket = io('https://devsysadd.da.gov.ph:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized:false});
         // for http websocket
-        var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
-        var get_width = 0;
+        // var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
+        // var get_width = 0;
 
    
        
@@ -200,50 +200,50 @@ table.dataTable td {
         //  connect to websocket
         
         
-        socket.on("connect", function() {
-                //  get progress of uploading
-                console.warn('connected');
+        // socket.on("connect", function() {
+        //         //  get progress of uploading
+        //         console.warn('connected');
 
                                   
-                socket.on('progress',function(data){
-                    // console.warn(data);
-                    if(data.room == "{{session('uuid')}}"){
+        //         socket.on('progress',function(data){
+        //             // console.warn(data);
+        //             if(data.room == "{{session('uuid')}}"){
                       
-                        if(data.percentage == '100%'){
-                            $(".progress-load").css('width','0%')
-                            $(".progress-load").html('0%')
-                        }else{
-                            $(".progress-load").css('width',data.percentage)
-                            $(".progress-load").html(data.percentage)
+        //                 if(data.percentage == '100%'){
+        //                     $(".progress-load").css('width','0%')
+        //                     $(".progress-load").html('0%')
+        //                 }else{
+        //                     $(".progress-load").css('width',data.percentage)
+        //                     $(".progress-load").html(data.percentage)
 
-                        }
-                    }
+        //                 }
+        //             }
                
                 
                     
-                })
+        //         })
        
 
                 
-            socket.emit('room',"{{session('uuid')}}"); 
+        //     socket.emit('room',"{{session('uuid')}}"); 
 
           
-            if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
+        //     if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
           
           
-                    console.warn('connected client side');
-                    socket.emit('reset',['false']); 
+        //             console.warn('connected client side');
+        //             socket.emit('reset',['false']); 
           
                 
         
             
-                $(".progress-load").css('width','0%')    
-            }
+        //         $(".progress-load").css('width','0%')    
+        //     }
 
 
             
           
-        });
+        // });
 
 
 

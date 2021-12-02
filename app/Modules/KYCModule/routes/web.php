@@ -15,11 +15,12 @@ Route::get('/kyc/summary-files-report', 'KYCModuleController@summary_files_repor
 
 
 // reports
+Route::get('/kyc-profiles', 'KYCModuleController@kyc_profiles_report_index')->name('kyc-profiles-report-index');
 Route::get('/kyc/all-reports', 'KYCModuleController@kyc_card_summary_all')->name('kyc-all-reports');
 Route::get('/kyc/region-fintech-reports', 'KYCModuleController@region_fintech_reports')->name('kyc-region-fintech-reports');
 Route::get('/disbursement-generated-reports', 'KYCModuleController@disbursement_generated_reports')->name('disbursement-generated-reports');
 Route::get('disbursement-generated-show-more/{dbp_batch_id}', 'KYCModuleController@disbursement_generated_show_more')->name('disbursement-generated-show-more');
-Route::get('/list_of_generated_disbursement_by_file_name', 'KYCModuleController@list_of_generated_disbursement_by_file_name')->name('list-of-generated_disbursement-by-file-name');
+Route::get('/list_of_generated_disbursement_by_file_name', 'KYCModuleController@list_of_generated_disbursement_by_file_name')->name('list-of-generated-disbursement-by-file-name');
 
 
 

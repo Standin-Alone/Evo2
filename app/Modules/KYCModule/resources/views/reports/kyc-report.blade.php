@@ -10,7 +10,8 @@
     <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
     <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.1.4/css/rowGroup.dataTables.min.css">
+    <link href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css" rel="stylesheet">
     
     <style>
 
@@ -128,6 +129,9 @@ table.dataTable td {
             background-color: #e42535 !important;
             color: #fff !important;
         }
+        #disbursement-generated-by-batch-datatable > tbody > tr > td{
+            vertical-align: middle
+        }
     </style>
 @endsection
 
@@ -147,6 +151,7 @@ table.dataTable td {
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
+    
 
     
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/dataTables.buttons.min.js"></script>
@@ -157,6 +162,10 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/gh/ashl1/datatables-rowsgroup@fbd569b8768155c7a9a62568e66a64115887d7d0/dataTables.rowsGroup.js"></script>
+
+
+    
     {{-- date range picker --}}
     <script type="text/javascript" src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="//cdn.jsdelivr.net/bootstrap.daterangepicker/2/daterangepicker.js"></script>
@@ -169,19 +178,19 @@ table.dataTable td {
             // load cards
             load_cards = ()=>{
 
-                $.ajax({
-                        url:"{{route('kyc-all-reports')}}",
-                        type:'get',
-                        success:function(data){
-                            let result_json = JSON.parse(data);
+                // $.ajax({
+                //         url:"{{route('kyc-all-reports')}}",
+                //         type:'get',
+                //         success:function(data){
+                //             let result_json = JSON.parse(data);
                             
-                            $('#spti_value').html(result_json.count_spti);
-                            $('#ussc_value').html(result_json.count_ussc);
-                            $('#files_value').html(result_json.count_files);
-                            $('#records_value').html(result_json.count_records);
+                //             $('#spti_value').html(result_json.count_spti);
+                //             $('#ussc_value').html(result_json.count_ussc);
+                //             $('#files_value').html(result_json.count_files);
+                //             $('#records_value').html(result_json.count_records);
                             
-                        }                    
-                    })
+                //         }                    
+                //     })
             }
 
             load_cards()
@@ -427,8 +436,7 @@ table.dataTable td {
 
                 $("#region-fintech-datatable").DataTable({
                                 pageLength : 5,
-                                destroy:true,
-                                serverSide:true,
+                                destroy:true,                                
                                 responsive:true,
                                 ajax: {"url":"{{route('kyc-region-fintech-reports')}}","type":'get'},
                                 dom: 'lBfrtip',
@@ -498,14 +506,48 @@ table.dataTable td {
                             })
 
 
-            
+                // list of generated disbursement report by batch
+                $("#disbursement-generated-by-batch-datatable").DataTable({
+                                pageLength : 5,
+                                destroy:true,                                                                                              
+                                ajax: {"url":"{{route('list-of-generated-disbursement-by-file-name')}}","type":'get'},                               
+                                columns:[
+                                        {data:'file_name',title:'File',name:'file_name'},
+                                        {data:'batch_number',title:'Batch Number',orderable:false},     
+                                        {data:'total_records',title:'Total Records',render: $.fn.dataTable.render.number(','),orderable:false},                                                                                
+                                        {data:'total_amount',title:'Total Amount',render:$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display,orderable:false},                                                                                                                                        
+                                        {data:'date_approved',title:'Approval Date'}                                                                                                                                                     
+                                ],                
+                                rowsGroup:[0],
+
+                                
+                                footerCallback: function ( row, data, start, end, display ) {
+                                    var api = this.api(), data;
+                                                    
+                                    var intVal = function ( i ) {
+                                        return typeof i === 'string' ?
+                                            i.replace(/[\₱,]/g, '')*1 :
+                                            typeof i === 'number' ?
+                                                i : 0;
+                                    };
+                                    
+                                    // compute total amount
+                                    total_amount = api.column( 3 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 3 ).footer() ).html("Overall Total Amount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display(total_amount) );
+
+                                    // compute total records
+                                    total_records = api.column( 2 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 2 ).footer() ).html("Overall Total no. of Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_records) );
+                                            
+                                },
+                                order: [[ 4, "desc" ]]     
+                            })
 
                   // list of generated disbursement report
 
                   $("#disbursement-generated-datatable").DataTable({
                                 pageLength : 5,
-                                destroy:true,
-                                serverSide:true,
+                                destroy:true,                            
                                 responsive:true,
                                 ajax: {"url":"{{route('disbursement-generated-reports')}}","type":'get'},
                                 dom: 'lBfrtip',
@@ -751,6 +793,7 @@ table.dataTable td {
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
             }
             }, cb);
+            
 
             cb(start, end);
 
@@ -950,7 +993,7 @@ table.dataTable td {
             </table>
 
         <br><br>
-        <div class="note note-success l-b-15">
+        {{-- <div class="note note-success l-b-15">
             <div class="note-icon"><i class="fa fa-users"></i></div>
             <div class="note-content">
                 <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
@@ -964,7 +1007,7 @@ table.dataTable td {
                 </tbody>
             </table>
 
-        <br><br>
+        <br><br> --}}
         <div class="note note-success l-b-15">
             <div class="note-icon"><i class="fa fa-file-excel"></i></div>
                 <div class="note-content">
@@ -1014,11 +1057,30 @@ table.dataTable td {
                                 <th></th>
                                 <th></th>
                                 <th></th>
-                                <th></th>
-                        
-                            
+                                <th></th>                                                    
                         </tfoot>
-                    </table>                    
+                    </table>
+
+            <br><br>
+                    <div class="note note-success l-b-15">
+                        <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                            <div class="note-content">
+                                <h4><b>List of Generated Disbursement By Batch Number</b></h4>                      
+                            </div>
+                    </div>
+                        <table id="disbursement-generated-by-batch-datatable" class="table  table-bordered reports" width="100%">            
+                            <thead>                                                                
+                            </thead>
+                            <tbody>                
+                            </tbody>    
+                            <tfoot style="background-color: white" >                          
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                                <th></th>
+                            </tfoot>               
+                        </table>                      
 
             </div>
         </div>

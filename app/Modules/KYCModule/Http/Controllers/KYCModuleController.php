@@ -53,57 +53,65 @@ class KYCModuleController extends Controller
         return view("KYCModule::new-file-upload",compact('get_region','action'));
     }
 
+    // render view of other kyc report
+    public function kyc_profiles_report_index(){
+        $action = session('check_module_path');
+ 
+        $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
+        return view("KYCModule::reports.other-kyc-report",compact('get_region','action'));
+    }
+    
     // import function of kyc profiles
-    public function import(){        
+    // public function import(){        
 
-        $file = request()->file('file');
-        $provider  = '';
+    //     $file = request()->file('file');
+    //     $provider  = '';
       
-        $upload_path = 'temp_excel/kyc';
+    //     $upload_path = 'temp_excel/kyc';
   
 
-        $upload_folder  = $upload_path.'/'.Carbon::now()->year;
+    //     $upload_folder  = $upload_path.'/'.Carbon::now()->year;
 
-        if(!File::isDirectory($upload_path)){
+    //     if(!File::isDirectory($upload_path)){
             
-            File::makeDirectory($upload_path, 0775, true);                                
-            $by_year_path = $upload_path.'/'.Carbon::now()->year;
-            if(!File::isDirectory($by_year_path)){
+    //         File::makeDirectory($upload_path, 0775, true);                                
+    //         $by_year_path = $upload_path.'/'.Carbon::now()->year;
+    //         if(!File::isDirectory($by_year_path)){
 
-                File::makeDirectory($by_year_path, 0775, true);
-            }
-        }
+    //             File::makeDirectory($by_year_path, 0775, true);
+    //         }
+    //     }
 
 
-        $get_filename = $file->getClientOriginalName();
+    //     $get_filename = $file->getClientOriginalName();
         
         
 
-        // check file name if it has fintech provider
-        if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
+    //     // check file name if it has fintech provider
+    //     if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
 
-            if(str_contains($get_filename,'USSC')){
-                $provider = 'UMSI';
-            }elseif(str_contains($get_filename,'SPTI') ){
-                $provider = 'SPTI';
-            }
+    //         if(str_contains($get_filename,'USSC')){
+    //             $provider = 'UMSI';
+    //         }elseif(str_contains($get_filename,'SPTI') ){
+    //             $provider = 'SPTI';
+    //         }
 
-            $kyc_import = new KYCImport($provider,$get_filename);
+    //         $kyc_import = new KYCImport($provider,$get_filename);
             
-            Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($file));
+    //         Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($file));
             
         
-            Excel::import($kyc_import, $file);
-            return $kyc_import->getRowCount();
-        }else{
-            return json_encode(["message" => 'filename error']);
-        }
+    //         Excel::import($kyc_import, $file);
+    //         return $kyc_import->getRowCount();
+    //     }else{
+    //         return json_encode(["message" => 'filename error']);
+    //     }
         
         
 
         
        
-    }
+    // }
 
     public function show(){
         
@@ -295,24 +303,18 @@ class KYCModuleController extends Controller
     }
 
 
-
+    // list of generated disbursement by file name
     public function list_of_generated_disbursement_by_file_name(){
 
 
         $get_records = db::table('kyc_profiles as kp')
-                            ->select('kf.file_name','db.approved_batch_seq as batch_number')
+                            ->select('kf.file_name','db.approved_batch_seq as batch_number',DB::raw('SUM(5070) as total_amount'),DB::raw('COUNT(kp.kyc_id) as total_records'),'db.date_approved')
                             ->join('kyc_files as kf','kf.kyc_file_id','kp.kyc_file_id')
-                            ->join('dbp_batch as db','kp.dbp_batch_id','db.dbp_batch_id')                                                        
+                            ->join('dbp_batch as db','kp.dbp_batch_id','db.dbp_batch_id')
+                            ->groupBy('db.approved_batch_seq')                            
                             ->get();
-        return json_encode($get_records);
+        return Datatables::of($get_records)->make(true);
     }
-
-
-
-
-
-
-
 
     // upload file only to the server
     public function upload_file_only(){
@@ -418,25 +420,24 @@ class KYCModuleController extends Controller
     // ingest file
     public function ingest_file(Request $request){
 
-        $options = [
-            'context' => [
-                'ssl' => [
-                    'verify_peer' => false,
-                     'verify_peer_name' => false
-                ]
-                ]];
-        $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
+        // $options = [
+        //     'context' => [
+        //         'ssl' => [
+        //             'verify_peer' => false,
+        //              'verify_peer_name' => false
+        //         ]
+        //         ]];
+        // $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
     
-        $client->initialize();
+        // $client->initialize();
             
         
         
         
             
-        $client->emit('reset',['false']);
+        // $client->emit('reset',['false']);
       
         
-
   
         
 
@@ -480,7 +481,7 @@ class KYCModuleController extends Controller
                     $provider = 'SPTI';
                 }
     
-                $kyc_import = new KYCImport($provider,$get_filename,$client);
+                $kyc_import = new KYCImport($provider,$get_filename);
                 
                                                     
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
