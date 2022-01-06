@@ -6,14 +6,14 @@
 
 {{-- import in this section your css files --}}
 @section('page-css')
-    <link href="assets/plugins/animate/animate.min.css" rel="stylesheet" />
-    <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
-    <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
-    <link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
+    <link href="{{url('assets/plugins/animate/animate.min.css')}}" rel="stylesheet" />
+    <link href="{{url('assets/plugins/gritter/css/jquery.gritter.css')}}" rel="stylesheet" />
+    <link href="{{url('assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css')}}" rel="stylesheet" />
+    <link href="{{url('assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css')}}" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.0.0/css/buttons.dataTables.min.css">
 
     	<!-- ================== BEGIN PAGE LEVEL STYLE ================== -->
-	<link href="assets/plugins/dropzone/min/dropzone.min.css" rel="stylesheet" />
+	{{-- <link href="assets/plugins/dropzone/min/dropzone.min.css" rel="stylesheet" /> --}}
 	<!-- ================== END PAGE LEVEL STYLE ================== -->
     <style>
 
@@ -140,13 +140,13 @@ table.dataTable td {
 
 {{-- import in this section your javascript files --}}
 @section('page-js')
-    <script src="assets/plugins/gritter/js/jquery.gritter.js"></script>
-    <script src="assets/plugins/bootstrap-sweetalert/sweetalert.min.js"></script>
-    <script src="assets/js/demo/ui-modal-notification.demo.min.js"></script>
-    <script src="assets/plugins/DataTables/media/js/jquery.dataTables.js"></script>
-    <script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
-    <script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
-    <script src="assets/js/demo/table-manage-default.demo.min.js"></script>
+    <script src="{{url('assets/plugins/gritter/js/jquery.gritter.js')}}"></script>
+    <script src="{{url('assets/plugins/bootstrap-sweetalert/sweetalert.min.js')}}"></script>
+    <script src="{{url('assets/js/demo/ui-modal-notification.demo.min.js')}}"></script>
+    <script src="{{url('assets/plugins/DataTables/media/js/jquery.dataTables.js')}}"></script>
+    <script src="{{url('assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js')}}"></script>
+    <script src="{{url('assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js')}}"></script>
+    <script src="{{url('assets/js/demo/table-manage-default.demo.min.js')}}"></script>
 
    
 
@@ -171,9 +171,9 @@ table.dataTable td {
     
 
     <!-- ================== BEGIN PAGE LEVEL JS ================== -->
-    <script src="assets/plugins/dropzone/min/dropzone.min.js"></script>
-	<script src="assets/plugins/highlight/highlight.common.js"></script>
-	<script src="assets/js/demo/render.highlight.js"></script>
+    {{-- <script src="{{url('assets/plugins/dropzone/min/dropzone.min.js')}}"></script>
+	<script src="{{url('assets/plugins/highlight/highlight.common.js')}}"></script>
+	<script src="{{url('assets/js/demo/render.highlight.js')}}"></script> --}}
     
 	<!-- ================== END PAGE LEVEL JS ================== -->
 
@@ -183,7 +183,8 @@ table.dataTable td {
 
     <script>
         // for https websocket
-        // var socket = io('https://devsysadd.da.gov.ph:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized:false});
+        // var socket = io.connect('wss://devsysadd.da.gov.ph:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+        // var socket = io.connect('wss://devsysadd.da.gov.ph/evoucher',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
         // for http websocket
         // var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
         // var get_width = 0;

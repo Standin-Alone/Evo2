@@ -60,7 +60,7 @@ class KYCModuleController extends Controller
         $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
         return view("KYCModule::reports.other-kyc-report",compact('get_region','action'));
     }
-    
+
     // import function of kyc profiles
     // public function import(){        
 
@@ -230,8 +230,7 @@ class KYCModuleController extends Controller
                             ->value('count_ussc');
 
          $count_files =db::table('kyc_files')          
-                            ->select(db::raw('count(kyc_file_id) as count_files'))                               
-                            ->where(db::raw('DATE(date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->select(db::raw('count(kyc_file_id) as count_files'))                                                           
                             ->value('count_files');
 
         $count_records =db::table('kyc_profiles as kp')          
@@ -274,13 +273,13 @@ class KYCModuleController extends Controller
                                             )
                                 ->join('kyc_profiles as kp','db.dbp_batch_id','kp.dbp_batch_id')                                                                
                                 ->join('geo_region as gr','gr.code_reg','db.reg_code')                                                                
-                                ->join('geo_map as gm','gr.code_reg','gm.reg_code')                                                                
+                                ->join(DB::raw('(
+                                    select * from geo_map group by iso_prv
+                                    ) as gm'),'db.prv_code','gm.iso_prv')                                                                
                                 ->orderBy('db.created_at','desc')                                
                                 ->get();
         return Datatables::of($get_records)->make(true);
     }
-
-
 
     // show more generated disbursement details
     public function disbursement_generated_show_more($dbp_batch_id){
@@ -302,16 +301,20 @@ class KYCModuleController extends Controller
         return Datatables::of($get_records)->make(true);
     }
 
-
-    // list of generated disbursement by file name
+      // list of generated disbursement by file name
     public function list_of_generated_disbursement_by_file_name(){
 
 
         $get_records = db::table('kyc_profiles as kp')
-                            ->select('kf.file_name','db.approved_batch_seq as batch_number',DB::raw('SUM(5070) as total_amount'),DB::raw('COUNT(kp.kyc_id) as total_records'),'db.date_approved')
+                            ->select('kf.file_name','db.approved_batch_seq as batch_number',DB::raw('SUM(5070) as total_amount'),DB::raw('COUNT(kp.kyc_id) as total_records'),'db.date_approved','gr.region','gm.prov_name')
                             ->join('kyc_files as kf','kf.kyc_file_id','kp.kyc_file_id')
                             ->join('dbp_batch as db','kp.dbp_batch_id','db.dbp_batch_id')
-                            ->groupBy('db.approved_batch_seq')                            
+                            ->join('geo_region as gr','gr.code_reg','db.reg_code')                                                                
+                            ->join(DB::raw('(
+                                select * from geo_map group by iso_prv
+                                ) as gm'),'db.prv_code','gm.iso_prv')                                                                
+                            ->orderBy('db.date_approved','DESC')
+                            ->groupBy(['db.approved_batch_seq'])                            
                             ->get();
         return Datatables::of($get_records)->make(true);
     }
@@ -420,24 +423,10 @@ class KYCModuleController extends Controller
     // ingest file
     public function ingest_file(Request $request){
 
-        // $options = [
-        //     'context' => [
-        //         'ssl' => [
-        //             'verify_peer' => false,
-        //              'verify_peer_name' => false
-        //         ]
-        //         ]];
-        // $client = new Client(new Version2X('http://127.0.0.1:7980',$options));
-    
-        // $client->initialize();
-            
-        
-        
-        
-            
-        // $client->emit('reset',['false']);
+       
       
         
+
   
         
 

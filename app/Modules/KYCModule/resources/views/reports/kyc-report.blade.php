@@ -177,20 +177,20 @@ table.dataTable td {
 
             // load cards
             load_cards = ()=>{
-
-                // $.ajax({
-                //         url:"{{route('kyc-all-reports')}}",
-                //         type:'get',
-                //         success:function(data){
-                //             let result_json = JSON.parse(data);
+               
+                $.ajax({
+                        url:"{{route('kyc-all-reports')}}",
+                        type:'get',
+                        success:function(data){
+                            let result_json = JSON.parse(data);
+                            console.warn(result_json)
+                            $('#spti_value').html(result_json.count_spti);
+                            $('#ussc_value').html(result_json.count_ussc);
+                            $('#files_value').html(result_json.count_files);
+                            $('#records_value').html(result_json.count_records);
                             
-                //             $('#spti_value').html(result_json.count_spti);
-                //             $('#ussc_value').html(result_json.count_ussc);
-                //             $('#files_value').html(result_json.count_files);
-                //             $('#records_value').html(result_json.count_records);
-                            
-                //         }                    
-                //     })
+                        }                    
+                    })
             }
 
             load_cards()
@@ -509,16 +509,21 @@ table.dataTable td {
                 // list of generated disbursement report by batch
                 $("#disbursement-generated-by-batch-datatable").DataTable({
                                 pageLength : 5,
-                                destroy:true,                                                                                              
+                                destroy:true,
+                                serverSide:true,                                                                                              
                                 ajax: {"url":"{{route('list-of-generated-disbursement-by-file-name')}}","type":'get'},                               
                                 columns:[
+                                        {data:'region',title:'Region',name:'Region'},
+                                        {data:'prov_name',title:'Province',name:'Province'},
                                         {data:'file_name',title:'File',name:'file_name'},
                                         {data:'batch_number',title:'Batch Number',orderable:false},     
                                         {data:'total_records',title:'Total Records',render: $.fn.dataTable.render.number(','),orderable:false},                                                                                
                                         {data:'total_amount',title:'Total Amount',render:$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display,orderable:false},                                                                                                                                        
-                                        {data:'date_approved',title:'Approval Date'}                                                                                                                                                     
-                                ],                
-                                rowsGroup:[0],
+                                        {data:'date_approved',title:'Approval Date',orderable:true}                                                                                                                                                     
+                                ],       
+                           
+                                order: [[ 6, "desc" ]] ,         
+                                
 
                                 
                                 footerCallback: function ( row, data, start, end, display ) {
@@ -532,15 +537,15 @@ table.dataTable td {
                                     };
                                     
                                     // compute total amount
-                                    total_amount = api.column( 3 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
-                                    $( api.column( 3 ).footer() ).html("Overall Total Amount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display(total_amount) );
+                                    total_amount = api.column( 5 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 5 ).footer() ).html("Overall Total Amount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display(total_amount) );
 
                                     // compute total records
-                                    total_records = api.column( 2 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
-                                    $( api.column( 2 ).footer() ).html("Overall Total no. of Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_records) );
+                                    total_records = api.column( 4 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 4 ).footer() ).html("Overall Total no. of Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_records) );
                                             
                                 },
-                                order: [[ 4, "desc" ]]     
+                                  
                             })
 
                   // list of generated disbursement report
@@ -549,6 +554,7 @@ table.dataTable td {
                                 pageLength : 5,
                                 destroy:true,                            
                                 responsive:true,
+                                serverSide:true,
                                 ajax: {"url":"{{route('disbursement-generated-reports')}}","type":'get'},
                                 dom: 'lBfrtip',
                                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
@@ -793,7 +799,6 @@ table.dataTable td {
             'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
             }
             }, cb);
-            
 
             cb(start, end);
 
@@ -993,21 +998,32 @@ table.dataTable td {
             </table>
 
         <br><br>
-        {{-- <div class="note note-success l-b-15">
-            <div class="note-icon"><i class="fa fa-users"></i></div>
-            <div class="note-content">
-                <h4><b>List Of Uploaded KYC Profiles</b></h4>                      
-            </div>
-            </div>
-           
-            <table id="load-datatable" class="table table-hover table-bordered reports" width="100%">            
-                <thead>                                    
-                </thead>
-                <tbody>                
-                </tbody>
-            </table>
+        
 
-        <br><br> --}}
+            <div class="note note-success l-b-15">
+                <div class="note-icon"><i class="fa fa-file-excel"></i></div>
+                    <div class="note-content">
+                        <h4><b>List of Generated Disbursement By Batch Number</b></h4>                      
+                    </div>
+            </div>
+                <table id="disbursement-generated-by-batch-datatable" class="table  table-bordered reports" width="100%">            
+                    <thead>                                                                
+                    </thead>
+                    <tbody>                
+                    </tbody>    
+                    <tfoot style="background-color: white" >                          
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                        <th></th>
+                    </tfoot>               
+                </table>                      
+
+
+        <br><br>
         <div class="note note-success l-b-15">
             <div class="note-icon"><i class="fa fa-file-excel"></i></div>
                 <div class="note-content">
@@ -1061,27 +1077,8 @@ table.dataTable td {
                         </tfoot>
                     </table>
 
-            <br><br>
-                    <div class="note note-success l-b-15">
-                        <div class="note-icon"><i class="fa fa-file-excel"></i></div>
-                            <div class="note-content">
-                                <h4><b>List of Generated Disbursement By Batch Number</b></h4>                      
-                            </div>
-                    </div>
-                        <table id="disbursement-generated-by-batch-datatable" class="table  table-bordered reports" width="100%">            
-                            <thead>                                                                
-                            </thead>
-                            <tbody>                
-                            </tbody>    
-                            <tfoot style="background-color: white" >                          
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                                <th></th>
-                            </tfoot>               
-                        </table>                      
-
+     
+             
             </div>
         </div>
         <br><br>
