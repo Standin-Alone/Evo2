@@ -23,7 +23,7 @@
 }
 
 /* MODIFY DATATABLE PRINT STYLE */
-.buttons-csv, .buttons-excel, .buttons-pdf, .buttons-print{
+.buttons-csv, .buttons-excel, .buttons-pdf, .buttons-print, .buttons-collection{
     background-color: #008a8a !important;
     color: #fff !important;
     font-size: 12px !important;
@@ -304,16 +304,22 @@ p {
     position:absolute;
     width:356px;
     height:356px;
-    /* top:50%;
+    top:50%;
     left:50%;
     right:50%;
-    bottom:50%; */
-    /* margin: -128px 0 0 -128px; */
-    /* z-index:1000; */
+    bottom:50%; 
+    margin: -80px 0 0 -80px;
+    z-index:1000;
   }
 
-  
 
+input[type=text],input[type=password],select,textarea{
+    border: #008a8a 1px solid !important;
+}
+
+.select2-container--open {
+    z-index: 9999999 !important;
+}
 
 
 

@@ -9,7 +9,7 @@ function addCommas(x) {
     // REMOVE CURRENCY
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     return parts.join(".");            
-}
+} 
 
 // CSRF-TOKEN
 $.ajaxSetup({
@@ -89,14 +89,14 @@ $(document).on('change','.dataTables_length',function(){
     // $('#overlay').fadeIn(100);
     // $('#overlay').fadeOut(2000);
     OverlayPanel_in();
-    OverlayPanel_out();
+    swal.close();
     $('.selectedbatchall').prop('checked',false);  
 });
 
 $(document).on('click','[data-dismiss=modal]',function(){
     // $('#overlay').fadeOut(100);
     OverlayPanel_in();
-    OverlayPanel_out();
+    swal.close();
 });
 
 // $('[data-dismiss=modal]').modal({
@@ -114,7 +114,7 @@ function OverlayPanel_in(){
         allowOutsideClick: false,
         // html:'<img src="../img/images/da-loading.gif" width="1000" height="1000" class="fa fa-span" />',   
         html:'<span class="loading-logo"></span>',
-        timer: 1000,
+        // timer: 1000,
         showCancelButton: false,
         showConfirmButton: false,
     });   
@@ -123,7 +123,22 @@ function OverlayPanel_in(){
 }
 
 function OverlayPanel_out(){    
-    swal.close();
+    setTimeout(function () {
+        swal.close();
+    }, 5000); 
+}
+
+function validateEmail(email) {
+    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
+function AddZero(num){
+    return num.toString().padStart(2, '0');
+}
+
+function AddZero2(num){
+    return num.toString().padStart(3, '0');   
 }
 
 
