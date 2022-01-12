@@ -43,77 +43,83 @@ class MobileAppController extends Controller
                               ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
                               ->join('supplier as s', 's.supplier_id', 'pp.other_info')
                               ->join('users as u', 'u.user_id', 'pp.user_id')
+                              ->whereNotNull('pp.other_info')
                               ->where('u.user_id', $authenticate->user_id)->first();
                 }   
 
-            
-                $check_otp = db::table('user_otp')
+                if(isset($supplier->user_id)){
+                     $check_otp = db::table('user_otp')
                                 ->where('user_id',$supplier->user_id)
                                 ->where('status','1')
                                 ->get();
                 
-                // check otp if exists
-                if(!$check_otp->isEmpty()){
-                    foreach($check_otp as $item){
-                           $otp_to_send = $item->otp;
-                           $get_user_otp_id = $item->otp_id;
+                    // check otp if exists
+                    if(!$check_otp->isEmpty()){
+                        foreach($check_otp as $item){
+                            $otp_to_send = $item->otp;
+                            $get_user_otp_id = $item->otp_id;
+                        }
+                    }else{
+                        $otp_to_send = $random_otp;
+                        // insert otp to user_otp table
+                        $get_user_otp_id = db::table('user_otp')->insertGetId([
+                            "user_id" => $supplier->user_id,
+                            "otp"     => $otp_to_send                    
+                        ]);
                     }
+
+
+                    foreach($check_otp as $item){
+                    $current_date_time = Carbon::now(); 
+                    $otp_date = Carbon::parse($item->date_created);
+                    $check_expiration = $otp_date->diffInDays($current_date_time);
+                    
+                    if($check_expiration > 0){     
+                        db::table('user_otp')
+                            ->where('user_id',$supplier->user_id)
+                            ->where('otp',$otp_to_send)
+                            ->update(["status" => '0']);                                                
+                        $otp_to_send = $random_otp;
+                        // insert otp to user_otp table
+                        $get_user_otp_id = db::table('user_otp')->insertGetId([
+                            "user_id" => $supplier->user_id,
+                            "otp"     => $otp_to_send                    
+                        ]);
+                    }
+
+                    }
+                    $get_otp_record = db::table('user_otp as uo')
+                                            ->select('u.user_id','uo.date_created',db::raw("CONCAT(first_name,' ',last_name) as full_name"),'role')
+                                            ->join('users as u','u.user_id','uo.user_id')
+                                            ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
+                                            ->join('roles as r','r.role_id','pp.role_id')
+                                            ->where('uo.otp_id',$get_user_otp_id)
+                                            ->where('uo.status',1)
+                                            ->first();
+                    
+                    Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "full_name" => $get_otp_record->full_name  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
+                        $message->to($to_email)
+                                ->subject('OTP');                            
+                    });
+
+                    return json_encode([
+                        "Message"     => "true",
+                        "OTP"         => $otp_to_send,
+                        "email"       => $to_email,
+                        "supplier_id" => $supplier->supplier_id,
+                        "user_id"     => $supplier->user_id,
+                        "full_name"   => $supplier->full_name
+                    ]);
+
                 }else{
-                    $otp_to_send = $random_otp;
-                    // insert otp to user_otp table
-                    $get_user_otp_id = db::table('user_otp')->insertGetId([
-                        "user_id" => $supplier->user_id,
-                        "otp"     => $otp_to_send                    
-                    ]);
+                    return json_encode(["Message" => "no account"]);
                 }
-
-
-                foreach($check_otp as $item){
-                $current_date_time = Carbon::now(); 
-                $otp_date = Carbon::parse($item->date_created);
-                $check_expiration = $otp_date->diffInDays($current_date_time);
-                
-                if($check_expiration > 0){     
-                    db::table('user_otp')
-                        ->where('user_id',$supplier->user_id)
-                        ->where('otp',$otp_to_send)
-                        ->update(["status" => '0']);                                                
-                    $otp_to_send = $random_otp;
-                    // insert otp to user_otp table
-                    $get_user_otp_id = db::table('user_otp')->insertGetId([
-                        "user_id" => $supplier->user_id,
-                        "otp"     => $otp_to_send                    
-                    ]);
-                }
-
-                }
-                $get_otp_record = db::table('user_otp as uo')
-                                        ->select('u.user_id','uo.date_created',db::raw("CONCAT(first_name,' ',last_name) as full_name"),'role')
-                                        ->join('users as u','u.user_id','uo.user_id')
-                                        ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
-                                        ->join('roles as r','r.role_id','pp.role_id')
-                                        ->where('uo.otp_id',$get_user_otp_id)
-                                        ->where('uo.status',1)
-                                        ->first();
-                
-                Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "full_name" => $get_otp_record->full_name  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
-                    $message->to($to_email)
-                            ->subject('OTP');                            
-                });
-
-                return json_encode(array([
-                    "Message"     => "true",
-                    "OTP"         => $otp_to_send,
-                    "email"       => $to_email,
-                    "supplier_id" => $supplier->supplier_id,
-                    "user_id"     => $supplier->user_id,
-                    "full_name"   => $supplier->full_name
-                ]));
+               
             }else{
-                return json_encode(array(["Message" => "false"]));
+                return json_encode(["Message" => "false"]);
             }
         } else {
-            return json_encode(array(["Message" => "no account"]));
+            return json_encode(["Message" => "no account"]);
         }
     }
 
@@ -145,18 +151,17 @@ class MobileAppController extends Controller
                                         ->join('program_permissions as pp','u.user_id','pp.user_id')                                        
                                         ->join('roles as r','r.role_id','pp.role_id')
                                         ->where('uo.otp_id',$get_user_otp_id)
-                                        ->where('uo.status',1)
+                                        ->where('uo.status','1')
                                         ->first();
                 
-        Mail::send('MobileApp::otp', ["otp_code" => $random_otp, "username" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($email, $random_otp) {
+        Mail::send('MobileApp::otp', ["otp_code" => $random_otp, "full_name" => $get_otp_record->username  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($email, $random_otp) {
                     $message->to($email)
                     ->subject('OTP');
                             
                 });
          
   
-          return json_encode(array(["Message" => 'true',
-                                    "OTP"     => $random_otp]));
+          return json_encode(["Message" => 'true',"OTP"     => $random_otp]);
       }
   
       // validate otp
