@@ -117,6 +117,7 @@
             gauge_chart(picked_start, picked_end);
             call_pie_chart(picked_start, picked_end);
             stacked_chart(picked_start, picked_end);
+            call_bar_chart(picked_start, picked_end);
         });
 
         function gauge_chart(date_start, date_end){
@@ -174,8 +175,6 @@
                 data: {'date_start': date_start,'date_end': date_end},
                 dataType: 'json',
                 success: function(data){
-                    console.log(data);
-
                     bar_chart(data);
                 }
             });
@@ -472,7 +471,7 @@
                 type: 'bar'
             },
             title: {
-                text: 'Data Transactions'
+                text: 'Target Beneficiaries'
             },
             subtitle: {
                 text: ''
@@ -486,16 +485,16 @@
             yAxis: {
                 min: 0,
                 title: {
-                    text: 'Transactions',
+                    text: 'Target Beneficiaries (percentage)',
                     align: 'high'
                 },
                 labels: {
                     overflow: 'justify'
                 },
-                max: 500
+                max: 100
             },
             tooltip: {
-                valueSuffix: ' records'
+                valueSuffix: '%'
             },
             plotOptions: {
                 bar: {

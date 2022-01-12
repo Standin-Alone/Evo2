@@ -28,7 +28,7 @@
     @include('ReportModule::components.js.js')
 
     {{-- Voucher Claimed DataTable --}}
-    @include('ReportModule::components.js.datatables.voucher_claimed_datatable')
+    @include('ReportModule::components.js.datatables.voucher.voucher_claimed_datatable')
 
     {{-- Dynamic dropdown --}}
     @include('ReportModule::components.js.dropdown.dynamic_dropdown')
@@ -54,13 +54,13 @@
 <div class="row mt-5">
     @include('ReportModule::components.dashboard_cards.paid_db_card')
 </div>
-<span class="text-danger">*Note: If the program card did not appear above. It means that the program are not available or does have a value of "0.00".</span>
+{{-- <span class="text-danger">*Note: If the program card did not appear above. It means that the program are not available or does have a value of "0.00".</span> --}}
 <!-- end row -->
 
 <!-- begin panel -->
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">Total Claimed Voucher by Region, Province & Supplier</h4>
+        <h4 class="panel-title">TOTAL CLAIMED VOUCHER BY REGION, PROVINCE & SUPPLIER</h4>
     </div>
     <div class="panel-body">
         <br>
@@ -71,14 +71,14 @@
         <table id="voucher-claimed-datatable" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Supplier</th>
-                    <th>Program</th>
-                    <th>Region</th>
-                    <th>Province</th>
-                    <th>Quantity</th>
-                    <th>Amount</th>
-                    <th>Total Amount</th>
-                    <th>Payout status</th>
+                    <th>SUPPLIER</th>
+                    <th>PROGRAM</th>
+                    <th>REGION</th>
+                    <th>PROVINCE</th>
+                    <th>QUANTITY</th>
+                    <th>AMOUNT</th>
+                    <th>TOTAL AMOUNT</th>
+                    <th>PAYOUT STATUS</th>
                 </tr>
             </thead>
             <tbody>

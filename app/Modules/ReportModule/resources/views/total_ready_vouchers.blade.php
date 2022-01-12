@@ -32,7 +32,7 @@
     @include('ReportModule::components.js.js')
 
     {{-- Voucher Claimed DataTable --}}
-    @include('ReportModule::components.js.datatables.ready_voucher_datatable')
+    @include('ReportModule::components.js.datatables.voucher.ready_voucher_datatable')
 
     {{-- Dynamic dropdown --}}
     @include('ReportModule::components.js.dropdown.ready_voucher_dynamic_dropdown')
@@ -50,12 +50,12 @@
 <ol class="breadcrumb pull-right">
     <li class="breadcrumb-item"><a href="{{route('main.home')}}">Home</a></li>
     {{-- <li class="breadcrumb-item"><a href="javascript:;">Page Options</a></li> --}}
-    <li class="breadcrumb-item active">Total Ready Vouchers</li>
+    <li class="breadcrumb-item active">TOTAL READY VOUCHERS</li>
 </ol>
 <!-- end breadcrumb -->
 
 <div class="row mt-5">
-    {{-- @include('BudgetModule::dashboard_cards') --}}
+    @include('ReportModule::components.dashboard_cards.ready_voucher_db_card')
 </div>
 <!-- end row -->
 
@@ -73,9 +73,9 @@
         <table id="ready-voucher-datatable" class="table table-bordered" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Region</th>
-                    <th>Province</th>
-                    <th>Amount</th>
+                    <th>REGION</th>
+                    <th>PROVINCE</th>
+                    <th>AMOUNT</th>
                 </tr>
             </thead>
             <tbody>

@@ -28,7 +28,7 @@
     @include('ReportModule::components.js.js')
 
     {{-- Claimed Not Yet Paid DataTable --}}
-    @include('ReportModule::components.js.datatables.claim_not_yet_paid_datatable')
+    @include('ReportModule::components.js.datatables.voucher.claim_not_yet_paid_datatable')
 
     {{-- Dynamic dropdown --}}
     @include('ReportModule::components.js.dropdown.not_paid_dynamic_dropdown')
@@ -56,13 +56,13 @@
 <div class="row mt-5">
     @include('ReportModule::components.dashboard_cards.not_yet_paid_db_card')
 </div>
-<span class="text-danger">*Note: If the program card did not appear above. It means that the program are not available or does have a value of "0.00".</span>
+{{-- <span class="text-danger">*Note: If the program card did not appear above. It means that the program are not available or does have a value of "0.00".</span> --}}
 <!-- end row -->
 
 <!-- begin panel -->
 <div class="panel panel-inverse">
     <div class="panel-heading">
-        <h4 class="panel-title">Claimed, Not Yet Paid</h4>
+        <h4 class="panel-title">CLAIMED, BUT NOT YET PAID</h4>
     </div>
     <div class="panel-body">
         <br>
@@ -73,14 +73,14 @@
         <table id="not-yet-claimed-datatable" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
-                    <th>Supplier</th>
-                    <th>Program</th>
-                    <th>Region</th>
-                    <th>Province</th>
-                    <th>Quantity</th>
-                    <th>Amount</th>
-                    <th>Total Amount</th>
-                    <th>Payout status</th>
+                    <th>SUPPLIER</th>
+                    <th>PROGRAM</th>
+                    <th>REGION</th>
+                    <th>PROVINCE</th>
+                    <th>QUANTITY</th>
+                    <th>AMOUNT</th>
+                    <th>TOTAL AMOUNT</th>
+                    <th>PAYOUT STATUS</th>
                 </tr>
             </thead>
             <tbody>

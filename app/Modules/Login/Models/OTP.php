@@ -55,7 +55,7 @@ class OTP extends Model
     }
 
     public function update_otp_status_to_deactive($uuid){
-        $query = DB::table('user_otp')->where('user_id', $uuid)->update(['status' => "0"]);
+        $query = DB::table('user_otp')->where('user_id', $uuid)->update(['status' => "2"]);
         return $query;
     }
 

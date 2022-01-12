@@ -46,3 +46,9 @@
         return s.join(dec);
     }
 </SCript>
+
+<script>
+    // $( "#buts" ).on( "click", function() {
+    //     alert('hahahaha');
+    // });
+</script>

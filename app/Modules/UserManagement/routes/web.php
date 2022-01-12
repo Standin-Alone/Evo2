@@ -22,9 +22,9 @@ Route::group([],function(){
 
     Route::get('/user/list-of-users','UserManagementController@list_of_users')->name('list-of-users.index');
     Route::get('/user/list-of-users/{uuid}','UserManagementController@user_details')->name('list-of-users.user-details');
+    Route::get('/user/list-of-users/{uuid}/user-status','UserManagementController@show_user_otp_status')->name('list-of-users.user-status');
     Route::post('/user/add-new-user-role', 'UserManagementController@add_user_role')->name('list-of-users.add_user_role');
 });
-
 
 
 

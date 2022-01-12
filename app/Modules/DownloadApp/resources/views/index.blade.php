@@ -84,10 +84,10 @@
                 <div class="container">
                     <div class="row align-items-center">
                         <div class="col-md-6">
-                            <h3>Voucher Management Platform <br>with Mobile Application</h3>
-                            <p>Mobile application helps you to manage your transaction.</p>
+                            <h3>IMP<br> Mobile Application</h3>
+                            <p>This Application helps you to manage your transaction with farmers.</p>
                             <div class="video_service_btn">                              
-                                <a href="{{ route('get.DownloadAppFiles') }}" class="btn btn-lg btn-primary btnDownload">  
+                                <a href="{{ route('get.DownloadAppFiles') }}" class="btn btn-lg btn-info btnDownload">  
                                     <i class="fa-2x fas fa-spinner fa-spin btnloadingIcon pull-left m-r-10" style="display: none;"></i>                                  
                                     <i class="fa fa-cloud-download-alt fa-2x pull-left m-r-10 text-black"></i>
                                     <b>Download Now</b><br />

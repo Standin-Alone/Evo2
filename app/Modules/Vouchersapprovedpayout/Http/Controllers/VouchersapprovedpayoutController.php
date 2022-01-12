@@ -16,7 +16,7 @@ class VouchersapprovedpayoutController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
-        if (!empty(session('supplier_id'))) {
+        if (!empty(session('uuid'))) {
             return view("Vouchersapprovedpayout::index");
         }else{
             return redirect('/login');

@@ -28,27 +28,30 @@ class GenerateBeneficiariesExcel implements FromCollection, ShouldAutoSize
     {
         $row_value = [];
         $session_reg_code = sprintf("%02d", session('reg_code'));
-        $session_selected_prv_code = session('selected_prov_code');
+        $kyc_file_id = session('kyc_file_id');
+        $kyc_batch_id = session('kyc_batch_id');
         $getData = DB::table('kyc_profiles as kyc')
                         ->select(DB::raw("kyc.kyc_id,kyc.dbp_batch_id,kyc.data_source,kyc.fintech_provider,kyc.rsbsa_no,kyc.first_name,kyc.middle_name,kyc.last_name,kyc.ext_name,
                         kyc.id_number,kyc.gov_id_type,kyc.street_purok,kyc.bgy_code,kyc.barangay,kyc.mun_code,kyc.municipality,kyc.district,kyc.prov_code,kyc.province,
                         kyc.reg_code,kyc.region,kyc.birthdate,kyc.place_of_birth,kyc.mobile_no,kyc.sex,kyc.nationality,kyc.profession,kyc.sourceoffunds,kyc.mothers_maiden_name,
                         kyc.no_parcel,kyc.total_farm_area,kyc.account_number,kyc.remarks,kyc.uploaded_by_user_id,kyc.uploaded_by_user_fullname,kyc.date_uploaded,".session("disburse_amount")." as amount"))
-                        ->where('kyc.reg_code',$session_reg_code)   
-                        ->where('kyc.prov_code',$session_selected_prv_code) 
+                        ->where('kyc.reg_code',$session_reg_code) 
                         ->where('kyc.isremove','0') 
-                        ->where(function ($query){
+                        ->where(function ($query) use ($kyc_file_id,$kyc_batch_id){
                             if(session('role_id') == 8){
-                            $query->where('kyc.isapproved','1')
+                            $query->where('kyc.approved_batch_seq',$kyc_batch_id) 
+                            ->where('kyc.isapproved','1')
                             ->where('kyc.approved_by_b','0');
                             }
                             else if(session('role_id') == 10){
-                            $query->where('kyc.isapproved','1')
+                            $query->where('kyc.approved_batch_seq',$kyc_batch_id) 
+                            ->where('kyc.isapproved','1')
                             ->where('kyc.approved_by_b','1')
                             ->where('kyc.approved_by_d','0');
                             }
                             else if(session('role_id') == 4){
-                            $query->where('kyc.isapproved','0');
+                            $query->where('kyc.kyc_file_id',$kyc_file_id) 
+                            ->where('kyc.isapproved','0');
                             }else{
                                 return dd("Access Denied!");
                             }

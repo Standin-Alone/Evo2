@@ -62,7 +62,7 @@
 
 <div class="row mt-5">
     <div class="col-lg-6">
-        <div class="panel panel-inverse">
+        <div class="panel panel-inverse" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
             <div class="panel-heading">
                 <h4 class="panel-title">EDIT INFO</h4>
             </div>
@@ -94,7 +94,7 @@
                 </form>
             </div>
         </div>
-        <div class="panel panel-inverse">
+        <div class="panel panel-inverse" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
             <div class="panel-heading">
                 <h4 class="panel-title">CHANGE PASSWORD</h4>
             </div>
@@ -134,7 +134,7 @@
         </div>
     </div>
     <div class="col-lg-6">
-        <div class="panel panel-inverse">
+        <div class="panel panel-inverse" style="box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);">
             <div class="panel-heading">
                 <h4 class="panel-title">USER</h4>
             </div>

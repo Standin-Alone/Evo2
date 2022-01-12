@@ -318,7 +318,7 @@ class SummaryMonitoring extends Model
                    ->get();
 
         $uploaded = DB::table('kyc_profiles')
-                      ->selectRaw('COUNT(kyc_id) as total_uploaded, reg_code')
+                      ->selectRaw('COUNT(kyc_id) as total, reg_code')
                       ->where(function($uploaded) use($today, $date_start, $date_end) {
                             if($date_start == $date_end){
                                 if($today != $date_start){
@@ -332,7 +332,7 @@ class SummaryMonitoring extends Model
                       ->get();
 
         $endorsed = DB::table('kyc_profiles')
-                      ->selectRaw('SUM(isapproved) as total_endorsed, reg_code')
+                      ->selectRaw('SUM(isapproved) as total, reg_code')
                       ->where(function($endorsed) use($today, $date_start, $date_end) {
                             if($date_start == $date_end){
                                 if($today != $date_start){
@@ -346,7 +346,7 @@ class SummaryMonitoring extends Model
                       ->get();
 
         $budget = DB::table('kyc_profiles')
-                    ->selectRaw('SUM(approved_by_b) as total_approved_budget, reg_code')
+                    ->selectRaw('SUM(approved_by_b) as total, reg_code')
                     ->where(function($budget) use($today, $date_start, $date_end) {
                         if($date_start == $date_end){
                             if($today != $date_start){
@@ -360,7 +360,7 @@ class SummaryMonitoring extends Model
                     ->get();
 
         $disbursed = DB::table('kyc_profiles')
-                       ->selectRaw('SUM(approved_by_d) as total_approved_disb, reg_code')
+                       ->selectRaw('SUM(approved_by_d) as total, reg_code')
                        ->where(function($disbursed) use($today, $date_start, $date_end) {
                             if($date_start == $date_end){
                                 if($today != $date_start){
@@ -372,81 +372,25 @@ class SummaryMonitoring extends Model
                        })
                        ->groupBy('reg_code')
                        ->get();
-
-  /*      print_r($uploaded);
-        print_r($endorsed);
-        print_r($budget);
-        print_r($disbursed);*/
-
-        $data_uploaded = [];
-        $data_endorsed = [];
-        $data_budget   = [];
-        $data_disbursed= [];
-        foreach($regions as $region){
-            $isMatchUpd = 0;
-            $isMatchEnd = 0;
-            $isMatchBud = 0;
-            $isMatchDis = 0;
-
-            $updFrags   = [];
-            $endFrags   = [];
-            $budFrags   = [];
-            $disFrags   = [];
-            foreach ($uploaded as $v) {
-                if($region->code_reg == $v->reg_code){
-                    $isMatchUpd = 1;
-                    $updFrags   = $v;
-                }
-            }
-
-            $data_uploaded[] = ($isMatchUpd == 1) ?  $updFrags->total_uploaded : 0;
-
-            foreach ($endorsed as $v) {
-                if($region->code_reg == $v->reg_code){
-                    $isMatchEnd = 1;
-                    $endFrags   = $v;
-                }
-            }
-
-            $data_endorsed[] = ($isMatchEnd == 1) ?  $endFrags->total_endorsed : 0;
-
-            foreach ($budget as $v) {
-                if($region->code_reg == $v->reg_code){
-                    $isMatchBud = 1;
-                    $budFrags   = $v;
-                }
-            }
-
-            $data_budget[] = ($isMatchBud == 1) ?  $budFrags->total_approved_budget : 0;
-
-            foreach ($disbursed as $v) {
-                if($region->code_reg == $v->reg_code){
-                    $isMatchDis = 1;
-                    $disFrags   = $v;
-                }
-            }
-
-            $data_disbursed[] = ($isMatchDis == 1) ?  $disFrags->total_approved_disb : 0;
-        }
-
+                       
         $r_uploaded = array(
             'name' => 'Uploaded',
-            'data' => $data_uploaded
+            'data' => $this->group_series($regions, $uploaded, $funds)
         );
 
         $r_endorsed = array(
             'name' => 'Endorsed',
-            'data' => $data_endorsed
+            'data' => $this->group_series($regions, $endorsed, $funds)
         );
 
         $r_budget = array(
-            'name' => 'Budget',
-            'data' => $data_budget
+            'name' => 'Reviewed',
+            'data' => $this->group_series($regions, $budget, $funds)
         );
 
         $r_disbursed = array(
-            'name' => 'Disbursed',
-            'data' => $data_disbursed
+            'name' => 'Approved',
+            'data' => $this->group_series($regions, $disbursed, $funds)
         );
 
         $categories = [];
@@ -459,5 +403,44 @@ class SummaryMonitoring extends Model
         $data['categories'] = $categories;
         //print_r($categories);
         return $data;
+    }
+
+    public function group_series($regions, $data, $funds = array()){
+        $r_targets = [];
+        $results   = [];
+
+        foreach($funds as $targets){
+            $isMatch   = 0;
+            $fragments = [];
+            foreach ($data as $v) {
+                if($targets->reg == $v->reg_code){
+                    $isMatch   = 1;
+                    $fragments = $v;
+                }
+            }
+
+            #$results[] = ($isMatch == 1) ? round(($fragments->total / $targets->target_farmers), 2) * 100  : 0;
+            $r_targets[] = array(
+                'region'   => $targets->reg,
+                'targets'  => $targets->target_farmers,
+                'utilized' => ($isMatch == 1) ?  $fragments->total : 0,
+                'percent_utilized' => ($isMatch == 1) ?  round(($fragments->total / $targets->target_farmers) * 100, 2)  : 0
+            );
+        }
+
+        foreach ($regions as $region) {
+            $isMatch   = 0;
+            $fragments = [];
+            foreach ($r_targets as $v) {
+                if($region->code_reg == $v['region']){
+                    $isMatch   = 1;
+                    $fragments = $v;
+                }
+            }
+
+            $results[] = ($isMatch == 1) ? $fragments['percent_utilized'] : 0;
+        }
+        
+        return $results;
     }
 }

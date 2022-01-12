@@ -11,6 +11,60 @@
     <link href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css" rel="stylesheet" />
     <link href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css" rel="stylesheet">
     <link href="assets/pgv/backend-style.css" rel="stylesheet">
+
+    <!-- <style>
+        
+    #svg circle {
+        stroke-dashoffset: 0;
+        transition: stroke-dashoffset 1s linear;
+        stroke: #008a8a;
+        stroke-width: 1em;
+        }
+    #svg #bar {
+        stroke: #777;
+        /* stroke: #008a8a; */
+        }
+    #cont {
+        display: block;
+        height: 200px;
+        width: 200px;
+        margin: 2em auto;
+        box-shadow: 0 0 1em black;
+        border-radius: 100%;
+        position: relative;
+    }
+    #cont:after {
+        position: absolute;
+        display: block;
+        height: 160px;
+        width: 160px;
+        left: 50%;
+        top: 50%;
+        box-shadow: inset 0 0 1em black;
+        content: attr(data-pct)"%";
+        margin-top: -80px;
+        margin-left: -80px;
+        border-radius: 100%;
+        line-height: 160px;
+        font-size: 2em;
+        /* text-shadow: 0 0 0.5em black; */
+        color: #000;
+        text-align: center;
+    }
+    input {
+        color: #000;
+        height: 100%; padding-top: 2em; text-align: center;
+        
+    } -->
+
+
+/* Make things perty */
+/* html {  height: 100%;} */
+/* body { font-family: 'Source Sans Pro', Helvetica, Arial, sans-serif;  color: #fff; height: 100%; padding-top: 2em; text-align: center;} */
+/* h1, h2{ margin: 0; text-transform: uppercase;text-shadow: 0 0 0.5em black;}
+<!-- h2 { font-weight: 300} */
+input { border: 1px solid #666; background: #333; color: #fff; padding: 0.5em; box-shadow: none; outline: none !important; margin: 1em  auto; text-align: center;}
+    </style> -->
 @endsection
 
 {{--  import in this section your javascript files  --}}
@@ -28,7 +82,7 @@
     <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/pgv/backend-script.js"></script>
+    <script src="assets/pgv/backend-script.js"></script>    
 
     <script type="text/javascript">
        $(document).ready(function() { 
@@ -53,22 +107,25 @@
                         render: function(data, type, row) {
                             $button1 = "";
                             $button2 = "";
-                            // if(row.approver_id != ""){
-                                if(row.isdownloaded === 1){
-                                    $button1 = '<a href="javascript:;"  data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.txt)"  class="btn btn-xs btn-outline-danger btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Re-Download (.txt)</a>'; 
-                                }else{
-                                    $button1 = '<a href="javascript:;"  data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.txt)"  class="btn btn-xs btn-outline-info btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.txt)</a>';
-                                } 
-                            // }else{
-                            //     $button1 = '<span class="btn btn-xs btn-outline-default" disabled data-toggle="tooltip" data-placement="top" title="For Review and Approve by Regional Director"><i class="fas fa-spinner fa-spin pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.txt)</span>'; 
-                            // }
-                            
+                            $button3 = "";
+                            if(row.isdownloaded === 1){
+                                $button1 = '<a href="{{route("download.SubmitDisbursementExcelFile")}}?excelfilename='+row.name+'&folderfilename='+row.folder_file_name+'&filetype=(.txt)" target="_blank" data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.txt)"  class="btn btn-xs btn-outline-danger btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Re-Download (.txt)</a>'; 
+                            }else{
+                                $button1 = '<a href="{{route("download.SubmitDisbursementExcelFile")}}?excelfilename='+row.name+'&folderfilename='+row.folder_file_name+'&filetype=(.txt)" target="_blank" data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.txt)"  class="btn btn-xs btn-outline-info btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.txt)</a>';
+                            }                         
                             
                             if(row.isdownloadedxls === 1){
-                                $button2 = '<a href="javascript:;"  data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.xls)"  class="btn btn-xs btn-outline-danger btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Re-Download (.xls)</a>';
+                                $button2 = '<a href="{{route("download.SubmitDisbursementExcelFile")}}?excelfilename='+row.name+'&folderfilename='+row.folder_file_name+'&filetype=(.xls)" target="_blank" data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.xls)"  class="btn btn-xs btn-outline-danger btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Re-Download (.xls)</a>';
                             }else{
-                                $button2 = '<a href="javascript:;"  data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.xls)"  class="btn btn-xs btn-outline-info btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.xls)</a>';
+                                $button2 = '<a href="{{route("download.SubmitDisbursementExcelFile")}}?excelfilename='+row.name+'&folderfilename='+row.folder_file_name+'&filetype=(.xls)" target="_blank" data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.xls)"  class="btn btn-xs btn-outline-info btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.xls)</a>';
                             }
+
+                            // if(row.isdownloadeddocx === 1){
+                            //     $button3 = '<a href="{{route("download.SubmitDisbursementExcelFile")}}?excelfilename='+row.name+'&folderfilename='+row.folder_file_name+'&filetype=(.docx)" target="_blank" data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.docx)"  class="btn btn-xs btn-outline-danger btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Re-Download (.docx)</a>';
+                            // }else{
+                            //     $button3 = '<a href="{{route("download.SubmitDisbursementExcelFile")}}?excelfilename='+row.name+'&folderfilename='+row.folder_file_name+'&filetype=(.docx)" target="_blank" data-excelfilename="'+row.name+'" data-folderfilename="'+row.folder_file_name+'" data-filetype="(.docx)"  class="btn btn-xs btn-outline-info btnDownloadFile"><i class="fas fa-spinner fa-spin '+row.name+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-cloud-download-alt"></span> Download (.docx)</a>';
+                            // }
+
                             return $button1+$button2;
                         }
                     }  
@@ -91,7 +148,7 @@
                         {data: 'total_records', name: 'total_records', title:'TOTAL RECORDS'}, 
                         {data: 'approved_batch_seq', name: 'approved_batch_seq',  title:'ACTION',
                             render: function(data, type, row) {
-                                return '<a href="javascript:;" data-selectedbatchid="'+row.approved_batch_seq+'" class="btn btn-xs btn-outline-info SubmitDisbursement_btnGenerate"><i class="fas fa-spinner fa-spin '+row.approved_batch_seq+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-file-excel"></span> Generate</a>';
+                                return '<a href="javascript:;" data-selectedbatchid="'+row.approved_batch_seq+'" data-selectedfintech="'+row.fintech_provider+'" class="btn btn-xs btn-outline-info SubmitDisbursement_btnGenerate"><i class="fas fa-spinner fa-spin '+row.approved_batch_seq+' pull-left m-r-10" style="display: none;"></i><span class="fa fa-file-excel"></span> Generate</a>';
                             }
                         }                   
                     ],
@@ -111,7 +168,17 @@
 
             $(document).on('click','.SubmitDisbursement_btnGenerate',function(){
                 var batch_id = $(this).data('selectedbatchid'),
+                    fintech = $(this).data('selectedfintech'),
                     _token = $("input[name=token]").val();
+                if(fintech == "SPTI"){
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        title:'Failed!',
+                        text:'The generation of SPTI disbursement files is temporarily prohibited.',
+                        icon:'error'
+                    });
+                    return false;
+                }
                 SpinnerShow('SubmitDisbursement_btnGenerate',batch_id);
                 Swal.fire({
                     title: 'Are you sure',
@@ -124,6 +191,7 @@
                     allowOutsideClick: false
                     }).then((result) => {
                     if (result.isConfirmed) {
+                            OverlayPanel_in();
                             $.ajax({
                                 type:'post',
                                 url:"{{ route('generate.SubmitDisbursement') }}",
@@ -258,32 +326,6 @@
                 });
             });
 
-           $(document).on('click','.btnDownloadFile',function(){
-            var _token = $("input[name=token]").val(),
-                filename = $(this).data('excelfilename'),
-                filetype = $(this).data('filetype'),
-                folder_filename = $(this).data('folderfilename');
-                SpinnerShow('btnDownloadFile',filename);
-                $('.errormsg').css('display','none');
-                $.ajax({
-                    type:'post',
-                    url:"{{ route('validate.SubmitDisbursementPin') }}",
-                    data:{folder_filename:folder_filename,filename:filename,filetype:filetype,_token:_token},
-                        success:function(data){                         
-                            var url = $('.SubmitDisbursement_downloadfile').attr('href');
-                            window.open(url,'_blank');                                                       
-                            $('#generatedSubmitDisbursementlist-datatable').DataTable().ajax.reload();     
-                            generatedSubmitDisbursementlist();   
-                            SpinnerHide('btnDownloadFile',filename);                                                                       
-                        },
-                        error: function (textStatus, errorThrown) {
-                            console.log('Err');
-                            SpinnerHide('btnDownloadFile',filename); 
-                        }
-                });
-                
-           });
-
            function getProvinceList(){
                 $.ajax({
                     type:'get',
@@ -341,6 +383,73 @@
     </script>
 @endif
 
+<script>
+
+$(document).ready(function() {
+    // $(document).on('blur','.percent',function(){
+
+        // var val = 1;
+
+        // var $circle = $('#svg #bar');
+
+        // for(var i=0;i<100;i++){           
+        // setTimeout(function () {
+        //     if (isNaN(val)) {
+        //     val = 0; 
+        //     }
+        //     else{
+        //         var r = $circle.attr('r');
+        //         var c = Math.PI*(r*2);
+            
+        //         if (val < 0) { val = 0;}
+        //         if (val > 100) { val = 100;}
+                
+        //         var pct = ((100-(val+100))/100)*c;
+               
+        //             $circle.css({ strokeDashoffset: pct});
+                
+        //         $('#cont').attr('data-pct',val);
+        //     }
+        //     val +=1;
+        // }, 2000); 
+        // }
+
+        
+    //     var progression = 0, 
+    //     val2 = parseInt($(this).val()),
+    //     val;
+    //     progress = setInterval(function() 
+    //     {            
+    //         $('#cont').attr('data-pct', progression);      
+    //             if(progression == val2) {
+    //                 clearInterval(progress);
+    //             } else {
+    //                 progression += 1; 
+    //             }
+            
+    //         val = parseInt($('#cont').attr('data-pct'));
+    //         var $circle = $('#svg #bar');
+        
+    //         if (isNaN(val)) {
+    //             val = 100; 
+    //         }
+    //         else{
+    //             var r = $circle.attr('r');
+    //             var c = Math.PI*(r*2);
+    //             if (val < 0) { val = 0;}
+    //             if (val > 100) { val = 100;}
+    //             var pct = ((100-(val+100))/100)*c;
+    //             $circle.css({ strokeDashoffset: pct});        
+    //         }
+            
+    //     }, 100);  
+        
+    // });
+
+ });
+        
+    </script>
+
 @endsection
 
 @section('content')
@@ -354,7 +463,7 @@
 <input type="hidden" id="download_folder_filename" value="">
 <input type="hidden" id="download_filetype" value="">
 <input type="hidden" id="download_filename" value="">
-<a href="{{route('download.SubmitDisbursementExcelFile')}}" class="SubmitDisbursement_downloadfile" style="display:none;"></a>
+<a href="" class="SubmitDisbursement_downloadfile" style="display:none;"></a>
 
 <div class="row">
     <div class="col-md-6">
@@ -381,6 +490,8 @@
         </div>
     </div>
 </div><br>
+
+
 <div class="panel panel-success">
     <div class="panel-heading">
         <div class="panel-heading-btn">
@@ -422,9 +533,9 @@
                                     </div>
                                 </div>
                                 <div>
-                                    <select id="default_DisbursementProvince" class="form-control selectProvince" name="DisbursementProvince" data-size="10" data-style="btn-white" value="{{ old('DisbursementProvince') }}">
+                                    <!-- <select id="default_DisbursementProvince" class="form-control selectProvince" name="DisbursementProvince" data-size="10" data-style="btn-white" value="{{ old('DisbursementProvince') }}">
                                         <option value="" selected>Select Province</option>
-                                    </select>  
+                                    </select>   -->
                                 </div>
                                 <div style="margin-top:10px;">
                                     <table id="SubmitDisbursementList-datatable" class="table table-striped display nowrap" style="width: 100%;">

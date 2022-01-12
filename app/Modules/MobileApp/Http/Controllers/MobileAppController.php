@@ -26,11 +26,7 @@ class MobileAppController extends Controller
         $password   = request('password');
         $random_otp = mt_rand(100000, 999999);
     
-        $authenticate = db::table('users as u')
-                                ->join('program_permissions as pp', 'u.user_id', 'pp.user_id')
-                                ->where('username', $username)
-                                ->whereNotNull('other_info')
-                                ->get();
+        $authenticate = db::table('users')->where('username', $username)->get();
         $get_password = db::table('users')->where('username', $username)->value('password');
 
         
@@ -591,9 +587,7 @@ class MobileAppController extends Controller
     {
 
         try {
-            
-            
-            $uuid         = Uuid::uuid4();
+         
             $voucher_info = json_decode(request('voucher_info'));
             $commodity    = json_decode(request('commodity'));
             $attachments  = json_decode(request('attachments'));
@@ -607,7 +601,7 @@ class MobileAppController extends Controller
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
-                $attachment_response = $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
+                $attachment_response = $this->insertAttachment($item,0,$voucher_info,$voucher_info->program);
                 $attachment_info[] = $attachment_response['attachment_info'];                
                 $attachment_error_count += $attachment_response['upload_error_count'];
             }

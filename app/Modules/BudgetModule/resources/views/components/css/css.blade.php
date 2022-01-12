@@ -18,7 +18,7 @@
     }
     
     table thead th{
-        color: white !important;;
+        color: white !important;
     }
 
     .dt-button{

@@ -26,10 +26,10 @@ class KYCImport implements ToCollection,WithStartRow
     private $error_data;
     private $region;
     
-    public function __construct($provider, $file_name,$client){
+    public function __construct($provider, $file_name){
         $this->provider = $provider;   
         $this->file_name = $file_name;    
-        $this->client = $client;    
+       
     
     }
 
@@ -126,12 +126,12 @@ class KYCImport implements ToCollection,WithStartRow
             
 
             // calculate the progress of importing;
-            $sum_percentage += $compute_percentage;
+            // $sum_percentage += $compute_percentage;
             
             // emit to the socket io server
          
             
-            $this->client->emit('message', ['room' => session('uuid'), 'percentage' => round($sum_percentage,2).'%']);
+            
       
 
                         
@@ -357,7 +357,7 @@ class KYCImport implements ToCollection,WithStartRow
 
       
 
-        $this->client->close();
+        
         
     }catch(\Exception $e){
         $this->message = json_encode($e->getMessage());

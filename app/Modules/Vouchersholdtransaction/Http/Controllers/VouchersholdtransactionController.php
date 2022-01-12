@@ -17,7 +17,7 @@ class VouchersholdtransactionController extends Controller
      */
 
     public function index(){
-        if (!empty(session('supplier_id'))) {
+        if (!empty(session('uuid'))) {
             return view("Vouchersholdtransaction::index");
         }else{
             return redirect('/login');

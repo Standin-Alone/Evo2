@@ -27,6 +27,9 @@
     {{-- External JS --}}
     @include('BudgetModule::components.js.js')
 
+    {{-- Number conversion with negative sign --}}
+    @include('BudgetModule::components.js.conversion.number_format_conversion_with_negative_sign')
+
     {{-- Fund Source Breakdown Datatable --}}
     @include('BudgetModule::components.js.datatables.breakdown_datatable')
 @endsection
@@ -50,6 +53,11 @@
 <!-- begin panel -->
 <div class="panel panel-inverse mt-5">
     <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand mt-1"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-redo mt-1"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus mt-1"></i></a>
+        </div>
         <h4 class="panel-title">FUND SOURCE BREAKDOWN</h4>
     </div>
     <div class="panel-body mt-5">

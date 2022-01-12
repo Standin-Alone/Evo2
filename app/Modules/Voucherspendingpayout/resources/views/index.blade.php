@@ -3,102 +3,21 @@
 
 {{--  import in this section your css files--}}
 @section('page-css')
-<link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
-<link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
-<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
-<link href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" rel="stylesheet">
-<link href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css" rel="stylesheet" />
-<link href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css" rel="stylesheet">
-<link href="assets/pgv/backend-style.css" rel="stylesheet">
+    {{-- Include Libraries CSS --}}
+    @include('components.libraries.css-components')
 @endsection
 
 {{--  import in this section your javascript files  --}}
 @section('page-js')    
-<script src="assets/plugins/gritter/js/jquery.gritter.js"></script>
-<script src="assets/plugins/bootstrap-sweetalert/sweetalert.min.js"></script>
-<script src="assets/js/demo/ui-modal-notification.demo.min.js"></script>
-<script src="assets/plugins/DataTables/media/js/jquery.dataTables.js"></script>
-<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
-<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
-<script src="assets/js/demo/table-manage-default.demo.min.js"></script>    
-<script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
-<script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
-<script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="assets/pgv/backend-script.js"></script>
+    {{-- Include Libraries JS --}}
+    @include('components.libraries.js-components')
 
-<script type="text/javascript">
-    $(document).ready(function() {
-
-        // CALL DATATABLE
-        getPendingPayoutDetails();
-
-        // DISPLAY DATATABLE
-        function getPendingPayoutDetails(){
-                $('#VoucherPendingPayout-datatable').unbind('click');
-            var table = $('#VoucherPendingPayout-datatable').DataTable({
-                destroy: true,
-                processing: true,
-                serverSide: true,
-                responsive: true,
-                ajax: "{{ route('get.VoucherPendingPayoutList') }}",
-                dom: 'Bfrtip',
-                    buttons: [
-                        'copy', 'csv', 'excel', 'pdf', 'print'
-                    ],
-                columns: [
-                    {data: 'program', name: 'program', title:'PROGRAM'},
-                    {data: 'transac_date', name: 'transac_date', title:'TRANSACTION DATE'},
-                    {data: 'reference_no', name: 'reference_no', title:'REFERENCE NO.'},
-                    {data: 'last_name', name: 'last_name', title:'LAST NAME'},
-                    {data: 'first_name', name: 'first_name', title:'FIRST NAME'},
-                    {data: 'middle_name', name: 'middle_name', title:'MIDDLE NAME'},
-                    {data: 'quantity', name: 'quantity', title:'QUANTITY'},
-                    {data: 'amount', name: 'amount',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title: 'AMOUNT'},
-                    {data: 'total_amount', name: 'total_amount',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title: 'TOTAL AMOUNT'},                  
-                ],
-                columnDefs: [
-                            { "visible": false, "targets": 0,}
-                        ],
-                order: [[0, 'asc']],
-                rowGroup: {
-                    dataSrc: function (data) {
-                            return '<span>'+data.program+'</span>';
-                        },
-                    starRender:null,
-                    endRender: function(rows){
-                            var total_amount_claim = rows
-                            .data()
-                            .pluck('total_amount')
-                            .reduce( function (a, b) {
-                                        return (a)*1 + (b)*1;
-                            }, 0 );
-                            return '<span>Page Total: '+$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display( total_amount_claim )+'</span>';
-                        },                    
-                    },
-                footerCallback: function (row, data, start, end, display) { 
-                    var TotalAmount = 0;                                        
-                        for (var i = 0; i < data.length; i++) {
-                            var dataval = data[i]['grandtotalamount'];
-                            TotalAmount = parseInt(dataval);
-                        }
-                        $('.totalvoucherpendingpayoutamt').html($.fn.dataTable.render.number(',', '.', 2, '&#8369;').display( TotalAmount ));                    
-                }
-            }).ajax.reload();        
-        }
-    });        
-</script>
+    {{-- Include Script Components --}}
+    @include('Voucherspendingpayout::components.script.js')
 
 @endsection
 
-
 @section('content')
-<!-- FADE SCREEN UPON ACTION -->
-<div id="overlay"></div>
-
 <!-- STORE DATA OBJECT -->
 <input type="hidden" id="selectedProgramDesc" value="{{session('Default_Program_Desc')}}">
 <input type="hidden" id="selectedProgramId" value="{{session('Default_Program_Id')}}">

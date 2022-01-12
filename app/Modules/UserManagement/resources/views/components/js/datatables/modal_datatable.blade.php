@@ -23,6 +23,5 @@
                 }
             }
         });
-        table.ajax.reload();
     }
 </script>

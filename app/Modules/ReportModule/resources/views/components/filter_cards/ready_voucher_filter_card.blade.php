@@ -1,5 +1,5 @@
 <div class="panel panel-primary col-md-6">
-    <div class="panel-heading">Select by Region</div>
+    <div class="panel-heading">Filter by Region</div>
     <div class="panel-body border">
         <div class="form-group">
           <label for=""></label>
@@ -13,7 +13,7 @@
     </div>
 </div>
 <div class="panel panel-primary col-md-6">
-    <div class="panel-heading">Select by Province</div>
+    <div class="panel-heading">Filter by Province</div>
     <div class="panel-body border">
         <div class="form-group">
             <label for=""></label>

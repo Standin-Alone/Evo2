@@ -41,7 +41,11 @@ class RffaBudgetController extends Controller
 
     public function rffa_disburse_breakdown(Request $request, $fund_id){
         if($request->ajax()){
-            return DataTables::of($this->RffaBudgetModel->get_rffa_fund_source_breakdown($fund_id))->make(true);
+            return DataTables::of($this->RffaBudgetModel->get_rffa_fund_source_breakdown($fund_id))
+            ->addColumn('fullname_column', function($row){
+                return $row->last_name.' '.$row->first_name.' '.$row->middle_name;
+            })
+            ->make(true);
         }  
 
         return view("BudgetModule::fund_source_breakdown");

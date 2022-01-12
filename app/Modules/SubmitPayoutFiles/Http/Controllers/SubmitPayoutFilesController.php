@@ -28,7 +28,7 @@ class SubmitPayoutFilesController extends Controller
 
     public function index()
     {
-        if (!empty(session('user_id'))) {
+        if (!empty(session('uuid'))) {
             return view("SubmitPayoutFiles::index");
         }else{
             return redirect('/login');

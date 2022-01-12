@@ -29,7 +29,7 @@ class SubmitPayoutsController extends Controller
      */
     public function index()
     {   
-        if (!empty(session('user_id'))) {
+        if (!empty(session('uuid'))) {
             return view("SubmitPayouts::index");
         }else{
             return redirect('/login');

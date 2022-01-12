@@ -20,3 +20,67 @@
     var solv = $('table#voucher-claimed-datatable').find('tfoot').find('th.grand_total_col').html('Grand Total:');
     console.log(solv);
 </script> --}}
+
+<script>
+    // $(document).ready(function(){
+    //     var mulipleCancelButton = new Choices('#filter_region', {
+    //         removeItemButton: true,
+    //         maxItemCount:0,
+    //         searchResultLimit:5,
+    //         renderChoiceLimit:0
+    //     });
+
+    //     $('#filter_region').on('change', function(){
+    //         var select = {};
+    //         var propName = $(this).val();
+
+    //         select[propName] = [];
+
+    //         $(this).children().each(function(){
+    //             select[propName].push({
+    //                 optionValue: $(this).append('<option value="'+propName+'"></option>')
+    //             });
+    //         });
+
+    //         if(select[propName].length == 0){
+    //             select[propName] = [""];
+    //         }else{
+    //             var types = $('select[name="filter_region_tbl_02"]').map(function() { 
+    //                 return '^' + propName + '\$';
+    //             }).get().join('|');
+    //             $('#co-program-focal-datatable-by-region-province-municipality-and-barangay').DataTable().columns(0).search(propName.join('|'), true, false, true).draw();
+    //         }
+    //     });
+    // });
+
+    // $(document).ready(function(){
+    //     var mulipleCancelButton = new Choices('#filter_province', {
+    //         removeItemButton: true,
+    //         maxItemCount:0,
+    //         searchResultLimit:5,
+    //         renderChoiceLimit:0
+    //     });
+
+    //     $('#filter_province').on('change', function(){
+    //         var select = {};
+    //         var propName = $(this).val();
+
+    //         select[propName] = [];
+
+    //         $(this).children().each(function(){
+    //             select[propName].push({
+    //                 optionValue: $(this).append('<option value="'+propName+'"></option>')
+    //             });
+    //         });
+
+    //         if(select[propName].length == 0){
+    //             select[propName] = [""];
+    //         }else{
+    //             var types = $('select[name="filter_province_tbl_02"]').map(function() { 
+    //                 return '^' + propName + '\$';
+    //             }).get().join('|');
+    //             $('#co-program-focal-datatable-by-region-province-municipality-and-barangay').DataTable().columns(1).search(propName.join('|'), true, false, true).draw();
+    //         }
+    //     });
+    // });
+</script>

@@ -15,7 +15,7 @@ class DownloadAppController extends Controller
 
     public function index()
     {
-        if (!empty(session('supplier_id'))) {
+        if (!empty(session('uuid'))) {
             return view("DownloadApp::index");
         }else{
             return redirect('/login');

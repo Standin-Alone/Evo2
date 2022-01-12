@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
+use App\Modules\VoucherTrans\Models\VoucherTrans;
 
 class VoucherTransController extends Controller
 {
@@ -15,8 +16,13 @@ class VoucherTransController extends Controller
      * @return \Illuminate\Http\Response
      */
 
+    public function __construct(Request $request)
+    {
+        $this->QueryVoucherTrans = new VoucherTrans();
+    }
+
     public function index(){
-        if (!empty(session('supplier_id'))) {
+        if (!empty(session('uuid'))) {
             return view("VoucherTrans::index");
         }else{
             return redirect('/login');
@@ -26,8 +32,8 @@ class VoucherTransController extends Controller
     public function getVoucherTransList(Request $request){
         if ($request->ajax()) {
             $getData = DB::table('vw_claimed_voucher_items as vt')
-                ->where('vt.supplier_id',session('supplier_id'))
-                ->where('vt.program_id',session('Default_Program_Id'))
+                // ->where('vt.supplier_id',session('uuid'))
+                // ->where('vt.program_id',session('Default_Program_Id'))
                 ->groupBy('vt.voucher_details_id')
                 ->get();
             return Datatables::of($getData)
@@ -47,7 +53,7 @@ class VoucherTransController extends Controller
                 ->addColumn('grandtotalamount', function($value){
                     $getgrandtotal = DB::table('vw_claimed_voucher_items as vt')
                     ->select(DB::raw("sum(total_amount) as grantotal"))
-                    ->where('vt.supplier_id',session('supplier_id'))
+                    ->where('vt.supplier_id',session('uuid'))
                     ->where('vt.program_id',session('Default_Program_Id'))
                     ->get();
                     $grandtotal=0;  

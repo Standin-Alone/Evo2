@@ -3,132 +3,19 @@
 
 {{--  import in this section your css files--}}
 @section('page-css')
-    <link href="assets/plugins/gritter/css/jquery.gritter.css" rel="stylesheet" />
-    <link href="assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" rel="stylesheet" />
-	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css" rel="stylesheet">
-    <link href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.dataTables.min.css" rel="stylesheet" />
-    <link href="https://cdn.datatables.net/rowgroup/1.1.3/css/rowGroup.dataTables.min.css" rel="stylesheet">
-    <link href="assets/pgv/backend-style.css" rel="stylesheet">
+    {{-- Include Libraries CSS --}}
+    @include('components.libraries.css-components')
 @endsection
 
 {{--  import in this section your javascript files  --}}
 @section('page-js')    
-    <script src="assets/plugins/gritter/js/jquery.gritter.js"></script>
-	<script src="assets/plugins/bootstrap-sweetalert/sweetalert.min.js"></script>
-	<script src="assets/js/demo/ui-modal-notification.demo.min.js"></script>
-    <script src="assets/plugins/DataTables/media/js/jquery.dataTables.js"></script>
-	<script src="assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js"></script>
-	<script src="assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js"></script>
-	<script src="assets/js/demo/table-manage-default.demo.min.js"></script>    
-    <script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
-    <script src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.print.min.js"></script>
-    <script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/pgv/backend-script.js"></script>
+    {{-- Include Libraries JS --}}
+    @include('components.libraries.js-components')
     
-    <script type="text/javascript">
-        $(document).ready(function (){
-
-            SubmitPayoutFileList();
-
-            function SubmitPayoutFileList(){
-                var table = $('#SubmitPayoutFileList-datatable').DataTable({
-                    destroy: true,
-                    processing: true,
-                    serverSide: true,
-                    responsive: true,
-                    ajax: "{{ route('get.SubmitPayoutFileList') }}",
-                    columns: [
-                        {data: 'created_at', name: 'created_at', title: 'TRANSACTION DATE'},
-                        {data: 'name', name: 'name', title: 'FILE NAME'},
-                        {data: 'total_amount', name: 'total_amount',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title: 'TOTAL AMOUNT'},
-                        {data: 'total_records', name: 'total_records',render: $.fn.dataTable.render.number( ',', '.', 2, ''  ).display, title: 'TOTAL RECORDS'},
-                        {data: 'action', name: 'action', orderable: false, searchable: false, title: 'ACTION'},
-                    ],
-                });
-            }
-
-            $(document).on('click','.btnGenerateKey',function(){
-                var _token = $("input[name=token]").val(),
-                    dbp_batch_id = $(this).data('selecteddbpfileid'),
-                    file_name = $(this).data('selectedfilename');
-                    SpinnerShow('btnGenerateKey',file_name);
-
-                Swal.fire({
-                title: 'Are you sure',
-                text: "You want to Generate Textfile with Private Key?",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Submit',
-                allowOutsideClick: false
-                }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        type:'get',
-                        url:"{{ route('generate.PrivateKey') }}",
-                        data:{dbp_batch_id:dbp_batch_id,file_name:file_name,_token:_token},
-                        success:function(data){  
-                            if(data == "failed"){
-                                Swal.fire({
-                                    allowOutsideClick: false,
-                                    title:'Failed!',
-                                    text:'File directory does not exist!',
-                                    icon:'error'
-                                });
-                                SubmitPayoutFileList();
-                                SpinnerHide('btnGenerateKey',file_name);
-                            }else{
-                                Swal.fire({
-                                    allowOutsideClick: false,
-                                    title:'Generated!',
-                                    text:'Your DBP textfile successfully Generated!',
-                                    icon:'success'
-                                });
-                                SubmitPayoutFileList();
-                                SpinnerHide('btnGenerateKey',file_name);
-                            }                       
-                            
-                            },
-                            error: function (textStatus, errorThrown) {
-                                    console.log('Err');
-                                    SpinnerHide('btnGenerateKey',file_name);
-                                }
-                            });
-                        }else{
-                            SpinnerHide('btnGenerateKey',file_name);
-                        }
-                    });
-            });
-
-            $(document).on('click','.btngeneratedtextfilehistory',function(){
-                SpinnerShow('btngeneratedtextfilehistory','btnloadingIcon');
-                var table = $('#GeneratedtextfileHistorylist-datatable').DataTable({ 
-                    destroy: true,
-                    processing: true,
-                    serverSide: true,
-                    responsive: true,
-                    ajax: "{{ route('get.GeneratedTextfileHistory') }}",
-                    columns: [ 
-                        {data: 'created_at', name: 'created_at', title: 'TRANSACTION DATE'},
-                        {data: 'name', name: 'name', title: 'FILE NAME'},
-                        {data: 'total_amount', name: 'total_amount',render: $.fn.dataTable.render.number( ',', '.', 2, '&#8369;'  ).display, title: 'TOTAL AMOUNT'},
-                        {data: 'total_records', name: 'total_records',render: $.fn.dataTable.render.number( ',', '.', 2, ''  ).display, title: 'TOTAL RECORDS'},
-                        ]
-                    }).ajax.reload();
-                $('#GeneratedtextfileHistoryModal').modal('toggle');
-                SpinnerHide('btngeneratedtextfilehistory','btnloadingIcon');
-           });
-            
-
-        });
-        
-</script>
+    {{-- Include Script Components --}}
+    @include('SubmitPayoutFiles::components.script.js')
+    
+    
 
 @endsection
 

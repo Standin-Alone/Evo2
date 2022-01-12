@@ -4,3 +4,20 @@
 <script src="https://cdn.datatables.net/rowgroup/1.1.3/js/dataTables.rowGroup.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.1.2/handlebars.min.js"></script>
+
+<script>
+    $(document).on('click', '#', function () {
+        var uuid = $(this).data('id');
+        otp_status(uuid);
+    });
+
+    $(document).on('click', '#', function () {
+        var uuid = $(this).data('id');
+        otp_status(uuid);
+    });
+
+    $(document).on('click', '#', function () {
+        var uuid = $(this).data('id');
+        otp_status(uuid);
+    });
+</script>

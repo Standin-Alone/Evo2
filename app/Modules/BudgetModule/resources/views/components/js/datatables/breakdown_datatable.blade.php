@@ -1,4 +1,4 @@
-<script type="text/javascript">
+{{-- <script type="text/javascript">
     $(function() {
         var table = $('#fund_source_breakdown_tbl').DataTable({
             processing: true,
@@ -111,4 +111,4 @@
             }
         });
     });
-</script>
+</script> --}}

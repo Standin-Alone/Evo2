@@ -11,11 +11,496 @@ class RffaReportModel extends Model
 {
     use HasFactory;
 
+    // get_fintech_files_custom_range
+    public function fintech_no_uploaded_file_and_no_disbursement_file_custom_range($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+
+        return $query;
+
+    }
+    
+    // get_fintech_files_by_today
+    public function get_fintech_files_by_today($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+        
+        return $query;
+
+    }
+
+    // get_fintech_files_by_yesterday
+    public function get_fintech_files_by_yesterday($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+
+        return $query;
+
+    }
+    
+    // get_fintech_files_by_last_7_days
+    public function get_fintech_files_by_last_7_days($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+        
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+
+        return $query;
+
+    }
+
+    // get_fintech_files_by_last_30_days
+    public function get_fintech_files_by_last_30_days($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+
+        return $query;
+    
+    }
+
+    // get_fintech_files_by_this_month
+    public function get_fintech_files_by_this_month($program_ids, $fin_start_date, $fin_end_date){
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+        
+        return $query;
+    }
+
+     // get fintech files default selected filter by date : This month 
+    public function get_fintech_files_by_this_month_02($program_ids){
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE MONTH(kp.date_uploaded) = MONTH(NOW()) OR MONTH(dbp.date) = MONTH(NOW())
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+        
+        return $query;
+    }
+
+    // get_fintech_files_by_last_month
+    public function get_fintech_files_by_last_month($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT y.fintech, sum(y.xki) as no_of_uploaded_file, sum(y.xtr) as no_of_disbursement_file, y.xkdu as date_uploaded, y.xdda as date
+                                FROM (
+                                        SELECT x.fp as fintech, count(x.ki) as xki, count(x.tr) as xtr, x.kdu as xkdu, x.dda as xdda
+                                        FROM (
+                                                SELECT 
+                                                kp.fintech_provider as fp,
+                                                kp.kyc_id as ki,
+                                                dbp.total_records as tr,
+                                                kp.kyc_id,
+                                                dbp.dbp_batch_id as dbp_batch_id,
+                                                date(kp.date_uploaded) as kdu,
+                                                dbp.date as dda
+                                                FROM kyc_profiles as kp
+                                                LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+
+                                                WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+
+                                                GROUP BY kp.dbp_batch_id ORDER BY kp.fintech_provider
+
+                                        ) as x GROUP BY x.dbp_batch_id ORDER BY x.fp
+                                ) as y GROUP BY y.fintech");
+
+        return $query; 
+
+    }
+
+
+
+
+    // get_fintech_records_custom_range
+    public function fintech_no_records_uploaded_and_no_records_disbursed($program_ids, $fin_start_date, $fin_end_date){
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+
+        return $query;
+    }
+
+        // get_fintech_records_by_today
+    public function get_fintech_records_by_today($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+        
+        return $query;
+
+    }
+
+    // get_fintech_records_by_yesterday
+    public function get_fintech_records_by_yesterday($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+    
+        return $query;
+
+    }
+    
+    // get_fintech_records_by_last_7_days
+    public function get_fintech_records_by_last_7_days($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+
+        return $query;
+
+    }
+
+    // get_fintech_records_by_last_30_days
+    public function get_fintech_records_by_last_30_days($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+
+        return $query;
+    
+    }
+
+    // get fintech records default selected filter by date : This month 
+    public function get_fintech_records_by_this_month_02($program_ids){
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when MONTH(x.kdu) = MONTH(NOW()) then 1 end) as no_of_records_uploaded, 
+                                count(case when MONTH(x.dda) = MONTH(NOW()) then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE MONTH(kp.date_uploaded) = MONTH(NOW()) OR MONTH(dbp.date) = MONTH(NOW())
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+        
+        return $query;
+    }
+
+    // get_fintech_records_by_this_month
+    public function get_fintech_records_by_this_month($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+        
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+        
+        return $query;
+    }
+
+    // get_fintech_records_by_last_month
+    public function get_fintech_records_by_last_month($program_ids, $fin_start_date, $fin_end_date){
+
+        $region = session()->get('region');
+
+        $query = DB::select("SELECT x.fp as fintech,
+                                count(case when x.kdu between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_uploaded, 
+                                count(case when x.dda between '$fin_start_date' and '$fin_end_date' then 1 end) as no_of_records_disbursed
+                                FROM (
+                                        SELECT 
+                                            kp.fintech_provider as fp,
+                                            kp.kyc_id as ki,
+                                            dbp.dbp_batch_id as tr,
+                                            kp.kyc_id,
+                                            dbp.dbp_batch_id as dbp_batch_id,
+                                            date(kp.date_uploaded) as kdu,
+                                            dbp.date as dda
+                                        FROM kyc_profiles as kp
+                                        LEFT JOIN dbp_batch as dbp on dbp.dbp_batch_id = kp.dbp_batch_id
+                                        
+                                        WHERE date(kp.date_uploaded) BETWEEN '$fin_start_date' AND '$fin_end_date' OR dbp.date BETWEEN '$fin_start_date' AND '$fin_end_date'
+                                        
+                                        ORDER BY kp.fintech_provider
+                                        
+                                ) as x group by x.fp ORDER BY x.fp");
+
+        return $query; 
+
+    }
+
+
+
+
     // get by region CO_program_focal_summary
     public function get_by_region_co_program_focal_summary($program_ids){
 
         $query = DB::table('kyc_profiles as kp')
-                        ->select('kp.region',DB::raw('COUNT(kp.region) as no_of_uploads_kyc'),
+                        ->select('kp.region', 'kp.fintech_provider', DB::raw('COUNT(kp.region) as no_of_uploads_kyc'),
                                 DB::raw('COUNT(ee.amount) as no_of_disbursed'), DB::raw('SUM(ifnull(ee.amount, 0)) as total_disbursed_amount'))
                         
                         ->leftJoin('excel_export as ee', 'kp.kyc_id', 'ee.kyc_id')
@@ -68,7 +553,7 @@ class RffaReportModel extends Model
             $region_name = $row->reg_name;
             
             $query = DB::table('kyc_profiles as kp')
-                                ->select('kp.region','kp.province', 
+                                ->select('kp.region','kp.province', 'kp.fintech_provider',
                                         DB::raw('COUNT(kp.kyc_id) as no_of_uploads_kyc'),
                                         DB::raw('COUNT(case when ee.kyc_id is not null then 1 end) as no_of_disbursed'),
                                         DB::raw('SUM(ifnull(ee.amount, 0)) as total_disbursed_amount'))
@@ -149,7 +634,7 @@ class RffaReportModel extends Model
     public function get_by_region_province_municipality_and_barangay_co_program_focal_summary($program_ids){
 
         $query = DB::table('kyc_profiles as kp')
-                        ->select('kp.region','kp.province', 'kp.municipality','kp.barangay',
+                        ->select('kp.region','kp.province', 'kp.municipality','kp.barangay', 'kp.fintech_provider',
                             DB::raw('COUNT(kp.kyc_id) as no_of_uploads_kyc'),
                             DB::raw('COUNT(case when ee.kyc_id is not null then 1 end) as no_of_disbursed'),
                             DB::raw('SUM(ifnull(ee.amount, 0)) as total_disbursed_amount'))
@@ -530,6 +1015,54 @@ class RffaReportModel extends Model
         return $query; 
     }
 
+    public function report_region_by_approval_level($program_ids){
+        $region = session()->get('region');
+
+        $region_name = session()->get('reg_reg');
+
+        $get_all_region = DB::table('kyc_profiles')
+                                ->select('region')
+                                ->groupBy('region')
+                                ->get();
+
+        $kyc_region = [];
+        foreach($get_all_region as $val){
+            array_push($kyc_region, $val->region);
+        }
+
+        foreach($region_name as $row){
+            $region_name = $row->reg_name;
+            
+            $query = DB::table('kyc_profiles as kp')
+                                ->select('kp.region', 'kp.fintech_provider',
+                                        DB::raw('COUNT(kp.kyc_id) as no_of_uploads_kyc'),
+                                        DB::raw('COUNT(case when kp.isapproved = 1 then 0 end) as generate_beneficiaries'), 
+                                        DB::raw('COUNT(case when kp.approved_by_b = 1 then 0 end ) as approve_by_budget'),
+                                        DB::raw('COUNT(case when kp.approved_by_d = 1 then 0 end ) as approve_by_disburse'))
+                                        // DB::raw('COUNT() as final_approve'),
+                                        // DB::raw('COUNT(case when ee.kyc_id is not null then 1 end) as no_of_disbursed'),
+                                        // DB::raw('SUM(ifnull(ee.amount, 0)) as total_disbursed_amount'))
+                                ->leftJoin('excel_export as ee', 'kp.kyc_id', 'ee.kyc_id')
+                                // ->leftJoin('dbp_batch as dbp', '', '')
+                                ->when($region, function($query, $region) use($region_name, $program_ids){
+                                    if($region != 13){
+                                        $query->where('kp.region', '=', $region_name)
+                                            //   ->whereIn('ee.program_id', $program_ids)
+                                            ->groupBy('kp.region')
+                                            ->orderBY('kp.region');
+                                    }
+                                    else{
+                                        $query
+                                            //   ->whereIn('ee.program_id', $program_ids)
+                                              ->groupBy('kp.region')
+                                              ->orderBY('kp.region');
+                                    }
+                                })
+                                ->get();
+        }
+        return $query;
+    }
+
     // total upload from kyc
     // generate beneficiaries from excel export, (isapprove -> column)
     // budget from excel export (approve_date_by_b -> column)
@@ -550,9 +1083,9 @@ class RffaReportModel extends Model
         }
 
         $get_all_province = DB::table('kyc_profiles')
-                        ->select('province')
-                        ->groupBy('province')
-                        ->get();
+                                    ->select('province')
+                                    ->groupBy('province')
+                                    ->get();
               
         $kyc_province = [];
         foreach($get_all_province as  $val){
@@ -573,7 +1106,7 @@ class RffaReportModel extends Model
             $region_name = $row->reg_name;
             
             $query = DB::table('kyc_profiles as kp')
-                                ->select('kp.region','kp.province', 
+                                ->select('kp.region','kp.province', 'kp.fintech_provider',
                                         DB::raw('COUNT(kp.kyc_id) as no_of_uploads_kyc'),
                                         DB::raw('COUNT(case when kp.isapproved = 1 then 0 end) as generate_beneficiaries'), 
                                         DB::raw('COUNT(case when kp.approved_by_b = 1 then 0 end ) as approve_by_budget'),
@@ -588,8 +1121,8 @@ class RffaReportModel extends Model
                                         $query->where('kp.region', '=', $region_name)
                                               ->whereIn('kp.province', $prov)
                                             //   ->whereIn('ee.program_id', $program_ids)
-                                            ->groupBy('kp.region', 'kp.province')
-                                            ->orderBY('kp.region');
+                                              ->groupBy('kp.region', 'kp.province')
+                                              ->orderBY('kp.region');
                                     }
                                     else{
                                         $query

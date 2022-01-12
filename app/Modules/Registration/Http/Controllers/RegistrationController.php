@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Yajra\DataTables\Facades\DataTables;
+use Illuminate\Support\Str;
+use App\Models\RegistrationNotifModel;
 
 class RegistrationController extends Controller
 {
@@ -20,55 +22,13 @@ class RegistrationController extends Controller
      */
 
     public function index(){   
-        try {
-            if(session('supplier_id')){
-                $supplier_id = session('supplier_id');
-                $checksupplier = DB::table('users')
-                ->where('other_info','=',$supplier_id)
-                ->exists();
-                if($checksupplier){                    
-                    back()->with('success','You are registered! You may now proceed to Login.');
-                    return $this->getRegion();
-                }else{                    
-                    return $this->getRegion();
-                }
-                
-            }else{
-                session()->forget('supplier_id');
-                return redirect('uservalidation/');
-            }
-        } catch (\Throwable $th) {
-            session()->forget('supplier_id');
-            return abort(404);
-        }   
-        
-    }
-
-    public function validateid(Request $request){
-        try {
-            $input = $request->all();
-            $supplier_id = $input['id'];
-            if($supplier_id){
-                $checkSupplier = DB::table('supplier')
-                ->where('supplier_id','=',$supplier_id)
-                ->exists();
-                if($checkSupplier){
-                    $request->session()->put('supplier_id',$supplier_id);
-                    back()->with('success','You are registered! You may now proceed to Login.');
-                    return $this->getRegion();
-                }else{                   
-                    return $this->getRegion();
-                }
-                
-            }else{
-                $request->session()->forget('supplier_id');
-                return abort(404);
-            }
-        } catch (\Throwable $th) {
-            $request->session()->forget('supplier_id');
-            return abort(404);
-        }
-            
+        $getRegion = array(
+            'reg_loc' => DB::table('geo_map')
+            ->select(DB::raw("reg_code,reg_name"))
+            ->groupBy('reg_name','reg_code')
+            ->get()
+        );                    
+        return view("Registration::register",$getRegion);        
     }
 
     public function getRegion(){
@@ -117,20 +77,35 @@ class RegistrationController extends Controller
         return response()->json($getMunicipality);
     }
 
-    public function signup(Request $request){
-        $request->validate([
-            'First_name'=>'required',
-            'Last_name'=>'required',
-            'Region'=>'required',
-            'Province'=>'required',
-            'Municipality'=>'required',
-            'Barangay'=>'required',
-            'Email'=>'required|email|unique:users,email',
-            'Contact_Number'=>'required|numeric|min:11|unique:users,contact_no',
-            'Username'=>'required',
-            'Password'=>'required_with:password|min:8',
-            'ReEnter_Password'=>'required_with:password|same:Password|min:8',
-        ]);
+    public function saveregistration(Request $request){
+        $checkExistName = DB::table('users')
+        ->where('last_name',$request->Last_name)
+        ->where('first_name',$request->First_name)
+        ->exists();
+        if($checkExistName){
+            return "ExistName";
+        }
+
+        $checkExistEmail = DB::table('users')
+        ->where('email',$request->Email)
+        ->exists();
+        if($checkExistEmail){
+            return "ExistEmail";
+        }
+
+        $checkExistCompany = DB::table('users')
+        ->where('company_name',$request->Company_name)
+        ->exists();
+        if($checkExistCompany){
+            return "ExistCompany";
+        }
+        
+        $checkExistUsername = DB::table('users')
+        ->where('username',$request->Username)
+        ->exists();
+        if($checkExistUsername){
+            return "ExistUsername";
+        }
 
         $getGeoCode = DB::table('geo_map')->select('geo_code')
         ->where('reg_code', '=', $request->Region)
@@ -141,9 +116,10 @@ class RegistrationController extends Controller
 
         $ldate = date('Y-m-d H:i:s');
         $password = Hash::make($request->Password);
+        $regs_code = Str::random(8);
 
         $query = DB::table('users')->insert([
-            'user_id'=>session('supplier_id'),
+            'user_id'=>Uuid::uuid4(),
             'agency'=>null,
             'agency_loc'=>null,
             'username'=>$request->Username,
@@ -160,14 +136,23 @@ class RegistrationController extends Controller
             'ext_name'=>$request->Extention_name,
             'contact_no'=>$request->Contact_Number,
             'date_created'=>$ldate,
-            'other_info'=>session('supplier_id')
-        ]);
-        if($query){
-            // $request->session()->forget('supplier_id');
-            return back()->with('success','Data have been successfuly Saved.');
-        }else{
-            return back()->with('failed','Something went wrong.');
-        }
+            'company_name'=>$request->Company_name,
+            'company_address'=>$request->Company_address,
+            'regs_code'=>$regs_code,
+            'status'=>'0',
+        ]);           
+            
+        $global_model = new RegistrationNotifModel;                
+        return $global_model->regs_send_email("Registration",$request->Last_name.','.$request->First_name.' '.$request->Extention_name.' '.$request->Middle_name,$regs_code,$request->Region,$request->Email,"Your account successfully registered! Please check your account activation status. Use this Registration Code: ".$regs_code);  
+    }
+
+    public function getregsstatus(Request $request){
+        $getRegsStatus = DB::table('users')
+        ->select(DB::raw("date_created,status,concat(last_name,', ',concat(first_name,' ',ifnull(ext_name,'')),' ',middle_name) as regs_name,company_name"))
+        ->where('regs_code', $request->regs_code)
+        ->where('email', $request->regs_email)
+        ->get();
+        return response()->json($getRegsStatus);
     }
     
 

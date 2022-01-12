@@ -31,7 +31,7 @@
 
 {{-- Farmer Datatable --}}
 @include('FarmerModule::components.js.datatables.farmer_datatable')
-
+@include('FarmerModule::components.js.datatables.farmer_rffa_datatable')
 @endsection
 
 
@@ -49,25 +49,59 @@
 </ol>
 <!-- end breadcrumb -->
 
-<!-- begin panel -->
-<div class="panel panel-inverse mt-5">
-    <div class="panel-heading">
-        <h4 class="panel-title">Farmers List</h4>
-    </div>
-    <div class="panel-body">
-        <br>
-        <br><br>
-        <table id="farmer-datatable" class="table table-striped table-bordered text-center">
-            <thead class="table-header">
-                <tr>
-                    <th>Reference No.</th>
-                    <th>Fullname</th>
-                    <th>View farmer details</th>
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-        </table>
-    </div>
+<br>
+<br>
+<ul class="nav nav-tabs">
+    <li class="nav-items">
+        <a href="#rffa_tbl" data-toggle="tab" class="nav-link active">
+            <span class="d-sm-none">RCEF RFFA</span>
+            <span class="d-sm-block d-none">RCEF RFFA</span>
+        </a>
+    </li>
+    <li class="nav-items">
+        <a href="#voucher_tbl" data-toggle="tab" class="nav-link">
+            <span class="d-sm-none">VOUCHER</span>
+            <span class="d-sm-block d-none">VOUCHER</span>
+        </a>
+    </li>
+    {{-- @foreach ($programs as $p)
+        <li class="nav-items">
+            <a href="#{{$p->program_id}}" data-toggle="tab" class="nav-link @if ($loop->first) active @endif">
+                <span class="d-sm-block d-none">{{$p->title}}</span>
+            </a>
+        </li>
+    @endforeach --}}
+</ul>
+<div class="tab-content">
+    @foreach ($programs as $p)
+        <div class="tab-pane fade @if ($loop->first) active show @endif" id="rffa_tbl">
+            <br>
+            <table id="farmer-rffa-datatable" class="table table-striped table-bordered text-center" style="width: 100%">
+                <thead class="table-header">
+                    <tr>
+                        <th>RSBSA NO.</th>
+                        <th>FULLNAME</th>
+                        <th>VIEW FARMER DETAILS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane fade" id="voucher_tbl">
+            <br>
+            <table id="farmer-datatable" class="table table-striped table-bordered text-center" style="width: 100%">
+                <thead class="table-header">
+                    <tr>
+                        <th>REFERENCE NO.</th>
+                        <th>FULLNAME</th>
+                        <th>VIEW FARMER DETAILS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    @endforeach
 </div>
 @endsection

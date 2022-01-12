@@ -2,13 +2,14 @@
     $(function() {
         var table = $('#user-datatable').DataTable({
             processing: true,
-            serverSide: true,
+            serverSide: false,
             responsive: true,
             paging: true,
             ajax: "{{route('list-of-users.index')}}",
             lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
             columns: [
                 {data: 'fullname_column', name: 'fullname_column'},
+                {data: 'email', name: 'email'},
                 {data: 'agency_shortname', name: 'agency_shortname'},
                 {data: 'region', name: 'region'},
                 // {data: 'prov', name: 'prov'},
@@ -24,5 +25,6 @@
     $(document).on('click', '#btn_data', function () {
         var uuid = $(this).data('id');
         interv_data(uuid);
+        otp_status(uuid);
     });
 </script>

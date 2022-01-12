@@ -18,7 +18,7 @@ class PayoutSummaryController extends Controller
 
     public function index()
     {
-        if (!empty(session('supplier_id'))) {
+        if (!empty(session('uuid'))) {
             return view("PayoutSummary::index");
         }else{
             return redirect('/login');

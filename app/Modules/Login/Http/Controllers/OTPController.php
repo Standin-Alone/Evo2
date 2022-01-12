@@ -47,9 +47,9 @@ class OTPController extends Controller
                 $users = $this->roles_and_perms->get_user_session($uOTP->user_id);
                 
                 // ==========  array of role_no of user(uuid)  ==========
-                $role_no_sets = $this->roles_and_perms->get_role_in_program_permission($get_uuid);
+                    $role_no_sets = $this->roles_and_perms->get_role_in_program_permission($get_uuid);
 
-                Session::put(['role_no_sets' => $role_no_sets]);
+                    Session::put(['role_no_sets' => $role_no_sets]);
                 // ==========  array of role_no of user(uuid)  ==========
 
                 // ========== Peter Session ==========

@@ -22,7 +22,7 @@ class PayoutApprovalController extends Controller
      */
     public function index()
     {
-        if (!empty(session('user_id'))) {
+        if (!empty(session('uuid'))) {
             return view("PayoutApproval::index");
         }else{
             return redirect('/login');

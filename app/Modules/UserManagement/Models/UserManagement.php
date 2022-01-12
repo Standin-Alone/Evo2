@@ -14,7 +14,7 @@ class UserManagement extends Model
         $region = session()->get('region');
 
         $query = DB::table('program_permissions as pp')
-                        ->select('u.user_id', 'u.first_name','u.last_name','u.middle_name','u.ext_name','a.agency_shortname','gr.region')
+                        ->select('u.email','u.user_id', 'u.first_name','u.last_name','u.middle_name','u.ext_name','a.agency_shortname','gr.region')
                         ->leftJoin('roles as r', 'pp.role_id', '=', 'r.role_id')
                         ->leftJoin('programs as p','pp.program_id', '=', 'p.program_id')
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
@@ -123,6 +123,15 @@ class UserManagement extends Model
                                 $query->groupBy('role_id');
                             }
                         })
+                        ->get();
+
+        return $query;
+    }
+
+    public function get_user_otp_status($uuid){
+        $query = DB::table('user_otp')
+                        ->select("user_id", "otp", "date_created", "status")
+                        ->where("user_id", "=", $uuid)
                         ->get();
 
         return $query;

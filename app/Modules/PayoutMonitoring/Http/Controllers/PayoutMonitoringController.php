@@ -20,7 +20,7 @@ class PayoutMonitoringController extends Controller
      */
     public function index()
     {
-        if (!empty(session('user_id'))) {
+        if (!empty(session('uuid'))) {
             return view("PayoutMonitoring::index");
         }else{
             return redirect('/login');

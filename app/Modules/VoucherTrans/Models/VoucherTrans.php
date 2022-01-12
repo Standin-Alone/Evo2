@@ -2,8 +2,11 @@
 
 namespace App\Modules\VoucherTrans\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Carbon\Carbon;
+use Ramsey\Uuid\Uuid;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class VoucherTrans extends Model
 {

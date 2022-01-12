@@ -16,8 +16,12 @@ class ProgramSrnController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {
-        return view("ProgramSrn::index");
+    {        
+        if (!empty(session('uuid'))) {
+            return view("ProgramSrn::index");
+        }else{
+            return redirect('/login');
+        }
     }
 
     public function getSupplierProgramList(Request $request)

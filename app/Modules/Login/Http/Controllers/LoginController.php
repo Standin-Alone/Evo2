@@ -108,8 +108,8 @@ class LoginController extends Controller
                                         return response()->json($otp_mail_success, 200);
                                     }
                                     else{
-                                        if($uOTP->status == "1"){
-                                            $this->otpModel->update_otp_status_to_deactive($user->user_id);
+                                        if($uOTP->status == "2"){
+                                            // $this->otpModel->update_otp_status_to_deactive($user->user_id);
         
                                             $generate_otp = $this->otpModel->generate_otp($user->user_id);
                                             $otp = $generate_otp['otp'];
@@ -315,7 +315,7 @@ class LoginController extends Controller
 
     public function logout_action(){
         if(Session::has('uuid')){
-            // $this->otpModel->update_otp_status_to_deactive(Session::get('uuid'));
+            $this->otpModel->update_otp_status_to_deactive(Session::get('uuid'));
             Session::flush();
         }
 

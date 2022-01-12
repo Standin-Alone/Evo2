@@ -17,7 +17,7 @@ class VoucherspendingpayoutController extends Controller
      */
 
     public function index(){
-        if (!empty(session('supplier_id'))) {
+        if (!empty(session('uuid'))) {
             return view("Voucherspendingpayout::index");
         }else{
             return redirect('/login');

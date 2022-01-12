@@ -12,11 +12,14 @@ use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
 use App\Modules\UserManagement\Models\UserManagement;
 use Yajra\DataTables\Facades\DataTables;
+use App\Modules\Login\Models\OTP;
 class UserManagementController extends Controller
 {
     public function __construct(Request $request)
     {
         $this->UserManagementModel = new UserManagement;
+
+        $this->OTPModel = new OTP;
 
         $this->middleware('session.module');
     }
@@ -314,6 +317,51 @@ class UserManagementController extends Controller
 
         if(request()->ajax()){
             return DataTables::of($this->UserManagementModel->show_user_details($uuid))->make(true);
+        }
+        return view("UserManagement::list-of-users"); 
+    }
+
+    public function show_user_otp_status($uuid){
+        if(request()->ajax()){
+            return DataTables::of($this->UserManagementModel->get_user_otp_status($uuid))
+            ->addColumn('status', function($row){
+                if(($row->status == 1) && ($this->OTPModel->check_otp_expiration($row->date_created) == FALSE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(57,218,138,.17); color: #39DA8A!important;">ACTIVE</span></h4>';
+                }  
+                elseif(($row->status == 1) && ($this->OTPModel->check_otp_expiration($row->date_created) == TRUE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;">OTP IS EXPIRED</span></h4>';
+                }
+                elseif(($row->status == 0) && ($this->OTPModel->check_otp_expiration($row->date_created) == FALSE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(91, 176, 255, 0.17); color: #39acda!important;">NOT YET EXPIRED</span></h4>';
+                }
+                elseif(($row->status == 0) && ($this->OTPModel->check_otp_expiration($row->date_created) == TRUE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;">OTP IS EXPIRED</span></h4>';
+                }
+                elseif($row->status == 2){
+                    $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;">INACTIVE</span></h4>';
+                }
+                return $html;
+            })
+            ->addColumn('login_status', function($row){
+                if(($row->status == 1) && ($this->OTPModel->check_otp_expiration($row->date_created) == FALSE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(57,218,138,.17); color: #39DA8A!important;">LOGIN</span></h4>';
+                } 
+                elseif(($row->status == 1) && ($this->OTPModel->check_otp_expiration($row->date_created) == TRUE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(57,218,138,.17); color: #39DA8A!important;">LOGIN</span></h4>';
+                } 
+                elseif(($row->status == 0) && ($this->OTPModel->check_otp_expiration($row->date_created) == FALSE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;">LOGOUT</span></h4>';
+                }
+                elseif(($row->status == 0) && ($this->OTPModel->check_otp_expiration($row->date_created) == TRUE)){
+                    $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;">LOGOUT</span></h4>';
+                }
+                elseif($row->status == 2){
+                    $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;">LOGOUT</span></h4>';
+                }
+                return $html;
+            })
+            ->rawColumns(['status', 'login_status'])
+            ->make(true);
         }
         return view("UserManagement::list-of-users"); 
     }

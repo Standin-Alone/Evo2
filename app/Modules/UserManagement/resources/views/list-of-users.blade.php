@@ -35,6 +35,7 @@
     
     {{-- Modal Datatable --}}
     @include('UserManagement::components.js.datatables.modal_datatable')
+    @include('UserManagement::components.js.datatables.user_otp_modal_datatable')
 
     {{-- Validation --}}
     @include('UserManagement::components.js.validation.add_modal_validation')
@@ -64,10 +65,15 @@
 <!-- begin panel -->
 <div class="panel panel-inverse mt-5">
     <div class="panel-heading">
+        <div class="panel-heading-btn">
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand mt-1"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-success" data-click="panel-reload"><i class="fa fa-redo mt-1"></i></a>
+            <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i class="fa fa-minus mt-1"></i></a>
+        </div>
         @foreach (session()->get('programs_ids') as $prog_id)
         <input type="hidden" id="detected_program" name="detected_program" value="{{$prog_id}}" />
         @endforeach
-        <button type="button" id="add-btn" name="add_role_btn" class="btn btn-lime" data-toggle="modal" data-target="#AddModal" style="font-size= 14px;">
+        <button type="button" id="add-btn" name="add_role_btn" class="btn btn-sm btn-lime" data-toggle="modal" data-target="#AddModal" style="font-size= 14px;">
             <i class="fa fa-plus"></i> ADD ROLE
         </button>
         {{-- <h4 class="panel-title">List of Users</h4> --}}
@@ -83,8 +89,9 @@
         <br><br>
         <table id="user-datatable" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
             <thead class="table-header">
-                <tr>                    
+                <tr>                   
                     <th>FULLNAME</th>
+                    <th>EMAIL</th>
                     <th>AGENCY</th>
                     <th>REGION</th> 
                     {{-- <th>Province</th>       --}}
@@ -118,10 +125,25 @@
                             <tbody>
                             </tbody>
                         </table>
+                        <br>
+                        <hr>
+                        <br>
+                        <table id="user-otp-datatable"class="table table-bordered table-hover mt-5 mb-5 text-center" style="width:100%;">
+                            <thead  class="table-header">
+                              <tr>
+                                <th scope="col">OTP</th>
+                                <th scope="col">OTP STATUS</th>
+                                <th scope="col">LOGIN STATUS</th>
+                                <th scope="col">DATE RECEIVED</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
                         {{--modal body end--}}
                     </div>
                     <div class="modal-footer">
-                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">CLOSE</a>
+                        <a href="javascript:;" class="btn btn-danger" data-dismiss="modal">CLOSE</a>
                     </div>
                 </div>
             </div>

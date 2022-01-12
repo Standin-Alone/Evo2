@@ -64,61 +64,40 @@ class BudgetModuleController extends Controller
 
     public function fund_monitoring_and_disbursement_view(Request $request){
         $programs = $this->BudgetModel->get_program($request->get('programs_ids'));
-        $rffa = $this->RffaBudgetModel->rffa_disbursement($request->get('programs_ids'));
+        // $rffa = $this->RffaBudgetModel->rffa_disbursement($request->get('programs_ids'));
+        if($request->ajax()){
+            return DataTables::of($this->BudgetModel->disbursement_v2($request->get('programs_ids')))
+            ->addColumn('disbursement_amount', function($row){
+                if($row->program_id == "212a7b35-b251-48a6-9928-3f689321d8b1" || $row->program_id == "42383225-3a4e-4e18-8cda-deed9a62775f")
+                $return = '<a href="'.url('/budget/fund-monitoring-and-disbursement/view-fund-source-breakdown/'.$row->fund_id.'/'.$row->prog_desc).'" data-id="'.$row->fund_id.'" data-prog_desc="'.$row->prog_desc.'" id="voucher_fund_btn_data" data-toggle="modal" data-target="#view_voucher_breakdown_computation">&#8369;'.number_format($row->disbursement_amount, 2, '.', ',').'
+                            </a>';
+                else
+                $return = '<a href="'.url('/budget/fund-monitoring-and-disbursement/rffa/'.$row->fund_id).'" data-id="'.$row->fund_id.'" data-title="'.$row->title.'" id="rffa_fund_btn_data" data-toggle="modal" data-target="#view_computation">&#8369;'.number_format($row->disbursement_amount, 2, '.', ',').'
+                            </a>';
 
-        // If the program is RFFA = True
-        // Else the progam are RRP2 wet or dry and Cash and Food
-        foreach($request->get('programs_ids') as $program_ids){
-            if($program_ids == "37b5fdab-6482-433c-af96-455402d5ef77"){
-                if($request->ajax()){
-                    return DataTables::of( $this->RffaBudgetModel->rffa_disbursement($request->get('programs_ids')))
-                    ->addColumn('disbursement_amount', function($row){
-                        $return = '<a href="#" data-id="'.$row->fund_id.'" data-title="'.$row->title.'" id="rffa_fund_btn_data" data-toggle="modal" data-target="#view_computation">&#8369;'.number_format($row->disbursement_amount, 2, '.', ',').'
-                                   </a>';
-        
-                        return $return;
-                    })
-                    ->addColumn('remaining_amount', function($row){
-                        return $row->total_amount - $row->disbursement_amount;
-                    })
-                    // ->addColumn('action', function($row){
-                    //     $return = '<a href="'.url('/budget/fund-monitoring-and-disbursement/view-fund-source-breakdown/'.$row->fund_id.'/'.$row->description).'" id="btn_data" type="button" class="btn btn-success">
-                    //                 <i class="fa fa-eye"></i> View
-                    //                </a>';
-        
-                    //     return $return;
-                    // })
-                    // ->rawColumns(['action'])
-                    ->rawColumns(['disbursement_amount'])
-                    ->make(true);
-                }  
-                return view("BudgetModule::fund_monitoring_and_disbursement", ['programs' => $programs]);
-            }
-            else{
-                if($request->ajax()){
-                    return DataTables::of($this->BudgetModel->disbursement($request->get('programs_ids')))
-                    ->addColumn('remaining_amount', function($row){
-                        return $row->total_amount - $row->disbursement_amount;
-                    })
-                    ->addColumn('action', function($row){
-                        $return = '<a href="'.url('/budget/fund-monitoring-and-disbursement/view-fund-source-breakdown/'.$row->fund_id.'/'.$row->description).'" id="btn_data" type="button" class="btn btn-success">
-                                    <i class="fa fa-eye"></i> View
-                                   </a>';
-        
-                        return $return;
-                    })
-                    ->rawColumns(['action'])
-                    ->make(true);
-                }            
-        
-                return view("BudgetModule::fund_monitoring_and_disbursement", ['programs' => $programs]);
-            }
-        }
+                return $return;
+            })
+            // ->addColumn('progress_bar', function($row){
+            //     $return = '<div>'.(($row->disbursement_amount/$row->total_amount)*100).'%</div> <br/> <div class="progress rounded-corner progress-striped active">
+            //                     <div class="progress-bar bg-purple" style="width:'.(($row->disbursement_amount/$row->total_amount)*100).'%"></div>
+            //                 </div>';
+
+            //     return $return;
+            // })
+            ->rawColumns(['disbursement_amount'])
+            ->make(true);
+        }            
+
+        return view("BudgetModule::fund_monitoring_and_disbursement", ['programs' => $programs]);
     }
 
     public function get_fund_source_breakdown(Request $request, $fund_id, $reg_program){
         if($request->ajax()){
-            return DataTables::of($this->BudgetModel->breakdown($fund_id, $reg_program))->make(true);
+            return DataTables::of($this->BudgetModel->breakdown($fund_id, $reg_program))
+            ->addColumn('fullname_column', function($row){
+                return $row->last_name.', '.$row->first_name.' '.$row->middle_name;
+            })
+            ->make(true);
         }  
 
         return view("BudgetModule::fund_source_breakdown");
@@ -164,6 +143,7 @@ class BudgetModuleController extends Controller
         $amount = floatval(preg_replace('/[^-\d.]/', '', $request->amount));
         
         $region = $request->select_region_hidden;
+        
         // return var_dump($region);
         // if($request->select_region == null){
         //     $region = $request->select_region_hidden;

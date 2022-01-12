@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Yajra\DataTables\Facades\DataTables;
 use App\Modules\ReportModule\Models\ReportModule;
+use App\Modules\ReportModule\Models\RffaReportModel;
 
 class ReportModuleController extends Controller
 {
     public function __construct(Request $request)
     {
         $this->reportModel = new ReportModule;
+
+        $this->rffa_report_Model = new RffaReportModel;
 
         $this->middleware('session.module');
     }
@@ -40,6 +43,10 @@ class ReportModuleController extends Controller
 
         $programs = $this->reportModel->get_program($request->get('programs_ids'));
 
+        $program_title = $this->reportModel->show_program_title_on_zero_value($request->get('programs_ids'));
+
+        $total_no_of_paid_voucher_transactions = $this->reportModel->total_number_of_paid_voucher_transactions();
+
         /**
          *  RRP 2 Dry Season (Grand Total)
          *  RRP 2 Wet Season (Grand Total)
@@ -56,11 +63,10 @@ class ReportModuleController extends Controller
 
         $gt_grand_total = $this->reportModel->get_all_voucher_transaction_grand_total($request->get('programs_ids'));
 
-        // Datatable
         if($request->ajax()){
             return DataTables::of($this->reportModel->get_vt_active_payout($request->get('programs_ids')))
             ->addColumn('payout_status', function($row){
-                $html = '<h4><span class="badge" style="background-color: green;" data-value="'.$row->payout.'">PAID</span></h4>';
+                $html = '<h4><span class="badge" style="background-color: rgba(57,218,138,.17); color: #39DA8A!important;" data-value="'.$row->payout.'">PAID</span></h4>';
                 return $html;
             })
             // ->addColumn('grand_total', function($row){
@@ -72,7 +78,9 @@ class ReportModuleController extends Controller
 
         return view("ReportModule::total_claimed_vouchers", [   'region'=>$region, 'province'=>$province, 'programs'=>$programs, 
                                                                 // 'gt_dry' => $gt_dry,'gt_wet' => $gt_wet, 'gt_csf' => $gt_csf, 
-                                                                'gt_grand_total'=>$gt_grand_total, 'progs_total' => $progs_total
+                                                                'gt_grand_total'=>$gt_grand_total, 'progs_total' => $progs_total,
+                                                                'total_no_of_paid_voucher_transactions' => $total_no_of_paid_voucher_transactions,
+                                                                'program_title' => $program_title
                                                             ]);
     }
 
@@ -91,6 +99,10 @@ class ReportModuleController extends Controller
          *  Cash and Food (Grand Total)
          *  Grand total of all claimed vouchers
          */
+        $count_no_of_not_paid = $this->reportModel->total_number_of_not_paid_voucher_transactions();
+
+        $program_title = $this->reportModel->show_program_title_on_zero_value($request->get('programs_ids'));
+
         $progs_total = $this->reportModel->total_amount_computation_inactive($request->get('programs_ids'));
 
         // $gt_dry = $this->reportModel->get_inactive_rrp_dry_season_grand_total($request->get('programs_ids'));
@@ -101,11 +113,10 @@ class ReportModuleController extends Controller
 
         $gt_grand_total = $this->reportModel->get_all_inactive_voucher_transaction_grand_total($request->get('programs_ids'));
 
-        // Datatable
         if($request->ajax()){
             return DataTables::of($this->reportModel->get_vt_inactive_payout($request->get('programs_ids')))
             ->addColumn('payout_status', function($row){
-                $html = '<h4><span class="badge badge-danger" data-value="'.$row->payout.'">NOT YET PAID</span></h4>';
+                $html = '<h4><span class="badge" style="background-color: rgba(255,91,92,.17); color: #FF5B5C!important;" data-value="'.$row->payout.'">NOT YET PAID</span></h4>';
                 return $html;
             })
 
@@ -114,32 +125,50 @@ class ReportModuleController extends Controller
         }
         return view("ReportModule::claim_not_yet_paid", [   'region'=>$region, 'province'=>$province, 'programs'=>$programs,
                                                             // 'gt_dry' => $gt_dry, 'gt_wet' => $gt_wet, 'gt_csf' => $gt_csf, 
-                                                            'gt_grand_total'=>$gt_grand_total, 'progs_total' => $progs_total
+                                                            'gt_grand_total'=>$gt_grand_total, 'program_title' => $program_title, 
+                                                            'progs_total' => $progs_total, 'count_no_of_not_paid' => $count_no_of_not_paid
                                                         ]);
     }
 
+    // Get Region by Selected Province
     public function get_region($prov_name){
         $regions = $this->reportModel->get_filter_region($prov_name);
 
         return response()->json($regions);
     }
     
+    // Get Province by Selected Region
     public function get_province($reg_name){
         $provinces = $this->reportModel->get_filter_province($reg_name);
 
         return response()->json($provinces);
     }
 
+    public function get_municipality($reg_name, $prov_name){
+        $municipalities = $this->reportModel->get_filter_municipality($reg_name, $prov_name);
+
+        return response()->json($municipalities);
+    }
+
+    // Get all the Province
     public function get_region_without_province(){
         $regions = $this->reportModel->region();
 
         return response()->json($regions);
     }
 
+    // Get all the Region
     public function get_province_without_region(){
         $provinces = $this->reportModel->province();
 
         return response()->json($provinces);
+    }
+
+    // Get all the Municipality
+    public function get_municipality_without_province(){
+        $municipalities = $this->reportModel->municipality();
+
+        return response()->json($municipalities);
     }
 
     public function ready_vouchers(Request $request){
@@ -149,11 +178,17 @@ class ReportModuleController extends Controller
         
         $province = $this->reportModel->province();
 
-        // Datatable
+        $total_ready_voucher_grandtotal = $this->reportModel->ready_voucher_grand_total();
+
+        $dashboard_cards = $this->reportModel->ready_voucher_dashboard_computation();
+
         if($request->ajax()){
             return DataTables::of($this->reportModel->total_ready_vouchers())->make(true);
         }
-        return view("ReportModule::total_ready_vouchers", ['region'=>$region, 'province'=>$province]);
+        return view("ReportModule::total_ready_vouchers", ['region'=>$region, 'province'=>$province, 
+                                                            'total_ready_voucher_grandtotal' => $total_ready_voucher_grandtotal,
+                                                            'dashboard_cards' => $dashboard_cards
+                                                        ]);
     }
 
     public function report_summary(Request $request){
@@ -177,7 +212,6 @@ class ReportModuleController extends Controller
 
         return view("ReportModule::summary_claims", ['supplier' => $supplier, 'gt_grand_total'=>$gt_grand_total,
                                                      'gt_voucher_claimed' => $gt_voucher_claimed, 'gt_not_paid' => $gt_not_paid, 
-                                                    //  'progs_total' => $progs_total
                                                     ]);
     }
 }

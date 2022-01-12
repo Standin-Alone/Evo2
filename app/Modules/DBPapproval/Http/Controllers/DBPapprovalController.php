@@ -25,7 +25,7 @@ class DBPapprovalController extends Controller
      */
     public function index()
     {
-        if (!empty(session('user_id'))) {
+        if (!empty(session('uuid'))) {
             return view("DBPapproval::index");
         }else{
             return redirect('/login');

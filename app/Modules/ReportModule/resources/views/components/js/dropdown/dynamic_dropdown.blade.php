@@ -69,7 +69,7 @@
                                                 $.each(provinces, function (key, province) {
                                                     $('select[name="filter_province"]').append('<option value="' + province.prov_name +'">' + province.prov_name + ' </option>').prop('selected', true);
                                                 });
-                                                 $('select[name="filter_province"]').val('');
+                                                $('select[name="filter_province"]').val('');
                                             }
                                         });
                                         $('#voucher-claimed-datatable').DataTable().columns('').search('').draw();
