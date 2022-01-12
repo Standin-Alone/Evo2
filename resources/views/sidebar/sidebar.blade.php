@@ -43,6 +43,95 @@
     @endforeach
 @endif
 
+
+<!-- <li class="has-sub active">
+        <a href="javascript:;">
+            <b class="caret"></b>
+            <i class="fa fa-th-large"></i>
+            <span>Supplier Module</span>
+        </a>
+        <ul class="sub-menu">
+            <li class="{{Route::currentRouteName() == 'DownloadApp.index' ? 'active' : null}}">
+                <a href="{{ route('DownloadApp.index') }}">	
+                    <span>Download Mobile App</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'VoucherTrans.index' ? 'active' : null}}">
+                <a href="{{ route('VoucherTrans.index') }}">
+                    <span>Voucher Monitoring</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'PayoutSummary.index' ? 'active' : null}}">
+                <a href="{{ route('PayoutSummary.index') }}">
+                    <span>Payout Summary</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'ProgramSrn.index' ? 'active' : null}}">
+                <a href="{{ route('ProgramSrn.index') }}">	
+                    <span>Program Overview</span>
+                </a>        
+            </li>
+        </ul>
+    </li>
+    <li class="has-sub active">
+        <a href="javascript:;">
+            <b class="caret"></b>
+            <i class="fa fa-th-large"></i>
+            <span>Payout Management</span>
+        </a>
+        <ul class="sub-menu">
+        <li class="{{Route::currentRouteName() == 'BatchPayout.index' ? 'active' : null}}">
+                <a href="{{ route('BatchPayout.index') }}">	
+                    <span>Batch Payout</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'SupplierPayout.index' ? 'active' : null}}">
+                <a href="{{ route('SupplierPayout.index') }}">	
+                    <span>Supplier Payout</span>
+                </a>        
+            </li>
+        </ul>
+    </li>
+    <li class="has-sub active">
+        <a href="javascript:;">
+            <b class="caret"></b>
+            <i class="fa fa-th-large"></i>
+            <span>Payout Module</span>
+        </a>
+        <ul class="sub-menu">
+        <li class="{{Route::currentRouteName() == 'PayoutMonitoring.index' ? 'active' : null}}">
+                <a href="{{ route('PayoutMonitoring.index') }}">	
+                    <span>Payout Monitoring</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'PayoutApproval.index' ? 'active' : null}}">
+                <a href="{{ route('PayoutApproval.index') }}">	
+                    <span>Payout Approval</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'PayoutSupervisorApproval.index' ? 'active' : null}}">
+                <a href="{{ route('PayoutSupervisorApproval.index') }}">	
+                    <span>Payout Supervisor Approval</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'SubmitPayouts.index' ? 'active' : null}}">
+                <a href="{{ route('SubmitPayouts.index') }}">	
+                    <span>Submit Payouts</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'DBPapproval.index' ? 'active' : null}}">
+                <a href="{{ route('DBPapproval.index') }}">	
+                    <span>DBP Approval</span>
+                </a>        
+            </li>
+            <li class="{{Route::currentRouteName() == 'SubmitPayoutFiles.index' ? 'active' : null}}">
+                <a href="{{ route('SubmitPayoutFiles.index') }}">	
+                    <span>Submit Payout Files</span>
+                </a>        
+            </li>
+        </ul>
+    </li> -->
+
     <!-- begin sidebar minify button -->
     <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
     <!-- end sidebar minify button -->

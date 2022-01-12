@@ -1,9 +1,9 @@
-@if(session()->has('main_modules'))
-	@if(Route::currentRouteName() == 'user.profile' || Route::currentRouteName() == 'main.home')			
+<!-- @if(session()->has('main_modules'))
+	@if(Route::currentRouteName() == 'user.profile' || Route::currentRouteName() == 'main.home' || Route::currentRouteName() == 'farmer.view.details.page' || Route::currentRouteName() == 'farmer.view.rffa_details.page')		
 	@elseif(!(session('main_modules')->where('routes',Route::currentRouteName())->first() || session('sub_modules')->where('routes',Route::currentRouteName())->first()))		
 		<script>window.location.href = "{{route('error_page.index')}}"</script>
 	@endif
-@endif
+@endif -->
 
 
 <?php echo
