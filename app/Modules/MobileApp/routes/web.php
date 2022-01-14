@@ -31,4 +31,6 @@ Route::post('/api/validate-otp','MobileAppController@validateOTP');
 //  
 
 Route::get('/otp','MobileAppController@otp');
+
+Route::get('/api/get-time','MobileAppController@get_time');
 });

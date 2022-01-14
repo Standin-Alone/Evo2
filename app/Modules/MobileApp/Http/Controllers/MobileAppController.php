@@ -264,10 +264,20 @@ class MobileAppController extends Controller
     
     
        
-   
+    //  get time to check if voucher transaction is now open
+    public function get_time(){                         
+
+        $get_current_time = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now());        
+        $start_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 6:00:00'));
+        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 18:00:00'));
+                
+        return ($get_current_time <= $end_time_of_scan) &&  ($get_current_time >= $start_time_of_scan) ? 'true'  : 'false' ;
+        
+    }
 
 
-    // get voucher info for farmer profile screen
+
+    // get voucher info for farmer profile screen (QRCODE SCREEN)
     public function get_voucher_info()
     {
         //
@@ -279,8 +289,10 @@ class MobileAppController extends Controller
                        ->join('programs as p','p.program_id','v.program_id')
                        ->where('reference_no', $reference_num)->get();
         
-         
+        //  check if voucher transaction is now open
+        if($this->get_time() == 'true'){
 
+        
         if (!$get_info->isEmpty()) {
             // Compute the balance of voucher    
             $get_voucher = db::table('voucher')->where('reference_no', $reference_num)->first();
@@ -288,7 +300,7 @@ class MobileAppController extends Controller
 
             
 
-            if($get_voucher->is_scanned == 0){
+            // if($get_voucher->is_scanned == 0){
 
                 // set already scanned
                 db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1']);
@@ -324,22 +336,25 @@ class MobileAppController extends Controller
                     db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
                 }
 
-                return json_encode(array(["Message"       => 'true',
+                return json_encode(["Message"       => 'true',
                                           "data"          => $get_info, 
                                           "program_items" => $get_program_items,
-                                          "history"       => $get_recent_claiming]));
+                                          "history"       => $get_recent_claiming]);
     
     
                 
-            }else{
+            // }else{
 
-                return json_encode(array(["Message" => 'already scanned']));
-            }
+            //     return json_encode(["Message" => 'already scanned']);
+            // }
       
 
         }else{
             db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
-            return json_encode(array(["Message" => 'false']));            
+            return json_encode(["Message" => 'false']);            
+        }
+        }else{
+            return json_encode(["Message" => 'Not Yet Open']);            
         }
     }
 
@@ -712,7 +727,8 @@ class MobileAppController extends Controller
 
         return $get_record;
     }
-
+    
+    
 
 
     
