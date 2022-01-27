@@ -1,5 +1,5 @@
 @extends('global.base')
-@section('title', 'KYC Profiles')
+@section('title', 'IMC Uploading')
 
 
 
@@ -165,8 +165,8 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
 
     {{-- <script src="//code.jquery.com/jquery-migrate-1.2.1.min.js"></script> --}}
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script> --}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.0/socket.io.js"></script> --}}
     
     
 
@@ -186,8 +186,8 @@ table.dataTable td {
         // var socket = io.connect('wss://devsysadd.da.gov.ph:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
         // var socket = io.connect('wss://devsysadd.da.gov.ph/evoucher',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
         // for http websocket
-        // var socket = io('127.0.0.1:7980',{ transports: ['websocket','polling'],allowEIO3:true});
-        // var get_width = 0;
+        var socket = io.connect('http://192.168.1.8:7980',{ transports: ['websocket','polling'],allowEIO3:true,rejectUnauthorized: true});
+        var get_width = 0;
 
    
        
@@ -201,50 +201,39 @@ table.dataTable td {
         //  connect to websocket
         
         
-        // socket.on("connect", function() {
-        //         //  get progress of uploading
-        //         console.warn('connected');
+        socket.on("connect", function() {
+            
+                //  get progress of uploading
+                console.warn('connected');
 
                                   
-        //         socket.on('progress',function(data){
-        //             // console.warn(data);
-        //             if(data.room == "{{session('uuid')}}"){
+                socket.on('progress',function(data){
+                    console.warn(data.percentage);
+                    if(data.room == "{{session('uuid')}}"){
                       
-        //                 if(data.percentage == '100%'){
-        //                     $(".progress-load").css('width','0%')
-        //                     $(".progress-load").html('0%')
-        //                 }else{
-        //                     $(".progress-load").css('width',data.percentage)
-        //                     $(".progress-load").html(data.percentage)
+                        if(data.percentage == '100%'){
+                            $(".progress-load").css('width','0%')
+                            $(".progress-load").html('0')
+                        }else{
+                            $(".progress-load").css('width',data.percentage+'%')
+                            $(".progress-load").html(data.percentage)
 
-        //                 }
-        //             }
+                        }
+                    }
                
                 
                     
-        //         })
+                })
        
 
                 
-        //     socket.emit('room',"{{session('uuid')}}"); 
+            socket.emit('room',"{{session('uuid')}}"); 
 
-          
-        //     if (performance.navigation.type == performance.navigation.TYPE_RELOAD) {
-          
-          
-        //             console.warn('connected client side');
-        //             socket.emit('reset',['false']); 
-          
-                
-        
-            
-        //         $(".progress-load").css('width','0%')    
-        //     }
-
+ 
 
             
           
-        // });
+        });
 
 
 
@@ -262,63 +251,8 @@ table.dataTable td {
                                 destroy:true,
                                 serverSide:true,
                                 responsive:true,
-                                ajax: {"url":"{{route('get-ingest-files')}}","type":'get'},
-                                dom: 'lBfrtip',
-                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                                "buttons": [
-                                        {
-                                            extend: 'collection',
-                                            text: 'Export',
-                                            buttons: [
-                                                {
-                                                    text: '<i class="fas fa-print"></i> PRINT',
-                                                    title: 'Report: List of Files to Ingest',
-                                                    extend: 'print',
-                                                    footer: true,
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    },
-                                                    customize: function ( doc ) {
-                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
-                                                        $(doc.document.body)
-                                                            .prepend(
-                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
-                                                        );
-                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
-                                                    },
-                                                }, 
-                                                {
-                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
-                                                    title: 'Summary Of Uploaded Files and Records',
-                                                    extend: 'excelHtml5',
-                                                    footer: true,
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    }
-                                                }, 
-                                                {
-                                                    text: '<i class="far fa-file-excel"></i> CSV',
-                                                    title: 'Summary Of Uploaded Files and Records',
-                                                    extend: 'csvHtml5',
-                                                    footer: true,
-                                                    fieldSeparator: ';',
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    }
-                                                }, 
-                                                {
-                                                    text: '<i class="far fa-file-pdf"></i> PDF',
-                                                    title: 'Summary Of Uploaded Files and Records',
-                                                    extend: 'pdfHtml5',
-                                                    footer: true,
-                                                    message: '',
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    },
-                                                }, 
-                                            ]
-                                            }
-                                    ],
+                                ajax: {"url":"{{route('get-ingest-imc-files')}}","type":'get'},
+                        
                                 columns:[
                                         {data:'ingest_file_id',title:'&nbsp;',                           
                                         orderable:false,                                        
@@ -391,7 +325,7 @@ table.dataTable td {
                                 $(".ingest-btn").prop('disabled',true);
                                 $(".ingest-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Ingesting');                 
                                 $.ajax({                      
-                                    url:"{{route('ingest-file')}}",
+                                    url:"{{route('ingest-imc-files')}}",
                                     type:'post',
                                     data: payload,                                                   
                                     success:function(response){
@@ -406,6 +340,7 @@ table.dataTable td {
                                                                      
                                                     
                                                 $(".progress-load").css('width','0%')    
+                                                $(".progress-load").html('0')    
                                         
                                             if(parses_result['error_data'].length != 0){
 
@@ -414,14 +349,70 @@ table.dataTable td {
                                                 $("#error-datatable").DataTable({
                                                     destroy:true,
                                                     data:parses_result['error_data'].length == 1 ?parses_result['error_data'][0] : parses_result['error_data'] ,
+                                                    dom: 'lBfrtip',
+                                                    "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                                    "buttons": [
+                                                            {
+                                                                extend: 'collection',
+                                                                text: 'Export',
+                                                                buttons: [
+                                                                    {
+                                                                        text: '<i class="fas fa-print"></i> PRINT',
+                                                                        title: 'Report: Error Logs',
+                                                                        extend: 'print',
+                                                                        footer: true,
+                                                                        exportOptions: {
+                                                                            columns: ':visible'
+                                                                        },
+                                                                        customize: function ( doc ) {
+                                                                            $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                                            $(doc.document.body)
+                                                                                .prepend(
+                                                                                    '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                                            );
+                                                                            $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                                        },
+                                                                    }, 
+                                                                    {
+                                                                        text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                                        title: 'Error Logs',
+                                                                        extend: 'excelHtml5',
+                                                                        footer: true,
+                                                                        exportOptions: {
+                                                                            columns: ':visible'
+                                                                        }
+                                                                    }, 
+                                                                    {
+                                                                        text: '<i class="far fa-file-excel"></i> CSV',
+                                                                        title: 'Error Logs',
+                                                                        extend: 'csvHtml5',
+                                                                        footer: true,
+                                                                        fieldSeparator: ';',
+                                                                        exportOptions: {
+                                                                            columns: ':visible'
+                                                                        }
+                                                                    }, 
+                                                                    {
+                                                                        text: '<i class="far fa-file-pdf"></i> PDF',
+                                                                        title: 'Error Logs',
+                                                                        extend: 'pdfHtml5',
+                                                                        footer: true,
+                                                                        message: '',
+                                                                        exportOptions: {
+                                                                            columns: ':visible'
+                                                                        },
+                                                                    }, 
+                                                                ]
+                                                                }
+                                                        ],
                                                     columns:[
                                                         {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
-                                                        {data:'fintech_provider',title:'Provider',orderable:false},
+                                                        {data:'provider',title:'Provider',orderable:false},
                                                         {title:'Name',orderable:false,render:function(data,type,row){
                                                             return row.first_name + ' ' + row.last_name;
                                                         }},                                                    
                                                         {data:'barangay',title:'Barangay',orderable:false},
-                                                        {data:'municipality',title:'Municipality',orderable:false},
+                                                        {data:'remittance_mun',title:'Municipality',orderable:false},
                                                         {data:'province',title:'Province',orderable:false},
                                                         {data:'region',title:'Region',orderable:false},
                                                         {data:'remarks',title:'Remarks',orderable:false},
@@ -518,13 +509,14 @@ table.dataTable td {
                         rules:{                      
                             file:{
                                 required:true,
-                                accept: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+                        
+                                 extension: "csv"
                             }
                         },
                         messages:{                                
                             file:{
                                 required: '<div class="text-danger">Please select file to upload.</div>',
-                                accept: '<div class="text-danger">Please upload valid files formats .xlsx, . xls only.</div>'
+                                extension: '<div class="text-danger">Please upload valid files formats .xlsx, . xls only.</div>'
                             }
                         },
                         submitHandler: function(){
@@ -560,17 +552,13 @@ table.dataTable td {
                                     });
                                     $(".import-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Uploading');                 
                                     $.ajax({                      
-                                        url:"{{route('upload-file-only')}}",
+                                        url:"{{route('upload-imc-files')}}",
                                         type:'post',
                                         data: fd,
                                         processData:false,
                                         contentType:false,
-                                        success:function(response){             
-                                            //      
-                                            parses_result = JSON.parse(response)
-                                            total_rows_inserted = parses_result['total_rows_inserted'];
-                                            total_rows = parses_result['total_rows'];
-                                            
+                                        success:function(response){                                                 
+                                            parses_result = JSON.parse(response);
                                             if(parses_result['message'] == 'true'){
                                                 swal('Files has been successfully uploaded.', {
                                                     icon: "success",
@@ -585,35 +573,7 @@ table.dataTable td {
                                                     $("#ingest-file-datatable").DataTable().ajax.reload();
                                                     
                                                 });
-                                            }else if(parses_result['message'] == 'filename error'){
-                                                    swal("Error!Wrong file name format.", {
-                                                        icon: "error",
-                                                        });
-                                                        $(window).unbind('beforeunload');
-                                                        $("#ImportForm")[0].reset();
-                                                        $(".import-btn").prop('disabled',false) 
-                                                        $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Upload');                                               
-                                            }
-                                            else if(parses_result['message'] == 'Some files is already exist.'){
-                                                    swal("Files is already exist.", {
-                                                        icon: "warning",
-                                                        });
-                                                        $(window).unbind('beforeunload');
-                                                        $("#ImportForm")[0].reset();
-                                                        $(".import-btn").prop('disabled',false) 
-                                                        $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Upload');  
-                                                        $("#ingest-file-datatable").DataTable().ajax.reload();                                             
-                                            } 
-                                            else if(parses_result['message'] == 're-upload'){
-                                                    swal("Files has been successfully re uploaded.", {
-                                                        icon: "success",
-                                                        });
-                                                        $(window).unbind('beforeunload');
-                                                        $("#ImportForm")[0].reset();
-                                                        $(".import-btn").prop('disabled',false) 
-                                                        $(".import-btn").html('<i class="fas fa-cloud-download-alt "></i> Upload');  
-                                                        $("#ingest-file-datatable").DataTable().ajax.reload();                                             
-                                            }                      
+                                            }                                                        
                                             else{
                                             
                                                 swal("Error!Wrong excel format.", {
@@ -639,7 +599,7 @@ table.dataTable td {
                                     $(".import-btn").prop('disabled',false)                            
                                     swal("Operation Cancelled.", {
                                         icon: "error",
-                                    });
+                                    }); 
                                 }
                             });
                         }
@@ -658,7 +618,7 @@ table.dataTable td {
 
     <!-- end breadcrumb -->
     <!-- begin page-header -->
-    <h1 class="page-header">KYC Profiles </h1>
+    <h1 class="page-header">IMC </h1>
     <!-- end page-header -->
 
 
@@ -669,13 +629,13 @@ table.dataTable td {
     
         <div class="panel panel-success">
             <div class="panel-heading">
-                <h4 class="panel-title">File Upload KYC</h4>
+                <h4 class="panel-title">IMC Uploading</h4>
             </div>
             {{-- KYC FORM PANEL --}}       
             <div class="panel-body">
             <div class="alert alert-warning fade show">
                     
-                    <strong>REMINDER {{session('progress')}} ! </strong>
+                    <strong>REMINDER! </strong>
                     Please don't  <a href="#" class="alert-link">CLOSE or RELOAD</a> the page when ingesting;
                    
                 </div>
@@ -683,7 +643,7 @@ table.dataTable td {
             <div class="panel-body">
                 <div class="panel panel-primary col-md-6">
                     <div class="panel-heading">
-                        <h4 class="panel-title">Upload KYC Excel Files</h4>
+                        <h4 class="panel-title">Upload IMC Files</h4>
                     </div>
                     <form id="ImportForm" method="POST">
                         @csrf
@@ -694,7 +654,7 @@ table.dataTable td {
                             <div class="col-lg-12">
                                 <div class="form-group">
                                     <label>Upload Excel</label><span style="color:red">*</span>
-                                    <input type="file" name="file" accept=".xlsx" class="form-control" multiple='true' required="true">
+                                    <input type="file" name="file"  class="form-control" multiple='true' required="true">
                                 </div>
                             </div>
                                     
@@ -761,7 +721,7 @@ table.dataTable td {
                     </tbody>
                 </table>
 
-                <div class="progress rounded-corner  active  " style="height:50px">
+                <div class="progress rounded-corner  active  " style="height:50px;width:100%">
                     <div class="progress-bar bg-green progress-bar-striped progress-bar-animated  progress-load"  >
           
                     </div>
