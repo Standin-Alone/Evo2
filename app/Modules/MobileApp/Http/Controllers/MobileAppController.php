@@ -96,7 +96,12 @@ class MobileAppController extends Controller
                                             ->where('uo.otp_id',$get_user_otp_id)
                                             ->where('uo.status',1)
                                             ->first();
-                    
+                    // get_programs
+                    $get_programs = db::table('program_permissions as pp')
+                                        ->select('program_id')
+                                        ->where('user_id',$supplier->user_id)
+                                        ->get();
+                                        
                     Mail::send('MobileApp::otp', ["otp_code" => $otp_to_send, "full_name" => $get_otp_record->full_name  , "date" => $get_otp_record->date_created   , "role" => $get_otp_record->role  ], function ($message) use ($to_email, $otp_to_send) {
                         $message->to($to_email)
                                 ->subject('OTP');                            
@@ -108,7 +113,8 @@ class MobileAppController extends Controller
                         "email"       => $to_email,
                         "supplier_id" => $supplier->supplier_id,
                         "user_id"     => $supplier->user_id,
-                        "full_name"   => $supplier->full_name
+                        "full_name"   => $supplier->full_name,
+                        "programs"    => $get_programs
                     ]);
 
                 }else{
@@ -225,10 +231,10 @@ class MobileAppController extends Controller
                  DB::raw("YEAR(transac_date) as year_transac")                       
               )
             ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
-            ->join('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
+            ->leftJoin('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
             ->join('programs as p', 'p.program_id','v.program_id')            
             ->where('supplier_id', $supplier_id)  
-            ->where('document', 'Farmer with Commodity')            
+            // ->where('document', 'Farmer with Commodity')            
             ->groupBy('v.reference_no')
             ->orderBy('transac_date', 'DESC')     
             ->skip($offset == 1 ? 0 : $offset)
@@ -240,13 +246,49 @@ class MobileAppController extends Controller
                 
                 $item->base64 = base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
                 
-            }
+            }                        
 
 
-            
-    
+        return json_encode($get_scanned_vouchers);
+    }
+
+
+    // get scanned vouchers TODAY for home screen
+    public function get_scanned_vouchers_today($supplier_id,$offset)
+    {
         
 
+
+        $get_scanned_vouchers = db::table('voucher as v')
+            ->select(
+                'v.reference_no',
+                'transac_date',
+                DB::raw("CONCAT(first_name,' ',last_name) as fullname"),
+                'rsbsa_no',
+                'file_name',
+                'v.amount_val',
+                'vt.voucher_details_id',   
+                'shortname as program',
+                 DB::raw("YEAR(transac_date) as year_transac")                       
+              )
+            ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
+            ->leftJoin('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
+            ->join('programs as p', 'p.program_id','v.program_id')            
+            ->where('supplier_id', $supplier_id)  
+            ->where('transac_date', DB::raw('NOW()'))  
+            // ->where('document', 'Farmer with Commodity')            
+            ->groupBy('v.reference_no')
+            ->orderBy('transac_date', 'DESC')     
+            ->skip($offset == 1 ? 0 : $offset)
+            ->take(2)               
+            ->get();
+
+      
+            foreach ($get_scanned_vouchers as $key => $item) {
+                
+                $item->base64 = base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
+                
+            }                        
 
 
         return json_encode($get_scanned_vouchers);
@@ -269,7 +311,7 @@ class MobileAppController extends Controller
 
         $get_current_time = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now());        
         $start_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 6:00:00'));
-        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 18:00:00'));
+        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 24:00:00'));
                 
         return ($get_current_time <= $end_time_of_scan) &&  ($get_current_time >= $start_time_of_scan) ? 'true'  : 'false' ;
         
@@ -328,7 +370,7 @@ class MobileAppController extends Controller
                     $item->Barangay          = $get_geo_map->bgy_name;
                 }
                 
-                $get_program_items   = $this->getProgramItems($supplier_id);
+                $get_program_items   = $this->getProgramItems($supplier_id,$reference_num);
                 $get_recent_claiming = $this->get_transactions_history($reference_num);
     
                 // validate voucher
@@ -713,12 +755,13 @@ class MobileAppController extends Controller
 
 
     // get program items (rice, egg , etc...)
-    public function getProgramItems($supplier_id)
+    public function getProgramItems($supplier_id,$reference_num)
     {
 
         $get_record = db::table('program_items as pi')
                         ->join('supplier_programs as sp', 'pi.item_id', 'sp.item_id')
                         ->where('supplier_id', $supplier_id)
+                        ->where('sp.program_id', db::table('voucher')->where('reference_no',$reference_num)->first()->program_id)
                         ->get();
                         
         foreach($get_record as $key => $item){
@@ -730,7 +773,22 @@ class MobileAppController extends Controller
     
     
 
+    public function check_utility($version){
+        $check_version = db::table('mobile_utility')
+                            ->where('version',$version)
+                            ->first();
+        $result = '';
+        if($check_version){
+            $result = json_encode(["message"=>'true',"maintenance"=>$check_version->maintenance , "active" => $check_version->active]);
+        }else{
+            $result = json_encode(["message"=>'false']);
+        }
+        return $result;
 
+
+
+        
+    }
     
 }
 

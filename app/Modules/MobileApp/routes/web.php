@@ -8,9 +8,13 @@ Route::post('/api/sign_in','MobileAppController@sign_in');
 // QRCode Screen
 Route::post('/api/get_voucher_info','MobileAppController@get_voucher_info');
 
+// Authentication
+
+Route::get('/api/check_utility/{version}','MobileAppController@check_utility');
 
 // Home Screen
 Route::get('/api/get-scanned-vouchers/{supplier_id}/{offset}','MobileAppController@get_scanned_vouchers');
+Route::get('/api/get-scanned-vouchers-today/{supplier_id}/{offset}','MobileAppController@get_scanned_vouchers_today');
 Route::get('/api/get-transaction-history/{reference_id}','MobileAppController@get_transactions_history');
 Route::get('/api/get-transacted-items/{reference_id}','MobileAppController@getTransactedItems');
 
