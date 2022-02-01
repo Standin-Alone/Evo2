@@ -222,17 +222,20 @@ class MobileAppController extends Controller
             ->select(
                 'v.reference_no',
                 'transac_date',
-                DB::raw("CONCAT(first_name,' ',last_name) as fullname"),
+                DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
                 'rsbsa_no',
                 'file_name',
-                'v.amount_val',
+                'v.amount_val as current_balance',
                 'vt.voucher_details_id',   
                 'shortname as program',
-                 DB::raw("YEAR(transac_date) as year_transac")                       
+                'title as program_title',
+                 DB::raw("YEAR(transac_date) as year_transac"),   
+                 DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address")                           
               )
             ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
             ->leftJoin('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
-            ->join('programs as p', 'p.program_id','v.program_id')            
+            ->join('programs as p', 'p.program_id','v.program_id')      
+            ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
             ->where('supplier_id', $supplier_id)  
             // ->where('document', 'Farmer with Commodity')            
             ->groupBy('v.reference_no')
@@ -269,13 +272,15 @@ class MobileAppController extends Controller
                 'v.amount_val',
                 'vt.voucher_details_id',   
                 'shortname as program',
-                 DB::raw("YEAR(transac_date) as year_transac")                       
+                 DB::raw("YEAR(transac_date) as year_transac"),
+                   
               )
             ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
             ->leftJoin('voucher_attachments as va', 'va.voucher_details_id','vt.voucher_details_id')
-            ->join('programs as p', 'p.program_id','v.program_id')            
+            ->join('programs as p', 'p.program_id','v.program_id')                   
             ->where('supplier_id', $supplier_id)  
             ->where('transac_date', DB::raw('NOW()'))  
+            
             // ->where('document', 'Farmer with Commodity')            
             ->groupBy('v.reference_no')
             ->orderBy('transac_date', 'DESC')     
