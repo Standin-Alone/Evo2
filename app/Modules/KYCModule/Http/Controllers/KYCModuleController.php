@@ -306,7 +306,7 @@ class KYCModuleController extends Controller
 
 
         $get_records = db::table('kyc_profiles as kp')
-                            ->select('kf.file_name','db.approved_batch_seq as batch_number',DB::raw('SUM(5070) as total_amount'),DB::raw('COUNT(kp.kyc_id) as total_records'),'db.date_approved','gr.region','gm.prov_name')
+                            ->select('kf.file_name','db.approved_batch_seq as batch_number',DB::raw('SUM(5070) as total_amount'),'total_rows',DB::raw('COUNT(kp.kyc_id) as total_records'),'db.date_approved','gr.region','gm.prov_name')
                             ->join('kyc_files as kf','kf.kyc_file_id','kp.kyc_file_id')
                             ->join('dbp_batch as db','kp.dbp_batch_id','db.dbp_batch_id')
                             ->join('geo_region as gr','gr.code_reg','db.reg_code')                                                                

@@ -513,13 +513,14 @@ table.dataTable td {
                                 serverSide:true,                                                                                              
                                 ajax: {"url":"{{route('list-of-generated-disbursement-by-file-name')}}","type":'get'},                               
                                 columns:[
-                                        {data:'region',title:'Region',name:'Region'},
+                                         {data:'region',title:'Region',name:'Region'},
                                         {data:'prov_name',title:'Province',name:'Province'},
                                         {data:'file_name',title:'File',name:'file_name'},
-                                        {data:'batch_number',title:'Batch Number',orderable:false},     
-                                        {data:'total_records',title:'Total Records',render: $.fn.dataTable.render.number(','),orderable:false},                                                                                
+                                        {data:'total_rows',title:'Total Rows Uploaded',render: $.fn.dataTable.render.number(','),orderable:false},                                                                                
+                                        {data:'batch_number',title:'Batch Number',orderable:false},                                             
+                                        {data:'total_records',title:'Total Rows Disbursed',render: $.fn.dataTable.render.number(','),orderable:false},                                                                                
                                         {data:'total_amount',title:'Total Amount',render:$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display,orderable:false},                                                                                                                                        
-                                        {data:'date_approved',title:'Approval Date',orderable:true}                                                                                                                                                     
+                                        {data:'date_approved',title:'Approval Date',orderable:true}                                                                                                                                                      
                                 ],       
                            
                                 order: [[ 6, "desc" ]] ,         
@@ -537,13 +538,17 @@ table.dataTable td {
                                     };
                                     
                                     // compute total amount
-                                    total_amount = api.column( 5 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
-                                    $( api.column( 5 ).footer() ).html("Overall Total Amount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display(total_amount) );
+                                    total_amount = api.column( 6 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 6 ).footer() ).html("Overall Total Amount:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',', '.', 2, '&#8369;').display(total_amount) );
 
-                                    // compute total records
-                                    total_records = api.column( 4 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
-                                    $( api.column( 4 ).footer() ).html("Overall Total no. of Records:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_records) );
-                                            
+                                    // compute total rows disbursed
+                                    total_records = api.column( 5 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 5 ).footer() ).html("Overall Total no. of Rows Disbursed:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_records) );
+
+                                    // compute total rows uploaded
+                                    total_records = api.column( 3 ).data().reduce( function (a, b) {return (a)*1 + (b)*1;}, 0 );                                    
+                                    $( api.column( 3 ).footer() ).html("Overall Total no. of Rows Uploaded:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+$.fn.dataTable.render.number(',').display(total_records) );
+                                             
                                 },
                                   
                             })
