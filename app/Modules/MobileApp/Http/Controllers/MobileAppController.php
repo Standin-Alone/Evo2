@@ -39,11 +39,19 @@ class MobileAppController extends Controller
             if(password_verify($password,$get_password)){
                 foreach ($authenticate as $authenticate) {
                     $to_email = $authenticate->email;
+                    // old supplier account checking
+                    // $supplier = db::table('program_permissions as pp')
+                    //           ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
+                    //           ->join('supplier as s', 's.supplier_id', 'pp.other_info')
+                    //           ->join('users as u', 'u.user_id', 'pp.user_id')
+                    //           ->whereNotNull('pp.other_info')
+                    //           ->where('u.user_id', $authenticate->user_id)->first();
+
                     $supplier = db::table('program_permissions as pp')
                               ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
-                              ->join('supplier as s', 's.supplier_id', 'pp.other_info')
+                              ->join('supplier as s', 's.supplier_id', 'pp.user_id')
                               ->join('users as u', 'u.user_id', 'pp.user_id')
-                              ->whereNotNull('pp.other_info')
+                              ->where('approval_status','1')
                               ->where('u.user_id', $authenticate->user_id)->first();
                 }   
 
@@ -240,16 +248,18 @@ class MobileAppController extends Controller
             // ->where('document', 'Farmer with Commodity')            
             ->groupBy('v.reference_no')
             ->orderBy('transac_date', 'DESC')     
-            ->skip($offset == 1 ? 0 : $offset)
+            ->skip($offset)
             ->take(2)               
             ->get();
 
-      
+
+
             foreach ($get_scanned_vouchers as $key => $item) {
                 
                 $item->base64 = base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
                 
             }                        
+        
 
 
         return json_encode($get_scanned_vouchers);
