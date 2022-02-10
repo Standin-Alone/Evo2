@@ -26,35 +26,28 @@ class MobileAppController extends Controller
         $password   = request('password');
         $random_otp = mt_rand(100000, 999999);
     
-        $authenticate = db::table('users')->where('username', $username)->get();
+        $authenticate = db::table('users')->where('username', $username)->first();
         $get_password = db::table('users')->where('username', $username)->value('password');
 
         
 
         $to_email = "";
         $otp_to_send = "";            
+        $supplier = '';
         
-        if (!$authenticate->isEmpty()) {
+        if ($authenticate) {
             $get_user_otp_id = 0;
             if(password_verify($password,$get_password)){
-                foreach ($authenticate as $authenticate) {
+          
                     $to_email = $authenticate->email;
-                    // old supplier account checking
-                    // $supplier = db::table('program_permissions as pp')
-                    //           ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
-                    //           ->join('supplier as s', 's.supplier_id', 'pp.other_info')
-                    //           ->join('users as u', 'u.user_id', 'pp.user_id')
-                    //           ->whereNotNull('pp.other_info')
-                    //           ->where('u.user_id', $authenticate->user_id)->first();
-
+     
                     $supplier = db::table('program_permissions as pp')
-                              ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id')
+                              ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id','approval_status')
                               ->join('supplier as s', 's.supplier_id', 'pp.user_id')
-                              ->join('users as u', 'u.user_id', 'pp.user_id')
-                              ->where('approval_status','1')
+                              ->join('users as u', 'u.user_id', 'pp.user_id')                                      
                               ->where('u.user_id', $authenticate->user_id)->first();
-                }   
-
+              
+                
                 if(isset($supplier->user_id)){
                      $check_otp = db::table('user_otp')
                                 ->where('user_id',$supplier->user_id)
@@ -115,15 +108,29 @@ class MobileAppController extends Controller
                                 ->subject('OTP');                            
                     });
 
-                    return json_encode([
-                        "Message"     => "true",
-                        "OTP"         => $otp_to_send,
-                        "email"       => $to_email,
-                        "supplier_id" => $supplier->supplier_id,
-                        "user_id"     => $supplier->user_id,
-                        "full_name"   => $supplier->full_name,
-                        "programs"    => $get_programs
-                    ]);
+                    if($supplier->approval_status == '1'){
+
+                        if($authenticate->status == '1'){
+
+
+                        
+                            return json_encode([
+                                "Message"     => "true",
+                                "OTP"         => $otp_to_send,
+                                "email"       => $to_email,
+                                "supplier_id" => $supplier->supplier_id,
+                                "user_id"     => $supplier->user_id,
+                                "full_name"   => $supplier->full_name,
+                                "programs"    => $get_programs
+                            ]);
+                        }else{
+                            return json_encode(["Message" => "Disabled"]);
+                        }
+               
+                    }else{
+
+                        return json_encode(["Message" => "Your account status is for approval."]);
+                    }
 
                 }else{
                     return json_encode(["Message" => "no account"]);
