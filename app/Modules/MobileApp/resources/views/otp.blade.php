@@ -229,9 +229,7 @@
                                 style="color: #ffffff; line-height: 140%; text-align: center; word-wrap: break-word;">
                                 <p style="font-size: 14px; line-height: 140%;"><strong><span
                                       style="font-size: 24px; line-height: 33.6px;"><span
-                                        style="color: #000000; font-size: 24px; line-height: 33.6px;">VOUCHER MANAGEMENT
-                                        SYSTE</span><span
-                                        style="color: #000000; font-size: 24px; line-height: 33.6px;">M</span></span></strong>
+                                        style="color: #000000; font-size: 24px; line-height: 33.6px;">Intervention Management Platform</span>
                                 </p>
                               </div>
 
@@ -586,7 +584,7 @@
                                 Please note that this OTP will be expired 24 hours after this email is sent.
                                 <br>
                                 <br>
-                                Thank you for using Voucher Management System!
+                                Thank you for using Intervention Management Platform!
                               </h4>
                               <br>
                             </td>
@@ -700,7 +698,7 @@
 
                               <div
                                 style="color: #646464; line-height: 140%; text-align: center; word-wrap: break-word;">
-                                <p style="font-size: 14px; line-height: 140%;">All rights reserved &amp;#169; Department
+                                <p style="font-size: 14px; line-height: 140%;">&copy; Department
                                   of Agriculture</p>
                               </div>
 

@@ -666,7 +666,7 @@ class MobileAppController extends Controller
         }
     }
 
-    //SUBMIT FUNCTION OF CLAIM VOUCHER CFSMFF
+    //SUBMIT FUNCTION OF Transaction
     public function submit_voucher_cfsmff() 
     {
 
@@ -681,7 +681,8 @@ class MobileAppController extends Controller
            
           
           
-        
+            
+
 
             // upload attachments to file server 
             foreach ($attachments as $item) {
