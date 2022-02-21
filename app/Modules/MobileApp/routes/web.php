@@ -18,6 +18,17 @@ Route::get('/api/get-scanned-vouchers-today/{supplier_id}/{offset}','MobileAppCo
 Route::get('/api/get-transaction-history/{reference_id}','MobileAppController@get_transactions_history');
 Route::get('/api/get-transacted-items/{reference_id}','MobileAppController@getTransactedItems');
 
+
+
+// cart modifying function
+Route::post('/api/check-if-category-has-draft','MobileAppController@check_if_category_has_draft');
+Route::post('/api/save-to-cart','MobileAppController@save_added_to_cart');
+Route::post('/api/check-draft-transaction','MobileAppController@check_draft_transaction');
+Route::post('/api/delete-cart','MobileAppController@delete_cart');
+Route::post('/api/checkout-update-cart','MobileAppController@checkout_update_cart');
+
+
+
 // Attachment Screen Claim Voucher (RRP)
 Route::post('/api/submit-voucher-rrp','MobileAppController@submit_voucher_rrp');
 

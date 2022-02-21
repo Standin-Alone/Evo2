@@ -350,7 +350,7 @@ class MobileAppController extends Controller
         $supplier_id   = request('supplier_id');
         
         $get_info      = db::table('voucher as v')
-                       ->join('programs as p','p.program_id','v.program_id')
+                       ->join('programs as p','p.program_id','v.program_id')                       
                        ->where('reference_no', $reference_num)->get();
         
         //  check if voucher transaction is now open
@@ -358,65 +358,79 @@ class MobileAppController extends Controller
 
         
         if (!$get_info->isEmpty()) {
-            // Compute the balance of voucher    
-            $get_voucher = db::table('voucher')->where('reference_no', $reference_num)->first();
+         
+         
+
+            $check_transaction_time =  db::table('voucher')->select(DB::raw('TIMESTAMPDIFF(MINUTE,scanned_date,NOW()) as minutes_scanned'))
+                                            ->where('reference_no', $reference_num)->first();
 
 
-            
+            // check transaction time to access voucher 
+            if($check_transaction_time->minutes_scanned >= 0){
+                db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+                $get_voucher = db::table('voucher')->where('reference_no', $reference_num)->first();
 
-            // if($get_voucher->is_scanned == 0){
+                $check_if_one_time =  $get_info[0]->one_time_transaction;
 
-                // set already scanned
-                db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1']);
-                
-                $get_region       = $get_voucher->reg;
-                $get_province     = $get_voucher->prv;
-                $get_municipality = $get_voucher->mun;
-                $get_brgy         = $get_voucher->brgy;
-    
-    
-                $get_geo_map =  db::table('geo_map')
-                             ->where('reg_code', $get_region)
-                             ->where('prov_code', $get_province)
-                             ->where('mun_code', $get_municipality)
-                             ->where('bgy_code', $get_brgy)
-                             ->first();
-    
-                $check_balance = $get_voucher->amount_val;
-    
-                foreach($get_info as $item){          
-                    $item->Available_Balance = $check_balance;
-                    $item->Region            = $get_geo_map->reg_name;
-                    $item->Province          = $get_geo_map->prov_name;
-                    $item->Municipality      = $get_geo_map->mun_name;
-                    $item->Barangay          = $get_geo_map->bgy_name;
+                if($get_voucher->is_scanned == 0){
+
+                    // set already scanned
+                    db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1','scanned_date' => db::raw('CURRENT_TIMESTAMP')]);
+                    
+                    $get_region       = $get_voucher->reg;
+                    $get_province     = $get_voucher->prv;
+                    $get_municipality = $get_voucher->mun;
+                    $get_brgy         = $get_voucher->brgy;
+        
+        
+                    $get_geo_map =  db::table('geo_map')
+                                ->where('reg_code', $get_region)
+                                ->where('prov_code', $get_province)
+                                ->where('mun_code', $get_municipality)
+                                ->where('bgy_code', $get_brgy)
+                                ->first();
+        
+                    $check_balance = $get_voucher->amount_val;
+        
+                    foreach($get_info as $item){          
+                        $item->Available_Balance = $check_balance;
+                        $item->Region            = $get_geo_map->reg_name;
+                        $item->Province          = $get_geo_map->prov_name;
+                        $item->Municipality      = $get_geo_map->mun_name;
+                        $item->Barangay          = $get_geo_map->bgy_name;
+                    }
+                    
+                    $get_program_items   = $this->getProgramItems($supplier_id,$reference_num);
+                    $get_recent_claiming = $this->get_transactions_history($reference_num);
+        
+                    // validate voucher
+                    if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->Available_Balance == 0.00){
+                        db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+                    }
+
+                    return json_encode(["Message"       => 'true',
+                                            "data"          => $get_info, 
+                                            "program_items" => $get_program_items,
+                                            "history"       => $get_recent_claiming]);
+        
+        
+                    
+                }else{
+
+                    return json_encode(["Message" => 'already scanned']);
                 }
-                
-                $get_program_items   = $this->getProgramItems($supplier_id,$reference_num);
-                $get_recent_claiming = $this->get_transactions_history($reference_num);
-    
-                // validate voucher
-                if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->Available_Balance == 0.00){
-                    db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
-                }
 
-                return json_encode(["Message"       => 'true',
-                                          "data"          => $get_info, 
-                                          "program_items" => $get_program_items,
-                                          "history"       => $get_recent_claiming]);
-    
-    
-                
-            // }else{
-
-            //     return json_encode(["Message" => 'already scanned']);
-            // }
-      
+            }else{
+                return json_encode(["Message" => 'on-going process']);
+            }
+     
 
         }else{
             db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
             return json_encode(["Message" => 'false']);            
         }
+
+
         }else{
             return json_encode(["Message" => 'Not Yet Open']);            
         }
@@ -441,7 +455,56 @@ class MobileAppController extends Controller
 
 
         $base_path = './uploads/transactions';
-        if ($item->name == 'Valid ID') {
+        
+        if ($item->name == 'Other Documents') {
+
+            $file_count = count($item->file);            
+            if($file_count != 0){
+
+                $upload_folder  = '/attachments'.'/'. $program.'/'.Carbon::now()->year.'/' . $voucher_info->rsbsa_no;
+              
+
+                foreach($item->file as $item_value ){
+
+                    $other_docs_attachment_uuid        = Uuid::uuid4();
+                    $item_file = $item_value;
+
+                    $item_file      = str_replace('data:image/jpeg;base64,', '', $item_file);
+                    $item_file      = str_replace(' ', '+', $item_file);
+                    $other_document_name = $voucher_info->rsbsa_no . '-'. $other_docs_attachment_uuid.'-' . $item->name . '.jpeg';
+
+                    $upload_other_document = Storage::disk('uploads')->put($upload_folder . '/' . $other_document_name, base64_decode($item_file));
+
+
+                    // count error if upload fail
+                    if(!$upload_other_document){
+                        $upload_error_count++;
+
+                    }else{    
+               
+
+                        
+                        $other_document_info = [
+                            'attachment_id'      => $other_docs_attachment_uuid,                  
+                            'voucher_details_id' => $uuid,                  
+                            'document'           => $item->name,
+                            'file_name'          => $other_document_name,
+           
+                        ];
+
+
+                        // $attachment_info[] = $other_document_info;
+                        array_push($attachment_info,$other_document_info);
+
+                    }
+                }
+
+            }
+
+
+        } 
+
+        else if ($item->name == 'Valid ID') {
             $id_front = $item->file[0]->front;
             $id_back  = $item->file[0]->back;
 
@@ -491,6 +554,7 @@ class MobileAppController extends Controller
             $upload_front_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
             $upload_back_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
 
+            // count error if upload fail
             if(!($upload_front_id && $upload_back_id)){
                 $upload_error_count++;
             }else{                
@@ -510,7 +574,8 @@ class MobileAppController extends Controller
                     ]];
             }
 
-        } else {
+        }
+      else {
 
             $image = $item->file;
 
@@ -545,6 +610,7 @@ class MobileAppController extends Controller
 
             $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
             
+            // count error if upload fail
             if(!$upload_image){
                 $upload_error_count++;
             }else{    
@@ -568,103 +634,104 @@ class MobileAppController extends Controller
     
 
     //SUBMIT FUNCTION OF CLAIM VOUCHER RRP
-    public function submit_voucher_rrp()
-    {
+    // public function submit_voucher_rrp()
+    // {
 
-        try {
+    //     try {
 
             
-            $uuid         = Uuid::uuid4();
-            $voucher_info = json_decode(request('voucher_info'));
-            $commodity    = json_decode(request('commodity'));
-            $attachments  = json_decode(request('attachments'));
-            $attachment_response = '';
-            $attachment_info = [];
-            $attachment_error_count = 0;
+    //         $uuid         = Uuid::uuid4();
+    //         $voucher_info = json_decode(request('voucher_info'));
+    //         $commodity    = json_decode(request('commodity'));
+    //         $attachments  = json_decode(request('attachments'));
+    //         $attachment_response = '';
+    //         $attachment_info = [];
+    //         $attachment_error_count = 0;
            
 
-            // upload attachments to file server 
-            foreach ($attachments as $item) {
-                $attachment_response = $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
-                $attachment_info[] = $attachment_response['attachment_info'];                
-                $attachment_error_count += $attachment_response['upload_error_count'];
-            }
+    //         // upload attachments to file server 
+    //         foreach ($attachments as $item) {
+    //             $attachment_response = $this->insertAttachment($item,$uuid,$voucher_info,$voucher_info->program);
+    //             $attachment_info[] = $attachment_response['attachment_info'];                
+    //             $attachment_error_count += $attachment_response['upload_error_count'];
+    //         }
 
-            // check if uploading is successfull
-            if($attachment_error_count == 0){
-                // insert to voucher transaction table
-                db::table('voucher_transaction')->insert(
-                    [
-                        'voucher_details_id'  => $uuid,
-                        'reference_no'        => $voucher_info->reference_no,
-                        'supplier_id'         => $voucher_info->supplier_id,
-                        'sub_program_id'      => $commodity->sub_id,
-                        'fund_id'             =>  $voucher_info->fund_id,
-                        'quantity'            =>  $commodity->quantity,
-                        'amount'              =>  $commodity->fertilizer_amount,
-                        'total_amount'        =>  $commodity->total_amount,
-                        'latitude'            =>  $voucher_info->latitude,
-                        'longitude'           =>  $voucher_info->longitude,
-                        'transac_by_id'       =>  $voucher_info->supplier_id,
-                        'transac_by_fullname' =>  $voucher_info->full_name,
-                    ]
-                );
+    //         // check if uploading is successfull
+    //         if($attachment_error_count == 0){
+    //             // insert to voucher transaction table
+    //             db::table('voucher_transaction')->insert(
+    //                 [
+    //                     'voucher_details_id'  => $uuid,
+    //                     'reference_no'        => $voucher_info->reference_no,
+    //                     'supplier_id'         => $voucher_info->supplier_id,
+    //                     'sub_program_id'      => $commodity->sub_id,
+    //                     'fund_id'             =>  $voucher_info->fund_id,
+    //                     'quantity'            =>  $commodity->quantity,
+    //                     'amount'              =>  $commodity->fertilizer_amount,
+    //                     'total_amount'        =>  $commodity->total_amount,
+    //                     'latitude'            =>  $voucher_info->latitude,
+    //                     'longitude'           =>  $voucher_info->longitude,
+    //                     'transac_by_id'       =>  $voucher_info->supplier_id,
+    //                     'transac_by_fullname' =>  $voucher_info->full_name,
+    //                 ]
+    //             );
                     
-                // get the attachments to batch insert to database
-                foreach($attachment_info as $item){
-                    
-                    if(count($item[0]) == 2){
-                        foreach($item[0] as $value){
-                            $encode_valid_id =  json_encode($value);
-                            $decode_valid_id = json_decode($encode_valid_id);
-                            // insert pictures in database
-                            db::table('voucher_attachments')->insert([
-                                'attachment_id'      => $decode_valid_id->attachment_id,
-                                'voucher_details_id' => $decode_valid_id->voucher_details_id,
-                                'document'           => $decode_valid_id->document,
-                                'file_name'          => $decode_valid_id->file_name,
-                            ]);
-                        }
-                    }else{
-                            $encode_attachment =  json_encode($item[0]);
-                            $decode_attachment = json_decode($encode_attachment);
-                            db::table('voucher_attachments')->insert([
-                                'attachment_id'      => $decode_attachment->attachment_id,
-                                'voucher_details_id' => $decode_attachment->voucher_details_id,
-                                'document'           => $decode_attachment->document,
-                                'file_name'          => $decode_attachment->file_name,
-                            ]);
-                    }
-                                        
-                }
                 
-                //  compute remaining balance
-                $compute_remaining_bal = $voucher_info->current_balance - $commodity->total_amount;
+    //             // get the attachments to batch insert to database
+    //             foreach($attachment_info as $item){
+                    
+    //                 if(count($item[0]) >= 1){
+    //                     foreach($item[0] as $value){
+    //                         $encode_valid_id =  json_encode($value);
+    //                         $decode_valid_id = json_decode($encode_valid_id);
+    //                         // insert pictures in database
+    //                         db::table('voucher_attachments')->insert([
+    //                             'attachment_id'      => $decode_valid_id->attachment_id,
+    //                             'voucher_details_id' => $decode_valid_id->voucher_details_id,
+    //                             'document'           => $decode_valid_id->document,
+    //                             'file_name'          => $decode_valid_id->file_name,
+    //                         ]);
+    //                     }
+    //                 }else{
+    //                         $encode_attachment =  json_encode($item[0]);
+    //                         $decode_attachment = json_decode($encode_attachment);
+    //                         db::table('voucher_attachments')->insert([
+    //                             'attachment_id'      => $decode_attachment->attachment_id,
+    //                             'voucher_details_id' => $decode_attachment->voucher_details_id,
+    //                             'document'           => $decode_attachment->document,
+    //                             'file_name'          => $decode_attachment->file_name,
+    //                         ]);
+    //                 }
+                                        
+    //             }
+                
+    //             //  compute remaining balance
+    //             $compute_remaining_bal = $voucher_info->current_balance - $commodity->total_amount;
 
-                // update  voucher gen table amount_val                
-                db::table('voucher')
-                    ->where('reference_no', $voucher_info->reference_no)
-                    ->update([
-                        'amount_val'     => $compute_remaining_bal, 
-                        'voucher_status' => 'FULLY CLAIMED',                    
-                    ]);
+    //             // update  voucher gen table amount_val                
+    //             db::table('voucher')
+    //                 ->where('reference_no', $voucher_info->reference_no)
+    //                 ->update([
+    //                     'amount_val'     => $compute_remaining_bal, 
+    //                     'voucher_status' => 'FULLY CLAIMED',                    
+    //                 ]);
 
 
-            // set already scanned to 0
-            db::table('voucher')->where('reference_no', $voucher_info->reference_no)->update(['is_scanned' => '0']);
+    //         // set already scanned to 0
+    //         db::table('voucher')->where('reference_no', $voucher_info->reference_no)->update(['is_scanned' => '0']);
                    
          
-                return 'success';
-            }else{
+    //             return 'success';
+    //         }else{
 
-                return 'error';
-            }
+    //             return 'error';
+    //         }
            
-        } catch (\Exception $e) {
-            echo json_encode(array(["Message"    => $e->getMessage(), 
-                                    "StatusCode" => $e->getCode()]));
-        }
-    }
+    //     } catch (\Exception $e) {
+    //         echo json_encode(array(["Message"    => $e->getMessage(), 
+    //                                 "StatusCode" => $e->getCode()]));
+    //     }
+    // }
 
     //SUBMIT FUNCTION OF Transaction
     public function submit_voucher_cfsmff() 
@@ -690,6 +757,7 @@ class MobileAppController extends Controller
                 $attachment_info[] = $attachment_response['attachment_info'];                
                 $attachment_error_count += $attachment_response['upload_error_count'];
             }
+
 
 
             // check if uploading is successfull
@@ -720,13 +788,16 @@ class MobileAppController extends Controller
                     // compute total amount
                     $sum_total_amount += $item->total_amount;        
                 }
-
+                
                 // get the attachments to batch insert to database
-                foreach($attachment_info as $item){
-                        
+                foreach($attachment_info as $key => $item){
+                   
                     if(count($item[0]) == 2){
+
+                        
                         foreach($item[0] as $value){
-                            $encode_valid_id =  json_encode($value);
+                            
+                            $encode_valid_id =  json_encode($value);                                                    
                             $decode_valid_id = json_decode($encode_valid_id);
                             // insert pictures in database
                             db::table('voucher_attachments')->insert([
@@ -734,6 +805,17 @@ class MobileAppController extends Controller
                                 'voucher_details_id' => $voucher_details_uuid,
                                 'document'           => $decode_valid_id->document,
                                 'file_name'          => $decode_valid_id->file_name,
+                            ]);
+                        }
+                    }else if($key == 3){
+                        foreach($item as $other_documents_item){
+                            $encode_item =  json_encode($other_documents_item);                                                    
+                            $decode_item = json_decode($encode_item);
+                            db::table('voucher_attachments')->insert([
+                                'attachment_id'      => $decode_item->attachment_id,
+                                'voucher_details_id' => $voucher_details_uuid,
+                                'document'           => $decode_item->document,
+                                'file_name'          => $decode_item->file_name,
                             ]);
                         }
                     }else{
@@ -752,6 +834,8 @@ class MobileAppController extends Controller
                 //  compute remaining balance
                 $compute_remaining_bal = $voucher_info->current_balance - $sum_total_amount;
 
+
+            
                 // update  voucher gen table amount_val
                 db::table('voucher')
                     ->where('reference_no', $voucher_info->reference_no)
@@ -786,6 +870,7 @@ class MobileAppController extends Controller
                         ->where('supplier_id', $supplier_id)
                         ->where('sp.program_id', db::table('voucher')->where('reference_no',$reference_num)->first()->program_id)
                         ->get();
+
                         
         foreach($get_record as $key => $item){
             $item->base64 = base64_encode(file_get_contents(storage_path('/commodities//' .$item->item_profile)));            
@@ -793,9 +878,273 @@ class MobileAppController extends Controller
 
         return $get_record;
     }
-    
-    
 
+
+
+    //delete saved items to cart draft
+    public function delete_cart(){
+        $cart   = request('cart');
+        $result = '';
+        $count_success = 0;
+        foreach($cart as $value){
+
+            $reference_no   = $value['reference_no'];
+            $supplier_id   = $value['supplier_id'];
+            $item_category   = $value['item_category'];
+            $sub_program_id   = $value['sub_id'];
+            
+            // delete item record to voucher transaction draft if remove
+            $item_delete = db::table('voucher_transaction_draft')                                
+                                ->where('reference_no',$reference_no)
+                                ->where('supplier_id',$supplier_id)
+                                ->where('sub_program_id',$sub_program_id)
+                                ->delete();
+
+            if($item_delete){
+                $count_success++;
+            }
+        }
+
+        
+        if($count_success == count($cart)){
+
+            $result = json_encode(["message" => 'true']);
+        }else{
+            $result = json_encode(["message" => 'false']);
+        }
+
+        
+        return $result;
+
+    }
+
+
+    // checkout update cart
+    public function checkout_update_cart(){        
+        $cart   = request('cart');
+        $count_success = 0;
+        $result = '' ;  
+        foreach($cart as $value){
+
+            $reference_no   = $value['reference_no'];
+            $supplier_id   = $value['supplier_id'];
+            $item_category   = $value['item_category'];
+            $sub_program_id   = $value['sub_id'];
+            $quantity   = $value['quantity'];
+            $amount   = $value['price'];
+            $total_amount   = $value['total_amount'];
+            
+
+
+            $check_if_draft_exist = db::table('voucher_transaction_draft')
+                                    ->where('reference_no',$reference_no)
+                                    ->where('supplier_id',$supplier_id)
+                                    ->where('sub_program_id',$sub_program_id)
+                                    ->get();
+
+            if(!$check_if_draft_exist->isEmpty()){
+
+
+         
+            $update_voucher_transaction_draft = db::table('voucher_transaction_draft')
+                                        ->where('reference_no',$reference_no)
+                                        ->where('supplier_id',$supplier_id)
+                                        ->where('sub_program_id',$sub_program_id)
+                                        ->update([
+                                            
+                                            'reference_no' => $reference_no,
+                                            'supplier_id' => $supplier_id,
+                                            'item_category' => $item_category,
+                                            'sub_program_id' => $sub_program_id,
+                                            'quantity' => $quantity,
+                                            'amount' => $amount,
+                                            'total_amount' => $total_amount
+                                        ]);
+
+                                          
+                if($update_voucher_transaction_draft){
+                    $count_success++;
+                    
+                }else{
+                    $count_success = count($cart);    
+                }
+
+            }else{
+                $count_success = count($cart);
+              
+            }
+        
+        }
+
+      
+        if($count_success == count($cart)){
+
+            $result = json_encode(["message" => 'true']);
+        }else{
+            $result = json_encode(["message" => 'false']);
+        }
+
+        
+        return $result;
+
+    }    
+
+
+
+    // check if voucher has draft transaction
+    public function check_draft_transaction(){
+        $supplier_id = request('supplier_id');
+        $reference_no = request('reference_no');
+
+        $result = '';
+        $check_draft_transaction = db::table('voucher_transaction_draft')
+                                        ->where('reference_no',$reference_no)
+                                        ->where('supplier_id',$supplier_id)
+                                        ->get();
+                                        
+        if(count($check_draft_transaction) > 0){
+            $result = json_encode(["message"=>'true','draft_cart'=>$check_draft_transaction]);
+        }else{
+
+            $result = json_encode(["message"=>'false']);
+        }                                     
+
+        return $result;
+
+    }    
+
+    // save items to cart as draft
+    public function save_added_to_cart(){
+
+        
+        $cart   = request('cart');
+        $count_success = 0;
+        $result = '' ;  
+        foreach($cart as $value){
+            $voucher_transaction_draft_id =  Uuid::uuid4();
+            $reference_no   = $value['reference_no'];
+            $supplier_id   = $value['supplier_id'];
+            $item_category   = $value['item_category'];
+            $sub_program_id   = $value['sub_id'];
+            $quantity   = $value['quantity'];
+            $amount   = $value['price'];
+            $total_amount   = $value['total_amount'];
+            
+
+
+            $check_if_draft_exist = db::table('voucher_transaction_draft')
+                                    ->where('reference_no',$reference_no)
+                                    ->where('supplier_id',$supplier_id)
+                                    ->where('sub_program_id',$sub_program_id)
+                                    ->get();
+
+            if($check_if_draft_exist->isEmpty()){
+
+
+                
+
+        
+            $insert_voucher_transaction = db::table('voucher_transaction_draft')
+                                        ->insert([
+                                            'voucher_transaction_draft_id' => $voucher_transaction_draft_id,
+                                            'reference_no' => $reference_no,
+                                            'supplier_id' => $supplier_id,
+                                            'item_category' => $item_category,
+                                            'sub_program_id' => $sub_program_id,
+                                            'quantity' => $quantity,
+                                            'amount' => $amount,
+                                            'total_amount' => $total_amount
+                                        ]);
+
+                                        
+                if($insert_voucher_transaction){
+                    $count_success++;
+                }
+
+            }else{
+
+
+                $check_if_category_exist = db::table('voucher_transaction_draft')
+                                            ->where('reference_no',$reference_no)
+                                            ->where('supplier_id',$supplier_id)
+                                            ->where('sub_program_id',$sub_program_id)
+                                            ->where('item_category',$item_category)
+                                            ->get();
+                                            
+                if($check_if_category_exist->isEmpty()){
+
+                    $insert_voucher_transaction = db::table('voucher_transaction_draft')
+                    ->insert([
+                        'voucher_transaction_draft_id' => $voucher_transaction_draft_id,
+                        'reference_no' => $reference_no,
+                        'supplier_id' => $supplier_id,
+                        'item_category' => $item_category,
+                        'sub_program_id' => $sub_program_id,
+                        'quantity' => $quantity,
+                        'amount' => $amount,
+                        'total_amount' => $total_amount
+                    ]);
+    
+                    
+                    if($insert_voucher_transaction){
+                    $count_success++;
+                    }
+                    
+                }else{
+                    $count_success = count($cart);
+                }
+             
+
+               
+            }
+        
+        }
+
+
+        if($count_success == count($cart)){
+
+            $result = json_encode(["message" => 'true']);
+        }else{
+            $result = json_encode(["message" => 'false']);
+        }
+
+        
+        return $result;
+    }    
+
+
+    public function check_if_category_has_draft(){
+        $reference_no   = request('reference_no');
+        $supplier_id   = request('supplier_id');
+        
+        $check_if_category_exist = db::table('voucher_transaction_draft')
+                                            ->where('reference_no',$reference_no)
+                                            ->where('supplier_id',$supplier_id)
+                                            
+                                            ->get();
+        $result = '';
+
+        $existing_category = [];
+        if(!$check_if_category_exist->isEmpty()){
+
+            foreach($check_if_category_exist as $value){
+
+                array_push($existing_category,$value->item_category);                
+            }
+
+
+            
+            $result = json_encode(["message" => 'true','existing_categories' => $existing_category]);
+
+        }else{
+            $result = json_encode(["message" => 'false']);
+        }
+
+        return $result;
+    
+        
+    }
+    
     public function check_utility($version){
         $check_version = db::table('mobile_utility')
                             ->where('version',$version)
@@ -807,9 +1156,6 @@ class MobileAppController extends Controller
             $result = json_encode(["message"=>'false']);
         }
         return $result;
-
-
-
         
     }
     

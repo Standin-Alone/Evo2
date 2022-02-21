@@ -25,6 +25,11 @@ class VerifyCsrfToken extends Middleware
         '/api/submit-voucher-cfsmff',
         '/api/validate-otp',
         '/api/discard_transaction',
+        '/api/save-to-cart',
+        '/api/check-draft-transaction',
+        '/api/delete-cart',
+        '/api/checkout-update-cart',
+        '/api/check-if-category-has-draft',
         'api'
     ];
     // sample
