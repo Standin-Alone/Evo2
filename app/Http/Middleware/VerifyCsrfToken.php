@@ -30,7 +30,9 @@ class VerifyCsrfToken extends Middleware
         '/api/delete-cart',
         '/api/checkout-update-cart',
         '/api/check-if-category-has-draft',
+        '/api/form_reset_password_link/sending_request',
         'api'
+        
     ];
     // sample
     // sample
