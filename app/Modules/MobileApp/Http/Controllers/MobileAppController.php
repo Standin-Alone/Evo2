@@ -10,6 +10,8 @@ use Ramsey\Uuid\Uuid;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use \Illuminate\Support\Arr;
+use App\Modules\Login\Models\Login;
+
 class MobileAppController extends Controller
 {
     /**
@@ -141,6 +143,60 @@ class MobileAppController extends Controller
             }
         } else {
             return json_encode(["Message" => "no account"]);
+        }
+    }
+
+
+     /**
+     * Action: when user click "Send Reset Password Link"
+     */
+    public function send_btn_link_req_form(Request $request){
+        $this->loginModel = new Login;
+
+        // check email if exists
+        $check_email = $this->loginModel->check_email($request->email);
+
+        // get user
+        $users = $this->loginModel->get_user($request->email);
+
+        $role_sets = [];
+        
+         // check if the user or user email exists
+        if($check_email == true){
+            foreach($users as $user_roles){
+                $role = $user_roles->role;
+                $role_sets[] = $role;
+            }
+            foreach($users as $user){
+                if($request->email == $user->email){
+                    // create token
+                    // $token = sha1(rand(1, 30));
+                    $uuid = $user->user_id;
+                    $email = $user->email;
+                    $username = $user->username;
+                    $firstname = $user->first_name;
+                    $lastname = $user->last_name;
+                    $extname = $user->ext_name;
+                    $reset_status = $user->password_reset_status;
+                    $date_created = Carbon::now('GMT+8')->toDateTimeString();
+
+                    // Change password_reset_status to "1"
+                    $this->loginModel->reset_status_active($uuid, $date_created);
+
+                    // send reset link to email
+                    $this->loginModel->email_reset_link($uuid, $email, $username, $firstname, $lastname, $extname, $role_sets, $date_created);
+                    $success_response = ['success'=> true, 'message' => 'The reset password link is have been send to your email: "'.$email.'".', 'auth' => false];
+                    return response()->json($success_response, 200);
+                }
+                else{
+                    $error_response = ['error'=> true, 'message'=>'The input email is incorrect', 'auth'=>false];
+                    return response()->json($error_response, 302);
+                }
+            }
+        }
+        else{
+            $error_response = ['error'=> true, 'message'=>"The email doesn't exists!", 'auth'=>false];
+            return response()->json($error_response, 302);
         }
     }
 
@@ -333,7 +389,7 @@ class MobileAppController extends Controller
 
         $get_current_time = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now());        
         $start_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 6:00:00'));
-        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 24:00:00'));
+        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 18:00:00'));
                 
         return ($get_current_time <= $end_time_of_scan) &&  ($get_current_time >= $start_time_of_scan) ? 'true'  : 'false' ;
         
@@ -733,8 +789,8 @@ class MobileAppController extends Controller
     //     }
     // }
 
-    //SUBMIT FUNCTION OF Transaction
-    public function submit_voucher_cfsmff() 
+    //SUBMIT FUNCTION OF voucher transaction
+    public function submit_voucher() 
     {
 
         try {
@@ -746,11 +802,17 @@ class MobileAppController extends Controller
             $attachment_info = [];
             $attachment_error_count = 0;
            
-          
+            $get_voucher_status = db::table('voucher')
+                                                ->where('reference_no',$voucher_info->reference_no)
+                                                ->first();
+
+                                        
+                                                
+                                                
           
             
 
-
+            if($get_voucher_status->voucher_status != 'FULLY CLAIMED'  && $get_voucher_status->amount_val != 0.00) {
             // upload attachments to file server 
             foreach ($attachments as $item) {
                 $attachment_response = $this->insertAttachment($item,0,$voucher_info,$voucher_info->program);
@@ -788,45 +850,93 @@ class MobileAppController extends Controller
                     // compute total amount
                     $sum_total_amount += $item->total_amount;        
                 }
-                
+
+                $attachment_insert_error_count = 0;
+               
                 // get the attachments to batch insert to database
                 foreach($attachment_info as $key => $item){
                    
-                    if(count($item[0]) == 2){
+                    if( isset($item[0])){
 
+                        if(count($item[0]) == 2){
                         
-                        foreach($item[0] as $value){
-                            
-                            $encode_valid_id =  json_encode($value);                                                    
-                            $decode_valid_id = json_decode($encode_valid_id);
-                            // insert pictures in database
-                            db::table('voucher_attachments')->insert([
-                                'attachment_id'      => $decode_valid_id->attachment_id,
-                                'voucher_details_id' => $voucher_details_uuid,
-                                'document'           => $decode_valid_id->document,
-                                'file_name'          => $decode_valid_id->file_name,
-                            ]);
+                            foreach($item[0] as $value){
+                                
+                                $encode_valid_id =  json_encode($value);                                                    
+                                $decode_valid_id =  json_decode($encode_valid_id);
+                                // insert pictures in database
+                                $insert_valid_id = db::table('voucher_attachments')->insert([
+                                    'attachment_id'      => $decode_valid_id->attachment_id,
+                                    'voucher_details_id' => $voucher_details_uuid,
+                                    'document'           => $decode_valid_id->document,
+                                    'file_name'          => $decode_valid_id->file_name,
+                                ]);
+
+
+                                if(!$insert_valid_id){
+                                    $attachment_insert_error_count++;
+                                }
+
+                                
+                            }
+                        }else if($key == 3){
+                            foreach($item as $other_documents_item){
+                                $encode_item =  json_encode($other_documents_item);                                                    
+                                $decode_item =  json_decode($encode_item);
+                                $insert_other_documents = db::table('voucher_attachments')->insert([
+                                    'attachment_id'      => $decode_item->attachment_id,
+                                    'voucher_details_id' => $voucher_details_uuid,
+                                    'document'           => $decode_item->document,
+                                    'file_name'          => $decode_item->file_name,
+                                ]);
+                                
+                                if(!$insert_other_documents){
+                                    $attachment_insert_error_count++;
+                                }
+                            }
+                        }else{
+                                $encode_attachment =  json_encode($item[0]);
+                                $decode_attachment = json_decode($encode_attachment);
+                                $insert_receipt_and_farmer_with_commodity = db::table('voucher_attachments')->insert([
+                                    'attachment_id'      => $decode_attachment->attachment_id,
+                                    'voucher_details_id' => $voucher_details_uuid,
+                                    'document'           => $decode_attachment->document,
+                                    'file_name'          => $decode_attachment->file_name,
+                                ]);
+    
+                                if(!$insert_receipt_and_farmer_with_commodity){
+                                    $attachment_insert_error_count++;
+                                }
                         }
+
                     }else if($key == 3){
                         foreach($item as $other_documents_item){
                             $encode_item =  json_encode($other_documents_item);                                                    
-                            $decode_item = json_decode($encode_item);
-                            db::table('voucher_attachments')->insert([
+                            $decode_item =  json_decode($encode_item);
+                            $insert_other_documents = db::table('voucher_attachments')->insert([
                                 'attachment_id'      => $decode_item->attachment_id,
                                 'voucher_details_id' => $voucher_details_uuid,
                                 'document'           => $decode_item->document,
                                 'file_name'          => $decode_item->file_name,
                             ]);
+                            
+                            if(!$insert_other_documents){
+                                $attachment_insert_error_count++;
+                            }
                         }
                     }else{
                             $encode_attachment =  json_encode($item[0]);
                             $decode_attachment = json_decode($encode_attachment);
-                            db::table('voucher_attachments')->insert([
+                            $insert_receipt_and_farmer_with_commodity = db::table('voucher_attachments')->insert([
                                 'attachment_id'      => $decode_attachment->attachment_id,
                                 'voucher_details_id' => $voucher_details_uuid,
                                 'document'           => $decode_attachment->document,
                                 'file_name'          => $decode_attachment->file_name,
                             ]);
+
+                            if(!$insert_receipt_and_farmer_with_commodity){
+                                $attachment_insert_error_count++;
+                            }
                     }
                                         
                 }
@@ -834,14 +944,16 @@ class MobileAppController extends Controller
                 //  compute remaining balance
                 $compute_remaining_bal = $voucher_info->current_balance - $sum_total_amount;
 
-
-            
+                db::table('voucher_transaction_draft')
+                            ->where('reference_no',$voucher_info->reference_no)
+                            ->delete();
+                
                 // update  voucher gen table amount_val
                 db::table('voucher')
                     ->where('reference_no', $voucher_info->reference_no)
                     ->update([
-                        'amount_val'     => $compute_remaining_bal, 
-                        'voucher_status' =>  $compute_remaining_bal != 0 ? 'PARTIALLY CLAIMED' : 'FULLY CLAIMED' ,
+                        'amount_val'     => $compute_remaining_bal <= 0 ? 0.00 : $compute_remaining_bal, 
+                        'voucher_status' =>  $compute_remaining_bal <= 0 ? 'FULLY CLAIMED'  : 'PARTIALLY CLAIMED' ,
                     ]);
 
                 // set already scanned to 0
@@ -849,8 +961,11 @@ class MobileAppController extends Controller
                     
                 return 'success';
             }else{
-
                 return 'error';
+            }
+            }else{
+
+                return 'claimed';
             }
         } catch (\Exception $e) {
             echo json_encode(array(["Message"    => $e->getMessage(), 
@@ -1157,6 +1272,16 @@ class MobileAppController extends Controller
         }
         return $result;
         
+    }
+
+    public function get_notifications(){
+        $path = 'uploads/notifications/sysadd/sample.json';
+        $json = json_decode(file_get_contents($path), true);         
+    }
+
+    public function set_notifications(){
+        $sample_encoded = [];
+        Storage::disk('local')->put('/sysadd/sample-created.json', json_encode($sample_encoded));
     }
     
 }
