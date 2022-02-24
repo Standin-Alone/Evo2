@@ -24,3 +24,5 @@ Route::patch('/create_new_password/{uuid}/update', 'LoginController@update_passw
  * Logout
  */
 Route::get('/logout', 'LoginController@logout_action')->name('user.logout');
+
+

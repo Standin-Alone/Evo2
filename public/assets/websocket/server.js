@@ -24,9 +24,13 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 
 
+const connections = new Set();
 
-io.on('connection', function(socket){
+io.sockets.on('connection', function(socket){
+  console.warn('connected')
 
+    
+  
   socket.setMaxListeners(0);
 
   socket.on('room', async function(data){
@@ -53,7 +57,37 @@ io.on('connection', function(socket){
 
  	
   })
+
   
+
+  socket.on('join-room',  function(room){
+  
+    console.warn(room);
+    socket.join(room);
+   
+
+})
+
+
+
+socket.on('message',  function(data){
+
+    console.warn(data)
+  if(io.sockets.adapter.rooms[data.room]){
+    
+    io.emit('progress',data);     
+  }
+ 
+  
+
+})
+
+
+// socket.on('disconnect',  function(data){
+//   console.warn('disconnected');
+   
+// })
+
  
 });
 

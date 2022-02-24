@@ -243,7 +243,27 @@ header('Content-Type: text/html');?>
 	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/jquery.validate.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+	<script src="{{url('assets/js/socket.js')}}"></script>
 	<script>
+
+		
+        var get_width = 0;
+
+          
+        // start websocket   
+        //  connect to websocket                		
+        socket().on("connect", function() {
+            
+                //  get progress of uploading
+                console.warn('connected');			
+		});
+
+
+		socket().emit('room',{channel:"{{session('uuid')}}",message:'Sample ko to'}); 
+
+
+
 
 		$(document).ready(function(){
 
