@@ -262,12 +262,25 @@ table.dataTable td {
                                         {data:'return_file_id',title:'Action',
                                         render:function(row,type,data){
                                                 
-                                        return "<button type='button' class='btn view-modal-btn btn-outline-primary'   uploaded_by='"+data['created_by'] +"' return_file_id='"+row+"' data-toggle='modal' data-target='#ViewModal'>"+
+                                        return ( 
+
+                                                
+
+                                                (   
+                                                (data['total_inserted'] != data['total_rows'] ) && data['total_inserted'] != 0 ?
+                                                "<button type='button' class='btn view-modal-btn btn-outline-primary'   uploaded_by='"+data['created_by'] +"' return_file_id='"+row+"' data-toggle='modal' data-target='#ViewModal'>"+
                                                     "<i class='fa fa-eye'></i> Show More"+
                                                 "</button> \t"+
+
                                                 "<button type='button' class='btn error-modal-btn btn-outline-warning'   uploaded_by='"+data['created_by'] +"' file_name='"+data['file_name']+"' data-toggle='modal' data-target='#ErrorDataModal'>"+
                                                     "<i class='fa fa-eye'></i> Show Error Logs"+
-                                                "</button>"
+                                                "</button>"   
+                                                :           
+                                                "<button type='button' class='btn view-modal-btn btn-outline-primary'   uploaded_by='"+data['created_by'] +"' return_file_id='"+row+"' data-toggle='modal' data-target='#ViewModal'>"+
+                                                    "<i class='fa fa-eye'></i> Show More"+
+                                                "</button> \t"                                   
+                                                )
+                                                )
                                         }}
                             
                                         
@@ -392,21 +405,21 @@ table.dataTable td {
                                     {data:'file_name',title:'',visible:false},                                                                                                        
                                 ],
                                 drawCallback:function(data){
-                                            let api = this.api();
-                                            let rows = api.rows({page:'current'}).nodes();
-                                            let last = null ;
+                                    let api = this.api();
+                                    let rows = api.rows({page:'current'}).nodes();
+                                    let last = null ;
 
-                                            api.column(8,{page:"current"})
-                                                .data()
-                                                .each((group,i)=>{
-                                                    
-                                                    console.warn(group);
-                                                        if(last != group && group != null){
-                                                            $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
-                                                            last = group;
-                                                        }
-                                                });
-                                        },     
+                                    api.column(8,{page:"current"})
+                                        .data()
+                                        .each((group,i)=>{
+                                            
+                                            console.warn(group);
+                                                if(last != group && group != null){
+                                                    $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                                                    last = group;
+                                                }
+                                        });
+                                },     
                             });
             })
                                 
@@ -435,12 +448,7 @@ table.dataTable td {
                 error_file_count = 0;
                 myDropzone.files.forEach((item)=>{
                     if(!item.upload.filename.includes('USSC') && !item.upload.filename.includes('DISRET')){
-                        
-                        // swal("File "+item.upload.filename+" is invalid this file will be remove.", {
-                        //     icon: "error",
-                        // }).then(()=>{
-                          
-                        // });
+                                               
                   
                         error_file_count++;
                     }
@@ -549,11 +557,13 @@ table.dataTable td {
                     error_data = []
                     parses_result.map((item)=>{
                         item['error_array'].map((error_item)=>{
-
+                            console.warn(error_item);
                             error_data.push(error_item);
                         })
                         
-                    });
+                    }); 
+
+                    
                  
                         if(error_data.length != 0){
 
@@ -562,7 +572,7 @@ table.dataTable td {
                         $("#ErrorDataModal").modal('show');
                         $("#error-datatable").DataTable({
                                 destroy:true,
-                                data:error_data.length == 1 ?error_data[0] : error_data ,
+                                data: error_data ,
                                 columns:[
                                     {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
                                     {data:'fintech_provider',title:'Provider',orderable:false},
@@ -639,7 +649,14 @@ table.dataTable td {
     <h1 class="page-header"> File uploading </h1>
     <!-- end page-header -->
 
-
+    <!-- with left icon -->
+    <div class="note note-warning note-with-left-icon">
+    <div class="note-icon"><i class="fa fa-lightbulb"></i></div>
+    <div class="note-content text-left">
+        <h4><b>Reminder!</b></h4>
+        <p> Please do not refresh the page while uploading. If you accidentally refresh the page please reupload the file. </p>
+    </div>
+    </div>
     <!-- begin row -->
         <div class="row">
             <!-- begin col-8 -->

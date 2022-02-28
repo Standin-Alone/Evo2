@@ -93,10 +93,9 @@ class ReturnedDisbursementController extends Controller
 
             // get region to check rsbsa
             $check_reg_prov =  db::table('geo_map')
-                                 ->select('reg_code','prov_code','mun_code','geo_code','bgy_code','bgy_name','reg_name')                            
+                                 ->select('reg_code','prov_code','mun_code','geo_code','bgy_code','bgy_name','reg_name')                                                             
                                  ->where('prov_name',$province)                                                          
-                                 ->where('mun_name',$city_municipality)   
-                                 ->take(1)                                             
+                                 ->where('mun_name',$city_municipality)                                                                             
                                  ->first(); 
 
             // get rsbsa to check rsbsa
@@ -107,7 +106,7 @@ class ReturnedDisbursementController extends Controller
 
             
             // check if rsbsa exist, PSGC exist 
-            if( !$check_rsbsa && $check_reg_prov && !$check_account_number){
+            if( !$check_rsbsa && $check_reg_prov && !$check_account_number && $account_number != '' && $first_name != '' && $last_name != '' ){
 
                 // insert row to dbp return
                 $insert_dbp_return = db::table('dbp_return')
@@ -160,6 +159,15 @@ class ReturnedDisbursementController extends Controller
                     $error_remarks = ($error_remarks == ''  ? 'Incomplete or wrong spelling of address' : $error_remarks.','.'Incomplete or wrong spelling of address');
                 }
 
+                
+                if($first_name == '' || $last_name == '' ){
+                    $error_remarks = ($error_remarks == ''  ? 'Incomplete name' : $error_remarks.','.'Incomplete name');
+                }
+
+                if($account_number == ''){
+                    $error_remarks = ($error_remarks == ''  ? 'No account number' : $error_remarks.','.'No account number');
+                }
+
                 if($check_account_number){
                     $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
                 }
@@ -192,12 +200,12 @@ class ReturnedDisbursementController extends Controller
                     "remitter_city"         => $remitter_city,
                     "remitter_province"     => $remitter_province,
                     "dbp_status"            => $dbp_status,
-                    "reg_code"              => $check_reg_prov->reg_code,
-                    "prov_code"             => $check_reg_prov->prov_code,                                               
-                    "mun_code"              => $check_reg_prov->mun_code,
-                    "bgy_code"              => $check_reg_prov->bgy_code,
-                    "region"                => $check_reg_prov->reg_name,
-                    "barangay"              => $check_reg_prov->bgy_name,                   
+                    "reg_code"              => isset($check_reg_prov->reg_code)  ? $check_reg_prov->reg_code  : '' ,
+                    "prov_code"             => isset($check_reg_prov->prov_code) ? $check_reg_prov->prov_code : '' ,                                               
+                    "mun_code"              => isset($check_reg_prov->mun_code)  ? $check_reg_prov->mun_code  : '',
+                    "bgy_code"              => isset($check_reg_prov->bgy_code)  ? $check_reg_prov->bgy_code  : '',
+                    "region"                => isset($check_reg_prov->reg_name)  ? $check_reg_prov->reg_name  : '',
+                    "barangay"              => isset($check_reg_prov->bgy_name)  ? $check_reg_prov->bgy_name  : '',                   
                     "remarks"               => $error_remarks,
                     "file_name"             => $filename,
                 ];
@@ -252,7 +260,7 @@ class ReturnedDisbursementController extends Controller
         return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array];
     }catch(\Exception $e){
 
-        var_dump($e);
+        return json_encode($e->getMessage());
     }
     }
 
@@ -348,8 +356,9 @@ class ReturnedDisbursementController extends Controller
 
                 $file_to_ingest = $upload_folder.'/'.$get_filename;
                 
-                $ingest_file = $this->ingest_files($file_to_ingest,$last_id,$get_filename,$total_records,$token);
+                $ingest_file = $this->ingest_files($file_to_ingest,$last_id,$get_filename,$total_records,$token);                
                 array_push($completed_array,$ingest_file);
+                // array_push($completed_array,$ingest_file);
             }
 
             
@@ -361,7 +370,7 @@ class ReturnedDisbursementController extends Controller
         
     }catch(\Exception $e){
 
-        echo json_encde($e->getMessage());
+        return json_encde($e->getMessage());
     }   
 
     
