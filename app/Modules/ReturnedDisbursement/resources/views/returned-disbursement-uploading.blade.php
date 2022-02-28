@@ -366,6 +366,7 @@ table.dataTable td {
                                         {data:'full_name',title:'Name',orderable:false},
                                         {data:'address',title:'Address',orderable:false},
                                         {data:'account_number',title:'DBP Account Number',orderable:false},
+                                        {data:'dbp_status',title:'Status'},
                                         {data:'date_uploaded',title:'Date Uploaded'},
                                         {data:'region',title:'Region',visible:false}
                                         

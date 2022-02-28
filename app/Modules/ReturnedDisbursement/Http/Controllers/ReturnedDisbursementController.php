@@ -406,7 +406,8 @@ class ReturnedDisbursementController extends Controller
                                     as address"),
                                     'fintech_provider',
                                     'return_file_id',
-                                    'account_number',                         
+                                    'account_number',        
+                                    'dbp_status',                         
                                     DB::raw('date_uploaded'),
                                     db::raw(' (select reg_name from geo_map where reg_code = dr.reg_code and mun_code = dr.mun_code and prov_code = dr.prov_code and bgy_code = dr.bgy_code) as region')                            
                                 )  
