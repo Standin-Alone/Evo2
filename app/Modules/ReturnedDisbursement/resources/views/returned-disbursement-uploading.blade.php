@@ -720,7 +720,7 @@ table.dataTable td {
 
         <!-- #modal-view -->
       <div class="modal fade" id="ViewModal">
-        <div class="modal-dialog modal-lg">
+        <div class="modal-dialog modal-lg" >
             <div class="modal-content" style="width: 100%">
                 <div class="modal-header" style="background-color: #007BFF">
                     <h4 class="modal-title" style="color: white">View Records</h4>
