@@ -157,34 +157,33 @@ table.dataTable td {
     <script>
       
         var token = '{{Str::random(20)}}';
-        socket().on("connect", function() {
-                    
-                //  get progress of uploading                
-
-                socket().emit('join-room',token);
-
-           
+        socket().on("connect", function() {                    
+                //  get progress of uploading               
+                socket().emit('join-room',token);           
             });
 
             
-            socket().on('progress',function(data){
+        socket().on('progress',function(data){
+                    
+                if(data.room == token){
+                    $(".progress-load").css('width',data.percentage+'%')
+                    $(".progress-load").html(data.percentage+'%')
+                    $(".filename-label").html(data.filename+' is now uploading');
+                    // if(data.percentage == '100'){
                         
-                    if(data.room == token){
-                        
-                        if(data.percentage == '100'){
-                            $(".upload-btn").show();
-                            $(".progress").hide();
-                            $(".progress-load").css('width','0%')
-                            $(".progress-load").html('0')
-                        }else{
-                            $(".progress-load").css('width',data.percentage+'%')
-                            $(".progress-load").html(data.percentage+'%')
-                        }
-                    }
+                    //     // $(".progress-load").css('width','0%')
+                    //     // $(".progress-load").html('0')
+                    //     $(".progress-load").css('width',data.percentage+'%')
+                    //     $(".progress-load").html(data.percentage+'%')
+                    // }else{
+                    //     $(".progress-load").css('width',data.percentage+'%')
+                    //     $(".progress-load").html(data.percentage+'%')
+                    // }
+                }
+        
             
                 
-                    
-                })
+            })
      
                     
         $(document).ready(function(){
@@ -192,86 +191,224 @@ table.dataTable td {
     
     
             $is_uploading = false;
-            // load datatable list of uploaded records
-                // load_datatable = $("#load-datatable").DataTable({
-                //                 pageLength : 5,
-                //                 destroy:true,
-                //                 serverSide:true,
-                //                 responsive:true,
-                //                 ajax: {"url":"{{route('kyc.show')}}","type":'get'},
-                //                 dom: 'lBfrtip',
-                //                 "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                //                 "buttons": [
-                //                         {
-                //                             extend: 'collection',
-                //                             text: 'Export',
-                //                             buttons: [
-                //                                 {
-                //                                     text: '<i class="fas fa-print"></i> PRINT',
-                //                                     title: 'Report: List Of Uploaded KYC Profiles',
-                //                                     extend: 'print',
-                //                                     footer: true,
-                //                                     exportOptions: {
-                //                                         columns: ':visible'
-                //                                     },
-                //                                     customize: function ( doc ) {
-                //                                         $(doc.document.body).find('h1').css('font-size', '15pt');
-                //                                         $(doc.document.body)
-                //                                             .prepend(
-                //                                                 '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
-                //                                         );
-                //                                         $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
-                //                                     },
-                //                                 }, 
-                //                                 {
-                //                                     text: '<i class="far fa-file-excel"></i> EXCEL',
-                //                                     title: 'List Of Uploaded KYC Profiles',
-                //                                     extend: 'excelHtml5',
-                //                                     footer: true,
-                //                                     exportOptions: {
-                //                                         columns: ':visible'
-                //                                     }
-                //                                 }, 
-                //                                 {
-                //                                     text: '<i class="far fa-file-excel"></i> CSV',
-                //                                     title: 'List Of Uploaded KYC Profiles',
-                //                                     extend: 'csvHtml5',
-                //                                     footer: true,
-                //                                     fieldSeparator: ';',
-                //                                     exportOptions: {
-                //                                         columns: ':visible'
-                //                                     }
-                //                                 }, 
-                //                                 {
-                //                                     text: '<i class="far fa-file-pdf"></i> PDF',
-                //                                     title: 'List Of Uploaded KYC Profiles',
-                //                                     extend: 'pdfHtml5',
-                //                                     footer: true,
-                //                                     message: '',
-                //                                     exportOptions: {
-                //                                         columns: ':visible'
-                //                                     },
-                //                                 }, 
-                //                             ]
-                //                             }
-                //                     ],
-                //                 columns:[
-                //                         {data:'rsbsa_no',title:'RSBSA Number'},
-                //                         {   data:'fintech_provider',
-                //                             title:'Provider',
-                //                             orderable:false,
-                //                             render:function(data,type,row){
-                //                                 return data == 'UMSI' ? 'USSC' : data;
-                //                             }                                    
-                //                         },
-                //                         {data:'full_name',title:'Name',orderable:false},
-                //                         {data:'address',title:'Address',orderable:false},
-                //                         {data:'account_number',title:'DBP Account Number',orderable:false},
-                //                         {data:'date_uploaded',title:'Date Uploaded'},
-                //                         {data:'region',title:'Region',visible:false}
+            // load datatable list of ingested files
+            $("#list-of-ingested-files-datatable").DataTable({
+                                pageLength : 5,
+                                destroy:true,
+                                serverSide:true,
+                                responsive:true,
+                                ajax: {"url":"{{route('list-of-ingested-files-datatable')}}","type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List of IMC Files',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'Summary Of Uploaded Files and Records',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'Summary Of Uploaded Files and Records',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'Summary Of Uploaded Files and Records',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
+                                columns:[                                        
+                                        {data:'file_name',title:'File'},     
+                                        {data:'total_inserted',title:'Total Records Saved',render: $.fn.dataTable.render.number(',').display,orderable:false},
+                                        {data:'total_rows',title:'Total Records',render: $.fn.dataTable.render.number(','),orderable:false},                              
+                                        {data:'date_uploaded',title:'Date Uploaded'},
+                                        {data:'return_file_id',title:'Action',
+                                        render:function(row,type,data){
+                                                
+                                        return "<button type='button' class='btn view-modal-btn btn-outline-primary'   uploaded_by='"+data['created_by'] +"' return_file_id='"+row+"' data-toggle='modal' data-target='#ViewModal'>"+
+                                                    "<i class='fa fa-eye'></i> Show More"+
+                                                "</button> \t"+
+                                                "<button type='button' class='btn error-modal-btn btn-outline-warning'   uploaded_by='"+data['created_by'] +"' file_name='"+data['file_name']+"' data-toggle='modal' data-target='#ErrorDataModal'>"+
+                                                    "<i class='fa fa-eye'></i> Show Error Logs"+
+                                                "</button>"
+                                        }}
+                            
                                         
-                //                 ],
-                //                 order: [[ 5, "desc" ]], 
+                                ],                     
+                                order: [[ 4, "desc" ]]                                                  
+                            });
+
+         // show more details button
+                $("#list-of-ingested-files-datatable").on('click','.view-modal-btn',function(){
+                    return_file_id = $(this).attr('return_file_id');
+                    created_by = $(this).attr('uploaded_by');
+                    $("#uploaded_by").text(created_by);
+                    $("#dbp-returned-files-show-more-datatable").DataTable({
+                                pageLength : 5,
+                                destroy:true,                                
+                                responsive:true,
+                                ajax: {"url":"{{route('dbp-returned-files-show-more',['return_file_id'=>':id'])}}".replace(':id',return_file_id),"type":'get'},
+                                dom: 'lBfrtip',
+                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                "buttons": [
+                                        {
+                                            extend: 'collection',
+                                            text: 'Export',
+                                            buttons: [
+                                                {
+                                                    text: '<i class="fas fa-print"></i> PRINT',
+                                                    title: 'Report: List Of Profiles',
+                                                    extend: 'print',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                    customize: function ( doc ) {
+                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
+                                                        $(doc.document.body)
+                                                            .prepend(
+                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                                        );
+                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                                    },
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
+                                                    title: 'List Of Profiles',
+                                                    extend: 'excelHtml5',
+                                                    footer: true,
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-excel"></i> CSV',
+                                                    title: 'List Of Profiles',
+                                                    extend: 'csvHtml5',
+                                                    footer: true,
+                                                    fieldSeparator: ';',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    }
+                                                }, 
+                                                {
+                                                    text: '<i class="far fa-file-pdf"></i> PDF',
+                                                    title: 'List Of Profiles',
+                                                    extend: 'pdfHtml5',
+                                                    footer: true,
+                                                    message: '',
+                                                    exportOptions: {
+                                                        columns: ':visible'
+                                                    },
+                                                }, 
+                                            ]
+                                            }
+                                    ],
+                                columns:[
+                                        {data:'rsbsa_no',title:'RSBSA Number'},
+                                        {   data:'fintech_provider',
+                                            title:'Provider',
+                                            orderable:false,
+                                            render:function(data,type,row){
+                                                return data == 'UMSI' ? 'USSC' : data;
+                                            }                                    
+                                        },
+                                        {data:'full_name',title:'Name',orderable:false},
+                                        {data:'address',title:'Address',orderable:false},
+                                        {data:'account_number',title:'DBP Account Number',orderable:false},
+                                        {data:'date_uploaded',title:'Date Uploaded'},
+                                        {data:'region',title:'Region',visible:false}
+                                        
+                                ],
+                                order: [[ 5, "desc" ]], 
+                                
+
+                            })
+
+                        })
+
+
+            // show error logs button
+            $("#list-of-ingested-files-datatable").on('click','.error-modal-btn',function(){
+                
+
+                filename = $(this).attr('file_name');
+                clean_filename = filename.split(".")[0];                
+                created_by = $(this).attr('uploaded_by');
+                $("#uploaded_by").text(created_by);
+                
+
+                $("#error-datatable").DataTable({
+                                destroy:true,
+                                ajax: {"url":"{{route('dbp-return-error-logs',['filename'=>':id'])}}".replace(':id',clean_filename),"type":'get'},                                
+                                columns:[
+                                    {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
+                                    {data:'fintech_provider',title:'Provider',orderable:false},
+                                    {title:'Name',orderable:false,render:function(data,type,row){
+                                        return row.first_name + ' ' + row.last_name;
+                                    }},                                                    
+                                    {data:'barangay',title:'Barangay',orderable:false},
+                                    {data:'city_municipality',title:'Municipality',orderable:false},
+                                    {data:'province',title:'Province',orderable:false},
+                                    {data:'region',title:'Region',orderable:false},
+                                    {data:'remarks',title:'Remarks',orderable:false},
+                                    {data:'file_name',title:'',visible:false},                                                                                                        
+                                ],
+                                drawCallback:function(data){
+                                            let api = this.api();
+                                            let rows = api.rows({page:'current'}).nodes();
+                                            let last = null ;
+
+                                            api.column(8,{page:"current"})
+                                                .data()
+                                                .each((group,i)=>{
+                                                    
+                                                    console.warn(group);
+                                                        if(last != group && group != null){
+                                                            $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                                                            last = group;
+                                                        }
+                                                });
+                                        },     
+                            });
+            })
                                 
 
           })
@@ -283,7 +420,9 @@ table.dataTable td {
         
          $(".upload-btn").click(function(){
 
-
+            var myDropzone_status   = [];      
+            
+            
             if(myDropzone.files.length == 0){               
                             
                             swal("Please upload atleast 1 file", {
@@ -293,46 +432,68 @@ table.dataTable td {
                             return false; //if an error happened stop here kaya return false hnd na dapat mag tuloy sa baba.
             }else{
 
-
-                // upload file here
-                swal({
-                title: "Do you really want to upload these files?",                
-                icon: "warning",
-                buttons: true,
-                dangerMode: false,
+                error_file_count = 0;
+                myDropzone.files.forEach((item)=>{
+                    if(!item.upload.filename.includes('USSC') && !item.upload.filename.includes('DISRET')){
+                        
+                        // swal("File "+item.upload.filename+" is invalid this file will be remove.", {
+                        //     icon: "error",
+                        // }).then(()=>{
+                          
+                        // });
+                  
+                        error_file_count++;
+                    }
                 })
-                .then((confirm) => {
-                
-                    if(confirm){
+
+                if(error_file_count == 0){
+                    // upload file here
+                    swal({
+                    title: "Do you really want to upload these files?",                
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                    })
+                    .then((confirm) => {
+                    
+                        if(confirm){
+                            
+                            
+                        
+
+                        
                         $(".upload-btn").hide();
                         $(".progress").show();
-                        
-                        var myDropzone_status   = [];            
-                        if(myDropzone.files.length == 0){               
-                            
-                            swal("Please upload atleast 1 file", {
-                                icon: "error",
-                            });
-                                                            
-                            return false; //if an error happened stop here kaya return false hnd na dapat mag tuloy sa baba.
-                        } else {
+                        $(".filename-label").show();
+                        myDropzone.processQueue();
 
-                            
-                            myDropzone.processQueue();
-                        }
+                           
+                        
 
                         $.each(myDropzone.files, function(k,v){
                             myDropzone_status.push(v.status);
                         });
+                                                
 
-                        console.log(myDropzone.files);
+                        }
+                    });
+                   
+                }else{
 
-                    }else{
+                    swal("Invalid files will be automatically remove.", {
+                            icon: "error",
+                    }).then(()=>{
                         
+                        myDropzone.files.forEach((item)=>{
+                        if(!item.upload.filename.includes('USSC') && !item.upload.filename.includes('DISRET')){                                                                           
+                            myDropzone.removeFile(item)
+                        }
+                        })                        
 
-
-                    }
-                });
+                    });
+                }
+                            
+          
 
 
             }
@@ -348,20 +509,21 @@ table.dataTable td {
         Dropzone.autoDiscover = false;
         
         Dropzone.options.uploadingDropzone = {
-            autoDiscover: false,
-            maxFilesize: 30,
+            
+            maxFilesize: 100,
             maxFiles: 30,
             addRemoveLinks: true,
-            timeout: 500000,
-            dictRemoveFile: 'x',
-            uploadMultiple: true,                 
+            timeout: 600000000,
+            dictRemoveFile: 'x',                        
             dictDefaultMessage: "<span>Drop files here or click to upload</span>",            
             paramName: "dbp_returned_file",
             autoProcessQueue: false,
             acceptedFiles: '.txt',  
+            uploadMultiple:true,
+            parallelUploads: 5,
             error: function(file){
 
-            console.warn(file)
+ 
             if (!file.accepted){
                 swal("Something went wrong!", {
                     icon: "error",
@@ -369,30 +531,96 @@ table.dataTable td {
                 file.previewElement.remove();
             }
 
-        },        
+            },                   
+            processing:function(){
+                check_upload = false;
+            },
+            success: function(file, response){
+
+                check_upload = true;
+                
+                if(check_upload != false){
+                    swal("Files has been successfully uploaded.", {
+                    icon: "success",
+                }).then(()=>{
+                    $(".filename-label").html('');
+                    $(".filename-label").hide();
+                    parses_result = JSON.parse(response);
+                    error_data = []
+                    parses_result.map((item)=>{
+                        item['error_array'].map((error_item)=>{
+
+                            error_data.push(error_item);
+                        })
+                        
+                    });
+                 
+                        if(error_data.length != 0){
+
+                    
+                        // show error logs of file upload
+                        $("#ErrorDataModal").modal('show');
+                        $("#error-datatable").DataTable({
+                                destroy:true,
+                                data:error_data.length == 1 ?error_data[0] : error_data ,
+                                columns:[
+                                    {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
+                                    {data:'fintech_provider',title:'Provider',orderable:false},
+                                    {title:'Name',orderable:false,render:function(data,type,row){
+                                        return row.first_name + ' ' + row.last_name;
+                                    }},                                                    
+                                    {data:'barangay',title:'Barangay',orderable:false},
+                                    {data:'city_municipality',title:'Municipality',orderable:false},
+                                    {data:'province',title:'Province',orderable:false},
+                                    {data:'region',title:'Region',orderable:false},
+                                    {data:'remarks',title:'Remarks',orderable:false},
+                                    {data:'file_name',title:'',visible:false},                                                                                                        
+                                ],
+                                drawCallback:function(data){
+                                            let api = this.api();
+                                            let rows = api.rows({page:'current'}).nodes();
+                                            let last = null ;
+
+                                            api.column(8,{page:"current"})
+                                                .data()
+                                                .each((group,i)=>{
+                                                    
+                                                    console.warn(group);
+                                                        if(last != group && group != null){
+                                                            $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                                                            last = group;
+                                                        }
+                                                });
+                                        },     
+                            });
+                        }   
+
+                
+                    
+                    
+                    $(".upload-btn").show();
+                    $(".progress").hide();
+                    $(".filename").hide();
+                    $("#list-of-ingested-files-datatable").DataTable().ajax.reload();
+                    Dropzone.forElement('#uploadingDropzone').removeAllFiles(true);
+                    $(".progress-load").css('width','0%')
+                    $(".progress-load").html('0')
+                });
+                }
+                
+            }, 
             sending: function(file, xhr, formData){       
-                console.warn('processing')                
+                formData.append('_token', '{{csrf_token()}}');
                 formData.append('token', token);
             
-            },     
-            success: function(file, response){
-                swal("Files Successfully uploaded", {
-                    icon: "success",
-                });
-            }, 
-            complete:function(file){
-                swal("Files Successfully uploaded", {
-                    icon: "success",
-                }); 
-                myDropzone.removeFile(file);
-            
-            } 
+            }            
+           
         }   
+
+    
       
         var base_url = "{{url('/')}}";
-        var myDropzone = new Dropzone("div#uploadingDropzone", { url: base_url + "/returned-disbursement/upload-file" ,headers: {
-            'x-csrf-token': "{{csrf_token()}}",
-        },});
+        var myDropzone = new Dropzone("div#uploadingDropzone", { url: base_url + "/returned-disbursement/upload-file" ,});
 
         
 
@@ -438,6 +666,7 @@ table.dataTable td {
                 
                             </div>
                         </div>
+                        <div class="alert alert-warning filename-label " style="top:15px;display:none"></div>
                     </div>						
                 </div>
                 <!-- end panel -->
@@ -451,7 +680,14 @@ table.dataTable td {
                 <!-- begin panel -->
                 <div class="panel w-90 panel-inverse">					
                     <div class="panel-body ">
+                        {{-- List of ingested files --}}
 
+                        <table id="list-of-ingested-files-datatable" class="table table-hover table-bordered" width="100%">            
+                            <thead>                                    
+                            </thead>
+                            <tbody>                
+                            </tbody>
+                        </table>
                                               
                     </div>						
                 </div>
@@ -460,6 +696,82 @@ table.dataTable td {
             <!-- end col-8 -->		
         </div>
         <!-- end row -->
+
+
+
+
+        <!-- #modal-view -->
+      <div class="modal fade" id="ViewModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content" style="width: 100%">
+                <div class="modal-header" style="background-color: #007BFF">
+                    <h4 class="modal-title" style="color: white">View Records</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                </div>
+                
+                    @csrf
+                    
+                    <div class="modal-body">
+                        {{--modal body start--}}
+                        <h2 id="ViewCategName" align="center"></h2>
+
+                        
+                        <div class="note note-success">
+                            <div class="note-icon"><i class="fas fa-user"></i></div>
+                            <div class="note-content">
+                                <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="uploaded_by">John Edcel Zenarosa</label>
+                                <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="name">Uploaded By</label>
+                            </div>
+                        </div>
+
+                        <table id="dbp-returned-files-show-more-datatable" class="table table-hover table-bordered reports" style="width:100%">            
+                            <thead>                                    
+                            </thead>
+                            <tbody>                
+                            </tbody>
+                        </table>  
+                    
+
+                
+                        {{--modal body end--}}
+                    </div>
+                    <div class="modal-footer">
+                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>   
+                    </div>                
+            </div>
+        </div>
+    </div>
+
+
+
+     <!-- #modal-list of not inserted data to database from text file -->
+    <div class="modal fade" id="ErrorDataModal"  data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog" style="max-width: 70%">                    
+                <div class="modal-content">
+                    <div class="modal-header" style="background-color: #ff5b57">
+                        <h4 class="modal-title update-modal-title" style="color: white">Unsuccessful Imported Data</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                    </div>
+                    <div class="modal-body">
+                        {{--modal body start--}}          
+
+                        <table id="error-datatable" class="table table-hover" style="width:100%">            
+                            <thead>                                        
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+
+                        {{--modal body end--}}
+                    </div>
+                    <div class="modal-footer">
+                        <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>                                
+                    </div>
+                </div>                    
+        </div>
+    </div>
+
+
 
 
 

@@ -30,9 +30,14 @@ return [
 
     'disks' => [
 
-        'local' => [
+        'temp_text_file' => [
             'driver' => 'local',
-            'root' => storage_path('app'),
+            'root' => base_path(),
+        ],
+
+        'notification' => [
+            'driver' => 'local',
+            'root' => base_path('uploads/notifications'),
         ],
 
         'public' => [

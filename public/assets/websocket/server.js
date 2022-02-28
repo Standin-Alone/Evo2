@@ -43,8 +43,7 @@ io.sockets.on('connection', function(socket){
       admin.messaging().send({      
           "data": {
             "channel": data.channel,
-            "message": data.message
-              
+            "message": data.message              
           }, 
           "notification": {
             "title": 'Intervention Management Platform',
@@ -59,34 +58,32 @@ io.sockets.on('connection', function(socket){
   })
 
   
+// file uploading socket
 
-  socket.on('join-room',  function(room){
-  
+
+socket.on('join-room',  function(room){  
     console.warn(room);
     socket.join(room);
-   
+  })
 
-})
+
 
 
 
 socket.on('message',  function(data){
 
-    console.warn(data)
+  console.warn(data)
   if(io.sockets.adapter.rooms[data.room]){
     
     io.emit('progress',data);     
   }
- 
-  
-
 })
 
 
-// socket.on('disconnect',  function(data){
-//   console.warn('disconnected');
+socket.on('disconnect',  function(data){
+  console.warn('disconnected');
    
-// })
+})
 
  
 });

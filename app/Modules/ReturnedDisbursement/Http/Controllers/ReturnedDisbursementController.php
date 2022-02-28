@@ -9,6 +9,7 @@ use File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
 use DB;
+use Yajra\DataTables\Facades\DataTables;
 use ElephantIO\Client;
 use ElephantIO\Engine\SocketIO\Version2X;
 use Ramsey\Uuid\Uuid;
@@ -59,7 +60,7 @@ class ReturnedDisbursementController extends Controller
         foreach($imc_array as $key => $item){
 
             $sum_percentage += $compute_percentage;            
-            $client->emit('message', ['percentage' => round($sum_percentage,2), 'room' => $token]);
+            $client->emit('message', ['percentage' => round($sum_percentage,2), 'room' => $token, 'filename' => $filename]);
         
             
             $date                  = Carbon::parse($item[1]);
@@ -92,7 +93,7 @@ class ReturnedDisbursementController extends Controller
 
             // get region to check rsbsa
             $check_reg_prov =  db::table('geo_map')
-                                 ->select('reg_code','prov_code','mun_code','geo_code','bgy_code')                            
+                                 ->select('reg_code','prov_code','mun_code','geo_code','bgy_code','bgy_name','reg_name')                            
                                  ->where('prov_name',$province)                                                          
                                  ->where('mun_name',$city_municipality)   
                                  ->take(1)                                             
@@ -119,12 +120,12 @@ class ReturnedDisbursementController extends Controller
                                             "amount"                => $amount,
                                             "rsbsa_no"              => $rsbsa_no,
                                             "fintech_provider"      => $fintech_provider,
-                                            "last_name"             => $last_name,
-                                            "first_name"            => $first_name,
-                                            "middle_name"           => $middle_name,
-                                            "street_purok"          => $street_purok,
-                                            "city_municipality"     => $city_municipality,
-                                            "province"              => $province,
+                                            "last_name"             => preg_replace('/[0-9]+/','',str_replace("Ñ","N", mb_strtoupper($last_name,'UTF-8'))),
+                                            "first_name"            => preg_replace('/[0-9]+/','',str_replace("Ñ","N", mb_strtoupper($first_name,'UTF-8'))),
+                                            "middle_name"           => preg_replace('/[0-9]+/','',str_replace("Ñ","N", mb_strtoupper($middle_name == '' ? 'NMN' : $middle_name,'UTF-8')))  ,
+                                            "street_purok"          => str_replace("Ñ","N", mb_strtoupper($street_purok,'UTF-8')),
+                                            "city_municipality"     => str_replace("Ñ","N", mb_strtoupper($city_municipality,'UTF-8')) ,
+                                            "province"              => str_replace("Ñ","N", mb_strtoupper($province,'UTF-8')),
                                             "beneficiary_telnum"    => $beneficiary_telnum,
                                             "contact_num"           => $contact_num,
                                             "message"               => $message,
@@ -133,9 +134,9 @@ class ReturnedDisbursementController extends Controller
                                             "remitter_name_3"       => $remitter_name_3,
                                             "remitter_id"           => $remitter_id,
                                             "beneficiary_id"        => $beneficiary_id,
-                                            "remitter_address_1"    => $remitter_address_1,
-                                            "remitter_city"         => $remitter_city,
-                                            "remitter_province"     => $remitter_province,
+                                            "remitter_address_1"    => str_replace("Ñ","N", mb_strtoupper($remitter_address_1,'UTF-8')),
+                                            "remitter_city"         => str_replace("Ñ","N", mb_strtoupper($remitter_city,'UTF-8')),
+                                            "remitter_province"     => str_replace("Ñ","N", mb_strtoupper($remitter_province,'UTF-8')),
                                             "dbp_status"            => $dbp_status,
                                             "reg_code"              => $check_reg_prov->reg_code,
                                             "prov_code"             => $check_reg_prov->prov_code,                                               
@@ -195,6 +196,8 @@ class ReturnedDisbursementController extends Controller
                     "prov_code"             => $check_reg_prov->prov_code,                                               
                     "mun_code"              => $check_reg_prov->mun_code,
                     "bgy_code"              => $check_reg_prov->bgy_code,
+                    "region"                => $check_reg_prov->reg_name,
+                    "barangay"              => $check_reg_prov->bgy_name,                   
                     "remarks"               => $error_remarks,
                     "file_name"             => $filename,
                 ];
@@ -211,8 +214,39 @@ class ReturnedDisbursementController extends Controller
             db::table('dbp_returned_files')   
                 ->where('return_file_id',$file_last_id)
                 ->update(["total_inserted" => $total_saved_records + $get_last_total_saved_records]);
-        }
+        }   
+
+
+        $upload_path = 'temp_text_file/returned_disbursement_files';
+
         
+        $upload_folder  = $upload_path.'/'.Carbon::now()->year;
+
+        // create folder for returned disbursement files;
+        if(!File::isDirectory($upload_path)){
+            
+            File::makeDirectory($upload_path, 0775, true);                                
+            $by_year_path = $upload_path.'/'.Carbon::now()->year;
+            if(!File::isDirectory($by_year_path)){
+
+                File::makeDirectory($by_year_path, 0775, true);
+            }
+        }else{
+            $by_year_path = $upload_path.'/'.Carbon::now()->year;
+            if(!File::isDirectory($by_year_path)){
+
+                File::makeDirectory($by_year_path, 0775, true);
+            }
+        }
+
+
+
+        // upload error log files
+        $serialize_data = response()->json($error_array)->getContent();
+        $error_log_name = pathinfo($filename, PATHINFO_FILENAME);        
+        Storage::disk('temp_text_file')->put($upload_folder.'/'.$error_log_name.'-error.json',$serialize_data);
+
+
         $client->close();
 
         return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array];
@@ -233,7 +267,7 @@ class ReturnedDisbursementController extends Controller
 
         $file = request()->file('dbp_returned_file');
         $token = request('token');
-
+        
         
         $upload_path = 'temp_text_file/returned_disbursement_files';
 
@@ -263,6 +297,7 @@ class ReturnedDisbursementController extends Controller
         
 
         foreach($file as $key => $item_file){
+            
             $get_filename = $item_file->getClientOriginalName();    
 
             $check_file_exist = db::table('dbp_returned_files')->where('file_name',$get_filename)->take(1)->get();
@@ -278,8 +313,7 @@ class ReturnedDisbursementController extends Controller
 
                 
                 $last_id = db::table('dbp_returned_files')->insertGetId(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
-
-                var_dump($last_id);
+                
                 // check file name if it has fintech provider
                 if(str_contains($get_filename,'USSC')){
 
@@ -318,16 +352,70 @@ class ReturnedDisbursementController extends Controller
                 array_push($completed_array,$ingest_file);
             }
 
-            return $completed_array;
+            
 
             }
         }
+
+        return json_encode($completed_array);
+        
     }catch(\Exception $e){
 
-        var_dump($e);
-    }
-    }
+        echo json_encde($e->getMessage());
+    }   
 
     
+    }
+
+
+    //get list of ingested files
+    public function get_files(){
+        $get_records = db::table('dbp_returned_files as drf')
+                            ->select('drf.file_name',DB::raw('IF(total_inserted is NULL,0,total_inserted) as total_inserted'),DB::raw('IF(total_rows is NULL,0,total_rows) as total_rows'),'drf.date_uploaded','return_file_id',DB::raw(" (select CONCAT(first_name,' ',last_name) as full_name  from users where user_id = drf.created_by_user_id) as created_by"))                            
+                            ->where('created_by_user_id',session('user_id'))                                                                   
+                            ->orderBy('drf.date_uploaded','DESC')                            
+                            ->get();
+
+        return Datatables::of($get_records)->make(true);                
+    }
+    
+     // show more uploaded dbp returned files
+     public function show_more($return_file_id){
+  
+        
+        $get_records = db::table('dbp_return as dr')
+                                ->select(
+                                    'rsbsa_no',
+                                    db::raw("CONCAT(first_name,' ',last_name) as full_name"),
+                                    db::raw("CONCAT(IF(street_purok = '-' OR street_purok = '', '' , CONCAT(street_purok,', ')),'BRGY. ',
+                                    (select bgy_name from geo_map where reg_code = dr.reg_code and mun_code = dr.mun_code and prov_code = dr.prov_code and bgy_code = dr.bgy_code),
+                                    ',',
+                                    (select prov_name from geo_map where reg_code = dr.reg_code and mun_code = dr.mun_code and prov_code = dr.prov_code and bgy_code = dr.bgy_code),
+                                    ', ',
+                                    (select reg_name from geo_map where reg_code = dr.reg_code and mun_code = dr.mun_code and prov_code = dr.prov_code and bgy_code = dr.bgy_code)
+                                    ) 
+                                    as address"),
+                                    'fintech_provider',
+                                    'return_file_id',
+                                    'account_number',                         
+                                    DB::raw('date_uploaded'),
+                                    db::raw(' (select reg_name from geo_map where reg_code = dr.reg_code and mun_code = dr.mun_code and prov_code = dr.prov_code and bgy_code = dr.bgy_code) as region')                            
+                                )  
+                                ->where('return_file_id',$return_file_id)                                                                                                               
+                                ->get();
+        return Datatables::of($get_records)->make(true);
+    }
+
+
+    // show more uploaded dbp returned files
+    public function show_error_logs($filename){
+        
+        $upload_path = 'temp_text_file/returned_disbursement_files';
+        $clean_filename = $filename;
+        $upload_folder  = $upload_path.'/'.Carbon::now()->year.'/'.$clean_filename.'-error.json';
+        $get_records    =  json_decode(file_get_contents($upload_folder),true);
+        
+        return Datatables::of($get_records)->make(true);
+    }
 
 }
