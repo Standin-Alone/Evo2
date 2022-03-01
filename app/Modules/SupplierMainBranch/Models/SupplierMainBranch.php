@@ -21,6 +21,7 @@ class SupplierMainBranch extends Model
                 'created_by_id'=> session('user_id'),
                 'created_by_fullname'=> session('user_fullname'),
                 'created_agency'=> session('agency_loc'),
+                'email' => session('email'),
                 'date_created'=> Carbon::now('GMT+8'),
             ]);
         });
@@ -42,4 +43,12 @@ class SupplierMainBranch extends Model
         });
         return $Remove_MainBranch_values;
     }
+
+    // public function request_approval_to_rfo(){
+
+    //     $query = MailController::send_request_approval_to_rfo();
+
+    //     return $query;
+
+    // }
 }
