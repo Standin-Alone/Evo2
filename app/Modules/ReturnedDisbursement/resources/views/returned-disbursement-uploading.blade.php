@@ -64,7 +64,7 @@ table.dataTable td {
 
 
         
-        #file-data-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
+        #dbp-returned-files-show-more-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
             color:white;
             background-color: #008a8a;
             font-size: 20px;
@@ -78,7 +78,7 @@ table.dataTable td {
         }           
 
               
-        #file-summary-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
+        #list-of-ingested-files-datatable > thead > tr > th  ,#load-datatable > thead > tr > th {
             color:white;
             background-color: #008a8a;
             font-size: 20px;
@@ -86,11 +86,11 @@ table.dataTable td {
         }
 
 
-        #file-data-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
+        #dbp-returned-files-show-more-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
             background-color: white;
         }
 
-        #file-summary-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
+        #list-of-ingested-files-datatable > tbody > tr > td , #load-datatable > tbody > tr > td{
             background-color: white;
         }
         .dt-button{
@@ -298,62 +298,62 @@ table.dataTable td {
                                 destroy:true,                                
                                 responsive:true,
                                 ajax: {"url":"{{route('dbp-returned-files-show-more',['return_file_id'=>':id'])}}".replace(':id',return_file_id),"type":'get'},
-                                dom: 'lBfrtip',
-                                "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-                                "buttons": [
-                                        {
-                                            extend: 'collection',
-                                            text: 'Export',
-                                            buttons: [
-                                                {
-                                                    text: '<i class="fas fa-print"></i> PRINT',
-                                                    title: 'Report: List Of Profiles',
-                                                    extend: 'print',
-                                                    footer: true,
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    },
-                                                    customize: function ( doc ) {
-                                                        $(doc.document.body).find('h1').css('font-size', '15pt');
-                                                        $(doc.document.body)
-                                                            .prepend(
-                                                                '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
-                                                        );
-                                                        $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
-                                                    },
-                                                }, 
-                                                {
-                                                    text: '<i class="far fa-file-excel"></i> EXCEL',
-                                                    title: 'List Of Profiles',
-                                                    extend: 'excelHtml5',
-                                                    footer: true,
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    }
-                                                }, 
-                                                {
-                                                    text: '<i class="far fa-file-excel"></i> CSV',
-                                                    title: 'List Of Profiles',
-                                                    extend: 'csvHtml5',
-                                                    footer: true,
-                                                    fieldSeparator: ';',
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    }
-                                                }, 
-                                                {
-                                                    text: '<i class="far fa-file-pdf"></i> PDF',
-                                                    title: 'List Of Profiles',
-                                                    extend: 'pdfHtml5',
-                                                    footer: true,
-                                                    message: '',
-                                                    exportOptions: {
-                                                        columns: ':visible'
-                                                    },
-                                                }, 
-                                            ]
-                                            }
-                                    ],
+                                // dom: 'lBfrtip',
+                                // "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+                                // "buttons": [
+                                //         {
+                                //             extend: 'collection',
+                                //             text: 'Export',
+                                //             buttons: [
+                                //                 {
+                                //                     text: '<i class="fas fa-print"></i> PRINT',
+                                //                     title: 'Report: List Of Returned Disbursement Profiles',
+                                //                     extend: 'print',
+                                //                     footer: true,
+                                //                     exportOptions: {
+                                //                         columns: ':visible'
+                                //                     },
+                                //                     customize: function ( doc ) {
+                                //                         $(doc.document.body).find('h1').css('font-size', '15pt');
+                                //                         $(doc.document.body)
+                                //                             .prepend(
+                                //                                 '<img src="{{url('assets/img/logo/DA-Logo.png')}}" width="10%" height="5%" style="display: inline-block" class="mt-3 mb-3"/>'
+                                //                         );
+                                //                         $(doc.document.body).find('table tbody td').css('background-color', '#cccccc');
+                                //                     },
+                                //                 }, 
+                                //                 {
+                                //                     text: '<i class="far fa-file-excel"></i> EXCEL',
+                                //                     title: 'List Of Returned Disbursement Profiles',
+                                //                     extend: 'excelHtml5',
+                                //                     footer: true,
+                                //                     exportOptions: {
+                                //                         columns: ':visible'
+                                //                     }
+                                //                 }, 
+                                //                 {
+                                //                     text: '<i class="far fa-file-excel"></i> CSV',
+                                //                     title: 'List Of Returned Disbursement Profiles',
+                                //                     extend: 'csvHtml5',
+                                //                     footer: true,
+                                //                     fieldSeparator: ';',
+                                //                     exportOptions: {
+                                //                         columns: ':visible'
+                                //                     }
+                                //                 }, 
+                                //                 {
+                                //                     text: '<i class="far fa-file-pdf"></i> PDF',
+                                //                     title: 'List Of Returned Disbursement Profiles',
+                                //                     extend: 'pdfHtml5',
+                                //                     footer: true,
+                                //                     message: '',
+                                //                     exportOptions: {
+                                //                         columns: ':visible'
+                                //                     },
+                                //                 }, 
+                                //             ]
+                                //             }
+                                //     ],
                                 columns:[
                                         {data:'rsbsa_no',title:'RSBSA Number'},
                                         {   data:'fintech_provider',
@@ -365,9 +365,9 @@ table.dataTable td {
                                         },
                                         {data:'full_name',title:'Name',orderable:false},
                                         {data:'address',title:'Address',orderable:false},
-                                        {data:'account_number',title:'DBP Account Number',orderable:false},
-                                        {data:'dbp_status',title:'Status'},
+                                        {data:'account_number',title:'DBP Account Number',orderable:false},                                        
                                         {data:'date_uploaded',title:'Date Uploaded'},
+                                        {data:'dbp_status',title:'Status'},
                                         {data:'region',title:'Region',visible:false}
                                         
                                 ],
@@ -721,7 +721,7 @@ table.dataTable td {
         <!-- #modal-view -->
       <div class="modal fade" id="ViewModal">
         <div class="modal-dialog modal-lg" >
-            <div class="modal-content" style="width: 100%">
+            <div class="modal-content" style="width: 150%;right:25%">
                 <div class="modal-header" style="background-color: #007BFF">
                     <h4 class="modal-title" style="color: white">View Records</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
