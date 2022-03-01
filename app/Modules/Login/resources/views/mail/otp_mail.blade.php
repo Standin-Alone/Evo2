@@ -206,8 +206,8 @@
                                                                         align="center">
 
                                                                         <img align="center" border="0"
-                                                                            src="{{$message->embed(public_path('/assets/img/images/image-3.png'))}}"
-                                                                            alt="Calendar" title="Calendar"
+                                                                            src="{{ $message->embed(public_path('/assets/img/images/DA-LOGO-1024x1024.png')) }}"
+                                                                            alt="DA_LOGO" title="Calendar"
                                                                             style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 145px;"
                                                                             width="145" />
 
@@ -409,7 +409,7 @@
 
                                                                         <img align="center" border="0"
                                                                             src="{{ $message->embed(public_path('/assets/img/images/image-1.png')) }}"
-                                                                            alt="Dollar" title="Dollar"
+                                                                            alt="Role" title="role"
                                                                             style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 25%;max-width: 48.5px;"
                                                                             width="48.5" />
 

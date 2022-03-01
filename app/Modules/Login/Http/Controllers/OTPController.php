@@ -60,7 +60,7 @@ class OTPController extends Controller
                     // Query
                     $getProgramValue = $this->roles_and_perms->get_supplier($uOTP->user_id);
                     foreach ($getProgramValue as $key => $value) {
-                            $Supplier_programs[] = $value->description;
+                            $Supplier_programs[] = $value->title;
                             $Supplier_programid[] = $value->program_id;
                     }
 
@@ -77,7 +77,7 @@ class OTPController extends Controller
                     $getDefaultValue = $this->roles_and_perms->get_default_program($uOTP->user_id);
 
                     foreach ($getDefaultValue as $key => $row) {
-                        $Default_Program_Desc = $row->description;
+                        $Default_Program_Desc = $row->title;
                         $Default_Program_Id = $row->program_id;
                         $Default_Program_shortname = $row->shortname;
                     }
@@ -106,7 +106,6 @@ class OTPController extends Controller
                     }
 
                     Session::put(['user_prov_list'=>$user_prov_list]); 
-
                 // ==========  Peter Session  ==========
    
                 //  ==========  session for list of provinces under base on region
@@ -156,7 +155,7 @@ class OTPController extends Controller
                     Session::put('municipality_name', $user->mun_name);
 
                     // supplier
-                    Session::put('Supplier_id', $user->supplier_id);
+                    Session::put('Supplier_id', $user->user_id);
                     Session::put('Supplier_name', $user->supplier_name);
 
                     // program

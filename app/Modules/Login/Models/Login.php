@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Modules\Login\Models\OTP;
 use Illuminate\Support\Facades\DB;
-use App\Modules\Login\Models\Login;
 use Illuminate\Database\Eloquent\Model;
 use App\Modules\Login\Http\Controllers\MailController;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

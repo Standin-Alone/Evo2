@@ -46,7 +46,7 @@
 			success: function(otp_mail_success ){
 				route = "{{route('otp_page',['uuid'=>':id'])}}".replace(':id', otp_mail_success['uuid']);
 
-				console.log(route);
+				// console.log(route);
 				
 				setTimeout(function(){
 					$("button.btn-log").attr("disabled", false);

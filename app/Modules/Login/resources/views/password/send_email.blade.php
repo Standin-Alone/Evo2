@@ -26,7 +26,7 @@
                 <!-- begin login-header -->
                 <div class="login-header">
                     <div class="brand">
-                        <img src="{{url('assets/img/logo/DA-Logo.png')}}" width="30" height="30" style="display: inline-block"  /> <b>Interventions Management Platform</b>
+                        <img src="{{url('assets/img/images/DA-LOGO-1024x1024.png')}}" width="70" height="70" style="display: inline-block"  /> <b>Interventions Management Platform</b>
                     </div>
                     <div class="icon">
                         <i class="fa fa-sign-in"></i>
