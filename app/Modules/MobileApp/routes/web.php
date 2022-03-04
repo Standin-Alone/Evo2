@@ -36,6 +36,8 @@ Route::get('/api/get-transaction-history/{reference_id}','MobileAppController@ge
 Route::get('/api/get-transacted-items/{reference_id}','MobileAppController@getTransactedItems');
 
 
+// Payout Screen
+Route::get('/api/get-payout-list/{supplier_id}/{offset}','MobileAppController@get_payout_list');
 
 // cart modifying function
 Route::post('/api/check-if-category-has-draft','MobileAppController@check_if_category_has_draft');
