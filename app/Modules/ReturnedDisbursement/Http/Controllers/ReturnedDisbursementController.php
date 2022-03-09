@@ -88,6 +88,10 @@ class ReturnedDisbursementController extends Controller
             $remitter_city         = $item[22];
             $remitter_province     = $item[23];
             $dbp_status            = $item[24];
+
+            //additional column
+            $remarks               = array_key_exists(25, $item) ? $item[25] : '';
+            $dbp_record_id         = array_key_exists(26, $item) ? $item[26] : '';
             
             
 
@@ -137,6 +141,8 @@ class ReturnedDisbursementController extends Controller
                                             "remitter_city"         => str_replace("Ñ","N", mb_strtoupper($remitter_city,'UTF-8')),
                                             "remitter_province"     => str_replace("Ñ","N", mb_strtoupper($remitter_province,'UTF-8')),
                                             "dbp_status"            => $dbp_status,
+                                            "remarks"               => $remarks,
+                                            "dbp_record_id"         => $dbp_record_id,
                                             "reg_code"              => $check_reg_prov->reg_code,
                                             "prov_code"             => $check_reg_prov->prov_code,                                               
                                             "mun_code"              => $check_reg_prov->mun_code,

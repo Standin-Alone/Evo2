@@ -700,7 +700,7 @@ table.dataTable td {
                     <div class="panel-body ">
                         {{-- List of ingested files --}}
 
-                        <table id="list-of-ingested-files-datatable" class="table table-hover table-bordered" width="100%">            
+                        <table id="list-of-ingested-files-datatable" class="table table-hover" width="100%">            
                             <thead>                                    
                             </thead>
                             <tbody>                
