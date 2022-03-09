@@ -81,7 +81,7 @@ class RfoApprovalModuleController extends Controller
                             data-approval_status= "'.$row->approval_status.'"
                             data-program_id= "'.$row->program_id.'"
                             data-program_title= "'.$row->title.'"
-                            data-toggle="modal" data-target="#update_user_status_modal">
+                            data-toggle="modal" data-target="#update_account_activation_checklist_modal">
                             <i class="fa fa-cog"></i> Update Checklist
                         </a>';
 
@@ -175,25 +175,25 @@ class RfoApprovalModuleController extends Controller
         $get_list_checked_arr = [];
         $get_list_unchecked_arr = [];
 
-        $get_checked_list = $this->rfo_approval_model->get_already_checked_in_checked_list($user_id);
+        $get_checked_list = $this->rfo_approval_model->get_already_checked_in_checked_list($user_uuid);
 
-        $get_unchecked_list = $this->rfo_approval_model->get_unchecked_in_checked_list($user_id);
+        $get_unchecked_list = $this->rfo_approval_model->get_unchecked_in_checked_list($user_uuid);
 
-        $get_checked_list = DB::table('checklist_details as cd')
-                                        ->select('cd.list')
-                                        ->where('cd.status', '=', "1")
-                                        ->where('cd.user_id', '=', $user_uuid)
-                                        ->orderBy('cd.sequence_no', 'asc')
-                                        // ->orderBy('cd.user_id', 'asc')
-                                        ->get();
+        // $get_checked_list = DB::table('checklist_details as cd')
+        //                                 ->select('cd.list')
+        //                                 ->where('cd.status', '=', "1")
+        //                                 ->where('cd.user_id', '=', $user_uuid)
+        //                                 ->orderBy('cd.sequence_no', 'asc')
+        //                                 // ->orderBy('cd.user_id', 'asc')
+        //                                 ->get();
 
-        $get_unchecked_list = DB::table('checklist_details as cd')
-                                        ->select('cd.list')
-                                        ->where('cd.status', '=', "0")
-                                        ->where('cd.user_id', '=', $user_uuid)
-                                        ->orderBy('cd.sequence_no', 'asc')
-                                        // ->orderBy('cd.user_id', 'asc')
-                                        ->get();
+        // $get_unchecked_list = DB::table('checklist_details as cd')
+        //                                 ->select('cd.list')
+        //                                 ->where('cd.status', '=', "0")
+        //                                 ->where('cd.user_id', '=', $user_uuid)
+        //                                 ->orderBy('cd.sequence_no', 'asc')
+        //                                 // ->orderBy('cd.user_id', 'asc')
+        //                                 ->get();
         
         foreach($get_checked_list as $v1){
             array_push($get_list_checked_arr, $v1->list);
@@ -275,18 +275,23 @@ class RfoApprovalModuleController extends Controller
                 // Get SRN 
                 $srn = $this->rfo_approval_model->get_SRN_query($u->user_id);
 
-                $srn_data = [];
+                $mrn_data = [];
 
                 foreach($srn as $srn_val){
+                    $srn = $srn_val->srn;
+                    $email = $u->email;
 
-                    // $data = [];
+                    $string_srn = strval($srn);
+                    $string_email = strval($email);
 
-                    $encrypted_srn = rtrim(strtr(base64_encode($srn_val->srn), '+/', '-_'), '=');
+                    $data =  $string_email.$string_srn;
 
-                    $encrypted_srn;
+                    $encrypted_mrn = rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
+
+                    // dd($encrypted_srn);
 
                     // QR Link when scan
-                    array_push($srn_data, url("/verify-accreditation/".$encrypted_srn));
+                    array_push($mrn_data, url("/verify-accreditation/".$encrypted_mrn));
 
                     // array_push($srn_data, url("/".$srn_val->supplier_id."/".$srn_val->srn."/Verfied-Certificate"));
 
@@ -513,8 +518,8 @@ class RfoApprovalModuleController extends Controller
     }
 
     // View list of wala pang program permission
-    public function setup_prgoram_for_users(Request $request){
-        
+    public function setup_program_for_users(Request $request){
+
         if($request->ajax()){
             return DataTables::of($this->rfo_approval_model->get_user_without_program_query())
             ->addColumn('fullname_column', function($row){
@@ -526,8 +531,8 @@ class RfoApprovalModuleController extends Controller
                             data-fullname= "'.$row->first_name.' '.$row->middle_name.' '.$row->last_name.' '.$row->ext_name.'"
                             data-status= "'.$row->status.'"
                             data-approval_status= "'.$row->approval_status.'"
-                            data-toggle="modal" data-target="#add_role_and_program">
-                            <i class="fa fa-cog"></i> Setup Role and Program
+                            data-toggle="modal" data-target="#setup_program_permission_modal">
+                            <i class="fa fa-cog"></i> Setup Program
                         </a>';
 
                 // $html = '<a href="#" id="" type="button" class="btn btn-xs btn-outline-info">
@@ -541,6 +546,7 @@ class RfoApprovalModuleController extends Controller
         }
 
         return view("RfoApprovalModule::account_activation");
+
     }
 
     public function create_setup_role_and_account(Request $request){

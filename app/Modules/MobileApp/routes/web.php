@@ -39,6 +39,9 @@ Route::get('/api/get-transacted-items/{reference_id}','MobileAppController@getTr
 // Payout Screen
 Route::get('/api/get-payout-list/{supplier_id}/{offset}','MobileAppController@get_payout_list');
 
+// Payout Summaru Screen
+Route::get('/api/get-payout-transaction-list/{batch_id}/{offset}','MobileAppController@get_payout_transaction_list');
+
 // cart modifying function
 Route::post('/api/check-if-category-has-draft','MobileAppController@check_if_category_has_draft');
 Route::post('/api/save-to-cart','MobileAppController@save_added_to_cart');

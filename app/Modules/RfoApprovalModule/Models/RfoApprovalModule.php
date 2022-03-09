@@ -129,6 +129,8 @@ class RfoApprovalModule extends Model
 
         $role_id = ["22", "23", "6", "7"];
 
+        $selected_program_id_on_dropdown = session()->get('Default_Program_Id');
+
         $query = DB::table('program_permissions as pp')
                         ->select('pp.program_id', 'p.title', 'p.shortname as program_shortname', 'u.user_id', 'u.company_name', 'u.company_address', 'u.email', 'u.username', 'u.first_name', 'u.middle_name', 'u.last_name', 'u.ext_name', 'r.role',
                                     'u.contact_no', 'u.reg', 'u.prov', 'gm.reg_name', 'gr.shortname', 'u.status', 'pp.status as permission_status', 'u.approval_status')
@@ -142,6 +144,7 @@ class RfoApprovalModule extends Model
                                 $query->where('u.status', '=', '2')
                                       ->where('u.approval_status', '=', '0')
                                       ->where('u.reg', '=', $region)
+                                    //   ->where('pp.program_id', '=', $selected_program_id_on_dropdown)
                                       ->where('pp.status', '=', '0')
                                       ->whereIn('pp.role_id', $role_id)
                                       ->groupBy('u.user_id')
@@ -150,6 +153,7 @@ class RfoApprovalModule extends Model
                             else{
                                 $query->where('u.status', '=', '2')
                                       ->where('u.approval_status', '=', '0')
+                                    //   ->where('pp.program_id', '=', $selected_program_id_on_dropdown)
                                       ->where('pp.status', '=', '0')
                                       ->whereIn('pp.role_id', $role_id)
                                       ->groupBy('u.user_id')
@@ -165,8 +169,11 @@ class RfoApprovalModule extends Model
 
     public function get_program(){
 
+        $selected_program_id_on_dropdown = session()->get('Default_Program_Id');
+
         $query = DB::table('programs')
                         ->select('program_id', 'title', 'shortname', 'description')
+                        ->where('program_id', '=', $selected_program_id_on_dropdown)
                         ->get();
 
         return $query;
@@ -305,6 +312,34 @@ class RfoApprovalModule extends Model
 
     }
 
+    public function get_already_checked_in_checked_list($user_uuid){
+
+        $query = DB::table('checklist_details as cd')
+                        ->select('cd.list')
+                        ->where('cd.status', '=', "1")
+                        ->where('cd.user_id', '=', $user_uuid)
+                        ->orderBy('cd.sequence_no', 'asc')
+                        // ->orderBy('cd.user_id', 'asc')
+                        ->get();
+
+        return $query;
+
+    }
+
+    public function get_unchecked_in_checked_list($user_uuid){
+
+        $query = DB::table('checklist_details as cd')
+                        ->select('cd.list')
+                        ->where('cd.status', '=', "0")
+                        ->where('cd.user_id', '=', $user_uuid)
+                        ->orderBy('cd.sequence_no', 'asc')
+                        // ->orderBy('cd.user_id', 'asc')
+                        ->get();
+
+        return $query;
+
+    }
+
     public function get_user_query_02($user_id, $program_id){
 
         $region = session()->get('region');
@@ -338,7 +373,7 @@ class RfoApprovalModule extends Model
 
     }
 
-    public function get_SRN_query($user_uuid,){
+    public function get_SRN_query($user_uuid){
 
         $query = DB::table('supplier_srn')
                         ->select('srn', 'supplier_id', 'program_id')

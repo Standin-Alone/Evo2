@@ -7,7 +7,7 @@
             responsive: true,
             paging: true,
             ajax: "{{route('rfo_approval_module.main_branch_approval')}}",
-            lengthMenu: [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]],
             columns: [
                 {data: 'group_name', name: 'group_name'},
                 {data: 'address', name: 'address'},
@@ -15,7 +15,7 @@
                 {data: 'created_by_fullname', name: 'created_by_fullname'},
                 {data: 'approved_by_fullname', name: 'approved_by_fullname'},
                 {data: 'approval_status', name: 'approval_status'},
-                {data: 'action', name: 'action'},
+                // {data: 'action', name: 'action'},
             ],
             responsive: {
                 details: {
@@ -276,10 +276,12 @@
                                                 Swal.fire({
                                                     position: 'center',
                                                     icon: 'success',
-                                                    title: 'The supplier main branch have update successfully!',
+                                                    title: 'Update Success!',
                                                     showConfirmButton: true,
                                                 }).then(function(){ 
-                                                    window.location.href = "{{ route('rfo_approval_module.list_of_merchs_and_supps')}} ";
+                                                    // window.location.href = "{{ route('rfo_approval_module.list_of_merchs_and_supps')}} ";
+                                                    $("#main_branch_and_supplier_branch_datatable").DataTable().ajax.reload();
+                                                    $('#update_main_branch_approval_status_modal').modal('hide');
                                                  });
                                             }
                         })

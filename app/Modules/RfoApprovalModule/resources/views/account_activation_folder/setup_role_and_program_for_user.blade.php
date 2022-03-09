@@ -11,13 +11,13 @@
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i
                     class="fa fa-minus mt-1"></i></a>
         </div>
-        <h4 class="panel-title">SETUP PROGRAM FOR USER</h4>
+        <img class="iconDetails" src="{{ url('/assets/img/images/number01.png') }}" alt=""> <h4 class="panel-title" style="margin-top: 2px;"> SETUP PROGRAM FOR USER</h4>
     </div>
     <div class="panel-body">
         <br>
         <br>
         {{-- <table id="" class="table table-bordered text-center" style="width:100%"> --}}
-        <table id="user_account_datatable" class="table table-bordered text-center" style="width:100%">
+        <table id="setup_program_user_datatable" class="table table-bordered text-center" style="width:100%">
             <thead class="table-header">
                 <tr>
                     <th>COMPANY NAME</th>
@@ -76,9 +76,11 @@
         </table>
 
         <!-- #modal-add -->
-        <div class="modal fade" id="add_role_and_program">
+        {{-- @include('RfoApprovalModule::components.modal.setup_program_permission_modal') --}}
+
+        <div class="modal fade" id="setup_program_permission_modal">
             <div class="modal-dialog modal-lg">
-                <form id="add_role_and_program_form" method="POST" route="">
+                <form id="setup_program_permission_form" method="POST" route="">
                     {{ csrf_field() }}
                     
                     <span class="error_form"></span>

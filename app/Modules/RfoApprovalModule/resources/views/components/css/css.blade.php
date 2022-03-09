@@ -11,6 +11,10 @@
 <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.css">
 <link rel="stylesheet" href="//cdn.datatables.net/responsive/2.2.9/css/responsive.dataTables.min.css">
 <style>
+    /* .panel-inverse>.panel-heading {
+      background: #008a8a;
+    }
+     */
     .notification {
         /* background-color: #555; */
         /* color: white; */
@@ -1426,4 +1430,10 @@ img {
     margin: 0 auto 2rem;
   }
 }
+
+
+  .iconDetails {
+    margin-right:1%;
+    float:left; 
+  } 
 </style>

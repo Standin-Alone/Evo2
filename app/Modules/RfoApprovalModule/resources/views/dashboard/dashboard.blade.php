@@ -48,7 +48,7 @@
     @include('RfoApprovalModule::components.js.js')
 
     {{-- Datatables --}}
-    @include('RfoApprovalModule::components.js.datatables.list_of_request_for_main_branch_approval_datatable')
+    {{-- @include('RfoApprovalModule::components.js.datatables.list_of_request_for_main_branch_approval_datatable') --}}
 @endsection
 
 
@@ -62,20 +62,22 @@
     <!-- begin breadcrumb -->
     <ol class="breadcrumb pull-right">
         <li class="breadcrumb-item"><a href="{{ route('main.home') }}">Home</a></li>
-        <li class="breadcrumb-item"><a href="{{ route('rfo_approval_module.index') }}">Supplier application and Validation</a></li>
-        <li class="breadcrumb-item active">Main Branch Approval</li>
+        {{-- <li class="breadcrumb-item"><a href="{{ route('rfo_approval_module.index') }}">Supplier application and Validation</a></li> --}}
+        <li class="breadcrumb-item active">Supplier Dashboard</li>
     </ol>
     <!-- end breadcrumb -->
 
     <!-- begin page-header -->
-    {{-- <h1 class="page-header">Overview of Head Supplier / Supplier Branch</h1> --}}
+    <h1 class="page-header">Supplier Dashboard</h1>
     <!-- end page-header -->
-    <div class="row mt-5">
-        {{-- @include('ReportModule::components.dashboard_cards.paid_db_card') --}}
-    </div>
+
     <!-- end row -->
 
-<div class="panel panel-inverse">
+    @include('RfoApprovalModule::list_of_main_branch');
+
+    @include('RfoApprovalModule::list_of_supplier_and_merchants');
+
+{{-- <div class="panel panel-inverse">
     <div class="panel-heading">
         <div class="panel-heading-btn">
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i
@@ -85,62 +87,12 @@
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i
                     class="fa fa-minus mt-1"></i></a>
         </div>
-        <h4 class="panel-title">Overview of Head Supplier</h4>
+        <h4 class="panel-title">List of Approved Head Supplier</h4>
     </div>
     <div class="panel-body">
         <br>
         <br>
-        {{-- @include('RfoApprovalModule::main_branch_approval') --}}
 
-        <table id="main_branch_and_supplier_branch_datatable" class="table table-bordered text-center" style="width:100%">
-            <thead class="table-header">
-                <tr>
-                    <th>GROUP NAME</th>
-                    <th>ADDRESS</th>
-                    <th>CREATED AGENCY</th>
-                    <th>CREATED BY FULLNAME</th>
-                    <th>APPROVED BY FULLNAME</th>
-                    <th>STATUS</th>
-                    {{-- <th>ACTIONS</th> --}}
-                </tr>
-            </thead>
-            <tbody>
-            </tbody>
-            <tfoot>
-            </tfoot>
-        </table>
-        
-        {{-- Update modal --}}
-        {{-- @include('RfoApprovalModule::components.modal.update_main_branch_approval_status_modal') --}}
     </div>
-</div>
-
-{{-- Optional cards to view --}}
-<div class="row" style="margin-top: 100px; margin-left: 0.5">
-    <h4 style="font-size: 21px; color: rgb(0, 118, 228)"> Also view </h3>
-</div>
-
-<div class="row also_view_card_row">
-    <div class="card also_view_card">
-        <a href="{{ route('rfo_approval_module.account_activation') }}" class="cards_link_custom"> 
-            <img src="https://image.freepik.com/free-vector/phone-user-activating-account-with-fingerprint-smartphone-screen-biometric-identity_74855-15499.jpg"
-                alt="..." class="card-img-top">
-            <div class="card-body">
-                <h4 class="card-title" style="font-size: 20px; text-align:center">Head Supplier / Supplier Branch Account Activation</h4>
-                <span class="card-text" style="font-size: 14px;"> View list of request for account activation </span>
-            </div>
-        </a>
-    </div>
-    
-    <div class="card also_view_card" >
-        <a href="{{ route('rfo_approval_module.list_of_merchs_and_supps') }}" class="cards_link_custom"> 
-        <img src="https://image.freepik.com/free-vector/worldwide-shipping-service-international-distribution-collaborative-logistics-supply-chain-partners-freight-cost-optimization-concept-pinkish-coral-bluevector-isolated-illustration_335657-1757.jpg"
-            alt="..." class="card-img-top">
-        <div class="card-body">
-            <h4 class="card-title" style="font-size: 20px; text-align:center">Overview of Suppliers and Merchants </h4>
-            <span class="card-text" style="font-size: 14px;"> View list of Supplier and Merchants </span>
-        </div>
-        </a>
-    </div>
-</div>
+</div> --}}
 @endsection

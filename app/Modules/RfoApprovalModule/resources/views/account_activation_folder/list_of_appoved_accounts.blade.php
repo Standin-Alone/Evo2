@@ -8,7 +8,7 @@
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i
                     class="fa fa-minus mt-1"></i></a>
         </div>
-        <h4 class="panel-title">LIST OF APPROVED ACCOUNTS</h4>
+        <img class="iconDetails" src="{{ url('/assets/img/images/number03.png') }}" alt=""> <h4 class="panel-title" style="margin-top: 2px;">LIST OF APPROVED ACCOUNTS</h4>
     </div>
     <div class="panel-body">
         <br>

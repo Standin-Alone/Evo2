@@ -12,7 +12,7 @@ Route::prefix('/rfo-approval-module')->group(function () {
 
     Route::get('/view/approved-checklist', 'RfoApprovalModuleController@view_approved_checklists')->name('rfo_approval_module.view_approved_checklists');
 
-    Route::get('/view/user-account-setup-role-and-program', 'RfoApprovalModuleController@setup_prgoram_for_users')->name('rfo_approval_module.user_account_setup_view');
+    Route::get('/view/user-account-setup-role-and-program', 'RfoApprovalModuleController@setup_program_for_users')->name('rfo_approval_module.user_account_setup_view');
 
     Route::get('/view/supplier-branch-approval','RfoApprovalModuleController@list_of_request_for_main_branch_approval')->name('rfo_approval_module.main_branch_approval');
 

@@ -48,7 +48,7 @@
     @include('RfoApprovalModule::components.js.js')
 
     {{-- Datatables --}}
-    @include('RfoApprovalModule::components.js.datatables.list_of_merchent_and_supplier_datatable')
+    @include('RfoApprovalModule::components.js.datatables.list_of_merchent_and_supplier_datatable_js')
 @endsection
 
 

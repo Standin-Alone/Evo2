@@ -8,7 +8,7 @@
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-warning" data-click="panel-collapse"><i
                     class="fa fa-minus mt-1"></i></a>
         </div>
-        <h4 class="panel-title">LIST OF CHECKLIST FOR ACCOUNT APPROVAL</h4>
+        <img class="iconDetails" src="{{ url('/assets/img/images/number02.png') }}" alt=""> <h4 class="panel-title" style="margin-top: 2px;">LIST OF CHECKLIST FOR ACCOUNT APPROVAL</h4>
     </div>
     <div class="panel-body">
         <br>
@@ -96,7 +96,7 @@
         </table>
 
         {{-- Update modal --}}
-        <div class="modal fade" id="update_user_status_modal">
+        <div class="modal fade" id="update_account_activation_checklist_modal">
             <div class="modal-dialog modal-lg">
                 {{-- action="{{ route('rfo_approval_module.create_user_checklist_details') }}" --}}
                 <form id="update_user_status_form" method="POST" action="">
@@ -105,7 +105,7 @@
                     <span class="error_form"></span>
                     <div class="modal-content">
                         <div class="modal-header" style="background-color:#21a8dd;">
-                            <h4 class="modal-title" style="color: white;">UPDATE USER ACCOUNT STATUS <br> <span
+                            <h4 class="modal-title" style="color: white;">REQUIREMENTS CHECKLIST: <br> <span
                                     class="user_name" style="font-size: 14px;">Name: <span> </h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true"
                                 style="color: white">×</button>
