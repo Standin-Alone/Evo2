@@ -1186,7 +1186,12 @@ class MobileAppController extends Controller
         $cart   = request('cart');
         $count_success = 0;
         $result = '' ;  
+        db::table('voucher_transaction_draft')
+                    ->where('reference_no',$cart[0]['reference_no'])
+                    ->delete();
         foreach($cart as $value){
+
+
             $voucher_transaction_draft_id =  Uuid::uuid4();
             $reference_no   = $value['reference_no'];
             $supplier_id   = $value['supplier_id'];
@@ -1213,13 +1218,13 @@ class MobileAppController extends Controller
             $insert_voucher_transaction = db::table('voucher_transaction_draft')
                                         ->insert([
                                             'voucher_transaction_draft_id' => $voucher_transaction_draft_id,
-                                            'reference_no' => $reference_no,
-                                            'supplier_id' => $supplier_id,
-                                            'item_category' => $item_category,
-                                            'sub_program_id' => $sub_program_id,
-                                            'quantity' => $quantity,
-                                            'amount' => $amount,
-                                            'total_amount' => $total_amount
+                                            'reference_no'                 => $reference_no,
+                                            'supplier_id'                  => $supplier_id,
+                                            'item_category'                => $item_category,
+                                            'sub_program_id'               => $sub_program_id,
+                                            'quantity'                     => $quantity,
+                                            'amount'                       => $amount,
+                                            'total_amount'                 => $total_amount
                                         ]);
 
                                         
@@ -1242,13 +1247,13 @@ class MobileAppController extends Controller
                     $insert_voucher_transaction = db::table('voucher_transaction_draft')
                     ->insert([
                         'voucher_transaction_draft_id' => $voucher_transaction_draft_id,
-                        'reference_no' => $reference_no,
-                        'supplier_id' => $supplier_id,
-                        'item_category' => $item_category,
-                        'sub_program_id' => $sub_program_id,
-                        'quantity' => $quantity,
-                        'amount' => $amount,
-                        'total_amount' => $total_amount
+                        'reference_no'                 => $reference_no,
+                        'supplier_id'                  => $supplier_id,
+                        'item_category'                => $item_category,
+                        'sub_program_id'               => $sub_program_id,
+                        'quantity'                     => $quantity,
+                        'amount'                       => $amount,
+                        'total_amount'                 => $total_amount
                     ]);
     
                     
@@ -1257,6 +1262,23 @@ class MobileAppController extends Controller
                     }
                     
                 }else{
+
+
+                    $update_voucher_transaction_draft = db::table('voucher_transaction_draft')
+                                        ->where('reference_no',$reference_no)
+                                        ->where('supplier_id',$supplier_id)
+                                        ->where('sub_program_id',$sub_program_id)
+                                        ->where('item_category',$item_category != '' ? $item_category : '')
+                                        ->update([                                            
+                                            'reference_no'   => $reference_no,
+                                            'supplier_id'    => $supplier_id,
+                                            'item_category'  => $item_category,
+                                            'sub_program_id' => $sub_program_id,
+                                            'quantity'       => $quantity,
+                                            'amount'         => $amount,
+                                            'total_amount'   => $total_amount
+                                        ]);
+
                     $count_success = count($cart);
                 }
              
@@ -1282,14 +1304,20 @@ class MobileAppController extends Controller
     public function get_payout_list($supplier_id,$offset){
         $supplier_id      = request('supplier_id');
 
-        $get_batch_payout = db::table('payout_gif_batch')
+        $get_batch_payout = db::table('payout_gif_batch')                                
                                 ->where('supplier_id',$supplier_id)                                
                                 ->orderBy('transac_date','desc')
                                 ->skip($offset)
-                                ->take(100000)                                      
+                                ->take(10)                                      
                                 ->get();
+                                
+        $total_paid_payout = db::table('payout_gif_batch')
+                                ->select(db::raw('SUM(amount) as total_paid_payout'))
+                                ->where('supplier_id',$supplier_id)                                
+                                ->orderBy('transac_date','desc')                                
+                                ->first()->total_paid_payout;    
 
-        return json_encode($get_batch_payout);
+        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => $total_paid_payout]);
     }
 
     // get payout list (PAYOUT SUMMARY SCREEN)
