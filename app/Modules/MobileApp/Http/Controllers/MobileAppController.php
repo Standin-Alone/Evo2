@@ -424,10 +424,11 @@ class MobileAppController extends Controller
 
         // get voucher program id 
         $voucher_program_id = db::table('voucher as v')                                          
-                       ->where('reference_no', $reference_num)->first()->program_id;
+                       ->where('reference_no', $reference_num)->first();
         
+        if(isset($voucher_program_id->program_id)){
         // check if voucher program  is equal to the array of merchant programs
-        if(in_array($voucher_program_id,$program_array)){
+        if(in_array($voucher_program_id->program_id,$program_array)){
 
 
             //  check if voucher transaction is now open
@@ -449,7 +450,8 @@ class MobileAppController extends Controller
                         $check_if_one_time =  $get_info[0]->one_time_transaction;
 
                         // check transaction time to access voucher 
-                        if(($check_transaction_time->minutes_scanned >= $time_limit ) || ($check_transaction_time->minutes_scanned <= $time_limit && $get_last_scanned_by_id == $supplier_id) || (is_null($check_transaction_time->minutes_scanned))){
+                        // condition for same supplier || ($check_transaction_time->minutes_scanned <= $time_limit && $get_last_scanned_by_id == $supplier_id)
+                        if(($check_transaction_time->minutes_scanned >= $time_limit )  || (is_null($check_transaction_time->minutes_scanned))){
 
                             // set already scanned
                             db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1','scanned_date' => db::raw('CURRENT_TIMESTAMP'),'last_scanned_by_id' => $supplier_id]);
@@ -514,6 +516,9 @@ class MobileAppController extends Controller
                 return json_encode(["Message" => 'invalid program.']);
                         
             }
+        }else{
+            return json_encode(["Message" => 'false']);
+        }
     }
 
 
