@@ -2,10 +2,10 @@
 
 
 
-// Route::group(array('module'=>'Login','namespace' => 'App\Modules\Login\Http\Controllers'), function() {
-//     // Forgot Password Screen
-//     Route::post('/api/form_reset_password_link/sending_request', 'LoginController@send_btn_link_req_form')->name('send-request-password-link-mobile-app');
-// });
+Route::group(array('module'=>'Login','namespace' => '\App\Modules\Login\Http\Controllers'), function() {
+    // Forgot Password Screen
+    Route::post('/api/form_reset_password_link/sending_request', 'LoginController@send_btn_link_req_form')->name('send-request-password-link-mobile-app');
+});
 
 
 Route::group([],function(){

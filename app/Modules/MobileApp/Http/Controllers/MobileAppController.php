@@ -485,12 +485,16 @@ class MobileAppController extends Controller
                             // validate voucher
                             if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->Available_Balance == 0.00){
                                 db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
-                            }
+                            }   
+
+                            $minutes_to_miliseconds = $time_limit * 60000;
 
                             return json_encode(["Message"           => 'true',
                                                     "data"          => $get_info, 
                                                     "program_items" => $get_program_items,
-                                                    "history"       => $get_recent_claiming]);
+                                                    "history"       => $get_recent_claiming,
+                                                    "time_limit"   => $minutes_to_miliseconds
+                                                ]);
                 
                         
                         }else{
@@ -1134,8 +1138,7 @@ class MobileAppController extends Controller
 
                                           
                 if($update_voucher_transaction_draft){
-                    $count_success++;
-                    
+                    $count_success++;                    
                 }else{
                     $count_success = count($cart);    
                 }
@@ -1148,12 +1151,10 @@ class MobileAppController extends Controller
         }
 
       
-        if($count_success == count($cart)){
+      
 
-            $result = json_encode(["message" => 'true']);
-        }else{
-            $result = json_encode(["message" => 'false']);
-        }
+        $result = json_encode(["message" => 'true']);
+       
 
         
         return $result;
@@ -1316,10 +1317,13 @@ class MobileAppController extends Controller
                                 ->take(10)                                      
                                 ->get();
                                 
-        $total_paid_payout = db::table('payout_gif_batch')
+        $total_paid_payout = db::table('payout_gif_batch as pgb')
                                 ->select(db::raw('SUM(amount) as total_paid_payout'))
+                                ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')
                                 ->where('supplier_id',$supplier_id)                                
-                                ->orderBy('transac_date','desc')                                
+                                ->where('iscompleted','1')                                
+                                ->orderBy('transac_date','desc')  
+                                ->groupBy('pgd.batch_id')                              
                                 ->first()->total_paid_payout;    
 
         return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => $total_paid_payout]);
