@@ -4,10 +4,10 @@
 
 <style>
     table.dataTable td {
-        font-size: 14px !important;
+        font-size: 13px !important;
     }
     table.dataTable th {
-        font-size: 14px !important;
+        font-size: 13px !important;
     }
 
     .table-header{
@@ -22,10 +22,15 @@
         display: none;
     }
     #submit-btn{
-        font-size: 14px;
+        font-size: 13px;
     }
-        /* MODIFY DATATABLE WRAPPER/MOBILE VIEW NAVAGATE ROW ICON */
-        .dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child::before{
+
+    span.badge{
+        font-size: 12px !important;
+    }
+
+    /* MODIFY DATATABLE WRAPPER/MOBILE VIEW NAVAGATE ROW ICON */
+    .dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child::before{
         /* background: #008a8a !important; */
         background: #008a8a !important;
         border-radius: 10px !important;

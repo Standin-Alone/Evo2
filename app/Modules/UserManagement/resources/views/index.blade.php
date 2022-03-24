@@ -34,6 +34,10 @@
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
             padding: 5px !important;
         }  
+        div.dataTables_wrapper div.dataTables_processing {
+          background-color: rgba(0, 0, 0, 0.5);
+          backdrop-filter: blur(6px);
+        }
 
         /* MODIFY DATATABLE WRAPPER/MOBILE VIEW NAVAGATE ROW ICON */
         .dataTables_wrapper table.dataTable.dtr-inline.collapsed > tbody > tr > td:first-child::before{
@@ -98,13 +102,14 @@
     $(document).ready(function(){
         load_datatable = $("#load-datatable").DataTable({
             serverSide:true,
-            responsive:true,
+            responsive:true,        
+            processing:true,    
             ajax: "{{route('user.show')}}",
             columns:[
                     {data:'full_name',title:'Name'},
                     {data:'role',title:"Role"},
                     {data:'shortname',title:'Program'},
-                    {data:'email',title:"email",visible:false},
+                    {data:'email',title:"Email"},
                     {data:'contact_no',title:"contact_no",visible:false},
                     {data:'reg_name',title:"Region"},
                     {data:'prov_name',title:"prov_name",visible:false},
@@ -117,7 +122,7 @@
                         
                         
 
-                            return  "<button type='button' class='btn view-modal-btn btn-outline-warning'   user_id="+row['user_id']+" data-toggle='modal' data-target='#ViewModal'>"+
+                            return  "<button type='button' class='btn view-modal-btn btn-outline-warning' user_id="+row['user_id']+" role_id="+row['role_id']+"  agency_loc="+row['agency_loc']+" agency_id="+row['agency']+" reg="+row['reg']+" prov="+row['prov']+"  mun="+row['mun']+"  bgy="+row['bgy']+"   data-toggle='modal' data-target='#ViewModal'>"+
                                         "<i class='fa fa-edit'></i> Edit"+
                                     "</button>   "+(
                                     row['status'] == 1 ?
@@ -136,7 +141,13 @@
                                     "</button> ")
                         }
                     }
-            ]
+            ],
+            "language": {
+            processing: '<img src="assets/img/images/da-loading.gif" >'
+        },
+ 
+        // processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw text-success"></i><span class="sr-only">Loading...</span> '
+           
 
         })
 
@@ -155,10 +166,88 @@
             let prov_name = load_datatable.row(currentRow).data()['prov_name'];
             let bgy_name = load_datatable.row(currentRow).data()['bgy_name'];
 
-            let role = load_datatable.row(currentRow).data()['role'];
-         
-            $("#user_id").val(id);
             
+            let reg = $(this).attr('reg');
+            let mun = $(this).attr('mun');
+            let prov = $(this).attr('prov');            
+            let bgy = $(this).attr('bgy');
+            
+
+
+            let role = load_datatable.row(currentRow).data()['role'];
+            let role_id = $(this).attr('role_id');
+            
+            
+            
+            let agency_loc = $(this).attr('agency_loc');
+            let agency_id = $(this).attr('agency_id');
+
+
+            $("input[name='edit_agency_loc'][value=" + agency_loc + "]"). prop('checked', true)
+            $("#edit_agency").val(agency_id).change();
+
+            $.ajax({
+                url:'{{route("filter-role",["agency_loc" => ":id"])}}'.replace(':id',agency_loc),
+                
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#role_id").prop('disabled',false);
+                    $("#role_id option").remove();
+                    $("#role_id").append('<option value="" selected disabled>Select Role</option>')
+                    convertToJson.map(item => {
+                        $("#role_id").append('<option value="'+item.role_id+'">'+item.role+'</option>')
+                    })
+                     
+                    $("#role_id").val(role_id); 
+                }                
+            });
+
+
+
+               // edit region fields
+               if(agency_loc == 'CO'){
+                    $("#edit_municipality").prop('selectedIndex',0);
+                    $("#edit_barangay").prop('selectedIndex',0);
+                    $("#edit_municipality").prop('disabled','disabled');
+                    $("#edit_barangay").prop('disabled','disabled');
+                    $("#edit_region").val(13).change();
+                    $("#edit_region option").filter(function(){
+                        return this.value != 13;
+                    }).hide()
+
+                    if($("#role option:selected").val() == 1 ){
+                        $("#edit_region option").filter(function(){
+                            return this.value
+                        }).show()
+                    }else{
+                        $("#edit_region option").filter(function(){
+                            return this.value == 13 ;
+                        }).show()
+
+                    }                
+            }else{
+                $("#edit_province").prop('selectedIndex',0);
+                $("#edit_municipality").prop('selectedIndex',0);
+                $("#edit_barangay").prop('selectedIndex',0);
+                $("#edit_province").prop('disabled','disabled');
+                $("#edit_municipality").prop('disabled','disabled');
+                $("#edit_barangay").prop('disabled','disabled');
+                $("#edit_region").val("").change();
+                $("#edit_region option").filter(function(){
+                    return this.value != 13;
+                }).show()
+
+                $("#edit_region option").filter(function(){
+                    return this.value == 13;
+                }).hide()
+
+
+            }
+            
+
+
+            // put values in update form
+            $("#user_id").val(id);                         
             $("#email").val(email);
             $("#contact").val(contact);
             $("#agency_view").text(agency);
@@ -166,15 +255,17 @@
             $("#reg_name").text(reg_name);
             $("#mun_name").text(mun_name);
             $("#prov_name").text(prov_name);
-            $("#bgy_name").text(bgy_name);
-
+            $("#bgy_name").text(bgy_name);            
+            $("#edit_region").val(reg).change();
+            $("#edit_municipality").val(mun).change();
+            $("#edit_province").val(prov).change();
+            $("#edit_barangay").val(bgy).change();            
             $("#name").text(full_name);
             $("#role_view").text(role);
             $("#update-role").val(role);
             
 
       
-
             
         });
 
@@ -299,6 +390,7 @@
 
 
         
+        
         // filter municipality
         $("#province").change(function(){
             let value = $("option:selected", this).val();
@@ -341,6 +433,10 @@
             });
         })
 
+        
+
+
+        // add agency loc function
         $("input[name='agency_loc']").change(function(){
             let value = $(this).val();
             
@@ -401,6 +497,71 @@
 
         })
 
+
+
+        // edit agency loc
+        $("input[name='edit_agency_loc']").change(function(){
+            let value = $(this).val();
+            
+            $.ajax({
+                url:'{{route("filter-role",["agency_loc" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#role_id").prop('disabled',false);
+                    $("#role_id option").remove();
+                    $("#role_id").append('<option value="" selected disabled>Select Role</option>')
+                    convertToJson.map(item => {
+                        $("#role_id").append('<option value="'+item.role_id+'">'+item.role+'</option>')
+                    })
+                }                
+            }); 
+
+            // edit region fields
+            if(value == 'CO'){
+                    $("#edit_municipality").prop('selectedIndex',0);
+                    $("#edit_barangay").prop('selectedIndex',0);
+                    $("#edit_municipality").prop('disabled','disabled');
+                    $("#edit_barangay").prop('disabled','disabled');
+                    $("#edit_region").val(13).change();
+                    $("#edit_region option").filter(function(){
+                        return this.value != 13;
+                    }).hide()
+
+                    if($("#role option:selected").val() == 1 ){
+                        $("#edit_region option").filter(function(){
+                            return this.value
+                        }).show()
+                    }else{
+                        $("#edit_region option").filter(function(){
+                            return this.value == 13 ;
+                        }).show()
+
+                    }                
+            }else{
+                $("#edit_province").prop('selectedIndex',0);
+                $("#edit_municipality").prop('selectedIndex',0);
+                $("#edit_barangay").prop('selectedIndex',0);
+                $("#edit_province").prop('disabled','disabled');
+                $("#edit_municipality").prop('disabled','disabled');
+                $("#edit_barangay").prop('disabled','disabled');
+                $("#edit_region").val("").change();
+                $("#edit_region option").filter(function(){
+                    return this.value != 13;
+                }).show()
+
+                $("#edit_region option").filter(function(){
+                    return this.value == 13;
+                }).hide()
+
+
+            }
+            
+                        
+
+        })
+
+
         $("#role").change(function(){
 
             let value = $("option:selected",this).val();                  
@@ -426,6 +587,109 @@
             }
         })
 
+
+
+
+        // FILTER REGION UPDATE FORM
+
+        
+        $("#role_id").change(function(){
+
+            let value = $("option:selected",this).val();                  
+            let check_agency = $("input[name='agency_loc']:checked").val();
+
+            
+            
+            if(check_agency == "CO"){
+                if(value == 1){
+                    $("#region option").filter(function(){
+                        return this.value
+                        }).show()                    
+                }else{
+                    $("#region").val(13).change();
+                    $("#region option").filter(function(){
+                        return this.value == 13 && this.value == ""
+                        }).show()    
+
+                    $("#region option").filter(function(){
+                        return this.value 
+                        }).hide()                   
+                }
+            }
+        })
+        // filter province
+        $("#edit_region").change(function(){
+            let value = $("option:selected", this).val();
+               
+            $.ajax({
+                url:'{{route("filter-province",["region_code" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#edit_province").prop('disabled',false);
+                    $("#edit_province option").remove();
+                    $("#edit_province").append('<option value="" selected disabled>Select Province</option>')
+                    convertToJson.map(item => {
+                        $("#edit_province").append('<option value="'+item.prov_code+'">'+item.prov_name+'</option>')
+                    })
+                }                
+            });
+        })
+
+      
+        // check agency of CO or RFO UPDATE
+        edit_check_agency = $("input[name='edit_agency_loc']:checked").val();
+        if(edit_check_agency == 'CO'){
+            $("#edit_region").val(13).change();
+            $("#edit_region option").filter(function(){
+                return this.value != 13;
+            }).hide()
+        }
+
+
+        
+        
+        // filter municipality
+        $("#edit_province").change(function(){
+            let value = $("option:selected", this).val();
+            $.ajax({
+                url:'{{route("filter-municipality",["province_code" => ":id"])}}'.replace(':id',value),
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#edit_municipality").prop('disabled',false);
+                    $("#edit_municipality option").remove();
+                    $("#edit_municipality").append('<option value="" selected disabled>Select Municipality</option>')
+                    convertToJson.map(item => {
+                        $("#edit_municipality").append('<option value="'+item.mun_code+'">'+item.mun_name+'</option>')
+                    })
+                }                
+            });
+        })
+
+
+
+        // filter barangay
+        $("#edit_municipality").change(function(){
+            
+            let region = $("#edit_region option:selected").val();
+            let province = $("#edit_province option:selected").val();
+            let value = $("option:selected",this).val();
+            console.warn(value)                        
+            $.ajax({
+                url:'{{route("filter-barangay",["region_code" => ":id_region_code","province_code" => ":id_province_code","municipality_code" => ":id"])}}'.replace(':id_region_code',region).replace(':id_province_code',province).replace(':id',value),                
+                type:'get',
+                success:function(data){
+                    let convertToJson = JSON.parse(data);
+                    $("#edit_barangay").prop('disabled',false);
+                    $("#edit_barangay option").remove();
+                    $("#edit_barangay").append('<option value="" selected disabled>Select Barangay</option>')
+                    convertToJson.map(item => {
+                        $("#edit_barangay").append('<option value="'+item.bgy_code+'">'+item.bgy_name+'</option>')
+                    })
+                }                
+            });
+        })
 
 
 
@@ -681,27 +945,40 @@
                 rules:{
                     email:{
                             required:true,
-                            email   :true,
-                            remote  :{
+                            email   :true,  
+                            remote:{
                                 url:"{{route('check-email')}}",
                                 type:'get'
-                            }
+                            }                                                    
                         },
                     contact:{
                         required:true,
                         phoneUS: true
                     }, 
+                    role:{
+                        required:true,
+                    },                    
+                    agency:'required',
+                    edit_agency_loc:'required',                                        
+                    region:'required',                   
                 },
                 messages:{
                      email:{
                             required:'<div class="text-danger">Please enter your email.</div>',
-                            email:'<div class="text-danger">Please enter a valid email address.</div>', 
+                            email:'<div class="text-danger">Please enter a valid email address.</div>',                             
                             remote:'<div class="text-danger">This email is already exist.</div>'
                             },                    
                     contact:{
                             required:'<div class="text-danger">Please enter your phone number.</div>',
                             phoneUS: '<div class="text-danger">Invalid format.</div>'
                             },
+                    role:{
+                        required:'<div class="text-danger">Please enter your role</div>',  
+                    },     
+                    agency      :{required:'<div class="text-danger">Please select agency location.</div>'},                                   
+                    edit_agency_loc  :{required:'<div class="text-danger">Please select agency location.</div>'},                    
+                    role        :{required:'<div class="text-danger">Please select your role.</div>'},
+                    region      :{required:'<div class="text-danger">Please select region.</div>'},                   
                 },
                 submitHandler:function(){
 
@@ -732,19 +1009,22 @@
                                         swal("Successfully updated the user info.", {
                                             icon: "success",
                                         }).then(()=>{
-                                            load_datatable.ajax.reload();
+                                            $("#load-datatable").DataTable().ajax.reload();
                                             $("#ViewModal").modal('hide')
                                             $(".update-btn").prop('disabled',false);                                            
                                             $(".update-btn").text('update');   
+                                            $(".update-btn").html('Update');   
                                         });
                                     }else{
                                         $("i").addClass('hide');
                                         swal("Failed to update user info.", {
                                             icon: "error",
                                         }).then(()=>{
-                                            
-                                            $(".update-btn").prop('disabled',false);
-                                            $(".update-btn").text('Update');   
+                                            $("#load-datatable").DataTable().ajax.reload();
+                                            $("#ViewModal").modal('hide')
+                                            $(".update-btn").prop('disabled',false);                                            
+                                            $(".update-btn").text('update');    
+                                            $(".update-btn").html('Update');   
                                             
                                         });
                                     }
@@ -755,7 +1035,11 @@
                             })
                             
                         } else {
-                            $(".update-btn").prop('disabled',false);
+                            $("#load-datatable").DataTable().ajax.reload();
+                            $(".update-btn").prop('disabled',false);                            
+                            $(".update-btn").prop('disabled',false);                                            
+                            $(".update-btn").text('update');    
+                            $(".update-btn").html('Update');   
                             swal("Operation Cancelled.", {
                                 icon: "error",
                             });
@@ -781,6 +1065,79 @@
                     }
                      
                 });
+
+
+
+                $("#SendAccountCreationLinkForm").validate({
+                rules:{
+                    email:{
+                            required:true,
+                            email:true,
+                            remote:{
+                                url:"{{route('check-email')}}",
+                                type:'get'
+                            }
+                        },
+                    program: {
+                        required: true
+                    },
+                },
+                messages:{
+                    email:{
+                            required:'<div class="text-danger">Please enter your email.</div>',
+                            email:'<div class="text-danger">Please enter a valid email address.</div>',                             
+                            remote:'<div class="text-danger">This email is already exist.</div>'
+                    },   
+                    program     :{required:'<div class="text-danger">Please select your program.</div>'}
+                },
+                submitHandler:()=>{
+                    $('.send-link-btn').prop('disbled',true)
+                    swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to send accoun creation link?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((result) => {
+
+
+                    if(result){
+
+                        $('.send-link-btn').prop('disabled',true)
+                        $('.send-link-btn').html('<i class="fas fa-spinner fa-spin"/> Sending')
+                        $.ajax({
+                            url:"{{route('send-account-creation-link')}}",
+                            type:'post',
+                            data:$("#SendAccountCreationLinkForm").serialize(),
+                            success:function(response){       
+                                parses_result = JSON.parse(response);
+
+
+                                swal(parses_result['message'], {
+                                    icon:parses_result['result'],
+                                });
+
+                                $("#SendAccountCreationLinkForm")[0].reset();
+                                
+
+                                $('.send-link-btn').prop('disabled',false)
+                                $('.send-link-btn').html('Send Account Creation Link')
+
+                            }                                                
+                        });
+                    }
+                   
+
+                                
+
+
+                                
+                });
+
+                }
+                });
+                
             
         })
 
@@ -810,6 +1167,10 @@
             <i class='fa fa-plus'></i> Add New
         </button>
 
+        <button type='button' class='btn btn-primary'data-toggle='modal' data-target='#AddByEmailModal' >
+            <i class='fa fa-plus'></i> Add New User By Email
+        </button>
+        
         <button type='button' class='btn btn-info' data-toggle='modal' data-target='#ImportModal' >
             <i class='fa fa-file-excel'></i> Import File
         </button>
@@ -988,12 +1349,12 @@
         </div>
 
 
-         <!-- #modal-view -->
+         <!-- #modal-view VIEW PROFILE-->
          <div class="modal fade" id="ViewModal">
             <div class="modal-dialog" style="max-width: 40%">
                 <div class="modal-content">
                     <div class="modal-header" style="background-color: #f59c1a">
-                        <h4 class="modal-title" style="color: white">View Profile</h4>
+                        <h4 class="modal-title" style="color: white">Update Profile</h4>
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                     </div>
                     <form id="UpdateForm" method="post">
@@ -1007,15 +1368,13 @@
                             <div class="note note-success">
                                 <div class="note-icon"><i class="fas fa-user"></i></div>
                                 <div class="note-content">
-                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="name">John Edcel Zenarosa</label>
-                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role_view">CO Banner Program</label>
+                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:24px" id="name"></label>
+                                    <label style="display: block; text-align: center; font-weight:bold;  font-size:20px" id="role_view"></label>
                                 </div>
                             </div>
 
 
-                            
-                                <br>
-                                <br>
+                    
                             <div class="col-lg-12">
                                 <div class="row">
                                     <dl class="dl-horizontal">                                
@@ -1030,33 +1389,103 @@
                                     </dl>
                                 </div>
 
-                                <div class="row">
-                                    <dl class="dl-horizontal">                                
-                                        <dt class="text-inverse">Region</dt>
-                                        <dd  id="reg_name" ></dd>
-                                        <dt class="text-inverse">Province</dt>
-                                        <dd id="prov_name" ></dd>                                
-                                        <dt class="text-inverse">Municipality</dt>
-                                        <dd id="mun_name"></dd>
-                                        <dt class="text-inverse">Barangay</dt>
-                                        <dd id="bgy_name"></dd>
-                                    </dl>
+                        
+                            </div>
+
+                            <div class="col-lg-12 row">
+                                <div class="form-group">
+                                    <label>Email</label><span style="color:red">*</span>
+                                    <input    type="email" name="email" id="email" class="form-control"  placeholder="example@gmail.com" >
+                                </div>&nbsp;&nbsp;
+                                <div class="form-group">
+                                    <label>Contact</label><span style="color:red">*</span>
+                                    <input    type="number" name="contact" id="contact" class="form-control"  placeholder="9102...." >
                                 </div>
+                            </div>
+
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Agency</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="edit_agency" name="agency" >
+                                        <option selected disabled value="">Select Agency</option>
+                                        @foreach ($get_agency as $item)
+                                            <option  value="{{$item->agency_id}}">{{$item->agency_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>                              
+                            </div><br>
+                            
+                            <div class="col-lg-12 row ">
+                                <label class="col-md-12 row">Agency <span style="color:red">*</span></label> 
+                                <div class="col-md-12  row">
+                                    <div class="form-check ">
+                                        <input class="form-check-input" type="radio" id="defaultRadio1" name="edit_agency_loc"  value="CO" checked  />
+                                        <label class="form-check-label" for="defaultRadio1">Central Office</label>
+                                    </div> &nbsp; &nbsp;                       
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" id="defaultRadio2" name="edit_agency_loc" value="RFO" />
+                                        <label class="form-check-label" for="defaultRadio2">Regional Field Office</label>
+                                    </div>       
+                                </div>                       
+                            </div><br>
+
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Role</label> <span style="color:red">*</span>
+                                    <select class="form-control" name="role_id" id="role_id" >
+                                        <option selected disabled value="">Select Role</option>    
+                                        @foreach ($get_roles as $item)
+                                            <option  value="{{$item->role_id}}">{{$item->role}}</option>
+                                        @endforeach                                
+                                    </select>
+                                </div>                              
+                            </div>                        
+                                          
+
+                            <div class="col-lg-12 row ">
+                                <div class="form-group" style="width:95%">
+                                    <label >Region</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="edit_region" name="region" >
+                                        <option selected disabled value="">Select Region</option>
+                                        @foreach ($get_regions as $item)
+                                            <option value="{{$item->reg_code}}">{{$item->reg_name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>                              
+                            </div>
+
+                            <div class="col-lg-12 row  hide">
+                                <div class="form-group" style="width:95%">
+                                    <label >Province</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="edit_province" name="province" disabled >
+                                        <option selected disabled value="">Select Province</option>
+                                    </select>
+                                </div>                              
+                            </div>
+
+                            <div class="col-lg-12 row  hide">
+                                <div class="form-group" style="width:95%">
+                                    <label >Municipality</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="edit_municipality" name="municipality" disabled >
+                                        <option selected disabled value="">Select Municipality</option>
+                                    </select>
+                                </div>                              
+                            </div>
+
+                            <div class="col-lg-12 row  hide">
+                                <div class="form-group" style="width:95%">
+                                    <label >Barangay</label> <span style="color:red">*</span>
+                                    <select class="form-control" id="edit_barangay" name="barangay" disabled     >
+                                        <option selected disabled value="">Select Barangay</option>
+                                    </select>
+                                </div>                              
                             </div>
 
                             <input type="text" id="update-role" name="role" class="form-control hide"   required="true" >                                              
 
-                            <div class="col-lg-12 row">                            
-                                <div class="form-group">
-                                    <label>Email</label>                                       
-                                        <input type="email" id="email" name="email" class="form-control"   required="true" >                                              
-                                </div>&nbsp;&nbsp;&nbsp;  
-
-                                <div class="form-group">
-                                    <label>Contact</label>
-                                        <input type="number" id="contact" name="contact" class="form-control"  required="true" >                                                        
-                                </div>
-                            </div>
+                          
 
                                 
                             {{--modal body end--}}
@@ -1071,37 +1500,7 @@
         </div>
 
 
-        <!-- #modal-EDIT -->
-        <div class="modal fade" id="UpdateModal">
-            <div class="modal-dialog" style="max-width: 30%">
-                <form id="EditForm" method="POST" >
-                    @csrf
-                    <div class="modal-content">
-                        <div class="modal-header" style="background-color: #f59c1a">
-                            <h4 class="modal-title" style="color: white">Edit Category</h4>
-                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
-                        </div>
-                        <div class="modal-body">
-                            {{--modal body start--}}
-                            <label class="form-label hide"> ID</label>
-                            <input id="edit_id" name="edit_id" type="text" class="form-control hide" name="edit_id"/>
-
-                            <div class="col-lg-12">
-                                <div class="form-group">
-                                    <label>Supplier Name</label>
-                                    <input style="text-transform: capitalize;" id="edit_sup_name" name="edit_sup_name" class="form-control"  placeholder="e.g.: SM" required="true">
-                                </div>
-                            </div>
-                            {{--modal body end--}}
-                        </div>
-                        <div class="modal-footer">
-                            <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
-                            <button type="submit" href="javascript:;" class="btn btn-success">Update</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+      
 
 
 
@@ -1190,6 +1589,47 @@
                         </div>
                     </div>                    
             </div>
+        </div>
+
+
+
+        <!-- #modal-list of not inserted data to database from excel -->
+        <div class="modal fade" id="AddByEmailModal"  data-backdrop="static" data-keyboard="false">
+            <form id="SendAccountCreationLinkForm">
+                @csrf
+                <div class="modal-dialog">                    
+                        <div class="modal-content">
+                            <div class="modal-header bg-primary">
+                                <h4 class="modal-title update-modal-title" style="color: white">Add User</h4>
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                            </div>
+                            <div class="modal-body">
+                                {{--modal body start--}}          
+                                <div class="col-lg-12">
+                                    <div class="form-group" >
+                                        <label >Program</label> <span style="color:red">*</span>
+                                        <select class="form-control" name="program" id="program" >
+                                            <option selected disabled value="">Select Program</option>                                    
+                                            @foreach ($get_programs as $item)
+                                                <option value="{{$item->program_id}}">{{$item->shortname}} ({{$item->description}})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>                              
+                                </div> 
+                                <div class="col-lg-12 ">
+                                    <div class="form-group">
+                                        <label>Email</label><span style="color:red">*</span>
+                                        <input    type="email" name="email" id="email" class="form-control border-info col-lg-12"  placeholder="example@gmail.com" >
+                                </div>
+                                {{--modal body end--}}
+                            </div>
+                            <div class="modal-footer">
+                                <a href="javascript:;" class="btn btn-white" data-dismiss="modal">Close</a>
+                                <button type="submit" class="btn btn-primary send-link-btn">Send Account Creation Link</button>
+                            </div>
+                        </div>                    
+                </div>
+            </form>
         </div>
 
 

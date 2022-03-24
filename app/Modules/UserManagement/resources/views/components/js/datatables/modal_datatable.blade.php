@@ -6,6 +6,7 @@
             destroy: true,
             processing: true,
             serverSide: true,
+            responsive: true,
                 ajax: {
                     url: route,
                 },
@@ -15,13 +16,6 @@
                     {data: 'contact_no', name: 'contact_no'},
                     {data: 'role', name: 'role'},
                 ],
-            responsive: {
-                details: {
-                    renderer: $.fn.dataTable.Responsive.renderer.tableAll( {
-                        tableClass: 'table'
-                    } )
-                }
-            }
         });
     }
 </script>

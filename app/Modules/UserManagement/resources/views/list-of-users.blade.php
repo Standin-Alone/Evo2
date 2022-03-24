@@ -63,7 +63,7 @@
 <!-- end breadcrumb -->
 
 <!-- begin panel -->
-<div class="panel panel-inverse mt-5">
+<div class="panel panel-inverse panel-success mt-5">
     <div class="panel-heading">
         <div class="panel-heading-btn">
             <a href="javascript:;" class="btn btn-xs btn-icon btn-circle btn-default" data-click="panel-expand"><i class="fa fa-expand mt-1"></i></a>
@@ -73,8 +73,8 @@
         @foreach (session()->get('programs_ids') as $prog_id)
         <input type="hidden" id="detected_program" name="detected_program" value="{{$prog_id}}" />
         @endforeach
-        <button type="button" id="add-btn" name="add_role_btn" class="btn btn-sm btn-lime" data-toggle="modal" data-target="#AddModal" style="font-size= 14px;">
-            <i class="fa fa-plus"></i> ADD ROLE
+        <button type="button" id="add-btn" name="add_role_btn" class="btn btn-sm btn-lime" data-toggle="modal" data-target="#AddModal" style="font-size= 13px;">
+            <i class="fa fa-plus"></i> ADD NEW ROLE AND PROGRAM
         </button>
         {{-- <h4 class="panel-title">List of Users</h4> --}}
         {{-- <div class="panel-heading-btn">
@@ -87,11 +87,12 @@
         </div>
         <br>
         <br><br>
-        <table id="user-datatable" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
+        <table id="user-datatable" class="table table-bordered table-hover mt-5 mb-5 text-center" style="width:100%;">            
             <thead class="table-header">
                 <tr>                   
                     <th>FULLNAME</th>
                     <th>EMAIL</th>
+                    <th>ROLE</th>
                     <th>AGENCY</th>
                     <th>REGION</th> 
                     {{-- <th>Province</th>       --}}
@@ -158,7 +159,7 @@
 
                     <div class="modal-content">
                         <div class="modal-header" style="background-color:#6C9738;">
-                            <h4 class="modal-title" style="color: white;">ADD NEW USER ROLE:</h4>
+                            <h4 class="modal-title" style="color: white;">ADD NEW USER ROLE AND PROGRAM:</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                         </div>
                         <div class="modal-body">

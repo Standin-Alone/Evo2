@@ -1,6 +1,7 @@
 <script type="text/javascript">
     $(function() {
         var table = $('#user-datatable').DataTable({
+            destroy: true,
             processing: true,
             serverSide: false,
             responsive: true,
@@ -10,11 +11,12 @@
             columns: [
                 {data: 'fullname_column', name: 'fullname_column'},
                 {data: 'email', name: 'email'},
+                {data: 'role', name: 'role'},
                 {data: 'agency_shortname', name: 'agency_shortname'},
                 {data: 'region', name: 'region'},
                 // {data: 'prov', name: 'prov'},
                 {data: 'action', name: 'action', orderable: true, searchable: true},
-            ]
+            ],
         });
         // seach filter select
         $('.filter-select').on('change', function(){

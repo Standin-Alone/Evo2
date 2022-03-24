@@ -57,6 +57,13 @@ class UserManagementController extends Controller
                                 'prov_name',
                                 'mun_name',
                                 'bgy_name',
+                                DB::raw('CAST( reg as char(50)) as reg'),
+                                DB::raw('CAST( reg as char(50)) as prov'),
+                                DB::raw('CAST( reg as char(50)) as mun'),
+                                DB::raw('CAST( reg as char(50)) as bgy'),
+                                'r.role_id',
+                                'agency_loc',
+                                'agency'
 
                                 )
                             ->leftjoin('program_permissions as pp', 'u.user_id', 'pp.user_id')
@@ -72,6 +79,8 @@ class UserManagementController extends Controller
         return datatables($get_users)->toJson();
     }
     
+
+
 
     public function destroy($id){
         $status = request('status');
@@ -221,25 +230,52 @@ class UserManagementController extends Controller
     // update user info
     public function update(){
         try{
-            $id = request('id');
-            $email = request('email');   
-            $contact = request('contact');
-            $role = request('role');
+            $id             = request('id');
+            $email          = request('email');   
+            $contact        = request('contact');
+            $role           = request('role');
+            $role_id        = request('role_id');
+            $agency         = request('agency');
+            $agency_loc     = request('edit_agency_loc');
+            $region         = request('region');
+            $province       = request('province');
+            $municipality   = request('municipality');
+            $barangay       = request('barangay');
+            
 
             $old_email = db::table('users')
                             ->where('user_id',$id)->first()->email;
+
+            $geo_code = db::table('geo_map')
+                            ->where('reg_code',$region)                            
+                            ->first();
+
             $update_info = db::table('users')
                             ->where('user_id',$id)
                             ->update([
-                                'email' => $email,
-                                'contact_no' => $contact,
+                                'email'      => $email,
+                                'contact_no' => $contact,    
+                                'agency_loc' => $agency_loc,   
+                                'agency' => $agency,                                
+                                'reg'        => $region,                                
                             ]);
 
-            if($update_info){
+            $update_role = db::table('program_permissions')
+                        ->where('user_id',$id)
+                        ->update([
+                            'role_id' => $role_id                            
+                        ]);
 
-                Mail::send('UserManagement::update-email', ["username" => $email,"role" => $role,"old_email" => $old_email], function ($message) use ($email) {
-                    $message->to($email)->subject('Updated User Account');                
-                });
+         
+            if($update_info >= 0 && $update_role  >= 0 ){
+
+
+                if($old_email != $email){
+                    
+                    Mail::send('UserManagement::update-email', ["username" => $email,"role" => $role,"old_email" => $old_email], function ($message) use ($email) {
+                        $message->to($email)->subject('Updated User Account');                
+                    });                    
+                }
 
                 return 'true';
             }else{
@@ -247,7 +283,7 @@ class UserManagementController extends Controller
             }
         }
         catch(\Exception $e){
-            return $e;
+            return $e->getMessage();
         }
     }
 
@@ -276,7 +312,7 @@ class UserManagementController extends Controller
 
         $UserManagementModel->add_new_user_role($user_id, $role_id, $program_id, $status);
 
-        $success_response = ["success" => true, "message" => "The add new user role have been submit successfully!"];
+        $success_response = ["success" => true, "message" => "SAVED SUCCESSFULL!"];
         return response()->json($success_response, 200);
     }
 

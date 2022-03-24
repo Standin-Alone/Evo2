@@ -6,6 +6,8 @@
             destroy: true,
             processing: true,
             serverSide: true,
+            lengthChange: false,
+            searching: false,
                 ajax: {
                     url: route,
                 },

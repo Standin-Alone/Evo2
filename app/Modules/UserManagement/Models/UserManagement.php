@@ -13,8 +13,10 @@ class UserManagement extends Model
     public function get_program_permission(){
         $region = session()->get('region');
 
+        $selected_program_id_dropdown = session()->get('Default_Program_Id');
+
         $query = DB::table('program_permissions as pp')
-                        ->select('u.email','u.user_id', 'u.first_name','u.last_name','u.middle_name','u.ext_name','a.agency_shortname','gr.region')
+                        ->select('u.email','u.user_id', 'u.first_name', 'r.role', 'u.last_name','u.middle_name','u.ext_name','a.agency_shortname','gr.region')
                         ->leftJoin('roles as r', 'pp.role_id', '=', 'r.role_id')
                         ->leftJoin('programs as p','pp.program_id', '=', 'p.program_id')
                         ->leftJoin('users as u','pp.user_id', '=', 'u.user_id')
@@ -23,11 +25,14 @@ class UserManagement extends Model
                         ->leftJoin('geo_map as g', 'u.reg', '=', 'g.reg_code')
                         ->leftJoin('geo_region as gr', 'gr.code_reg', '=', 'g.reg_code')
                         ->where('pp.status','=', 1)
-                        ->when($region, function ($query, $region) {
+                        ->when($region, function ($query, $region) use($selected_program_id_dropdown){
                             if($region != 13){
-                                $query->where('u.reg', '=', $region)->groupBy('u.user_id');
+                                $query->where('u.reg', '=', $region)
+                                      ->where('pp.program_id', '=', $selected_program_id_dropdown)
+                                      ->groupBy('u.user_id');
                             }else{
-                                $query->groupBy('u.user_id');
+                                $query->where('pp.program_id', '=', $selected_program_id_dropdown)
+                                      ->groupBy('u.user_id');
                             }
                         })
                         ->get();
@@ -76,8 +81,11 @@ class UserManagement extends Model
     }
 
     public function get_program(){
+        $selected_program_id_dropdown = session()->get('Default_Program_Id');
+
         $query = DB::table('programs')
                         ->select('program_id', 'title', 'shortname', 'description')
+                        ->where('program_id', '=', $selected_program_id_dropdown)
                         ->get();
 
         return $query;
