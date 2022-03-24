@@ -44,9 +44,10 @@ class MobileAppController extends Controller
                     $to_email = $authenticate->email;
      
                     $supplier = db::table('program_permissions as pp')
-                              ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id','approval_status')
+                              ->select(db::raw("CONCAT(first_name,' ',last_name) as full_name"), 'supplier_id', 'u.user_id','approval_status','gm.reg_code','reg_name','supplier_name')
                               ->join('supplier as s', 's.supplier_id', 'pp.user_id')
-                              ->join('users as u', 'u.user_id', 'pp.user_id')                                      
+                              ->join('users as u', 'u.user_id', 'pp.user_id')       
+                              ->join('geo_map as gm', 'gm.reg_code', 'u.reg')                                      
                               ->where('u.user_id', $authenticate->user_id)->first();
               
                 
@@ -123,6 +124,9 @@ class MobileAppController extends Controller
                                 "supplier_id" => $supplier->supplier_id,
                                 "user_id"     => $supplier->user_id,
                                 "full_name"   => $supplier->full_name,
+                                "region_code" => $supplier->reg_code,
+                                "region_name" => $supplier->reg_name,                                
+                                "company_name"=> $supplier->supplier_name,
                                 "programs"    => $get_programs
                             ]);
                         }else{
@@ -185,7 +189,7 @@ class MobileAppController extends Controller
 
                     // send reset link to email
                     $this->loginModel->email_reset_link($uuid, $email, $username, $firstname, $lastname, $extname, $role_sets, $date_created);
-                    $success_response = ['success'=> true, 'message' => 'The reset password link is have been send to your email: "'.$email.'".', 'auth' => false];
+                    $success_response = ['success'=> true, 'message' => 'The reset password link  have been send to your email: "'.$email.'".', 'auth' => false];
                     return response()->json($success_response, 200);
                 }
                 else{
@@ -301,7 +305,9 @@ class MobileAppController extends Controller
                 'shortname as program',
                 'title as program_title',
                  DB::raw("YEAR(transac_date) as year_transac"),   
-                 DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address")                           
+                 DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address"),
+                 'vt.transaction_id'
+
               )
             ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
             ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
@@ -314,19 +320,39 @@ class MobileAppController extends Controller
             ->skip($offset)
             ->take(2)               
             ->get();
-
-
-
-            foreach ($get_scanned_vouchers as $key => $item) {
-                
-                
-                $item->base64 = base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$item->file_name));
-                
-            }                        
         
 
+            $total_vouchers = db::table('voucher as v')
+                                    ->select(
+                                        db::raw('COUNT(*) as total_vouchers')
+                                    )
+                                    ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
+                                    ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
+                                    ->join('programs as p', 'p.program_id','v.program_id')      
+                                    ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
+                                    ->where('supplier_id', $supplier_id)              
+                                    ->groupBy('v.reference_no')
+                                    ->orderBy('transac_date', 'DESC')                             
+                                    ->first()->total_vouchers;
 
-        return json_encode($get_scanned_vouchers);
+            
+            foreach ($get_scanned_vouchers as $key => $item) {
+                $get_attachments  = db::table('voucher_attachments')
+                                        ->where('transaction_id',$item->transaction_id)                                        
+                                        ->get();    
+
+                $image_array = [];
+
+                foreach($get_attachments as $attachment_key => $attachment_item){
+                    array_push($image_array,base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)));                    
+                }
+
+                
+                $item->base64 = $image_array;
+
+            }                        
+        
+        return json_encode(["scanned_vouchers"=>$get_scanned_vouchers,"total_vouchers"=>$total_vouchers]);
     }
 
 
@@ -402,7 +428,7 @@ class MobileAppController extends Controller
     public function get_voucher_info()
     {
         //
-        $time_limit         = 1; //in minutes
+        $time_limit         = 5; //in minutes
         $reference_num      = request('reference_num');
         $supplier_id        = request('supplier_id');
         $programs           = request('programs');
@@ -565,10 +591,11 @@ class MobileAppController extends Controller
                     $upload_other_document = Storage::disk('uploads')->put($upload_folder . '/' . $other_document_name, base64_decode($item_file));
 
 
-                    // count error if upload fail
-                    if(!$upload_other_document){
-                        $upload_error_count++;
+                    $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $other_document_name);
 
+                    // count error if upload fail
+                    if(!$check_file){
+                        $upload_error_count++;
                     }else{    
                
 
@@ -618,7 +645,8 @@ class MobileAppController extends Controller
 
             //     File::makeDirectory($base_path.$upload_folder,0755,true);                                                
             // }
-
+            
+            
                
             if (File::isDirectory($base_path)) {                                
                 $program_path = $base_path.'/attachments'.'/'.$program;
@@ -643,8 +671,12 @@ class MobileAppController extends Controller
             $upload_front_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_front_name, base64_decode($id_front));
             $upload_back_id = Storage::disk('uploads')->put($upload_folder . '/' . $id_back_name, base64_decode($id_back));
 
+            
+            $check_file_front_id =  Storage::disk('uploads')->exists($upload_folder . '/' . $id_front_name) ;
+            $check_file_back_id  = Storage::disk('uploads')->exists($upload_folder . '/' . $id_back_name);
+
             // count error if upload fail
-            if(!($upload_front_id && $upload_back_id)){
+            if(!($check_file_front_id && $check_file_back_id)){
                 $upload_error_count++;
             }else{                
                  $attachment_info[] = [
@@ -698,9 +730,11 @@ class MobileAppController extends Controller
             } 
 
             $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
-            
+
+            $check_file_back_id  = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
+
             // count error if upload fail
-            if(!$upload_image){
+            if(!$check_file_back_id){
                 $upload_error_count++;
             }else{    
                
