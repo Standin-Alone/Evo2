@@ -63,7 +63,8 @@ class UserManagementController extends Controller
                                 DB::raw('CAST( reg as char(50)) as bgy'),
                                 'r.role_id',
                                 'agency_loc',
-                                'agency'
+                                'agency_id',
+                                
 
                                 )
                             ->leftjoin('program_permissions as pp', 'u.user_id', 'pp.user_id')

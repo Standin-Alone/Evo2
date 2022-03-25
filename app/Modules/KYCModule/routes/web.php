@@ -29,6 +29,8 @@ Route::get('/list_of_generated_disbursement_by_file_name', 'KYCModuleController@
 
 Route::post('/kyc/upload-file-only', 'KYCModuleController@upload_file_only')->name('upload-file-only');
 Route::get('/kyc/get-ingest-files', 'KYCModuleController@get_to_ingest_files')->name('get-ingest-files');
+Route::get('/kyc/get-ingested-files', 'KYCModuleController@get_ingested_files')->name('get-ingested-files');
 Route::post('/kyc/ingest-file', 'KYCModuleController@ingest_file')->name('ingest-file');
+Route::post('/kyc/update-agency', 'KYCModuleController@update_agency')->name('update-agency');
 
 

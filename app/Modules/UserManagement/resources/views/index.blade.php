@@ -122,7 +122,7 @@
                         
                         
 
-                            return  "<button type='button' class='btn view-modal-btn btn-outline-warning' user_id="+row['user_id']+" role_id="+row['role_id']+"  agency_loc="+row['agency_loc']+" agency_id="+row['agency']+" reg="+row['reg']+" prov="+row['prov']+"  mun="+row['mun']+"  bgy="+row['bgy']+"   data-toggle='modal' data-target='#ViewModal'>"+
+                            return  "<button type='button' class='btn view-modal-btn btn-outline-warning' user_id="+row['user_id']+" role_id="+row['role_id']+"  agency_name="+row['agency_name']+" agency_loc="+row['agency_loc']+" agency_id="+row['agency_id']+" reg="+row['reg']+" prov="+row['prov']+"  mun="+row['mun']+"  bgy="+row['bgy']+"   data-toggle='modal' data-target='#ViewModal'>"+
                                         "<i class='fa fa-edit'></i> Edit"+
                                     "</button>   "+(
                                     row['status'] == 1 ?
@@ -180,25 +180,26 @@
             
             
             let agency_loc = $(this).attr('agency_loc');
+            
             let agency_id = $(this).attr('agency_id');
 
 
             $("input[name='edit_agency_loc'][value=" + agency_loc + "]"). prop('checked', true)
-            $("#edit_agency").val(agency_id).change();
+            
 
             $.ajax({
-                url:'{{route("filter-role",["agency_loc" => ":id"])}}'.replace(':id',agency_loc),
+                url:'{{route("ac-filter-role",["agency_loc" => ":id"])}}'.replace(':id',agency_loc),
                 
                 success:function(data){
                     let convertToJson = JSON.parse(data);
-                    $("#role_id").prop('disabled',false);
-                    $("#role_id option").remove();
-                    $("#role_id").append('<option value="" selected disabled>Select Role</option>')
+                    $("#edit_role_id").prop('disabled',false);
+                    $("#edit_role_id option").remove();
+                    $("#edit_role_id").append('<option value="" selected disabled>Select Role</option>')
                     convertToJson.map(item => {
-                        $("#role_id").append('<option value="'+item.role_id+'">'+item.role+'</option>')
+                        $("#edit_role_id").append('<option value="'+item.role_id+'">'+item.role+'</option>')
                     })
                      
-                    $("#role_id").val(role_id); 
+                    $("#edit_role_id").val(role_id); 
                 }                
             });
 
@@ -243,18 +244,25 @@
 
 
             }
+            check_edit_agency = $("input[name='edit_agency_loc']:checked").val();
+            if(check_edit_agency == 'CO'){
+                $("#edit_region").val(13).change();
+                $("#edit_region option").filter(function(){
+                    return this.value != 13;
+                }).hide()
+            }
             
-
-
             // put values in update form
             $("#user_id").val(id);                         
-            $("#email").val(email);
-            $("#contact").val(contact);
+            $("#edit_email").val(email);
+            $("#edit_contact").val(contact);
             $("#agency_view").text(agency);
             $("#program_view").text(program);
-            $("#reg_name").text(reg_name);
-            $("#mun_name").text(mun_name);
-            $("#prov_name").text(prov_name);
+            $("#edit_reg_name").text(reg_name);
+            $("#edit_mun_name").text(mun_name);
+            $("#edit_prov_name").text(prov_name);
+            $("#edit_role_id").val(role_id).change();
+            $("#edit_agency").val(agency_id).change();
             $("#bgy_name").text(bgy_name);            
             $("#edit_region").val(reg).change();
             $("#edit_municipality").val(mun).change();
@@ -502,17 +510,19 @@
         // edit agency loc
         $("input[name='edit_agency_loc']").change(function(){
             let value = $(this).val();
-            
+                
             $.ajax({
-                url:'{{route("filter-role",["agency_loc" => ":id"])}}'.replace(':id',value),
+                url:'{{route("ac-filter-role",["agency_loc" => ":id"])}}'.replace(':id',value),
                 type:'get',
-                success:function(data){
+                success:function(data){ 
+         
                     let convertToJson = JSON.parse(data);
-                    $("#role_id").prop('disabled',false);
-                    $("#role_id option").remove();
-                    $("#role_id").append('<option value="" selected disabled>Select Role</option>')
+                    
+                    $("#edit_role_id").prop('disabled',false);
+                    $("#edit_role_id option").remove();
+                    $("#edit_role_id").append('<option value="" selected disabled>Select Role</option>')
                     convertToJson.map(item => {
-                        $("#role_id").append('<option value="'+item.role_id+'">'+item.role+'</option>')
+                        $("#edit_role_id").append('<option value="'+item.role_id+'">'+item.role+'</option>')
                     })
                 }                
             }); 
@@ -946,10 +956,10 @@
                     email:{
                             required:true,
                             email   :true,  
-                            remote:{
-                                url:"{{route('check-email')}}",
-                                type:'get'
-                            }                                                    
+                            // remote:{
+                            //     url:"{{route('check-email')}}",
+                            //     type:'get'
+                            // }                                                    
                         },
                     contact:{
                         required:true,
@@ -966,7 +976,7 @@
                      email:{
                             required:'<div class="text-danger">Please enter your email.</div>',
                             email:'<div class="text-danger">Please enter a valid email address.</div>',                             
-                            remote:'<div class="text-danger">This email is already exist.</div>'
+                            // remote:'<div class="text-danger">This email is already exist.</div>'
                             },                    
                     contact:{
                             required:'<div class="text-danger">Please enter your phone number.</div>',
@@ -1395,11 +1405,11 @@
                             <div class="col-lg-12 row">
                                 <div class="form-group">
                                     <label>Email</label><span style="color:red">*</span>
-                                    <input    type="email" name="email" id="email" class="form-control"  placeholder="example@gmail.com" >
+                                    <input    type="email" name="email" id="edit_email" class="form-control"  placeholder="example@gmail.com" >
                                 </div>&nbsp;&nbsp;
                                 <div class="form-group">
                                     <label>Contact</label><span style="color:red">*</span>
-                                    <input    type="number" name="contact" id="contact" class="form-control"  placeholder="9102...." >
+                                    <input    type="number" name="contact" id="edit_contact" class="form-control"  placeholder="9102...." >
                                 </div>
                             </div>
 
@@ -1434,7 +1444,7 @@
                             <div class="col-lg-12 row ">
                                 <div class="form-group" style="width:95%">
                                     <label >Role</label> <span style="color:red">*</span>
-                                    <select class="form-control" name="role_id" id="role_id" >
+                                    <select class="form-control" name="role_id" id="edit_role_id" >
                                         <option selected disabled value="">Select Role</option>    
                                         @foreach ($get_roles as $item)
                                             <option  value="{{$item->role_id}}">{{$item->role}}</option>

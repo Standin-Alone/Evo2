@@ -324,15 +324,14 @@ class MobileAppController extends Controller
 
             $total_vouchers = db::table('voucher as v')
                                     ->select(
-                                        db::raw('COUNT(*) as total_vouchers')
+                                        db::raw('COUNT(distinct vt.transaction_id) as total_vouchers')
                                     )
                                     ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
                                     ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
                                     ->join('programs as p', 'p.program_id','v.program_id')      
                                     ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
                                     ->where('supplier_id', $supplier_id)              
-                                    ->groupBy('v.reference_no')
-                                    ->orderBy('transac_date', 'DESC')                             
+                                    ->groupBy('v.reference_no')                                    
                                     ->first()->total_vouchers;
 
             

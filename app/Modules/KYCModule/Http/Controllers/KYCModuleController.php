@@ -41,16 +41,10 @@ class KYCModuleController extends Controller
     {   $action = session('check_module_path');
         session()->put('progress',0);
         session()->save();     
-   
        
-        // $io->on('connection', function ($socket) use ($io) {
-        //      $socket->broadcast->emit('progress','sample');
-        //     $socket->on('progress', function ($data) use ($socket) {
-           
-        //     });
-        // });
         $get_region = db::table('geo_map')->select(DB::raw('DISTINCT reg_code'),'reg_name')->get();
-        return view("KYCModule::new-file-upload",compact('get_region','action'));
+        $get_agency = db::table('agency')->get();
+        return view("KYCModule::new-file-upload",compact('get_region','action','get_agency'));
     }
 
     // render view of other kyc report
@@ -61,57 +55,7 @@ class KYCModuleController extends Controller
         return view("KYCModule::reports.other-kyc-report",compact('get_region','action'));
     }
 
-    // import function of kyc profiles
-    // public function import(){        
-
-    //     $file = request()->file('file');
-    //     $provider  = '';
-      
-    //     $upload_path = 'temp_excel/kyc';
-  
-
-    //     $upload_folder  = $upload_path.'/'.Carbon::now()->year;
-
-    //     if(!File::isDirectory($upload_path)){
-            
-    //         File::makeDirectory($upload_path, 0775, true);                                
-    //         $by_year_path = $upload_path.'/'.Carbon::now()->year;
-    //         if(!File::isDirectory($by_year_path)){
-
-    //             File::makeDirectory($by_year_path, 0775, true);
-    //         }
-    //     }
-
-
-    //     $get_filename = $file->getClientOriginalName();
-        
-        
-
-    //     // check file name if it has fintech provider
-    //     if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
-
-    //         if(str_contains($get_filename,'USSC')){
-    //             $provider = 'UMSI';
-    //         }elseif(str_contains($get_filename,'SPTI') ){
-    //             $provider = 'SPTI';
-    //         }
-
-    //         $kyc_import = new KYCImport($provider,$get_filename);
-            
-    //         Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($file));
-            
-        
-    //         Excel::import($kyc_import, $file);
-    //         return $kyc_import->getRowCount();
-    //     }else{
-    //         return json_encode(["message" => 'filename error']);
-    //     }
-        
-        
-
-        
-       
-    // }
+    
 
     public function show(){
         
@@ -119,7 +63,7 @@ class KYCModuleController extends Controller
 
 
 
-        $get_records = db::table('kyc_profiles')
+        $get_records = db::table('kyc_profiles as kp')
                                 ->select(
                                     'rsbsa_no',
                                     db::raw("CONCAT(first_name,' ',last_name) as full_name"),
@@ -130,6 +74,7 @@ class KYCModuleController extends Controller
                                     DB::raw('date_uploaded'),
                                     'region'                      
                                 )                                
+                                ->where('kp.program_id',session('Default_Program_Id'))
                                 ->orderBy('date_uploaded','DESC')
                                 ->get();
 
@@ -159,6 +104,7 @@ class KYCModuleController extends Controller
                                         DB::raw("IF(fintech_provider = 'UMSI','USSC',fintech_provider) as fintech_provider"),
                                         'total_rows','total_inserted','kf.date_uploaded as date_uploaded')
                                 ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
+                                ->where('kp.program_id',session('Default_Program_Id'))
                                 ->groupBy('region','province','file_name')    
                                 ->orderBy('kf.date_uploaded','DESC')                            
                                 ->get();
@@ -176,7 +122,8 @@ class KYCModuleController extends Controller
                             ->select(db::raw('count(kyc_id) as count_spti'))
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','SPTI')                                 
-                            ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))    
+                            ->where('kp.program_id',session('Default_Program_Id'))                             
                             ->value('count_spti');
 
         $count_ussc =db::table('kyc_profiles as kp')
@@ -184,17 +131,20 @@ class KYCModuleController extends Controller
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','UMSI')                                 
                             ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->where('kp.program_id',session('Default_Program_Id'))
                             ->value('count_ussc');
 
          $count_files_today =db::table('kyc_files')          
                             ->select(db::raw('count(kyc_file_id) as count_files_stoday'))                               
                             ->where(db::raw('DATE(date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->where('kp.program_id',session('Default_Program_Id'))
                             ->value('count_files_stoday');
 
         $count_records_today =db::table('kyc_profiles as kp')          
                             ->select(db::raw('count(kyc_id) as count_records_stoday'))  
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                             
                             ->where(db::raw('DATE(kf.date_uploaded)'),db::raw('CURDATE()'))                                 
+                            ->where('kp.program_id',session('Default_Program_Id'))
                             ->value('count_records_stoday');
 
 
@@ -220,13 +170,14 @@ class KYCModuleController extends Controller
                             ->select(db::raw('count(kyc_id) as count_spti'))
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','SPTI')                                 
-                            
+                            ->where('kp.program_id',session('Default_Program_Id'))
                             ->value('count_spti');
 
         $count_ussc =db::table('kyc_profiles as kp')
                             ->select(db::raw('count(kyc_id) as count_ussc'))
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
-                            ->where('fintech_provider','UMSI')                                                             
+                            ->where('fintech_provider','UMSI')                    
+                            ->where('kp.program_id',session('Default_Program_Id'))                                         
                             ->value('count_ussc');
 
          $count_files =db::table('kyc_files')          
@@ -235,7 +186,8 @@ class KYCModuleController extends Controller
 
         $count_records =db::table('kyc_profiles as kp')          
                             ->select(db::raw('count(kyc_id) as count_records'))  
-                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                                                         
+                            ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                                                      
+                            ->where('kp.program_id',session('Default_Program_Id'))   
                             ->value('count_records');
 
 
@@ -296,6 +248,7 @@ class KYCModuleController extends Controller
                                     DB::raw('date_uploaded'),
                                     'region'                                    
                                 )  
+                                ->where('kp.program_id',session('Default_Program_Id'))
                                 ->where('dbp_batch_id',$dbp_batch_id)                                                                                                               
                                 ->get();
         return Datatables::of($get_records)->make(true);
@@ -313,6 +266,7 @@ class KYCModuleController extends Controller
                             ->join(DB::raw('(
                                 select * from geo_map group by iso_prv
                                 ) as gm'),'db.prv_code','gm.iso_prv')                                                                
+                            ->where('kp.program_id',session('Default_Program_Id'))
                             ->orderBy('db.date_approved','DESC')
                             ->groupBy(['db.approved_batch_seq'])                            
                             ->get();
@@ -340,7 +294,7 @@ class KYCModuleController extends Controller
         }
 
 
- 
+        $count_success  = 0;
         
         foreach($file as $key => $item_file){
          
@@ -349,56 +303,72 @@ class KYCModuleController extends Controller
             if(is_file($item_file)){
             $get_filename = $item_file->getClientOriginalName();
             $check_file_exist = db::table('ingest_files')->where('file_name',$get_filename)->take(1)->get();
+            $get_programs = db::table('programs')->where('status','1')->get();
+                
             
-            if($check_file_exist->isEmpty()){
-
-
+            foreach($get_programs as $program_value){
                 
-                db::table('ingest_files')->insert(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
+                $check_program_filename =  str_contains($get_filename,trim($program_value->shortname));
+                
+                if($check_program_filename){
+                    $count_success++;
+                }
+
+            }
+                                
+            
+            if($count_success > 0 ){
+                if($check_file_exist->isEmpty()){
+
 
                     
-                // check file name if it has fintech provider
-                if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
+                    db::table('ingest_files')->insert(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
 
-                    if(str_contains($get_filename,'USSC')){
-                        $provider = 'UMSI';
-                    }elseif(str_contains($get_filename,'SPTI') ){
-                        $provider = 'SPTI';
-                    }   
-                
-                
-                Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                        
+                    // check file name if it has fintech provider
+                    if(str_contains($get_filename,'USSC') || str_contains($get_filename,'SPTI') ){
+
+                        if(str_contains($get_filename,'USSC')){
+                            $provider = 'UMSI';
+                        }elseif(str_contains($get_filename,'SPTI') ){
+                            $provider = 'SPTI';
+                        }   
                     
-                
                     
-                $result =  json_encode(["message" => 'true']);
+                    Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                        
+                    
+                        
+                    $result =  json_encode(["message" => 'true']);
+                    }else{
+                        $result = json_encode(["message" => 'filename error']);
+                    }
                 }else{
-                    $result = json_encode(["message" => 'filename error']);
+
+                    foreach($check_file_exist as $val){
+                        if($val->status == '0'){
+                            $check_filename = db::table('kyc_files')->where('file_name',$get_filename)->whereColumn('total_inserted','total_rows')->first();
+
+                            if($check_filename){
+                                db::table('ingest_files')->insert(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
+                                Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));                            
+                                $result = json_encode(["message" => 'true']);
+                            }else{
+                                $result = json_encode(["message" => 'Some files is already exist.']);
+                            }
+                            
+                        }else{
+                            Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                            $result = json_encode(["message" => 're-upload']);
+                        }
+
+                    }
+                    
+                    
                 }
             }else{
-
-                foreach($check_file_exist as $val){
-                    if($val->status == '0'){
-                        $check_filename = db::table('kyc_files')->where('file_name',$get_filename)->whereColumn('total_inserted','total_rows')->first();
-
-                        if($check_filename){
-                            db::table('ingest_files')->insert(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
-                            Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));                            
-                            $result = json_encode(["message" => 'true']);
-                        }else{
-                            $result = json_encode(["message" => 'Some files is already exist.']);
-                        }
-                        
-                    }else{
-                        Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
-                        $result = json_encode(["message" => 're-upload']);
-                    }
-
-                }
-                
-                
+                $result = json_encode(["message" => 'filename error']);
             }
-        
 
             }
         }
@@ -425,18 +395,16 @@ class KYCModuleController extends Controller
 
        
       
-        
 
-  
-        
 
         $file_name = request('file_name');
+        $agency_id = request('agency_id');
         $provider  = '';
         $result = '';
         $upload_path = 'temp_excel/kyc';
         
-        $count_error = 0;
-
+        
+      
         $upload_folder  = $upload_path.'/'.Carbon::now()->year;
 
         if(!File::isDirectory($upload_path)){
@@ -450,12 +418,25 @@ class KYCModuleController extends Controller
         }
 
         $error_storage = [];
+        
     foreach($file_name as $item_filename){
-
+        $count_success = 0;
         $count = '';
-
+        $count_error = 0 ;
         $get_filename = $item_filename;
 
+
+        $get_programs = db::table('programs')->where('status','1')->get();
+        $program_id = '';
+        foreach($get_programs as $program_value){
+            
+            $check_program_filename =  str_contains($get_filename,$program_value->shortname);
+
+            if($check_program_filename){
+                $program_id = $program_value->program_id;
+            }
+
+        }
         
         $check_file = db::table('kyc_files')->where('file_name',$get_filename)->whereColumn('total_inserted','total_rows')->take(1)->get();
 
@@ -470,11 +451,12 @@ class KYCModuleController extends Controller
                     $provider = 'SPTI';
                 }
     
-                $kyc_import = new KYCImport($provider,$get_filename);
+                $kyc_import = new KYCImport($provider,$get_filename,$agency_id,$program_id);
                 
                                                     
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
                 $import_file = $kyc_import->newResult();
+                
                 
                 if($import_file){
                 
@@ -522,6 +504,50 @@ class KYCModuleController extends Controller
 
     }
 
+    // GET INGESTED FILES
+    public function get_ingested_files(){
+
+        $get_records = db::table('kyc_files as kf')
+                            ->select('kf.date_uploaded','kp.kyc_file_id','file_name','agency_name','kf.total_inserted','kf.total_rows')
+                            ->leftJoin('kyc_profiles as kp','kf.kyc_file_id','kp.kyc_file_id')
+                            ->leftJoin('agency as a','a.agency_id','kp.agency_id')
+                            ->where('total_inserted','!=','0')
+                            ->groupBy('kf.file_name')
+                            ->orderBy('kf.date_uploaded')
+                            ->get();
+
+        return Datatables::of($get_records)->make(true);
+    }
+
+    // UPDATE FILE AGENCY
+    public function update_agency(){
+
+        try{
+
+            $result = '';
+            $message= '';
+
+            $kyc_file_id = request('kyc_file_id');
+            $agency_id = request('agency_id');
+
+            $update_agency = db::table('kyc_profiles')
+                                ->where('kyc_file_id',$kyc_file_id)
+                                ->update(['agency_id'=>$agency_id]);
+            
+            if($update_agency){
+                $result = 'true';
+                $message = 'Successfully updated the agency.';
+            }else{
+                $result = 'false';
+                $message = 'No changes has been made.';
+            }
+
+            return json_encode(['message'=>$message,"result"=>$result]);
+        }catch(\Exception $e ){
+
+            return json_encode(['message'=>$e->getMessage(),"result"=>'false']);
+        }
+    }
 
 
 
