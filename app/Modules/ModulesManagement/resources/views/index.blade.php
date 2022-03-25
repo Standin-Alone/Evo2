@@ -17,6 +17,10 @@
             font-size: 20px;
             font-family: calibri
         }
+        
+        th{
+            text-align: center
+        }
     </style>
 @endsection
 

@@ -151,39 +151,40 @@ table.dataTable td {
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/2.0.0/js/buttons.colVis.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
-    <script src="{{url('assets/js/socket.js')}}"></script>
+    {{-- <script src="{{url('assets/js/socket.js')}}"></script> --}}
     <script src="assets/plugins/dropzone/min/dropzone.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.all.min.js"></script>
     
     <script>
       
         var token = '{{Str::random(20)}}';
-        socket().on("connect", function() {                    
-                //  get progress of uploading               
-                socket().emit('join-room',token);           
-            });
+        // socket().on("connect", function() {                    
+        //         //  get progress of uploading               
+        //         socket().emit('join-room',token);           
+        //     });
 
             
-        socket().on('progress',function(data){
+        // socket().on('progress',function(data){
                     
-                if(data.room == token){
-                    $(".progress-load").css('width',data.percentage+'%')
-                    $(".progress-load").html(data.percentage+'%')
-                    $(".filename-label").html(data.filename+' is now uploading');
-                    // if(data.percentage == '100'){
+        //         if(data.room == token){
+        //             $(".progress-load").css('width',data.percentage+'%')
+        //             $(".progress-load").html(data.percentage+'%')
+        //             $(".filename-label").html(data.filename+' is now uploading');
+        //             // if(data.percentage == '100'){
                         
-                    //     // $(".progress-load").css('width','0%')
-                    //     // $(".progress-load").html('0')
-                    //     $(".progress-load").css('width',data.percentage+'%')
-                    //     $(".progress-load").html(data.percentage+'%')
-                    // }else{
-                    //     $(".progress-load").css('width',data.percentage+'%')
-                    //     $(".progress-load").html(data.percentage+'%')
-                    // }
-                }
+        //             //     // $(".progress-load").css('width','0%')
+        //             //     // $(".progress-load").html('0')
+        //             //     $(".progress-load").css('width',data.percentage+'%')
+        //             //     $(".progress-load").html(data.percentage+'%')
+        //             // }else{
+        //             //     $(".progress-load").css('width',data.percentage+'%')
+        //             //     $(".progress-load").html(data.percentage+'%')
+        //             // }
+        //         }
         
             
                 
-            })
+        //     })
      
                     
         $(document).ready(function(){
@@ -255,7 +256,9 @@ table.dataTable td {
                                             }
                                     ],
                                 columns:[                                        
-                                        {data:'file_name',title:'File'},     
+                                        {data:'file_name',title:'File'},                                             
+                                        {data:'shortname',title:'Program'},   
+                                        {data:'agency_shortname',title:'Agency'},   
                                         {data:'total_inserted',title:'Total Records Saved',render: $.fn.dataTable.render.number(',').display,orderable:false},
                                         {data:'total_rows',title:'Total Records',render: $.fn.dataTable.render.number(','),orderable:false},                              
                                         {data:'date_uploaded',title:'Date Uploaded'},
@@ -285,7 +288,7 @@ table.dataTable td {
                             
                                         
                                 ],                     
-                                order: [[ 4, "desc" ]]                                                  
+                                order: [[ 5, "desc" ]]                                                  
                             });
 
          // show more details button
@@ -438,12 +441,16 @@ table.dataTable td {
             
             
             if(myDropzone.files.length == 0){               
+                $(".upload-btn").html("<i class='fa fa-cloud-download-alt'></i> Upload and Ingest");
+                $(".upload-btn").prop('disabled',false);
                             
-                            swal("Please upload atleast 1 file", {
-                                icon: "error",
-                            });
+                Swal.fire(
+                        'Message',
+                        'Please upload at least 1 file.',
+                        'error'
+                        )  ;
                                                             
-                            return false; //if an error happened stop here kaya return false hnd na dapat mag tuloy sa baba.
+                return false; //if an error happened stop here kaya return false hnd na dapat mag tuloy sa baba.
             }else{
 
                 error_file_count = 0;
@@ -455,43 +462,97 @@ table.dataTable td {
                     }
                 })
 
+
+               
                 if(error_file_count == 0){
-                    // upload file here
-                    swal({
-                    title: "Do you really want to upload these files?",                
-                    icon: "warning",
-                    buttons: true,
-                    dangerMode: false,
-                    })
-                    .then((confirm) => {
+
+
+                    Swal.fire({
+                title: 'Select Agency',
+                input: 'select',
+                inputOptions: {
+                    @foreach ($get_agency as $agency_value )
+                    {{ $agency_value->agency_id }}:'{{ $agency_value->agency_name }}',
+                    @endforeach                                        
+                },
+                inputPlaceholder: '-- Select Agency --',
+                showCancelButton: true,
+                inputValidator: (value) => {
                     
-                        if(confirm){
+                    return new Promise((resolve) => {
+                    if (value) {    
+
+                        resolve();
+                        
+                        
                             
+                    } else {
+                        resolve('You need to select agency')
+                    }
+                    })
+                }
+                }).then((res)=>{
+
+
+                        if(res.isConfirmed){
+                            // upload file here
+                            Swal.fire({
+                                title: 'Are you sure you want to ingest these files?',
+                                text: "You won't be able to revert this!",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonColor: '#3085d6',
+                                cancelButtonColor: '#d33',
+                                confirmButtonText: 'Yes, Ingest it!'
+                            })
+                            .then((result) => {
                             
-                        
+                                if(result.isConfirmed){                                                                                                        
+                                
+                                // $(".upload-btn").hide();
+                                $(".upload-btn").html('<i class="fas fa-spinner fa-spin"></i> Ingesting...');
+                                $(".upload-btn").prop('disabled',true);
 
-                        
-                        $(".upload-btn").hide();
-                        $(".progress").show();
-                        $(".filename-label").show();
-                        myDropzone.processQueue();
+                                // $(".progress").show();
+                                // $(".filename-label").show();
+                                myDropzone.on("sending", function(file, xhr, formData) { 
 
-                           
-                        
+                                // Will sendthe filesize along with the file as POST data.
 
-                        $.each(myDropzone.files, function(k,v){
-                            myDropzone_status.push(v.status);
-                        });
-                                                
+                                formData.append("agency_id", res.value);  
 
+                                });
+
+                                myDropzone.processQueue();
+
+                                
+                                
+
+                                $.each(myDropzone.files, function(k,v){
+                                    myDropzone_status.push(v.status);
+                                });
+                                                        
+
+                                }
+                                else{
+                                    Swal.fire(
+                                        'Message',
+                                        'Operation cancelled',
+                                        'error'
+                                        )
+                                }
+                            })
                         }
                     });
                    
                 }else{
-
-                    swal("Invalid files will be automatically remove.", {
-                            icon: "error",
-                    }).then(()=>{
+                    $(".upload-btn").html("<i class='fa fa-cloud-download-alt'></i> Upload and Ingest");
+                    $(".upload-btn").prop('disabled',false);
+                    Swal.fire(
+                    'Message',
+                    'Invalid files will be automatically remove.',
+                    'error'
+                    ).then(()=>{
                         
                         myDropzone.files.forEach((item)=>{
                         if(!item.upload.filename.includes('USSC') && !item.upload.filename.includes('DISRET')){                                                                           
@@ -500,11 +561,7 @@ table.dataTable td {
                         })                        
 
                     });
-                }
-                            
-          
-
-
+                }     
             }
    
 
@@ -534,9 +591,13 @@ table.dataTable td {
 
  
             if (!file.accepted){
-                swal("Something went wrong!", {
-                    icon: "error",
-                });
+                $(".upload-btn").html("<i class='fa fa-cloud-download-alt'></i> Upload and Ingest");
+                $(".upload-btn").prop('disabled',false);
+                Swal.fire(
+                        'Message',
+                        'Something went wrong!',
+                        'error'
+                        )
                 file.previewElement.remove();
             }
 
@@ -547,76 +608,79 @@ table.dataTable td {
             success: function(file, response){
 
                 check_upload = true;
-                
+                $(".upload-btn").html("<i class='fa fa-cloud-download-alt'></i> Upload and Ingest");
+                $(".upload-btn").prop('disabled',false);
                 if(check_upload != false){
-                    swal("Files has been successfully uploaded.", {
-                    icon: "success",
-                }).then(()=>{
-                    $(".filename-label").html('');
-                    $(".filename-label").hide();
-                    parses_result = JSON.parse(response);
-                    error_data = []
-                    parses_result.map((item)=>{
-                        item['error_array'].map((error_item)=>{
-                            console.warn(error_item);
-                            error_data.push(error_item);
-                        })
+                    Swal.fire(
+                        'Message',
+                        'Successfully uploaded and ingested.',
+                        'success'
+                    ).then(()=>{
+                        $(".filename-label").html('');
+                        $(".filename-label").hide();
+                        parses_result = JSON.parse(response);
+                        error_data = []
+                        parses_result.map((item)=>{
+                            item['error_array'].map((error_item)=>{
+                                console.warn(error_item);
+                                error_data.push(error_item);
+                            })
+                            
+                        }); 
+
                         
-                    }); 
+                    
+                            if(error_data.length != 0){
+
+                        
+                            // show error logs of file upload
+                            $("#ErrorDataModal").modal('show');
+                            $("#error-datatable").DataTable({
+                                    destroy:true,
+                                    data: error_data ,
+                                    columns:[
+                                        {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
+                                        {data:'fintech_provider',title:'Provider',orderable:false},
+                                        {title:'Name',orderable:false,render:function(data,type,row){
+                                            return row.first_name + ' ' + row.last_name;
+                                        }},                                                    
+                                        {data:'barangay',title:'Barangay',orderable:false},
+                                        {data:'city_municipality',title:'Municipality',orderable:false},
+                                        {data:'province',title:'Province',orderable:false},
+                                        {data:'region',title:'Region',orderable:false},
+                                        {data:'remarks',title:'Remarks',orderable:false},
+                                        {data:'file_name',title:'',visible:false},                                                                                                        
+                                    ],
+                                    drawCallback:function(data){
+                                                let api = this.api();
+                                                let rows = api.rows({page:'current'}).nodes();
+                                                let last = null ;
+
+                                                api.column(8,{page:"current"})
+                                                    .data()
+                                                    .each((group,i)=>{
+                                                        
+                                                        console.warn(group);
+                                                            if(last != group && group != null){
+                                                                $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                                                                last = group;
+                                                            }
+                                                    });
+                                            },     
+                                });
+                            }   
 
                     
-                 
-                        if(error_data.length != 0){
-
-                    
-                        // show error logs of file upload
-                        $("#ErrorDataModal").modal('show');
-                        $("#error-datatable").DataTable({
-                                destroy:true,
-                                data: error_data ,
-                                columns:[
-                                    {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
-                                    {data:'fintech_provider',title:'Provider',orderable:false},
-                                    {title:'Name',orderable:false,render:function(data,type,row){
-                                        return row.first_name + ' ' + row.last_name;
-                                    }},                                                    
-                                    {data:'barangay',title:'Barangay',orderable:false},
-                                    {data:'city_municipality',title:'Municipality',orderable:false},
-                                    {data:'province',title:'Province',orderable:false},
-                                    {data:'region',title:'Region',orderable:false},
-                                    {data:'remarks',title:'Remarks',orderable:false},
-                                    {data:'file_name',title:'',visible:false},                                                                                                        
-                                ],
-                                drawCallback:function(data){
-                                            let api = this.api();
-                                            let rows = api.rows({page:'current'}).nodes();
-                                            let last = null ;
-
-                                            api.column(8,{page:"current"})
-                                                .data()
-                                                .each((group,i)=>{
-                                                    
-                                                    console.warn(group);
-                                                        if(last != group && group != null){
-                                                            $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
-                                                            last = group;
-                                                        }
-                                                });
-                                        },     
-                            });
-                        }   
-
-                
-                    
-                    
-                    $(".upload-btn").show();
-                    $(".progress").hide();
-                    $(".filename").hide();
-                    $("#list-of-ingested-files-datatable").DataTable().ajax.reload();
-                    Dropzone.forElement('#uploadingDropzone').removeAllFiles(true);
-                    $(".progress-load").css('width','0%')
-                    $(".progress-load").html('0')
-                });
+                        
+                        
+                        $(".upload-btn").show();
+                        // $(".progress").hide();
+                        // $(".filename").hide();
+                        $("#list-of-ingested-files-datatable").DataTable().ajax.reload();
+                        Dropzone.forElement('#uploadingDropzone').removeAllFiles(true);
+                        $(".progress-load").css('width','0%')
+                        $(".progress-load").html('0')
+                    });
                 }
                 
             }, 

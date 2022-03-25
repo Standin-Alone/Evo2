@@ -23,15 +23,22 @@ class ReturnedDisbursementController extends Controller
      */
     public function index()
     {
-        
-        return view('ReturnedDisbursement::returned-disbursement-uploading');        
+        $get_agency = db::table('agency')->get();
+        return view('ReturnedDisbursement::returned-disbursement-uploading',compact('get_agency'));        
     }   
 
-    public function ingest_files($file,$file_last_id,$filename,$db_total_rows,$token){
+    public function ingest_files($agency_id,$program_id,$file,$file_last_id,$filename,$db_total_rows,$token){
         try{
-
-        $client = new Client(new Version2X(request()->getHost().':8080'));   
-        $client->initialize();
+        //     $options = [
+        //         'context' => [
+        //             'ssl' => [
+        //                 'verify_peer' => false,
+        //                 'verify_peer_name' => false
+        //             ]
+        //         ]
+        //     ];
+        // $client = new Client(new Version2X('https://imp-app.da.gov.ph'.':8080',$options));   
+        // $client->initialize();
         
         $get_file             = explode("\n", file_get_contents($file));
         $error_array          = [];
@@ -40,9 +47,12 @@ class ReturnedDisbursementController extends Controller
         $imc_array            = [];
 
         foreach($get_file as $item){
-
-            $row = explode($delimiter,$item);
-            array_push($imc_array, $row);                
+            
+            if(!empty($item)){
+                $row = explode($delimiter,$item);
+                array_push($imc_array, $row);                
+            }
+            
         }
 
         $total_records = count($imc_array);
@@ -60,7 +70,7 @@ class ReturnedDisbursementController extends Controller
         foreach($imc_array as $key => $item){
 
             $sum_percentage += $compute_percentage;            
-            $client->emit('message', ['percentage' => round($sum_percentage,2), 'room' => $token, 'filename' => $filename]);
+            // $client->emit('message', ['percentage' => round($sum_percentage,2), 'room' => $token, 'filename' => $filename]);
         
             
             $date                  = Carbon::parse($item[1]);
@@ -104,9 +114,10 @@ class ReturnedDisbursementController extends Controller
 
             // get rsbsa to check rsbsa
             $check_rsbsa = db::table('dbp_return')
+                             ->where('program_id',$program_id)
                              ->where('rsbsa_no',$rsbsa_no)->first();
 
-            $check_account_number = db::table('dbp_return')->select('account_number')->where('account_number',$account_number)->first();
+            $check_account_number = db::table('dbp_return')->select('account_number')->where('account_number',$account_number)->where('program_id',$program_id)->first();
 
             
             // check if rsbsa exist, PSGC exist 
@@ -116,6 +127,8 @@ class ReturnedDisbursementController extends Controller
                 $insert_dbp_return = db::table('dbp_return')
                                         ->insert([
                                             "return_file_id"        => $file_last_id,
+                                            "program_id"            => $program_id,
+                                            "agency_id"             => $agency_id,
                                             "date"                  => $date,
                                             "funding_currency"      => $funding_currency,
                                             "imc"                   => $imc,
@@ -228,7 +241,7 @@ class ReturnedDisbursementController extends Controller
             db::table('dbp_returned_files')   
                 ->where('return_file_id',$file_last_id)
                 ->update(["total_inserted" => $total_saved_records + $get_last_total_saved_records]);
-        }   
+        }
 
 
         $upload_path = 'temp_text_file/returned_disbursement_files';
@@ -261,7 +274,7 @@ class ReturnedDisbursementController extends Controller
         Storage::disk('temp_text_file')->put($upload_folder.'/'.$error_log_name.'-error.json',$serialize_data);
 
 
-        $client->close();
+        // $client->close();
 
         return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array];
     }catch(\Exception $e){
@@ -281,6 +294,7 @@ class ReturnedDisbursementController extends Controller
 
         $file = request()->file('dbp_returned_file');
         $token = request('token');
+        $agency_id = request('agency_id');
         
         
         $upload_path = 'temp_text_file/returned_disbursement_files';
@@ -311,65 +325,78 @@ class ReturnedDisbursementController extends Controller
         
 
         foreach($file as $key => $item_file){
-            
+            $count_success = 0;    
             $get_filename = $item_file->getClientOriginalName();    
 
             $check_file_exist = db::table('dbp_returned_files')->where('file_name',$get_filename)->take(1)->get();
-          
-            if(is_file($item_file)){
+            $get_programs = db::table('programs')->where('status','1')->get();
+            $get_program_id = '';
             
-            
-            
-            
-            
-            if($check_file_exist->isEmpty()){
-
-
+            foreach($get_programs as $program_value){
                 
-                $last_id = db::table('dbp_returned_files')->insertGetId(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
+                $check_program_filename =  str_contains($get_filename,trim($program_value->shortname));
                 
-                // check file name if it has fintech provider
-                if(str_contains($get_filename,'USSC')){
-
-                    if(str_contains($get_filename,'USSC')){
-                        $provider = 'UMSI';
-                    }
-                
-  
-               $upload_file =  Storage::disk('temp_text_file')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
-               $re_check_file_exist = db::table('dbp_returned_files')->where('file_name',$get_filename)->take(1)->get();
-
-                //uploadfile
-                if($upload_file){   
-                    $file_to_ingest = $upload_folder.'/'.$get_filename;
-                    $total_records = $re_check_file_exist[0]->total_rows;
-                    $ingest_file = $this->ingest_files($file_to_ingest,$last_id,$get_filename,$total_records,$token);
-
-                    array_push($completed_array,$ingest_file);
-                }   
-                    
-                    $result =  json_encode(["message" => 'true']);
-                }else{
-                    $result = json_encode(["message" => 'filename error']);
+                if($check_program_filename){
+                    $count_success++;
+                    $get_program_id = $program_value->program_id;
                 }
-            }else{
-                
-                $upload_file =  Storage::disk('temp_text_file')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
 
-
-                $last_id = $check_file_exist[0]->return_file_id;
-                $total_records = $check_file_exist[0]->total_rows;
-
-                $file_to_ingest = $upload_folder.'/'.$get_filename;
-                
-                $ingest_file = $this->ingest_files($file_to_ingest,$last_id,$get_filename,$total_records,$token);                
-                array_push($completed_array,$ingest_file);
-                // array_push($completed_array,$ingest_file);
             }
+            
+
+            if($count_success > 0 ){
+                if(is_file($item_file)){                                                            
+                    if($check_file_exist->isEmpty()){
+
+
+                
+                        $last_id = db::table('dbp_returned_files')->insertGetId(['file_name' => $get_filename ,'created_by_user_id' => session('user_id') ]);
+                        
+                        // check file name if it has fintech provider
+                        if(str_contains($get_filename,'USSC')){
+
+                            if(str_contains($get_filename,'USSC')){
+                                $provider = 'UMSI';
+                            }
+                        
+        
+                    $upload_file =  Storage::disk('temp_text_file')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                    $re_check_file_exist = db::table('dbp_returned_files')->where('file_name',$get_filename)->take(1)->get();
+
+                        //uploadfile
+                        if($upload_file){   
+                            $file_to_ingest = $upload_folder.'/'.$get_filename;
+                            $total_records = $re_check_file_exist[0]->total_rows;
+                            $ingest_file = $this->ingest_files($agency_id,$get_program_id,$file_to_ingest,$last_id,$get_filename,$total_records,$token);
+
+                            array_push($completed_array,$ingest_file);
+                        }   
+                            
+                            $result =  json_encode(["message" => 'true']);
+                        }else{
+                            $result = json_encode(["message" => 'filename error']);
+                        }
+                    }else{
+                
+                        $upload_file =  Storage::disk('temp_text_file')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+
+
+                        $last_id = $check_file_exist[0]->return_file_id;
+                        $total_records = $check_file_exist[0]->total_rows;
+
+                        $file_to_ingest = $upload_folder.'/'.$get_filename;
+                        
+                        $ingest_file = $this->ingest_files($agency_id,$get_program_id,$file_to_ingest,$last_id,$get_filename,$total_records,$token);                
+                        array_push($completed_array,$ingest_file);
+                        
+                    }
 
             
 
             }
+        }else{
+            $result = json_encode(["message" => 'filename error']);
+        }
         }
 
         return json_encode($completed_array);
@@ -386,8 +413,20 @@ class ReturnedDisbursementController extends Controller
     //get list of ingested files
     public function get_files(){
         $get_records = db::table('dbp_returned_files as drf')
-                            ->select('drf.file_name',DB::raw('IF(total_inserted is NULL,0,total_inserted) as total_inserted'),DB::raw('IF(total_rows is NULL,0,total_rows) as total_rows'),'drf.date_uploaded','return_file_id',DB::raw(" (select CONCAT(first_name,' ',last_name) as full_name  from users where user_id = drf.created_by_user_id) as created_by"))                            
-                            ->where('created_by_user_id',session('user_id'))                                                                   
+                            ->select('drf.file_name',
+                                'p.shortname',
+                                'a.agency_shortname',
+                                DB::raw('IF(total_inserted is NULL,0,total_inserted) as total_inserted'),
+                                DB::raw('IF(total_rows is NULL,0,total_rows) as total_rows'),
+                                'drf.date_uploaded',
+                                'drf.return_file_id',
+                                DB::raw(" (select CONCAT(first_name,' ',last_name) as full_name  from users where user_id = drf.created_by_user_id) as created_by"
+                            ))    
+                            ->join('dbp_return as dr','drf.return_file_id','dr.return_file_id')                            
+                            ->join('agency as a','a.agency_id','dr.agency_id')                            
+                            ->join('programs as p','p.program_id','dr.program_id')                            
+                            ->where('created_by_user_id',session('user_id'))                 
+                            ->groupBy('drf.file_name')                                                  
                             ->orderBy('drf.date_uploaded','DESC')                            
                             ->get();
 
