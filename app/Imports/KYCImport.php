@@ -21,14 +21,18 @@ class KYCImport implements ToCollection,WithStartRow
     private $message = '';
     protected $provider;
     protected $file_name;
+    protected $agency_id;
+    protected $program_id;
     protected $client;
 
     private $error_data;
     private $region;
     
-    public function __construct($provider, $file_name){
+    public function __construct($provider, $file_name,$agency_id,$program_id){
         $this->provider = $provider;   
-        $this->file_name = $file_name;    
+        $this->file_name = $file_name;
+        $this->agency_id = $agency_id;    
+        $this->program_id = $program_id;    
        
     
     }
@@ -61,6 +65,8 @@ class KYCImport implements ToCollection,WithStartRow
         $rows_inserted = 0;
         $provider = $this->provider;
         $file_name = $this->file_name;
+        $agency_id = $this->agency_id;
+        $program_id = $this->program_id;
         $collection_count = $collection->count();
         $region_for_mail = '';
         $compute_percentage = (1 / $collection_count ) * 100;
@@ -110,7 +116,7 @@ class KYCImport implements ToCollection,WithStartRow
 
      
 
-            
+      
 
         foreach($collection as $key => $item){
         
@@ -122,7 +128,7 @@ class KYCImport implements ToCollection,WithStartRow
 
             // check rsbsa no if exists
             $rsbsa_no   = $item[0];                
-            $check_rsbsa_no = db::table('kyc_profiles')->select('rsbsa_no')->where('rsbsa_no',trim($rsbsa_no))->first();
+            $check_rsbsa_no = db::table('kyc_profiles')->select('rsbsa_no')->where('rsbsa_no',trim($rsbsa_no))->where('program_id',$program_id)->first();
             
 
             // calculate the progress of importing;
@@ -137,8 +143,7 @@ class KYCImport implements ToCollection,WithStartRow
                         
                   
                     // insert to kyc profiles
-                    // db::transaction(function() use ($item,&$rows_inserted , $PRIVATE_KEY , $provider, &$error_data,&$region_for_mail,$file_name,$collection_count,$get_kyc_file_id){
-                    
+                   
   
 
                         $format_birthday = strpos($item[13], '/') || is_int($item[13]) ? \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($item[13]) : $item[13];
@@ -184,9 +189,12 @@ class KYCImport implements ToCollection,WithStartRow
                                                 ->first(); 
                                                 
                         // $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get(); for encryption of accout number
-                        $check_account_number = db::table('kyc_profiles')->select('account_number')->where('account_number',$account)->first();
-          
-     
+                        $check_account_number = db::table('kyc_profiles')                                                                
+                                                                ->where('program_id',$program_id)
+                                                                ->where('account_number',$account)   
+                                                                ->first();
+                        
+                        
                         if(!$check_rsbsa_no && !$check_account_number  && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
                          
                             // set region for send email
@@ -207,8 +215,9 @@ class KYCImport implements ToCollection,WithStartRow
                         $insert_kyc = db::table('kyc_profiles')
                                 ->insert([
                                     'kyc_id'              => $uuid,
-                                    'kyc_file_id'         => $get_kyc_file_id,
-                                    // 'data_source'         => $data_source,
+                                    'agency_id'           => $agency_id,
+                                    'program_id'          => $program_id,
+                                    'kyc_file_id'         => $get_kyc_file_id,                                    
                                     'fintech_provider'    => $fintech_provider,
                                     'rsbsa_no'            => $rsbsa_no,
                                     'first_name'          => preg_replace('/[0-9]+/','',str_replace("Ñ","N", mb_strtoupper($first_name,'UTF-8'))),
@@ -236,8 +245,7 @@ class KYCImport implements ToCollection,WithStartRow
                                     'sourceoffunds'       => str_replace("Ñ","N", mb_strtoupper($sourceoffunds,'UTF-8')),
                                     'mothers_maiden_name' => str_replace("Ñ","N", mb_strtoupper($mothers_maiden_name == '' ? 'NMMN' : $mothers_maiden_name,'UTF-8')),
                                     'no_parcel'           => $no_parcel,
-                                    'total_farm_area'     => $total_farm_area,
-                                    // 'account_number'   => DB::raw("AES_ENCRYPT('".$account."','".$PRIVATE_KEY."')"),
+                                    'total_farm_area'     => $total_farm_area,                                    
                                     'account_number'      => $account,
                                     'remarks'             => mb_strtoupper($remarks),
                                     'uploaded_by_user_id' => session('uuid'),
@@ -320,11 +328,7 @@ class KYCImport implements ToCollection,WithStartRow
                             ];
                                 
                             array_push($error_data,$data);
-                        }
-
-                        
-                    // });             
-           
+                        }                  
         }
         
         $this->error_data = $error_data;
@@ -350,10 +354,10 @@ class KYCImport implements ToCollection,WithStartRow
         $message = "You have new ".$rows_inserted." records to approve.";
 
         // send email to rfo program focals.
-        if($rows_inserted != 0){
-            $global_notif_model = new GlobalNotificationModel;
-            $global_notif_model->send_email($role,$region,$message);
-        }
+        // if($rows_inserted != 0){
+        //     $global_notif_model = new GlobalNotificationModel;
+        //     $global_notif_model->send_email($role,$region,$message);
+        // }
 
       
 
