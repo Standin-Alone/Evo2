@@ -1,6 +1,7 @@
 <?php
 
-
+// get unit type
+Route::get('/api/unit-types','MobileAppController@get_unit_types')->name('unit-types');
 
 Route::group(array('module'=>'Login','namespace' => '\App\Modules\Login\Http\Controllers'), function() {
     // Forgot Password Screen

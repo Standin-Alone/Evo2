@@ -301,6 +301,7 @@ class MobileAppController extends Controller
                 'rsbsa_no',
                 'file_name',
                 'v.amount_val as current_balance',
+                'v.amount as default_balance',
                 'vt.voucher_details_id',   
                 'shortname as program',
                 'title as program_title',
@@ -324,16 +325,14 @@ class MobileAppController extends Controller
 
             $total_vouchers = db::table('voucher as v')
                                     ->select(
-                                        db::raw('COUNT(distinct vt.transaction_id) as total_vouchers')
+                                        db::raw('COUNT( vt.transaction_id) as total_vouchers')
                                     )
-                                    ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
-                                    ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
-                                    ->join('programs as p', 'p.program_id','v.program_id')      
-                                    ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
-                                    ->where('supplier_id', $supplier_id)              
-                                    ->groupBy('v.reference_no')                                    
+                                    ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')                                                
+                                    ->join('programs as p', 'p.program_id','v.program_id')                                          
+                                    ->where('vt.supplier_id', $supplier_id)              
+                                    ->groupBy('vt.transaction_id')                                    
                                     ->first()->total_vouchers;
-
+               
             
             foreach ($get_scanned_vouchers as $key => $item) {
                 $get_attachments  = db::table('voucher_attachments')
@@ -343,7 +342,13 @@ class MobileAppController extends Controller
                 $image_array = [];
 
                 foreach($get_attachments as $attachment_key => $attachment_item){
-                    array_push($image_array,base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)));                    
+                    if(file_exists('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)){
+                        array_push($image_array,base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)));                    
+                    }else{
+                        
+                        array_push($image_array,base64_encode(file_get_contents('public/edcel_images/no-image.jpg')));                    
+                    }
+                    
                 }
 
                 
@@ -427,7 +432,7 @@ class MobileAppController extends Controller
     public function get_voucher_info()
     {
         //
-        $time_limit         = 5; //in minutes
+        $time_limit         = 60; //in minutes
         $reference_num      = request('reference_num');
         $supplier_id        = request('supplier_id');
         $programs           = request('programs');
@@ -460,81 +465,96 @@ class MobileAppController extends Controller
             if($this->get_time() == 'true'){
 
                 $get_last_scanned_by_id = db::table('voucher')->where('reference_no',$reference_num)->first()->last_scanned_by_id;
-                if (!$get_info->isEmpty()) {
-                
-                
+                $check_if_fully_claimed = db::table('voucher')->where('reference_no',$reference_num)->first();
 
-                    $check_transaction_time =  db::table('voucher')->select(DB::raw('TIMESTAMPDIFF(MINUTE,scanned_date,NOW()) as minutes_scanned'),DB::raw('TIMESTAMPDIFF(SECOND,scanned_date,NOW()) as seconds_scanned'))
-                                                    ->where('reference_no', $reference_num)->first();
+                // check if fully claimed 
+                if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->amount_val == 0.00){
 
+                    return json_encode(["Message"           => 'true',
+                                        "data"              => $get_info, 
 
-                        
-                        $get_voucher = db::table('voucher')->where('reference_no', $reference_num)->first();
-                        $get_elapsed_minutes = $time_limit - $check_transaction_time->minutes_scanned ;
-                        $get_elapsed_seconds = 300 - $check_transaction_time->seconds_scanned ;
-                        $check_if_one_time =  $get_info[0]->one_time_transaction;
-
-                        // check transaction time to access voucher 
-                        // condition for same supplier || ($check_transaction_time->minutes_scanned <= $time_limit && $get_last_scanned_by_id == $supplier_id)
-                        if(($check_transaction_time->minutes_scanned >= $time_limit )  || (is_null($check_transaction_time->minutes_scanned))){
-
-                            // set already scanned
-                            db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1','scanned_date' => db::raw('CURRENT_TIMESTAMP'),'last_scanned_by_id' => $supplier_id]);
-                            
-                            $get_region       = $get_voucher->reg;
-                            $get_province     = $get_voucher->prv;
-                            $get_municipality = $get_voucher->mun;
-                            $get_brgy         = $get_voucher->brgy;
-                
-                
-                            $get_geo_map =  db::table('geo_map')
-                                        ->where('reg_code', $get_region)
-                                        ->where('prov_code', $get_province)
-                                        ->where('mun_code', $get_municipality)
-                                        ->where('bgy_code', $get_brgy)
-                                        ->first();
-                
-                            $check_balance = $get_voucher->amount_val;
-                
-                            foreach($get_info as $item){          
-                                $item->Available_Balance = $check_balance;
-                                $item->Region            = $get_geo_map->reg_name;
-                                $item->Province          = $get_geo_map->prov_name;
-                                $item->Municipality      = $get_geo_map->mun_name;
-                                $item->Barangay          = $get_geo_map->bgy_name;
-                            }
-                            
-                            $get_program_items   = $this->getProgramItems($supplier_id,$reference_num);
-                            $get_recent_claiming = $this->get_transactions_history($reference_num);
-                
-                            // validate voucher
-                            if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->Available_Balance == 0.00){
-                                db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
-                            }   
-
-                            $minutes_to_miliseconds = $time_limit * 60000;
-
-                            return json_encode(["Message"           => 'true',
-                                                    "data"          => $get_info, 
-                                                    "program_items" => $get_program_items,
-                                                    "history"       => $get_recent_claiming,
-                                                    "time_limit"   => $minutes_to_miliseconds
-                                                ]);
-                
-                        
-                        }else{
-                          
-                            return json_encode(["Message" => 'on-going process',"Minutes" => $get_elapsed_minutes,"Seconds" => $get_elapsed_seconds ]);                        
-                            // return json_encode(["Message" => 'already scanned']);
-                        }
-
-                  
-            
-
-                }else{
-                    db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
-                    return json_encode(["Message" => 'false']);            
+                                    ]);
                 }
+                else{
+
+            
+                    if (!$get_info->isEmpty()) {
+                    
+                    
+
+                        $check_transaction_time =  db::table('voucher')->select(DB::raw('TIMESTAMPDIFF(MINUTE,scanned_date,NOW()) as minutes_scanned'),DB::raw('TIMESTAMPDIFF(SECOND,scanned_date,NOW()) as seconds_scanned'))
+                                                        ->where('reference_no', $reference_num)->first();
+
+
+                            
+                            $get_voucher = db::table('voucher')->where('reference_no', $reference_num)->first();
+                            $get_elapsed_minutes = $time_limit - $check_transaction_time->minutes_scanned ;
+                            $get_elapsed_seconds = 300 - $check_transaction_time->seconds_scanned ;
+                            $check_if_one_time =  $get_info[0]->one_time_transaction;
+
+                            // check transaction time to access voucher 
+                            // condition for same supplier || ($check_transaction_time->minutes_scanned <= $time_limit && $get_last_scanned_by_id == $supplier_id)
+                            if(($check_transaction_time->minutes_scanned >= $time_limit )  || (is_null($check_transaction_time->minutes_scanned)) || ($check_transaction_time->minutes_scanned <= $time_limit && $get_last_scanned_by_id == $supplier_id)){
+
+                                // set already scanned
+                                db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '1','scanned_date' => db::raw('CURRENT_TIMESTAMP'),'last_scanned_by_id' => $supplier_id]);
+                                
+                                $get_region       = $get_voucher->reg;
+                                $get_province     = $get_voucher->prv;
+                                $get_municipality = $get_voucher->mun;
+                                $get_brgy         = $get_voucher->brgy;
+                    
+                    
+                                $get_geo_map =  db::table('geo_map')
+                                            ->where('reg_code', $get_region)
+                                            ->where('prov_code', $get_province)
+                                            ->where('mun_code', $get_municipality)
+                                            ->where('bgy_code', $get_brgy)
+                                            ->first();
+                    
+                                $check_balance = $get_voucher->amount_val;
+                    
+                                foreach($get_info as $item){          
+                                    $item->Available_Balance = $check_balance;
+                                    $item->Region            = $get_geo_map->reg_name;
+                                    $item->Province          = $get_geo_map->prov_name;
+                                    $item->Municipality      = $get_geo_map->mun_name;
+                                    $item->Barangay          = $get_geo_map->bgy_name;
+                                }
+                                
+                                $get_program_items   = $this->getProgramItems($supplier_id,$reference_num);
+                                $get_recent_claiming = $this->get_transactions_history($reference_num);
+                    
+                                // validate voucher
+                                if($get_info[0]->voucher_status == 'FULLY CLAIMED' || $get_info[0]->Available_Balance == 0.00){
+                                    db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+                                }   
+
+                                $minutes_to_miliseconds = $time_limit * 60000;
+                                $unit_types = db::table('unit_types')->select('type as label','type as value')->get();
+                                return json_encode(["Message"           => 'true',
+                                                        "data"          => $get_info, 
+                                                        "program_items" => $get_program_items,
+                                                        "unit_types"    => $unit_types,
+                                                        "history"       => $get_recent_claiming,
+                                                        "time_limit"   => $minutes_to_miliseconds
+                                                    ]);
+                    
+                            
+                            }else{
+                            
+                                return json_encode(["Message" => 'on-going process',"Minutes" => $get_elapsed_minutes,"Seconds" => $get_elapsed_seconds ]);                        
+                                // return json_encode(["Message" => 'already scanned']);
+                            }
+
+                    
+                
+
+                    }else{
+                        db::table('voucher')->where('reference_no', $reference_num)->update(['is_scanned' => '0']);
+                        return json_encode(["Message" => 'false']);            
+                    }
+            }
                     
             }else{
 
@@ -999,15 +1019,18 @@ class MobileAppController extends Controller
                         db::table('voucher_transaction')->insert(
                             [
                                 'voucher_details_id'  => $voucher_details_uuid,
-                                'transaction_id'     => $transaction_id,
+                                'transaction_id'      => $transaction_id,
                                 'reference_no'        => $voucher_info->reference_no,
                                 'supplier_id'         => $voucher_info->supplier_id,
                                 'sub_program_id'      => $item->sub_id,
                                 'fund_id'             =>  $voucher_info->fund_id,
                                 'quantity'            =>  $item->quantity,
-                                'amount'              =>  $item->price,
-                                'item_category'        =>  $item->item_category,
-                                'total_amount'        =>  $item->total_amount,
+                                'amount'              =>  $item->price,                                
+                                'item_category'       =>  $item->item_category,
+                                'total_amount'        =>  $item->cash_added > 0 ? $item->total_amount  - $item->cash_added  : $item->total_amount,
+                                'cash_added'          =>  $item->cash_added,
+                                'unit_type'           =>  $item->unit_type,
+                                
                                 'latitude'            =>  $voucher_info->latitude,
                                 'longitude'           =>  $voucher_info->longitude,
                                 'transac_by_id'       =>  $voucher_info->supplier_id,
@@ -1138,7 +1161,9 @@ class MobileAppController extends Controller
             $sub_program_id   = $value['sub_id'];
             $quantity   = $value['quantity'];
             $amount   = $value['price'];
-            $total_amount   = $value['total_amount'];
+            $total_amount   = $value['cash_added'] > 0 ? $value['total_amount']  - $value['cash_added'] : $value['total_amount'];
+            $unit_type   = $value['unit_type'];
+            $cash_added   = $value['cash_added'];
             
 
 
@@ -1166,7 +1191,9 @@ class MobileAppController extends Controller
                                             'sub_program_id' => $sub_program_id,
                                             'quantity' => $quantity,
                                             'amount' => $amount,
-                                            'total_amount' => $total_amount
+                                            'total_amount' => $total_amount,
+                                            'unit_type' => $unit_type,
+                                            'cash_added' => $cash_added
                                         ]);
 
                                           
@@ -1238,7 +1265,10 @@ class MobileAppController extends Controller
             $sub_program_id   = $value['sub_id'];
             $quantity   = $value['quantity'];
             $amount   = $value['price'];
-            $total_amount   = $value['total_amount'];
+            $total_amount   =   $value['cash_added'] > 0 ? $value['total_amount']  - $value['cash_added']  : $value['total_amount'];
+            $unit_type   = $value['unit_type'];
+            $cash_added   = $value['cash_added'];
+            
             
 
 
@@ -1263,7 +1293,9 @@ class MobileAppController extends Controller
                                             'sub_program_id'               => $sub_program_id,
                                             'quantity'                     => $quantity,
                                             'amount'                       => $amount,
-                                            'total_amount'                 => $total_amount
+                                            'total_amount'                 => $total_amount,
+                                            'unit_type'                    => $unit_type,
+                                            'cash_added'                   => $cash_added
                                         ]);
 
                                         
@@ -1292,7 +1324,9 @@ class MobileAppController extends Controller
                         'sub_program_id'               => $sub_program_id,
                         'quantity'                     => $quantity,
                         'amount'                       => $amount,
-                        'total_amount'                 => $total_amount
+                        'total_amount'                 => $total_amount,
+                        'unit_type'                    => $unit_type,
+                        'cash_added'                   => $cash_added
                     ]);
     
                     
@@ -1315,7 +1349,9 @@ class MobileAppController extends Controller
                                             'sub_program_id' => $sub_program_id,
                                             'quantity'       => $quantity,
                                             'amount'         => $amount,
-                                            'total_amount'   => $total_amount
+                                            'total_amount'   => $total_amount,
+                                            'unit_type'      => $unit_type,
+                                            'cash_added'     => $cash_added
                                         ]);
 
                     $count_success = count($cart);
@@ -1343,9 +1379,10 @@ class MobileAppController extends Controller
     public function get_payout_list($supplier_id,$offset){
         $supplier_id      = request('supplier_id');
 
-        $get_batch_payout = db::table('payout_gif_batch')                                
+        $get_batch_payout = db::table('payout_gif_batch as pgb')         
+                                ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
                                 ->where('supplier_id',$supplier_id)                                
-                                ->orderBy('transac_date','desc')
+                                ->orderBy('pgb.transac_date','desc')
                                 ->skip($offset)
                                 ->take(10)                                      
                                 ->get();
@@ -1354,12 +1391,12 @@ class MobileAppController extends Controller
                                 ->select(db::raw('SUM(amount) as total_paid_payout'))
                                 ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')
                                 ->where('supplier_id',$supplier_id)                                
-                                ->where('iscompleted','1')                                
-                                ->orderBy('transac_date','desc')  
-                                ->groupBy('pgd.batch_id')                              
-                                ->first()->total_paid_payout;    
-
-        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => $total_paid_payout]);
+                                ->where('iscomplete','1')             
+                                ->groupBy('pgd.batch_id')                     
+                                ->orderBy('pgb.transac_date','desc')                                                              
+                                ->first();
+        
+        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => isset($total_paid_payout) ? $total_paid_payout->total_paid_payout : 0]);
     }
 
     // get payout list (PAYOUT SUMMARY SCREEN)
@@ -1400,8 +1437,7 @@ class MobileAppController extends Controller
         
         $check_if_category_exist = db::table('voucher_transaction_draft')
                                             ->where('reference_no',$reference_no)
-                                            ->where('supplier_id',$supplier_id)
-                                            
+                                            ->where('supplier_id',$supplier_id)                                            
                                             ->get();
         $result = '';
 
@@ -1409,7 +1445,6 @@ class MobileAppController extends Controller
         if(!$check_if_category_exist->isEmpty()){
 
             foreach($check_if_category_exist as $value){
-
                 array_push($existing_category,$value->item_category);                
             }
 
@@ -1436,10 +1471,14 @@ class MobileAppController extends Controller
         }else{
             $result = json_encode(["message"=>'false']);
         }
-        return $result;
-        
+        return $result;        
     }
 
+
+    public function get_unit_types(){
+        $records = db::table('unit_types')->select('type as label','type as value')->get();
+        return json_encode($records);
+    }
 
 
     
