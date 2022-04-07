@@ -191,12 +191,14 @@
                                 $('.txt-registration-name').html(data[i].regs_name);
                                 $('.txt-company-name').html(data[i].company_name);
                                 $('.txt-registration-date, .txt-registration-name, .txt-company-name').removeClass('text-danger');
-                                if(data[i].status == 0){                                
+                                if(data[i].status == 2 && data[i].approval_status == 0){                              
                                     $('.step-registration').addClass("active");
                                     $('.step-approve, .step-complete').removeClass("active");
+                                }else if(data[i].status == 2 && data[i].approval_status == 2){
+                                    $('.step-registration').addClass("active");
+                                    $('.step-approve').addClass("active");
                                 }else{
-                                    $('.step-registration').removeClass("active");
-                                    $('.step-approve, .step-complete').addClass("active");
+                                    $('.step-registration, .step-approve, .step-complete').addClass("active");
                                 }
                             }
                         }else{

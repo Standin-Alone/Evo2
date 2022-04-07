@@ -50,12 +50,17 @@
                 "type" : "get"
             },
             columns:[
+                {data:'icon',render:function(data){
+
+                    return `<i class='fa fa-${data} fa-lg fa text-success'></i>`
+                }},
                 {data:'module'},
                 {data:'routes',
                     render: function(data){                   
                         return data == null ? 'N/A' : data;
                     }
                 },            
+                {data:'sequence'},
                 {data:'sub_modules',
                     render:function(data,type,row){
                         let output = '';
@@ -73,7 +78,7 @@
                         
                         
 
-                        return  "<button type='button' class='btn btn-outline-warning update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateModal'>"+
+                        return  "<button type='button' class='btn btn-outline-warning update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" icon="+row['icon']+"  data-toggle='modal' data-target='#UpdateModal'>"+
                                     "<i class='fa fa-edit'></i> Edit"+
                                 "</button>   "+(
                                 row['status'] == 1 ?
@@ -99,8 +104,10 @@
                 $(".main-module-component").show();
                 $(".sub-modules-component").hide();                
                 $('#update-id').val($(this).attr('sys_module_id'));
-                $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
-                $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+                $("#UpdateForm  input[name='icon']").val($(this).attr('icon') == 'null' ? '' :  $(this).attr('icon') );                
+                $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+                $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(2)').text());
+                $("#UpdateForm  input[name='sequence']").val($(this).closest('tbody tr').find('td:eq(3)').text());
                 $(".main-module-update-btn").show();
                 $(".add-sub-module-btn").hide();
             }else{                
@@ -122,14 +129,16 @@
                                                 "type" : "get"
                                                 },
                                                 columns:[
+                                                            {data:'icon',title:'Icon'},
                                                             {data:'module',title:'Module'},
                                                             {data:'routes',title:'Route'},                                                             
+                                                            {data:'sequence',title:'Sequence'},                                                             
                                                             {data:'sys_module_id', title:'Actions',
                                                                 render: function(data,type,row){       
                                                                     
                                                                     
 
-                                                                    return  "<button type='button' class='btn btn-outline-info update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
+                                                                    return  "<button type='button' class='btn btn-outline-info update-modal-btn' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
                                                                                 "<i class='fa fa-edit'></i> Edit"+
                                                                             "</button>   "+(
                                                                             row['status'] == 1 ?
@@ -154,8 +163,10 @@
            
                              
                 $("#UpdateSubModuleForm  input[name='id']").val($(this).attr('sys_module_id'));
-                $("#UpdateSubModuleForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(0)').text());
-                $("#UpdateSubModuleForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+                $("#UpdateSubModuleForm  input[name='icon']").val($(this).attr('icon') == 'null' ? '' : $(this).attr('icon') );
+                $("#UpdateSubModuleForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(1)').text());
+                $("#UpdateSubModuleForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(2)').text());
+                $("#UpdateSubModuleForm  input[name='sequence']").val($(this).closest('tbody tr').find('td:eq(3)').text());
           
             
             });
@@ -390,16 +401,25 @@
         // Update Record of Main Module
         $("#UpdateForm").validate({
             rules:{
+                icon:"required",
                 module_name:"required",
                 route:"required",
+                sequence:"required",
             },
             messages:{
+
+                icon:{
+                    required:'<div class="text-danger">Please enter icon name.</div>'
+                },
                 module_name:{
                     required:'<div class="text-danger">Please enter module name.</div>'
                 },
                 route:{
                     required:'<div class="text-danger">Please enter route.</div>'
-                }
+                },
+                sequence:{
+                    required:'<div class="text-danger">Please enter sequence.</div>'
+                },
             },
             submitHandler: function(e) { 
               
@@ -451,16 +471,24 @@
         // Update record of sub module
         $("#UpdateSubModuleForm").validate({
             rules:{
+                icon:"required",
                 module_name:"required",
                 route:"required",
+                sequence:"required",
             },
             messages:{
+                icon:{
+                    required:'<div class="text-danger">Please enter icon name.</div>'
+                },
                 module_name:{
                     required:'<div class="text-danger">Please enter module name.</div>'
                 },
                 route:{
                     required:'<div class="text-danger">Please enter route.</div>'
-                }
+                },
+                sequence:{
+                    required:'<div class="text-danger">Please enter sequence.</div>'
+                },
             },
             submitHandler: function(e) { 
                 swal({
@@ -608,9 +636,12 @@
         <table id="load-datatable" class="table table-hover table-bordered">            
             <thead>
                 <tr>                    
+                    <th >Icon</th>
                     <th >Module Name</th>
                     <th >Route</th> 
+                    <th >Sequence</th>
                     <th >Sub Modules</th>                    
+                    
                     <th >Action</th>
                 </tr>
             </thead>
@@ -700,10 +731,14 @@
                             <br><br>
                             <div class="col-lg-12 main-module-component">
                                 <div class="form-group">
+                                    <label>Icon</label>
+                                    <input  name="icon" class="form-control"  placeholder="icon name"  required="true"><br>
                                     <label>Module Name</label>
-                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">
+                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true"><br>
                                     <label>Route</label>
-                                    <input   name="route" class="form-control"  placeholder="route" required="true">
+                                    <input   name="route" class="form-control"  placeholder="route" required="true"><br>
+                                    <label>Sequence</label>
+                                    <input  type="number" name="sequence" class="form-control"  placeholder="sequence"  required="true"><br>
                                 </div>
                             </div>
 
@@ -754,10 +789,14 @@
 
                             <div class="col-lg-12">
                                 <div class="form-group">
+                                    <label>Icon</label>
+                                    <input  name="icon" class="form-control"  placeholder="icon name"  required="true"><br>
                                     <label>Module Name</label>
-                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">
+                                    <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true"><br>
                                     <label>Route</label>
-                                    <input   name="route" class="form-control"  placeholder="route" required="true">
+                                    <input   name="route" class="form-control"  placeholder="route" required="true"><br>
+                                    <label>Sequence</label>
+                                    <input  type="number" name="sequence" class="form-control"  placeholder="sequence"  required="true"><br>
                                 </div>
                             </div>
                         
@@ -790,13 +829,21 @@
                             <div class="col-lg-12 row">
                                 <input type="text" name="parent_module_id"   class="form-control hide">
                                 <div class="form-group">
+                                    <label>Icon</label>
+                                    <input style="text-transform: capitalize;"  name="icon" class="form-control"  placeholder="icon name"  required="true">                                        
+                                </div> &nbsp;&nbsp;
+                                <div class="form-group">
                                     <label>Module Name</label>
                                     <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">                                        
                                 </div> &nbsp;&nbsp;
                                 <div class="form-group">
                                     <label>Route</label>
                                     <input   name="route" class="form-control"  placeholder="route" required="true">
-                                </div>&nbsp;&nbsp;                                
+                                </div>&nbsp;&nbsp;
+                                <div class="form-group">
+                                    <label>Sequence</label>
+                                    <input style="text-transform: capitalize;"  name="sequence" class="form-control"  placeholder="sequence"  required="true">                                        
+                                </div> &nbsp;&nbsp;                                
                             </div>  
                         
                             {{--modal body end--}}

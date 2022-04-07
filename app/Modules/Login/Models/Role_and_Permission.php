@@ -226,9 +226,11 @@ class Role_and_Permission extends Model
                                 ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
                                 ->where('sm.status', '1')
                                 ->whereIn('role_id', $role_id)                   
+                                ->orderBy('sequence')
                                 ->get();
                             })                                  
                             // ->groupBy('sm.parent_module_id')        
+                            ->orderBy('sequence')
                             ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                                       
                             ->get();
 
@@ -238,7 +240,8 @@ class Role_and_Permission extends Model
     public function get_parent_module(){
         $query = DB::table('sys_modules')
                         ->where('has_sub','1')    
-                        ->where('status','1')                                    
+                        ->where('status','1')      
+                        ->orderBy('sequence')                              
                         ->get();
 
         return $query;

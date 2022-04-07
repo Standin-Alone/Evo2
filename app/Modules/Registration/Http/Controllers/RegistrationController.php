@@ -118,8 +118,12 @@ class RegistrationController extends Controller
         $password = Hash::make($request->Password);
         $regs_code = Str::random(8);
 
+        $user_id = Uuid::uuid4();
+
+        $supplier_id = isset($request->group_supplier_id) ? $request->group_supplier_id : null;
+
         $query = DB::table('users')->insert([
-            'user_id'=>Uuid::uuid4(),
+            'user_id'=>$user_id,
             'agency'=>null,
             'agency_loc'=>null,
             'username'=>$request->Username,
@@ -136,11 +140,20 @@ class RegistrationController extends Controller
             'ext_name'=>$request->Extention_name,
             'contact_no'=>$request->Contact_Number,
             'date_created'=>$ldate,
+            'group_supplier_id' => $supplier_id,
             'company_name'=>$request->Company_name,
             'company_address'=>$request->Company_address,
             'regs_code'=>$regs_code,
-            'status'=>'0',
-        ]);           
+            'status'=>'2',
+        ]);
+        
+        // Kent script
+        DB::table('program_permissions')->insert([
+                                                    'role_id' => 6, // Head Supplier
+                                                    // 'role_id' => 22, // Head Supplier V2
+                                                    'user_id' => $user_id,
+                                                    'status'  => '0',
+                                                ]);
             
         $global_model = new RegistrationNotifModel;                
         return $global_model->regs_send_email("Registration",$request->Last_name.','.$request->First_name.' '.$request->Extention_name.' '.$request->Middle_name,$regs_code,$request->Region,$request->Email,"Your account successfully registered! Please check your account activation status. Use this Registration Code: ".$regs_code);  
@@ -148,7 +161,7 @@ class RegistrationController extends Controller
 
     public function getregsstatus(Request $request){
         $getRegsStatus = DB::table('users')
-        ->select(DB::raw("date_created,status,concat(last_name,', ',concat(first_name,' ',ifnull(ext_name,'')),' ',middle_name) as regs_name,company_name"))
+        ->select(DB::raw("date_created,status,concat(last_name,', ',concat(first_name,' ',ifnull(ext_name,'')),' ',middle_name) as regs_name,company_name, approval_status"))
         ->where('regs_code', $request->regs_code)
         ->where('email', $request->regs_email)
         ->get();

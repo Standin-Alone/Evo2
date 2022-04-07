@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::get('/returned-disbursement-uploading', 'ReturnedDisbursementController@index')->name('returned-disbursement-uploading');
+Route::get('/returned-disbursement-uploading', 'ReturnedDisbursementController@index')->name('returned-disbursement-uploading')->middleware('ensure.user.has.role');
 
 Route::post('/returned-disbursement/upload-file', 'ReturnedDisbursementController@upload_file')->name('returned-disbursement-upload-file');
 Route::get('/returned-disbursement-uploading/get-files', 'ReturnedDisbursementController@get_files')->name('list-of-ingested-files-datatable');

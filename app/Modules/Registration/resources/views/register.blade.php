@@ -26,7 +26,7 @@
             </div>
             <div class="right-content">
                 <h1 class="register-header">
-                    <img src="assets/img/logo/DA-Logo.png" alt="DA-Logo" style="height:40px; width:40px;"> Registration
+                    <img src="{{url('assets/img/images/DA-LOGO-1024x1024.png')}}" alt="DA-Logo" style="height:70px; width:70px;"> Registration
                     <small>Create your Account.</small>
                 </h1>
                 <div class="register-content">                

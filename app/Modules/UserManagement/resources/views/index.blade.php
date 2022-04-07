@@ -211,9 +211,9 @@
                     $("#edit_barangay").prop('selectedIndex',0);
                     $("#edit_municipality").prop('disabled','disabled');
                     $("#edit_barangay").prop('disabled','disabled');
-                    $("#edit_region").val(13).change();
+                    $("#edit_region").val(00).change();
                     $("#edit_region option").filter(function(){
-                        return this.value != 13;
+                        return this.value != 00;
                     }).hide()
 
                     if($("#role option:selected").val() == 1 ){
@@ -222,7 +222,7 @@
                         }).show()
                     }else{
                         $("#edit_region option").filter(function(){
-                            return this.value == 13 ;
+                            return this.value == 00 ;
                         }).show()
 
                     }                
@@ -235,20 +235,20 @@
                 $("#edit_barangay").prop('disabled','disabled');
                 $("#edit_region").val("").change();
                 $("#edit_region option").filter(function(){
-                    return this.value != 13;
+                    return this.value != 00;
                 }).show()
 
                 $("#edit_region option").filter(function(){
-                    return this.value == 13;
+                    return this.value == 00;
                 }).hide()
 
 
             }
             check_edit_agency = $("input[name='edit_agency_loc']:checked").val();
             if(check_edit_agency == 'CO'){
-                $("#edit_region").val(13).change();
+                $("#edit_region").val(00).change();
                 $("#edit_region option").filter(function(){
-                    return this.value != 13;
+                    return this.value != 00;
                 }).hide()
             }
             
@@ -533,9 +533,9 @@
                     $("#edit_barangay").prop('selectedIndex',0);
                     $("#edit_municipality").prop('disabled','disabled');
                     $("#edit_barangay").prop('disabled','disabled');
-                    $("#edit_region").val(13).change();
+                    $("#edit_region").val(00).change();
                     $("#edit_region option").filter(function(){
-                        return this.value != 13;
+                        return this.value != 00;
                     }).hide()
 
                     if($("#role option:selected").val() == 1 ){
@@ -544,7 +544,7 @@
                         }).show()
                     }else{
                         $("#edit_region option").filter(function(){
-                            return this.value == 13 ;
+                            return this.value == 00 ;
                         }).show()
 
                     }                
@@ -557,11 +557,11 @@
                 $("#edit_barangay").prop('disabled','disabled');
                 $("#edit_region").val("").change();
                 $("#edit_region option").filter(function(){
-                    return this.value != 13;
+                    return this.value != 00;
                 }).show()
 
                 $("#edit_region option").filter(function(){
-                    return this.value == 13;
+                    return this.value == 00;
                 }).hide()
 
 
@@ -585,9 +585,9 @@
                         return this.value
                         }).show()                    
                 }else{
-                    $("#region").val(13).change();
+                    $("#region").val(00).change();
                     $("#region option").filter(function(){
-                        return this.value == 13 && this.value == ""
+                        return this.value == 00 && this.value == ""
                         }).show()    
 
                     $("#region option").filter(function(){
@@ -616,9 +616,9 @@
                         return this.value
                         }).show()                    
                 }else{
-                    $("#region").val(13).change();
+                    $("#region").val(00).change();
                     $("#region option").filter(function(){
-                        return this.value == 13 && this.value == ""
+                        return this.value == 00 && this.value == ""
                         }).show()    
 
                     $("#region option").filter(function(){
@@ -650,9 +650,9 @@
         // check agency of CO or RFO UPDATE
         edit_check_agency = $("input[name='edit_agency_loc']:checked").val();
         if(edit_check_agency == 'CO'){
-            $("#edit_region").val(13).change();
+            $("#edit_region").val(00).change();
             $("#edit_region option").filter(function(){
-                return this.value != 13;
+                return this.value != 00;
             }).hide()
         }
 

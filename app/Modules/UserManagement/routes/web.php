@@ -4,7 +4,7 @@
 
 
 Route::group([],function(){
-    Route::get('/user','UserManagementController@index')->name('user.index');
+    Route::get('/user','UserManagementController@index')->name('user.index')->middleware('ensure.user.has.role');
     Route::get('/user/show','UserManagementController@show')->name('user.show');
     Route::get('/user/destroy/{id}','UserManagementController@destroy')->name('user.destroy');
     Route::get('/user/block/{id}','UserManagementController@block')->name('user.block');

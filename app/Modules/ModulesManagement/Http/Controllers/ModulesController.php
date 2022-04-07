@@ -109,7 +109,12 @@ class ModulesController extends Controller
             $route       = request('route');
             $parent_module_id       = request('parent_module_id');
 
+            
             $check_module =  L5Modular::exists(trim($module_name));
+
+            // $check_last_sequence = db::table('sys_modules')
+            //                             ->where('parent_module_id')
+            //                             ->
             db::table('sys_modules')
                 ->insert([
                     "module"           => $module_name,
@@ -128,13 +133,15 @@ class ModulesController extends Controller
     
     // update data
     public function update($id){
+        $icon = request('icon');
         $module_name = request('module_name');
         $route       = request('route');
+        $sequence       = request('sequence');
         $get_id = request('id');
         
         db::table('sys_modules')
             ->where('sys_module_id',$get_id)
-            ->update(['module'=>$module_name,'routes'=>$route]);
+            ->update(['module'=>$module_name,'routes'=>$route,'icon'=>$icon,'sequence'=>$sequence]);
     }
 
     // show record to datatable

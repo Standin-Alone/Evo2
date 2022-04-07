@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 
 // Route::get('/kyc', 'KYCModuleController@index')->name('kyc.index');
-Route::get('/kyc', 'KYCModuleController@uploading_index')->name('kyc.index');
+Route::get('/kyc', 'KYCModuleController@uploading_index')->name('kyc.index')->middleware('ensure.user.has.role');
 Route::get('/kyc-reports', 'KYCModuleController@report_index')->name('kyc-reports-index');
 Route::get('/kyc/file-data-reports', 'KYCModuleController@file_data_reports')->name('kyc-file-data-reports');
 Route::get('/kyc/today-reports', 'KYCModuleController@kyc_card_summary_today')->name('kyc-today-reports');

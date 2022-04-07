@@ -1395,8 +1395,17 @@ class MobileAppController extends Controller
                                 ->groupBy('pgd.batch_id')                     
                                 ->orderBy('pgb.transac_date','desc')                                                              
                                 ->first();
+
+        $total_pending_payout = db::table('payout_gif_batch as pgb')
+                                ->select(db::raw('SUM(amount) as total_paid_payout'))
+                                ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')
+                                ->where('supplier_id',$supplier_id)                                
+                                ->where('iscomplete','0')             
+                                ->groupBy('pgd.batch_id')                     
+                                ->orderBy('pgb.transac_date','desc')                                                              
+                                ->first();
         
-        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => isset($total_paid_payout) ? $total_paid_payout->total_paid_payout : 0]);
+        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => isset($total_paid_payout) ? $total_paid_payout->total_paid_payout : 0, "total_pending_payout" => isset($total_pending_payout) ? $total_pending_payout->total_paid_payout : 0]);
     }
 
     // get payout list (PAYOUT SUMMARY SCREEN)

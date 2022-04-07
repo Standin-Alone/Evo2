@@ -1,6 +1,6 @@
 <?php
 
-Route::resource('roles', 'RolesAndPermissionsController');
+Route::resource('roles', 'RolesAndPermissionsController')->middleware('ensure.user.has.role');;
 // Route::resource('/roles/sample', 'RolesAndPermissionsController');
 Route::post('/roles/get-permissions', 'RolesAndPermissionsController@get_permissions')
             ->name('roles-get-permissions');

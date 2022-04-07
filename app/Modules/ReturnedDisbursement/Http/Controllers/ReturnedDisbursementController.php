@@ -121,7 +121,7 @@ class ReturnedDisbursementController extends Controller
 
             
             // check if rsbsa exist, PSGC exist 
-            if( !$check_rsbsa && $check_reg_prov && !$check_account_number && $account_number != '' && $first_name != '' && $last_name != '' ){
+            if( !$check_rsbsa && $check_reg_prov && !$check_account_number && $account_number != '' && $first_name != '' && $last_name != '' && $program_id != '' && $agency_id != ''  ){
 
                 // insert row to dbp return
                 $insert_dbp_return = db::table('dbp_return')
@@ -186,7 +186,15 @@ class ReturnedDisbursementController extends Controller
                 if($account_number == ''){
                     $error_remarks = ($error_remarks == ''  ? 'No account number' : $error_remarks.','.'No account number');
                 }
+                
+                if($program_id == ''){
+                    $error_remarks = ($error_remarks == ''  ? 'No program' : $error_remarks.','.'No program');
+                }
 
+                if($agency_id == ''){
+                    $error_remarks = ($error_remarks == ''  ? 'No agency' : $error_remarks.','.'No agency');
+                }
+                
                 if($check_account_number){
                     $error_remarks = ($error_remarks == ''  ? 'Duplicate account number' : $error_remarks.','.'Duplicate account number');
                 }
