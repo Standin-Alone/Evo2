@@ -1161,9 +1161,9 @@ class MobileAppController extends Controller
             $sub_program_id   = $value['sub_id'];
             $quantity   = $value['quantity'];
             $amount   = $value['price'];
-            $total_amount   = $value['cash_added'] > 0 ? $value['total_amount']  - $value['cash_added'] : $value['total_amount'];
+            $total_amount   =  $value['total_amount'];
             $unit_type   = $value['unit_type'];
-            $cash_added   = $value['cash_added'];
+            $cash_added   = 0;
             
 
 
@@ -1265,9 +1265,9 @@ class MobileAppController extends Controller
             $sub_program_id   = $value['sub_id'];
             $quantity   = $value['quantity'];
             $amount   = $value['price'];
-            $total_amount   =   $value['cash_added'] > 0 ? $value['total_amount']  - $value['cash_added']  : $value['total_amount'];
+            $total_amount   =    $value['total_amount'];
             $unit_type   = $value['unit_type'];
-            $cash_added   = $value['cash_added'];
+            $cash_added   = 0;
             
             
 
@@ -1383,29 +1383,47 @@ class MobileAppController extends Controller
                                 ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
                                 ->where('supplier_id',$supplier_id)                                
                                 ->orderBy('pgb.transac_date','desc')
+                                ->groupBy('pgb.application_number')
                                 ->skip($offset)
                                 ->take(10)                                      
                                 ->get();
                                 
-        $total_paid_payout = db::table('payout_gif_batch as pgb')
-                                ->select(db::raw('SUM(amount) as total_paid_payout'))
-                                ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')
-                                ->where('supplier_id',$supplier_id)                                
-                                ->where('iscomplete','1')             
-                                ->groupBy('pgd.batch_id')                     
-                                ->orderBy('pgb.transac_date','desc')                                                              
-                                ->first();
+        // $total_paid_payout = db::table('payout_gif_batch as pgb')
+        //                         ->select(db::raw('SUM(amount) as total_paid_payout'))
+        //                         ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')
+        //                         ->where('supplier_id',$supplier_id)                                
+        //                         ->where('iscomplete','1')             
+        //                         ->groupBy('pgd.batch_id')                     
+        //                         ->orderBy('pgb.transac_date','desc')                                                              
+        //                         ->first();
+        $total_paid_payout = db::select("
+                                select sum(amount) as totalPaidAmount
+                                    from (
+                                    select amount
+                                    from payout_gif_batch as pgb
+                                    left Join payout_gfi_details as pgd on pgd.batch_id= pgb.batch_id
+                                    where supplier_id = '$supplier_id'  
+                                    and  iscomplete = '1'
+                                    group By pgd.batch_id
+                                    order By pgb.transac_date desc
+                                    ) as total_paid_table
+                            ");
 
-        $total_pending_payout = db::table('payout_gif_batch as pgb')
-                                ->select(db::raw('SUM(amount) as total_paid_payout'))
-                                ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')
-                                ->where('supplier_id',$supplier_id)                                
-                                ->where('iscomplete','0')             
-                                ->groupBy('pgd.batch_id')                     
-                                ->orderBy('pgb.transac_date','desc')                                                              
-                                ->first();
+                            
+        $total_pending_payout = db::select("
+                                select sum(amount) as total_pending_payout
+                                    from (
+                                    select amount
+                                    from payout_gif_batch as pgb
+                                    left Join payout_gfi_details as pgd on pgd.batch_id= pgb.batch_id
+                                    where supplier_id = '$supplier_id'  
+                                    and  iscomplete = '0'
+                                    group By pgd.batch_id
+                                    order By pgb.transac_date desc
+                                    ) as total_paid_table
+                                ")[0]->total_pending_payout;
         
-        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => isset($total_paid_payout) ? $total_paid_payout->total_paid_payout : 0, "total_pending_payout" => isset($total_pending_payout) ? $total_pending_payout->total_paid_payout : 0]);
+        return json_encode(["get_batch_payout" => $get_batch_payout, "total_paid_payout" => isset($total_paid_payout[0]->totalPaidAmount) ? $total_paid_payout[0]->totalPaidAmount : 0, "total_pending_payout" => isset($total_pending_payout) ? $total_pending_payout : 0]);
     }
 
     // get payout list (PAYOUT SUMMARY SCREEN)
@@ -1433,7 +1451,8 @@ class MobileAppController extends Controller
                                 ->get();
         }
 
-        return json_encode($get_voucher_info);
+        return json_encode($get_batch_payout_transaction_list);
+        // return json_encode($get_voucher_info);
     }
     
 
