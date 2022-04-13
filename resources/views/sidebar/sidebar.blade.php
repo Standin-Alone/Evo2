@@ -1,23 +1,64 @@
 <!-- begin sidebar nav -->
-<ul class="nav">
+<ul class="nav  navbar-collapse" >
     <li class="nav-header">{{session('role')}} Navigation </li>
     
 <li class="{{Route::currentRouteName() == 'main.home'  ? "active" : null}}">
     <a href="{{route('main.home')}}">					        
-        <i class="fa fa-th-large"></i>
+        <i class="fa fa-home"></i>
         <span>Home</span>
     </a>        
 </li> 
-    
+
+
 
 @if(session()->has('main_modules'))
-    @foreach (session('main_modules') as $item)
-    @if(!is_null($item->parent_module_id) )
     
-    <li class="has-sub active">
+
+    @foreach(session('main_modules') as $item)    
+    @if(is_null($item->parent_module_id) && $item->has_sub == 1 )        
+    <li class="has-sub  {{ (in_array(Route::currentRouteName(),array_column(json_decode(session('sub_modules'),true), 'routes'))  &&  array_filter(json_decode(session('sub_modules')),function($e) use ($item){return ($e->routes  == Route::currentRouteName() && $e->parent_module_id == $item->sys_module_id);})) ? 'active' : '' }} ">
         <a href="javascript:;">
             <b class="caret"></b>
-            <i class="fa fa-th-large"></i>
+            <i class="fa fa-{{ $item->icon }}"></i>
+            @foreach (session('parent_modules') as $item_parent)
+                @if($item_parent->sys_module_id == $item->sys_module_id && $item_parent->nav_show == 1)
+                    <span>{{$item_parent->module}}</span>
+                @endif
+            @endforeach
+        </a>
+        <ul class="sub-menu">    
+                    @foreach(session('sub_modules') as $value)
+                        @if($value->parent_module_id == $item->sys_module_id && $value->nav_show == 1 )                        
+                        <li class="{{Route::currentRouteName() == $value->routes ? "active" : null}} " ><a href="{{route($value->routes)}}">{{$value->module}} </a></li>    
+                        @endif                   
+                    @endforeach           
+                </ul>
+            </li>
+    @elseif(is_null($item->parent_module_id) && $item->nav_show == 1 && $item->has_sub == 0)   
+        <li class="{{Route::currentRouteName() == $item->routes  ? "active" : null}}">
+            <a href="{{route($item->routes)}}">					        
+                <i class="fa fa-{{ $item->icon }}"></i>
+                <span>{{$item->module}}</span>
+            </a>        
+        </li> 
+    @endif
+    @endforeach
+@endif
+
+
+
+{{--    OLD
+@if(session()->has('main_modules'))
+    @foreach (session('main_modules') as $item)
+    
+    @if(!is_null($item->parent_module_id) )
+        @php
+            
+        @endphp
+    <li class="has-sub {{ (in_array(Route::currentRouteName(),array_column(json_decode(session('sub_modules'),true), 'routes'))  &&  array_filter(json_decode(session('sub_modules')),function($e) use ($item){return ($e->routes  == Route::currentRouteName() && $e->parent_module_id == $item->parent_module_id);})) ? 'active' : '' }} ">
+        <a href="javascript:;">
+            <b class="caret"></b>
+            <i class="fa fa-{{ $item->icon }}"></i>
             @foreach (session('parent_modules') as $item_parent)
                 @if($item_parent->sys_module_id == $item->parent_module_id && $item_parent->nav_show == 1)
                     <span>{{$item_parent->module}}</span>
@@ -35,105 +76,11 @@
     @elseif(is_null($item->parent_module_id) && $item->nav_show == 1)   
         <li class="{{Route::currentRouteName() == $item->routes  ? "active" : null}}">
             <a href="{{route($item->routes)}}">					        
-                <i class="fa fa-th-large"></i>
+                <i class="fa fa-{{ $item->icon }}"></i>
                 <span>{{$item->module}}</span>
             </a>        
         </li> 
     @endif
     @endforeach
-@endif
+@endif --}}
 
-
-<!-- <li class="has-sub active">
-        <a href="javascript:;">
-            <b class="caret"></b>
-            <i class="fa fa-th-large"></i>
-            <span>Supplier Module</span>
-        </a>
-        <ul class="sub-menu">
-            <li class="{{Route::currentRouteName() == 'DownloadApp.index' ? 'active' : null}}">
-                <a href="{{ route('DownloadApp.index') }}">	
-                    <span>Download Mobile App</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'VoucherTrans.index' ? 'active' : null}}">
-                <a href="{{ route('VoucherTrans.index') }}">
-                    <span>Voucher Monitoring</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'PayoutSummary.index' ? 'active' : null}}">
-                <a href="{{ route('PayoutSummary.index') }}">
-                    <span>Payout Summary</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'ProgramSrn.index' ? 'active' : null}}">
-                <a href="{{ route('ProgramSrn.index') }}">	
-                    <span>Program Overview</span>
-                </a>        
-            </li>
-        </ul>
-    </li>
-    <li class="has-sub active">
-        <a href="javascript:;">
-            <b class="caret"></b>
-            <i class="fa fa-th-large"></i>
-            <span>Payout Management</span>
-        </a>
-        <ul class="sub-menu">
-        <li class="{{Route::currentRouteName() == 'BatchPayout.index' ? 'active' : null}}">
-                <a href="{{ route('BatchPayout.index') }}">	
-                    <span>Batch Payout</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'SupplierPayout.index' ? 'active' : null}}">
-                <a href="{{ route('SupplierPayout.index') }}">	
-                    <span>Supplier Payout</span>
-                </a>        
-            </li>
-        </ul>
-    </li>
-    <li class="has-sub active">
-        <a href="javascript:;">
-            <b class="caret"></b>
-            <i class="fa fa-th-large"></i>
-            <span>Payout Module</span>
-        </a>
-        <ul class="sub-menu">
-        <li class="{{Route::currentRouteName() == 'PayoutMonitoring.index' ? 'active' : null}}">
-                <a href="{{ route('PayoutMonitoring.index') }}">	
-                    <span>Payout Monitoring</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'PayoutApproval.index' ? 'active' : null}}">
-                <a href="{{ route('PayoutApproval.index') }}">	
-                    <span>Payout Approval</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'PayoutSupervisorApproval.index' ? 'active' : null}}">
-                <a href="{{ route('PayoutSupervisorApproval.index') }}">	
-                    <span>Payout Supervisor Approval</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'SubmitPayouts.index' ? 'active' : null}}">
-                <a href="{{ route('SubmitPayouts.index') }}">	
-                    <span>Submit Payouts</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'DBPapproval.index' ? 'active' : null}}">
-                <a href="{{ route('DBPapproval.index') }}">	
-                    <span>DBP Approval</span>
-                </a>        
-            </li>
-            <li class="{{Route::currentRouteName() == 'SubmitPayoutFiles.index' ? 'active' : null}}">
-                <a href="{{ route('SubmitPayoutFiles.index') }}">	
-                    <span>Submit Payout Files</span>
-                </a>        
-            </li>
-        </ul>
-    </li> -->
-
-    <!-- begin sidebar minify button -->
-    <li><a href="javascript:;" class="sidebar-minify-btn" data-click="sidebar-minify"><i class="fa fa-angle-double-left"></i></a></li>
-    <!-- end sidebar minify button -->
-</ul>
-<!-- end sidebar nav -->

@@ -20,15 +20,18 @@
         
         #load-datatable > thead > tr > th {
             color:white;
-            background-color: #008a8a;
+            
+            background-color: #89d8d3;
+		    background-image: linear-gradient(315deg, #89d8d3 0%, #03c8a8 74%);
             font-size: 20px;
             font-family: calibri
         }
 
         #load-datatable > thead > tr > th {
             color:white;
-            font-size: 20px;
-            background-color: #008a8a;
+            font-size: 20px;            
+            background-color: #89d8d3;
+		    background-image: linear-gradient(315deg, #89d8d3 0%, #03c8a8 74%);
             font-weight: bold
         }
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
@@ -1170,8 +1173,8 @@
 <!-- end page-header -->
 
 <!-- begin panel -->
-<div class="panel panel-success ">
-    <div class="panel-heading ">
+<div class="panel  ">
+    <div class="panel-heading  gradient-bg">
         {{-- <h4 class="panel-title">Panel Title here</h4> --}}
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
             <i class='fa fa-plus'></i> Add New
@@ -1188,8 +1191,8 @@
     <div class="panel-body">
 
    
-        <div class="panel panel-primary ">
-            <div class="panel-heading">Filter by Region</div>
+        <div class="panel ">
+            <div class="panel-heading  gradient-bg text-white">Filter by Region</div>
             <div class="panel-body border">
                 <div class="form-group">
                 <label for=""></label>
