@@ -45,6 +45,12 @@ header('Content-Type: text/html');?>
 		input.form-control.error{
 			text-align: left;
 		}
+
+		.gradient-bg{			
+			background-color: #89d8d3;
+			background-image: linear-gradient(315deg, #89d8d3 0%, #03c8a8 74%);
+		}
+		
 	</style>
 
 	
@@ -117,7 +123,7 @@ header('Content-Type: text/html');?>
 		<div id="header" class="header navbar-default">
 			<!-- begin navbar-header -->
 			<div class="navbar-header">
-				<a href="{{Request::url()}}" class="navbar-brand"> <img src="{{url('assets/img/logo/DA-Logo.png')}}" width="30" height="30" style="display: inline-block"  /> <b> Interventions Management Platform</b> </a>
+				<a href="{{Request::url()}}" class="navbar-brand"> <img src="{{url('assets/img/images/DA-LOGO-1024x1024.png')}}" width="30" height="30" style="display: inline-block"  /> <b> Interventions Management Platform</b> </a>
 				<button type="button" class="navbar-toggle" data-click="sidebar-toggled">
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
@@ -127,11 +133,32 @@ header('Content-Type: text/html');?>
 			<!-- end navbar-header -->
 			
 			<!-- begin header-nav -->
-			<ul class="navbar-nav navbar-right">							
+			<ul class="navbar-nav navbar-right">	
+				<li class="btn-group" role="group" style="margin-top:7px;">
+					<button type="button" class="btn btn-success dropdown-toggle no-caret ">
+						<span class="showSupplierProgram">{{session('Default_Program_Desc')}}</span>
+					</button>
+					<ul class="dropdown-menu">
+						<li class="text-muted" style="text-align:center;">Select Program</li>     
+						@php
+							if (!empty(session('user_id'))) {                                                                                                               
+								for($i = 0 ; $i < count(session('Supplier_programs')) ; $i++) {
+								echo '<li><a href="javascript:void(0)" data-selectedprogramid="'.session('Supplier_programid')[$i].'" class="selectedSupplierProgram">'.session('Supplier_programs')[$i].'</a></li>';
+								}
+							}else{
+								return redirect('/login');
+							} 
+							
+						@endphp
+					</ul>
+					<button type="button" class="btn btn-success" data-toggle="dropdown">
+						<span class="caret"></span>
+					</button>
+				</li>								
 				<li class="dropdown navbar-user">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
-						<img src="{{url('assets/img/images/profile/profile-user.png')}}" alt="" /> 
-						<span class="d-none d-md-inline">{{session('first_name')}} {{session('last_name')}}</span> <b class="caret"></b>
+						<img src="{{url('assets/img/images/profile/profile-user-black.png')}} "  alt="" /> 
+						<span class="d-none d-md-inline" >{{session('first_name')}} {{session('last_name')}}</span> <b class="caret"></b>
 					</a>
 					<div class="dropdown-menu dropdown-menu-right">
 						<a href="{{route('user.profile')}}" class="dropdown-item">Edit Profile</a>																		
@@ -152,11 +179,11 @@ header('Content-Type: text/html');?>
 				<ul class="nav">
 					<li class="nav-profile">
 						<a href="javascript:;" data-toggle="nav-profile">
-							<div class="cover with-shadow"></div>
+							<div class="cover with-shadow" style="background-image: url({{ url('assets/img/cover/profile-cover.jpg')}})"></div>
 							<div class="image">
-								<img src="{{url('assets/img/images/profile/profile-user.png')}}" alt="" />
+								<img src="{{url('assets/img/images/profile/profile-user.png')}}" alt="" style="width:500pt; height:500pt;"/>
 							</div>
-							<div class="info">
+							<div class="info" style="text-transform: uppercase">
 								<b class="caret pull-right"></b>
 								{{session('first_name')}} {{session('last_name')}}
 								<small>
@@ -184,11 +211,13 @@ header('Content-Type: text/html');?>
 					@include('sidebar.amas')
 				@endif --}}
 				@include('sidebar.sidebar')
-				
+						
 			</div>
+			
 			<!-- end sidebar scrollbar -->
+			<div class="sidebar-bg" style="background-image: url({{url('assets/img/cover/farmer.jpg')}});opacity:0.1;z-index:-1; " ></div>
 		</div>
-		<div class="sidebar-bg" style="background-image: url('assets/img/cover/farmer.jpg');background-position: center;" ></div>
+		
 		{{-- <div class="sidebar-bg" style="background-image: url('{{url('assets/img/cover/farmer.jpg')}}');background-position: center;" ></div> --}}
 		<!-- end #sidebar -->
 		
@@ -233,6 +262,28 @@ header('Content-Type: text/html');?>
 			App.init();
 			TableManageDefault.init();
 			// FormPlugins.init();
+
+			// CALL SELECT PROGRAM UPON CLICK THE SELECTED PROGRAM TO FILTER ON DATATABLE
+			$(document).on('click','.selectedSupplierProgram',function(){
+				var selectedProgramDesc =  $(this).html(),
+					selectedProgramId =  $(this).data('selectedprogramid');
+					$('.showSupplierProgram').html(selectedProgramDesc);
+					// alert(selectedProgramId);
+					$.ajax({
+						headers: {
+							'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+						},
+						type:'post',
+						url:"{{ route('update.ProgramDefault') }}",
+						data:{selectedProgramDesc:selectedProgramDesc,selectedProgramId:selectedProgramId},
+						success:function(data){                         
+							location.reload();
+						},
+						error: function (textStatus, errorThrown) {
+							console.log('Err');
+						}
+					});
+			});	
 		});
 	</script>
 
@@ -247,24 +298,17 @@ header('Content-Type: text/html');?>
 	<script src="{{url('assets/js/socket.js')}}"></script>
 	<script>
 
-		
-        var get_width = 0;
 
-          
+
+		var get_width = 0;          
         // start websocket   
         //  connect to websocket                		
-        socket().on("connect", function() {
-            
-                //  get progress of uploading
-                console.warn('connected');			
-		});
+        // socket().on("connect", function() {            
+        //         //  get progress of uploading
+        //         console.warn('connected');			
+		// });
 
-
-		socket().emit('room',{channel:"{{session('uuid')}}",message:'Sample ko to'}); 
-
-
-
-
+		
 		$(document).ready(function(){
 
 			jQuery.validator.addMethod("password_pattern", function(value,element,param){		
