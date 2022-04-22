@@ -35,6 +35,10 @@ return [
             'root' => base_path(),
         ],
 
+        'downloads' => [
+            'driver' => 'local',
+            'root' => base_path('downloads'),
+        ],
         'notification' => [
             'driver' => 'local',
             'root' => base_path('uploads/notifications'),
@@ -51,6 +55,10 @@ return [
             'root' => base_path('/uploads/transactions'),
             'url' => env('APP_URL').'/uploads/transactions',
             'visibility' => 'public',
+        ],
+        'local' => [
+            'driver' => 'local',
+            'root' => base_path('temp_excel/'),
         ],
         's3' => [
             'driver' => 's3',
