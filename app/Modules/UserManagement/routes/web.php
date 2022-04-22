@@ -34,6 +34,8 @@ Route::group([],function(){
     Route::get('/account-creation/filter-municipality/{province_code}','AccountCreationController@filter_municipality')->name('ac-filter-municipality');
     Route::get('/account-creation/filter-barangay/{region_code}/{province_code}/{municipality_code}','AccountCreationController@filter_barangay')->name('ac-filter-barangay');
     Route::post('/account-creation/add','AccountCreationController@store')->name('create-account');
+
+    
 });
 
 

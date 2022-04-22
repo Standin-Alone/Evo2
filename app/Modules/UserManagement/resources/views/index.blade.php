@@ -16,22 +16,11 @@
             font-size: 20
         }
         td { font-size: 17px; font-weight: 500 }
-
         
-        #load-datatable > thead > tr > th {
-            color:white;
-            
-            background-color: #89d8d3;
-		    background-image: linear-gradient(315deg, #89d8d3 0%, #03c8a8 74%);
-            font-size: 20px;
-            font-family: calibri
-        }
 
         #load-datatable > thead > tr > th {
-            color:white;
-            font-size: 20px;            
-            background-color: #89d8d3;
-		    background-image: linear-gradient(315deg, #89d8d3 0%, #03c8a8 74%);
+            color:#545a64;
+            font-size: 20px;                        
             font-weight: bold
         }
         #load-datatable> thead > tr > th, .table > tbody > tr > th, .table > tfoot > tr > th, .table > thead > tr > td, .table > tbody > tr > td, .table > tfoot > tr > td {
@@ -1154,6 +1143,8 @@
             
         })
 
+ 
+
     </script>
 @endsection
 
@@ -1174,7 +1165,7 @@
 
 <!-- begin panel -->
 <div class="panel  ">
-    <div class="panel-heading  gradient-bg">
+    <div class="panel-heading">
         {{-- <h4 class="panel-title">Panel Title here</h4> --}}
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
             <i class='fa fa-plus'></i> Add New
@@ -1187,6 +1178,7 @@
         <button type='button' class='btn btn-info' data-toggle='modal' data-target='#ImportModal' >
             <i class='fa fa-file-excel'></i> Import File
         </button>
+        
     </div>
     <div class="panel-body">
 
@@ -1209,7 +1201,7 @@
         </div>
 
         
-        <table id="load-datatable" class="table table-striped table-bordered table-hover text-center" style="width:100%;">            
+        <table id="load-datatable" class="table table-striped table-hover text-center" style="width:100%;">            
             <thead>
              
             </thead>

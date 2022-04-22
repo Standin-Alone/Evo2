@@ -13,8 +13,16 @@ use Yajra\DataTables\Facades\DataTables;
 use ElephantIO\Client;
 use ElephantIO\Engine\SocketIO\Version2X;
 use Ramsey\Uuid\Uuid;
+use App\Models\GlobalNotificationModel;
 class ReturnedDisbursementController extends Controller
-{
+{   
+
+
+    public function __construct(){
+        $this->middleware('session.module');
+        $this->middleware('session.notifications');
+     
+    }
 
     /**
      * Display the module welcome screen
@@ -65,7 +73,8 @@ class ReturnedDisbursementController extends Controller
                 ->where('return_file_id',$file_last_id)
                 ->update(["total_rows" => $total_records]);
 
-        
+        $region_code = '';
+        $program = '';
         // insert to dbp_return file
         foreach($imc_array as $key => $item){
 
@@ -122,7 +131,9 @@ class ReturnedDisbursementController extends Controller
             
             // check if rsbsa exist, PSGC exist 
             if( !$check_rsbsa && $check_reg_prov && !$check_account_number && $account_number != '' && $first_name != '' && $last_name != '' && $program_id != '' && $agency_id != ''  ){
-
+                // region code
+                $region_code = $check_reg_prov->reg_code;
+                $program = $program_id;
                 // insert row to dbp return
                 $insert_dbp_return = db::table('dbp_return')
                                         ->insert([
@@ -283,8 +294,15 @@ class ReturnedDisbursementController extends Controller
 
 
         // $client->close();
+        $role_id = [10]; 
+        
+        $message = "You have new ".$total_saved_records." records of returned disbursement.";
+        $title   = "New Returned Disbursement KYC Profiles.";
+        $link    = route('CancellationModule.index');
+        
+        $notification = $total_saved_records != 0 ? GlobalNotificationModel::sendNotification($role_id,$region_code,$message,$program,$link,$title) : json_encode([]);
 
-        return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array];
+        return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array,"notification" => $notification ];
     }catch(\Exception $e){
 
         return json_encode($e->getMessage());

@@ -15,7 +15,10 @@ use App\Exports\GenerateBeneficiariesExcel;
 
 class DisbursementModuleController extends Controller
 {
-
+    public function __construct(){        
+        $this->middleware('session.notifications');
+     
+    }
     /**
      * Display the module welcome screen
      *

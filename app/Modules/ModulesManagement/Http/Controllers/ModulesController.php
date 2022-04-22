@@ -82,7 +82,8 @@ class ModulesController extends Controller
                                     ->insert([
                                         "module"           => $item,
                                         "routes"           => $route_item,
-                                        "parent_module_id" => $get_last_id
+                                        "parent_module_id" => $get_last_id,
+                                        "has_sub"          => $has_sub[$routekey]
                                     ]);    
                                     
                                 }
@@ -107,28 +108,51 @@ class ModulesController extends Controller
         try{
             $module_name = request('module_name');
             $route       = request('route');
-            $parent_module_id       = request('parent_module_id');
+            $icon       = request('icon');
+            $sequence       = request('sequence');
+            $parent_module_id   = request('parent_module_id') === null ? request('sub_parent_module_id') : request('parent_module_id');
 
             
-            $check_module =  L5Modular::exists(trim($module_name));
+            
 
             // $check_last_sequence = db::table('sys_modules')
             //                             ->where('parent_module_id')
             //                             ->
             db::table('sys_modules')
                 ->insert([
-                    "module"           => $module_name,
-                    "routes"           => $route,
+                    "module"    => $module_name,
+                    "routes"    => $route,
+                    "icon"      => $icon,
+                    "sequence"  => $sequence,
+                     "has_sub"  => request('sub_parent_module_id') ? '1' : '0',
                     "parent_module_id" => $parent_module_id
                 ]);        
-
-            if(!$check_module){
-                // Artisan::call("make:module",["name" => trim($module_name)]);
-            }   
+            
             
         }catch(\Exception $e){
-
+            
         }
+    }
+
+    public function edit_sub_modules_icon(){
+        
+        try{
+
+        
+        $icon       = request('icon');
+        $parent_module_id   = request('parent_module_id') === null ? request('sub_parent_module_id') : request('parent_module_id');
+
+        db::table('sys_modules')
+                ->where('parent_module_id',$parent_module_id)
+                ->orWhere('sys_module_id',$parent_module_id)
+                ->update([                    
+                    "icon"      => $icon,                                        
+                ]);    
+                
+        }catch(\Exception $e){
+            
+        }    
+            
     }
     
     // update data

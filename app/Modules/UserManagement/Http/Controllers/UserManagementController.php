@@ -22,6 +22,7 @@ class UserManagementController extends Controller
         $this->OTPModel = new OTP;
 
         $this->middleware('session.module');
+        $this->middleware('session.notifications');
     }
     /**
      * Display the module welcome screen

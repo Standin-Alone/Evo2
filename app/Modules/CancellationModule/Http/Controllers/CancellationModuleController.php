@@ -25,6 +25,9 @@ class CancellationModuleController extends Controller
     public function __construct(Request $request)
     {
         $this->query_CancellationModule = new CancellationModule();
+        $this->middleware('session.module');
+        $this->middleware('session.notifications');
+     
     }
 
     public function index()

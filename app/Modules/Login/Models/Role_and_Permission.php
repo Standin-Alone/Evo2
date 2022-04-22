@@ -219,22 +219,97 @@ class Role_and_Permission extends Model
     }
 
     public function get_main_module($role_id){
-        $query = DB::table('sys_modules as sm')  
-                            ->whereIn('sm.sys_module_id',function($query) use($role_id){
-                                $query->select('sm.sys_module_id') 
-                                ->from('sys_modules as sm')
-                                ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
-                                ->where('sm.status', '1')
-                                ->whereIn('role_id', $role_id)                   
-                                ->orderBy('sequence')
-                                ->get();
-                            })                                  
-                            // ->groupBy('sm.parent_module_id')        
-                            ->orderBy('sequence')
-                            ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                                       
-                            ->get();
 
-        return $query;
+        // OLD
+        // $query = DB::table('sys_modules as sm')  
+        //                     ->whereIn('sm.sys_module_id',function($query) use($role_id){
+        //                         $query->select('sm.sys_module_id') 
+        //                         ->from('sys_modules as sm')
+        //                         ->join('sys_access_matrix as sam','sm.sys_module_id','sam.sys_module_id')                                                                                                                                        
+        //                         ->where('sm.status', '1')
+        //                         ->whereIn('role_id', $role_id)                   
+        //                         ->orderBy('sequence')
+        //                         ->get();
+        //                     })                                  
+        //                     // ->groupBy('sm.parent_module_id')        
+        //                     ->orderBy('sequence')
+        //                     ->groupBy(DB::raw('ifnull(parent_module_id,sys_module_id)'))                                                       
+        //                     ->get();
+
+        // return $query;
+
+        
+
+        // NEW
+        $modules = DB::table('sys_modules as sm')                                                                  
+                                ->whereNull('sm.parent_module_id')                                                                
+                                ->orderBy('sequence')                                                                
+                                ->get();
+        $parent_module = DB::table('sys_modules as sm')                                                                  
+                                ->whereNotNull('sm.parent_module_id')                                                                
+                                ->orderBy('sequence')                                                                
+                                ->get();
+        $get_matrix = db::table('sys_access_matrix')->whereIn('role_id', $role_id)->groupBy('sys_module_id')->get();
+     
+        $clean_modules = [];
+            
+        // get solo modules 
+        foreach($modules as $item_modules){
+
+            $check_module = array_search($item_modules->sys_module_id, array_column($get_matrix->toArray(), 'sys_module_id'));
+            if($check_module){
+
+                array_push($clean_modules,$item_modules);
+              
+            }
+           
+            
+            
+            
+        }
+
+
+        // get parent of sub modules
+        foreach($get_matrix as $item_modules){
+            $check_parent = array_search($item_modules->sys_module_id, array_column($parent_module->toArray(), 'sys_module_id'));
+            
+
+            if($check_parent){
+
+                $get_parent_module = array_filter($modules->toArray(),function($e) use ($item_modules,$parent_module){
+
+
+
+                    $get_parent_module_id = array_filter($parent_module->toArray(), function($i) use ($item_modules){ return $i->sys_module_id == $item_modules->sys_module_id;
+                    });
+                    
+                    foreach($get_parent_module_id as $item_parent){
+                        if(!empty($get_parent_module_id)){
+                                return $e->has_sub == 1 && $e->sys_module_id == $item_parent->parent_module_id;
+                        }
+
+                    }
+
+                });
+
+                foreach($get_parent_module as $item_parent){
+                    if(!in_array($item_parent->sys_module_id,array_column($clean_modules, 'sys_module_id'))){
+                        array_push($clean_modules,$item_parent);
+                    }
+                    
+                }    
+            }
+            
+
+            
+        }
+        
+    
+        $get_sorted_modules = array_column($clean_modules, 'sequence');
+
+        array_multisort($get_sorted_modules, SORT_ASC, $clean_modules);
+        
+        return collect($clean_modules);
     }
 
     public function get_parent_module(){

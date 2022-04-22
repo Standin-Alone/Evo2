@@ -9,7 +9,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Session;
 
 class HomeController extends Controller
-{
+{   
+    public function __construct(Request $request)
+    {    
+        $this->middleware('session.notifications');
+    }
+
     public function index(){
         if(Session::has('username') == true){
             return view('home');

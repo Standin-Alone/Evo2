@@ -27,6 +27,7 @@ class KYCImport implements ToCollection,WithStartRow
 
     private $error_data;
     private $region;
+    private $region_code;
     
     public function __construct($provider, $file_name,$agency_id,$program_id){
         $this->provider = $provider;   
@@ -69,6 +70,7 @@ class KYCImport implements ToCollection,WithStartRow
         $program_id = $this->program_id;
         $collection_count = $collection->count();
         $region_for_mail = '';
+        $region_code = '';
         $compute_percentage = (1 / $collection_count ) * 100;
         $error_data = [];        
 
@@ -199,13 +201,15 @@ class KYCImport implements ToCollection,WithStartRow
                          
                             // set region for send email
                             $region_for_mail =  $region; 
+                            
 
                             // $bgy_code   =  $check_reg_prov->bgy_code; for checking of barangay
                             $mun_code   =  $check_reg_prov->mun_code;
                             $prov_code   =  $check_reg_prov->prov_code;
                             $reg_code   =  $check_reg_prov->reg_code;
                             
-                            
+                            // for send notification
+                            $region_code = $reg_code;
 
                
                         
@@ -336,6 +340,7 @@ class KYCImport implements ToCollection,WithStartRow
         $this->total_rows = $collection->count();
         $this->message = 'true';
         $this->region = $region_for_mail;
+        $this->region_code = $region_code;
         
         // update total inserted in kyc file table
         if($rows_inserted != 0 ) {
@@ -381,7 +386,7 @@ class KYCImport implements ToCollection,WithStartRow
     public function getRowCount()
     {
 
-        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region];
+        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region_code];
     }
 
 
@@ -389,7 +394,7 @@ class KYCImport implements ToCollection,WithStartRow
     {
          
        
-        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region];
+        return ['total_rows_inserted' => $this->inserted_count , 'total_rows' => $this->total_rows,"message"=>$this->message,"error_data" => $this->error_data,'region'=>$this->region_code];
     }
  
 }

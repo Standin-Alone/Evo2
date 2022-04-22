@@ -616,10 +616,36 @@ table.dataTable td {
                         'Successfully uploaded and ingested.',
                         'success'
                     ).then(()=>{
+
+
                         $(".filename-label").html('');
                         $(".filename-label").hide();
                         parses_result = JSON.parse(response);
-                        error_data = []
+                        error_data = []                        
+                        
+                        // SEND NOTIFICATION
+                        parseNotification = JSON.parse(parses_result[0]['notification']);
+                        console.warn(parseNotification)
+                        
+                        if(parseNotification.length != 0 && parses_result[0]['total_saved_records'] != 0){
+
+                            parseNotification.map((item_notif)=>{
+
+                                socket().emit('message',{
+                                    room:{                                                                                                                                
+                                        roles:item_notif.role,
+                                        region:parses_result['region'],
+                                        from:'{{session("uuid")}}',                                
+                                        senderName:item_notif.senderName,
+                                        to:item_notif.to                                
+                                    },
+                                    message:item_notif.message,
+                                    status:"unread" 
+                                }); 
+                            })
+                            
+                        }
+
                         parses_result.map((item)=>{
                             item['error_array'].map((error_item)=>{
                                 console.warn(error_item);

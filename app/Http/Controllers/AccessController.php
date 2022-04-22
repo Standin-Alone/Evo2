@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use DB;
 use App\Models\AccessModel;
+use File;
+use Illuminate\Support\Facades\Storage;
 class AccessController extends Controller
 {
     /**
@@ -153,5 +155,70 @@ class AccessController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+
+    public function get_notifications(){
+
+        session()->forget('notifications');
+        $upload_path = 'uploads/notifications';        
+        $upload_folder  = $upload_path;
+        $filename = session('uuid');
+
+        $get_notif = [];
+
+        if(File::exists($upload_folder.'/'.$filename.'.json')){
+            
+        
+            $get_notification = file_get_contents($upload_folder.'/'.$filename.'.json');            
+            $get_notif = json_decode($get_notification);
+
+        }
+
+        return json_encode($get_notif);
+
+    }
+
+    public function read_notification(){
+
+
+        try{
+                $notification_id = request('notification_id');
+
+                $upload_path = 'uploads/notifications';        
+                $upload_folder  = $upload_path;
+                $filename = session('uuid');
+
+                $get_notif = [];
+
+                if(File::exists($upload_folder.'/'.$filename.'.json')){
+                    
+                
+                    $get_notification = file_get_contents($upload_folder.'/'.$filename.'.json');
+
+                            
+                    $get_notif = json_decode($get_notification);
+                    $get_link = '';
+                    // MARK AS READ THE NOTIF
+                    foreach($get_notif as $item_notif){
+            
+                        if($item_notif->notif_id == $notification_id){
+                            $item_notif->status = 'read';
+                            $get_link = $item_notif->link;
+                        }
+                    }
+                    
+
+                    $serialize_data = response()->json($get_notif)->getContent();            
+                    Storage::disk('notification')->put('/'.$filename.'.json',$serialize_data);
+
+                    return json_encode(["message"=>true,"link"=>$get_link]);          
+                }
+        }catch(\Exception $e){
+            return json_encode(["message"=>false,"error"=>$e->getMessage()]);          
+
+        }
+
+
     }
 }

@@ -12,14 +12,21 @@
 	<link href="assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" rel="stylesheet" />
     <style>
         #load-datatable > thead > tr > th {
-            color:white;
-            background-color: #008a8a;
+            color:#545a64;
+            background-color: #ffffff;
             font-size: 20px;
             font-family: calibri
         }
         
         th{
-            text-align: center
+            text-align: center;
+            
+        }
+        td:{
+            white-space: nowrap;
+        }
+        .panel-title{
+            color:#545a64
         }
     </style>
 @endsection
@@ -44,7 +51,8 @@
     $(document).ready(function(){
         // load record to datatable
         module_table = $('#load-datatable').DataTable({
-            serverSide: true,                        
+            serverSide: true,    
+            responsive:true,                      
             ajax: {
                 "url" : '{{route("modules.show",["module" => "0"])}}',
                 "type" : "get"
@@ -123,7 +131,8 @@
 
                 // sub modules id
                  sub_module_table = $("#sub-modules-datatable").DataTable({
-                                        serverSide: true,                                                       
+                                        serverSide: true,        
+                                        responsive:true,                                               
                                         ajax: {
                                                 "url" : '{{route("modules.show_sub_modules",["parent_module_id" => ":id"])}}'.replace(':id',$(this).attr('sys_module_id')),
                                                 "type" : "get"
@@ -138,7 +147,8 @@
                                                                     
                                                                     
 
-                                                                    return  "<button type='button' class='btn btn-outline-info update-modal-btn' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
+                                                                    return (!row['routes'] ? ("<button type='button' class='btn btn-outline-success add-parent-sub-modal-btn' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#AddParentSubModulesModal'>"+"<i class='fa fa-edit'></i> Add Sub Module"+ "</button> ") : '' )
+                                                                          +"<button type='button' class='btn btn-outline-info update-modal-btn' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
                                                                                 "<i class='fa fa-edit'></i> Edit"+
                                                                             "</button>   "+(
                                                                             row['status'] == 1 ?
@@ -170,6 +180,17 @@
           
             
             });
+
+
+
+            $("#sub-modules-datatable").on('click','.add-parent-sub-modal-btn',function(){
+                
+                $("#AddParentSubModulesForm  input[name='sub_parent_module_id']").val($(this).attr('sys_module_id'));
+
+          
+            
+            });
+
         
    
         // set status btn
@@ -398,6 +419,125 @@
         })
 
 
+        $("#EditSubModulesIconForm").validate({
+            rules:{
+                icon:"required",                
+            },
+            messages:{
+                icon:{
+                    required:'<div class="text-danger">Please enter icon name.</div>'
+                }            
+            },
+            submitHandler: function(e) { 
+                
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to edit the icon?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    $has_sub = $("input[name='has_sub']:checked").val();
+                    
+                    // check if confirm
+                    if (confirm) {       
+
+                        $.ajax({
+                            url:'{{route("modules.edit_sub_modules_icon")}}',
+                            type:'post',
+                            data:$("#EditSubModulesIconForm").serialize(),
+                            success:function(response){             
+                                   
+                                swal("Successfully updated the icon of module.", {
+                                    icon: "success",
+                                }).then(()=>{
+                                    $("#EditSubModulesIconModal").modal('hide')
+                                     sub_module_table.ajax.reload();
+                                     $("#EditSubModulesIconForm")[0].reset();
+                                     $("#load-datatable").DataTable().ajax.reload();
+                                    
+                                    
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+               
+                
+            }
+        })
+
+        
+
+        $("#AddParentSubModulesForm").validate({
+            rules:{
+                module_name:"required",
+                route:"required",
+            },
+            messages:{
+                module_name:{
+                    required:'<div class="text-danger">Please enter module name.</div>'
+                },
+                route:{
+                    required:'<div class="text-danger">Please enter route.</div>'
+                }              
+            },
+            submitHandler: function(e) { 
+                
+                swal({
+                    title: "Wait!",
+                    text: "Are you sure you want to add this module?",
+                    icon: "warning",
+                    buttons: true,
+                    dangerMode: false,
+                })
+                .then((confirm) => {
+                    $has_sub = $("input[name='has_sub']:checked").val();
+                    
+                    // check if confirm
+                    if (confirm) {       
+
+                        $.ajax({
+                            url:'{{route("modules.store_sub_modules")}}',
+                            type:'post',
+                            data:$("#AddParentSubModulesForm").serialize(),
+                            success:function(response){             
+                                   
+                                swal("Successfully created a new sub module.", {
+                                    icon: "success",
+                                }).then(()=>{
+                                    $("#AddParentSubModulesModal").modal('hide')
+                                     sub_module_table.ajax.reload();
+                                    //  $("#AddParentSubModulesForm")[0].reset();
+                                     $("#load-datatable").DataTable().ajax.reload();
+                                    
+                                    
+                                });
+                            },
+                            error:function(response){
+
+                            }
+                        })
+                        
+                    } else {
+                        swal("Operation Cancelled.", {
+                            icon: "error",
+                        });
+                    }
+                });
+               
+                
+            }
+        })
         // Update Record of Main Module
         $("#UpdateForm").validate({
             rules:{
@@ -546,16 +686,30 @@
                     $(".sub_module").append('<div class="sub_module_component row">'+
                                         '<div class="form-group">'+
                                             '<label>Sub Module Name</label> <span id="reqcatnameadd" style="color:red">*</span>'+
-                                            '<input   name="module_name[]" class="form-control"  placeholder="module.index" required="true">'+
+                                            '<input   name="module_name[]" class="form-control"  placeholder=" module name" required="true">'+
                                         '</div>&nbsp;&nbsp;'+
                                         '<div class="form-group">'+
                                             '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
-                                            '<input   name="route[]" class="form-control"  placeholder="module.index" required="true">'+
+                                            '<input   name="route[]" class="form-control"  placeholder="module.index" >'+
                                         '</div>&nbsp;&nbsp;'+
+                                        '<div class="form-group row ml-2">'+
+                                        '<label>Has Sub? <span style="color:red">*</span></label>'+
+                                            '<div class="col-md-12  row">'+
+                                                '<div class="form-check ">'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio1" name="has_sub"  value="1"   />'+
+                                                    '<label class="form-check-label" for="defaultRadio1">Yes</label>'+
+                                                    '</div> &nbsp; &nbsp;'+
+                                                '<div class="form-check">'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio2" name="has_sub" value="0" checked/>'+
+                                                '<label class="form-check-label" for="defaultRadio2">No</label>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
                                         '<div class="form-group">'+
                                             '<label>&nbsp;</label> <span id="reqcatnameadd" style="color:red">&nbsp;</span>'+                                            
                                             '<button type="button" class="form-control btn btn-lime component-plus-btn"><span class="fas fa-plus"></span></button>'+
                                         '</div>'+
+                                    
                                     '</div>');
                                     
                     $('.route-component').remove();
@@ -565,7 +719,7 @@
                     $('.route').append(
                                 '<div class="form-group route-component">'+
                                 '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
-                                '<input   name="route[]" class="form-control"  placeholder="module.index" required="true">'+
+                                '<input   name="route[]" class="form-control"  placeholder="module.index" >'+
                                 '</div>'
                     );
 
@@ -577,7 +731,7 @@
 
             // add sub module component
             $(document).on('click', '.component-plus-btn' , function(){
-
+                
                 $(".sub_module").prepend('<div class="sub_module_component row">'+
                                         '<div class="form-group">'+
                                             '<label>Sub Module Name</label> <span id="reqcatnameadd" style="color:red">*</span>'+
@@ -587,10 +741,24 @@
                                             '<label>Route </label> <span id="reqcatnameadd" style="color:red">*</span>'+
                                             '<input   name="route[]" class="form-control"  placeholder="module.index" required="true">'+
                                         '</div>&nbsp;&nbsp;'+
+                                        '<div class="form-group row ml-2">'+
+                                        '<label>Has Sub? <span style="color:red">*</span></label>'+
+                                            '<div class="col-md-12  row">'+
+                                                '<div class="form-check ">'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio3" name="has_sub"  value="1"   />'+
+                                                    '<label class="form-check-label" for="defaultRadio3">Yes</label>'+
+                                                    '</div> &nbsp; &nbsp;'+
+                                                '<div class="form-check">'+
+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio4" name="has_sub" value="0" checked/>'+
+                                                '<label class="form-check-label" for="defaultRadio4">No</label>'+
+                                                '</div>'+
+                                            '</div>'+
+                                        '</div>'+
                                         '<div class="form-group">'+
                                             '<label>&nbsp;</label> <span id="reqcatnameadd" style="color:red">&nbsp;</span>'+
                                             '<button type="button"  class="form-control btn btn-danger remove-btn" ><span class="fas fa-times"></span></button>'+                                            
-                                        '</div>'+
+                                        '</div>'+                                       
                                     '</div>');
             })
 
@@ -618,13 +786,13 @@
 
 @section('content')
 <!-- begin page-header -->
-<h1 class="page-header">Modules Management</h1>
+{{-- <h1 class="page-header">Modules Management</h1> --}}
 <!-- end page-header -->
 
 <!-- begin panel -->
-<div class="panel panel-success">
+<div class="panel">
     <div class="panel-heading">
-        <h4 class="panel-title">Module Management</h4>
+        <h4 class="panel-header"><i class='fa fa-info-circle' style="color:#03c8a8"></i>  Module Management</h4>
     </div>
     <div class="panel-body">
         <button type='button' class='btn btn-lime'data-toggle='modal' data-target='#AddModal' >
@@ -633,7 +801,7 @@
         <br>
         <br>
         <br>
-        <table id="load-datatable" class="table table-hover table-bordered">            
+        <table id="load-datatable" class="table table-hover table-striped">            
             <thead>
                 <tr>                    
                     <th >Icon</th>
@@ -652,7 +820,7 @@
 
         <!-- #modal-add -->
         <div class="modal fade" id="AddModal"  data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog" style="max-width: 30%">
+            <div class="modal-dialog" style="max-width: 33%">
                 <form id="AddForm" method="POST" >
                     @csrf
                     <div class="modal-content">
@@ -687,7 +855,7 @@
                                 <div class="form-group route">
                                     <div class="form-group route-component">
                                     <label>Route </label> <span id='reqcatnameadd' style='color:red'>*</span>
-                                    <input   name="route" class="form-control"  placeholder="module.index" required="true">
+                                    <input   name="route" class="form-control"  placeholder="module.index" >
                                     </div>
                                 </div>
                                 
@@ -713,7 +881,7 @@
 
         <!-- #modal-EDIT Main Modal and Sub Modules -->
         <div class="modal fade" id="UpdateModal"  data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog update-modal-dialog" style="max-width: 100%">
+            <div class="modal-dialog update-modal-dialog modal-lg" style="max-width: 100%">
                 <form id="UpdateForm" method="PUT"  >
                     @csrf
                     <div class="modal-content">
@@ -727,6 +895,9 @@
                             <input name="id" type="text" class="form-control hide" id="update-id" />
                             <button type='button' class='btn btn-lime add-sub-module-btn' data-toggle='modal' data-target='#AddSubModulesModal' >
                                 <i class='fa fa-plus'></i> Add New
+                            </button>
+                            <button type='button' class='btn btn-primary edit-sub-module-icon-btn' data-toggle='modal' data-target='#EditSubModulesIconModal' >
+                                <i class='fa fa-edit'></i> Edit Icon
                             </button>
                             <br><br>
                             <div class="col-lg-12 main-module-component">
@@ -816,7 +987,7 @@
 
          <!-- #modal-ADD sub modules-->
          <div class="modal fade" id="AddSubModulesModal"  data-backdrop="static" data-keyboard="false">
-            <div class="modal-dialog" style="max-width: 30%">
+            <div class="modal-dialog modal-lg" style="max-width: 30%">
                 <form id="AddSubModulesForm" method="POST" >
                     @csrf
                     <div class="modal-content">
@@ -830,7 +1001,7 @@
                                 <input type="text" name="parent_module_id"   class="form-control hide">
                                 <div class="form-group">
                                     <label>Icon</label>
-                                    <input style="text-transform: capitalize;"  name="icon" class="form-control"  placeholder="icon name"  required="true">                                        
+                                    <input   name="icon" class="form-control"  placeholder="icon name"  required="true">                                        
                                 </div> &nbsp;&nbsp;
                                 <div class="form-group">
                                     <label>Module Name</label>
@@ -842,7 +1013,7 @@
                                 </div>&nbsp;&nbsp;
                                 <div class="form-group">
                                     <label>Sequence</label>
-                                    <input style="text-transform: capitalize;"  name="sequence" class="form-control"  placeholder="sequence"  required="true">                                        
+                                    <input style="text-transform: capitalize;"  name="sequence" class="form-control"  placeholder="sequence">                                        
                                 </div> &nbsp;&nbsp;                                
                             </div>  
                         
@@ -857,6 +1028,93 @@
             </div>
         </div>
 
+
+        
+         <!-- #modal-EDIT sub modules ICON-->
+         <div class="modal fade" id="EditSubModulesIconModal"  data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog" style="max-width: 30%">
+                <form id="EditSubModulesIconForm" method="POST" >
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: #6C9738">
+                            <h4 class="modal-title update-sub-modal-title" style="color: white">Edit Icon</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                        </div>
+                        <div class="modal-body">
+                            {{--modal body start--}}
+                            <div class="col-lg-12 row">
+                                <input type="text" name="parent_module_id"   class="form-control hide">
+                                <div class="form-group">
+                                    <label>Icon</label>
+                                    <input   name="icon" class="form-control"  placeholder="icon name"  required="true">                                        
+                                </div>                             
+                            </div>  
+                        
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white update-close-btn" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+
+        <!-- #modal-ADD PARENT SUB SUB modules-->
+        <div class="modal fade" id="AddParentSubModulesModal"  data-backdrop="static" data-keyboard="false">
+            <div class="modal-dialog " style="max-width: 30%">
+                <form id="AddParentSubModulesForm" method="POST" >
+                    @csrf
+                    <div class="modal-content">
+                        <div class="modal-header" style="background-color: #28a745">
+                            <h4 class="modal-title update-sub-modal-title" style="color: white">Add Sub Modules</h4>
+                            <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
+                        </div>
+                        <div class="modal-body">
+                            {{--modal body start--}}
+                            <div class="col-lg-12 row">
+                                <input type="text" name="sub_parent_module_id"  id="sub_parent_module_id"   class="form-control hide">
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Icon</label>
+                                        <input   name="icon" class="form-control"  placeholder="icon name"  required="true">                                        
+                                    </div> 
+                                </div>
+                                <div class="col-md-5">
+                                
+                                    <div class="form-group">
+                                        <label>Module Name</label>
+                                        <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true">                                        
+                                    </div> 
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Route</label>
+                                        <input   name="route" class="form-control"  placeholder="route" required="true">
+                                    </div>
+                                </div>
+
+                                <div class="col-md-5">
+                                    <div class="form-group">
+                                        <label>Sequence</label>
+                                        <input style="text-transform: capitalize;"  name="sequence" class="form-control"  placeholder="sequence">                                        
+                                    </div>                
+                                </div>                 
+                            </div>  
+                        
+                            {{--modal body end--}}
+                        </div>
+                        <div class="modal-footer">
+                            <a href="javascript:;" class="btn btn-white update-close-btn" data-dismiss="modal">Close</a>
+                            <button type="submit" class="btn" style="background-color:#28a745;color:white">Add</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
 
     </div>
 </div>

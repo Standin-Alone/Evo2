@@ -17,8 +17,8 @@
 
         
         #load-datatable > thead > tr > th {
-            color:white;
-            background-color: #008a8a;
+            color:#545a64;
+            background-color: #ffffff;
             font-size: 20px;
             font-family: calibri
         }
@@ -105,15 +105,34 @@
 
                             convertToJson = JSON.parse(data);
                             
-                            console.warn();
+                            console.warn(convertToJson.sub_modules);
                             convertToJson.main_modules.map((item)=>{
                                 let check_parent_module = convertToJson.sub_modules.some((result)=> result.parent_module_id === item.sys_module_id);
+
+
+                                
                                 if(item.has_sub == 1 && check_parent_module ){
                                     $("#select_module").append('<optgroup label="'+item.module+'" id="'+item.sys_module_id+'"></optgroup>');                                    
 
                                     convertToJson.sub_modules.map((value) =>{
                                         if(item.sys_module_id == value.parent_module_id){
-                                            $('#select_module #'+item.sys_module_id).append('<option value="'+value.module+'">'+value.module+'</option>')
+                                            
+                                            if(value.routes){
+                                                
+                                                $('#select_module #'+item.sys_module_id).append('<option value="'+value.module+'">'+value.module+'</option>')
+                                            }else{
+                                                
+                                                $('#select_module #'+item.sys_module_id).append('<option value="'+value.module+'"  id="'+value.sys_module_id+'" style="font-weight:bold;" >'+value.module+'</option>')
+
+                                                convertToJson.sub_modules.map((item_parent_module)=>{
+                                                    if(value.sys_module_id == item_parent_module.parent_module_id){
+                                                        $('#select_module #'+item.sys_module_id).append('<option value="'+item_parent_module.module+'">'+'*'+item_parent_module.module+'</option>')
+                                                    }
+                                                })
+                                                
+                                            }
+                                            
+
                                         }
                                     })
                                 }else{
@@ -195,7 +214,7 @@
                                 .data()
                                 .each((group,i)=>{
                                     
-                                    console.warn(group);
+                                    
                                         if(last != group && group != null){
                                             $(rows).eq(i).before('<tr  class="bg-success font-weight-bold  text-white" ><td colspan="{{count($get_permissions)+2}}" >'+group+'</td></tr>')
                                             last = group;
@@ -351,13 +370,13 @@
 
 @section('content')
 <!-- begin page-header -->
-<h1 class="page-header">Roles and Permissions<small> This page is setup of permissions of roles.</small></h1>
+{{-- <h1 class="page-header">Roles and Permissions<small> This page is setup of permissions of roles.</small></h1> --}}
 <!-- end page-header -->
 
 <!-- begin panel -->
-<div class="panel panel-inverse">
+<div class="panel">
     <div class="panel-heading">
-        <h4 class="panel-title">Roles and Permissions </h4>
+        <h4 class="panel-header"><i class='fa fa-info-circle' style="color:#03c8a8"></i> Roles and Permissions </h4>
     </div>
     <div class="panel-body">        
         {{-- table --}}

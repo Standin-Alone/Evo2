@@ -11,6 +11,7 @@ use Illuminate\Support\Str;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Imports\UsersImport;
 use App\Modules\UserManagement\Models\UserManagement;
+use App\Models\GlobalNotificationModel;
 use Yajra\DataTables\Facades\DataTables;
 use App\Modules\Login\Models\OTP;
 class AccountCreationController extends Controller
@@ -196,5 +197,6 @@ class AccountCreationController extends Controller
         }
         return $result;
     }
+
 
 }   

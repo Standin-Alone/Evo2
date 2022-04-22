@@ -16,13 +16,14 @@ use Illuminate\Support\Facades\Session;
 
 use ElephantIO\Client;
 use ElephantIO\Engine\SocketIO\Version2X;
-
+use App\Models\GlobalNotificationModel;
 
 class KYCModuleController extends Controller
 {
 
     public function __construct(){
         $this->middleware('session.module');
+        $this->middleware('session.notifications');
      
     }
     /**
@@ -493,9 +494,11 @@ class KYCModuleController extends Controller
     }
 
     if($count_error == 0){
-        echo  json_encode(["message" => 'true','error_data' => $error_storage]);
+
+        $link = route("DisbursementModule.index");
+        $title  = 'New Kyc Profiles Uploaded';
+        echo  json_encode(["message" => 'true','error_data' => $error_storage,"notification"=>$import_file['total_rows_inserted'] != 0 ? GlobalNotificationModel::sendNotification([4],$import_file['region'],"You have new ".$import_file['total_rows_inserted']." kyc profiles to approve.",$program_id,$link,$title) : json_encode([]),"region"=>$import_file['region'],"total_rows_inserted"=>$import_file['total_rows_inserted']]);            
         
-    
     }else{
         echo  json_encode(["message" => 'false']);
         

@@ -6,6 +6,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use File;
+use Illuminate\Support\Facades\Storage;
+use Ramsey\Uuid\Uuid;
 class GlobalNotificationModel extends Model
 {
     use HasFactory;
@@ -87,4 +90,88 @@ class GlobalNotificationModel extends Model
 
         return 'true';
     }
+
+    // SEND NOTIFICATION VIA SOCKET
+    public function sendNotification($roles,$region_id,$message,$program_id,$link,$title){
+
+
+
+        $program_id = session('role_id') == 19 ? $program_id : session('Default_Program_Id');
+
+        $upload_path = 'uploads/notifications';        
+        $upload_folder  = $upload_path;
+        
+         // create folder for returned disbursement files;
+         if(!File::isDirectory($upload_path)){
+            
+            File::makeDirectory($upload_path, 0775, true);                                
+            
+        }
+
+        
+        $consolidated_notifications = [];
+        foreach($roles as $item_role){
+          
+            
+            $get_users = db::table('program_permissions as pp')
+                                ->leftJoin('users as u','u.user_id','pp.user_id')
+                                ->where('role_id',$item_role)
+                                ->where('reg',$region_id)
+                                ->where('program_id',$program_id)
+                                ->get();
+            $notif_id = Uuid::uuid4();
+
+
+
+            if($get_users){
+
+
+
+    
+                foreach($get_users as $user_data){
+                
+                    if(isset($user_data->user_id)){
+                            
+                        $notification_array = [[
+                            "notif_id"  =>$notif_id,
+                            "title"     => $title,            
+                            "senderName" => session('first_name').' '.session('last_name'),
+                            "from"     => session('uuid'),            
+                            "message"  => $message,
+                            "to"       => $user_data->user_id, 
+                            "date"     => date('Y/m/d h:i A'),
+                            "role"     =>$item_role,
+                            "link"     =>$link,
+                            "status"   => "unread"
+                        ]];            
+
+                        
+
+                        $filename = isset($user_data->user_id) ? $user_data->user_id : 'none';
+            
+                        if(File::exists($upload_folder.'/'.$filename.'.json')){
+
+                            $get_notification = file_get_contents($upload_folder.'/'.$filename.'.json');
+                            $tempArray = json_decode($get_notification);
+
+                            $tempArray[] = $notification_array[0] ;
+                            $serialize_data = json_encode($tempArray);
+
+                            Storage::disk('notification')->put('/'.$filename.'.json',$serialize_data);
+                        }else{
+                            // upload notification log files
+                            $serialize_data = response()->json($notification_array)->getContent();            
+                            Storage::disk('notification')->put('/'.$filename.'.json',$serialize_data);
+                        }
+
+                        array_push($consolidated_notifications,$notification_array[0]);
+                    }
+                }
+            }
+        }
+        
+        return json_encode($consolidated_notifications);
+
+    }
+    
 }

@@ -60,7 +60,7 @@ class OTP extends Model
     }
 
     public function update_otp_status_to_active($uuid){
-        $query = DB::table('user_otp')->where('user_id', '=', $uuid)->update(['status' => "1"]);
+        $query = DB::table('user_otp')->where('user_id', '=', $uuid)->update(['status' => "0"]);
         return $query;
     }
 

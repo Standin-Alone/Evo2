@@ -429,7 +429,33 @@ table.dataTable td {
                                                     $("#ingested-files-datatable").DataTable().ajax.reload();     
                                                     $("#select_agency").val("");
                                                     $(".progress-load").css('width','0%')    
-                                            
+
+                                                
+                                                // SEND NOTIFICATION
+                                                parseNotification = JSON.parse(parses_result['notification']);
+                                                console.warn(parseNotification)
+                                                
+                                                if(parseNotification.length != 0 && parses_result['total_rows_inserted'] != 0){
+
+                                                    parseNotification.map((item_notif)=>{
+
+                                                        socket().emit('message',{
+                                                            room:{                                                                                                                                
+                                                                roles:item_notif.role,
+                                                                region:parses_result['region'],
+                                                                from:'{{session("uuid")}}',                                
+                                                                senderName:item_notif.senderName,
+                                                                to:item_notif.to                                
+                                                            },
+                                                            message:item_notif.message,
+                                                            status:"unread" 
+                                                        }); 
+                                                    })
+                                                   
+                                                }
+                                          
+
+                                                
                                                 if(parses_result['error_data'].length != 0){
     
                                                     console.warn(parses_result['error_data'].length)
