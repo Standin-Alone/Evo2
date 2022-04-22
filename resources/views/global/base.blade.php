@@ -1,16 +1,11 @@
-<!-- @if(session()->has('main_modules'))
-	@if(Route::currentRouteName() == 'user.profile' || Route::currentRouteName() == 'main.home' || Route::currentRouteName() == 'farmer.view.details.page' || Route::currentRouteName() == 'farmer.view.rffa_details.page')		
-	@elseif(!(session('main_modules')->where('routes',Route::currentRouteName())->first() || session('sub_modules')->where('routes',Route::currentRouteName())->first()))		
-		<script>window.location.href = "{{route('error_page.index')}}"</script>
-	@endif
-@endif -->
-
 
 <?php echo
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
 header("Cache-Control: post-check=0, pre-check=0", false);
 header("Pragma: no-cache");
 header('Content-Type: text/html');?>
+
+
 
 <!DOCTYPE html>
 <!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
@@ -154,7 +149,52 @@ header('Content-Type: text/html');?>
 					<button type="button" class="btn btn-success" data-toggle="dropdown">
 						<span class="caret"></span>
 					</button>
-				</li>								
+				</li>	
+				
+						
+				<li class="dropdown  dropdown-menu-right ">
+					<a href="javascript:;" data-toggle="dropdown" class="dropdown-toggle f-s-14 open-notif-btn">
+						<i class="fa fa-bell"></i>
+						<span class="label label-danger notif-count" style="background:#ff5b57">{{session('notification_count') }}</span>
+					</a>
+					
+					<ul class="dropdown-menu media-list dropdown-menu-right" id="notif-dropdown">
+						<li class="dropdown-header notification-count-label">NOTIFICATIONS ({{session('notification_count') }})</li>
+						<li class="media loading justify-content-center"> <i class="fas fa-spinner fa-spin  fa-5x" style="color:#03c8a8;"></i></li>
+
+						<li class="media no-notif justify-content-center" style="display:none" > 
+									<div class="media-body justify-content-center">  	
+										<h6 class="media-heading justify-content-center" style="text-align:center">You have no current notifications.</h6> 
+									</div>
+						</li>
+						
+						<li class="dropdown-footer text-center">
+							<a href="javascript:;">View more</a>
+						</li>
+					</ul>
+				</li>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 				<li class="dropdown navbar-user">
 					<a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
 						<img src="{{url('assets/img/images/profile/profile-user-black.png')}} "  alt="" /> 
@@ -295,6 +335,7 @@ header('Content-Type: text/html');?>
 	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.2/dist/additional-methods.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.1/socket.io.js"></script>
+	<script src="{{url('assets/plugins/gritter/js/jquery.gritter.js')}}"></script>
 	<script src="{{url('assets/js/socket.js')}}"></script>
 	<script>
 
@@ -303,13 +344,140 @@ header('Content-Type: text/html');?>
 		var get_width = 0;          
         // start websocket   
         //  connect to websocket                		
-        // socket().on("connect", function() {            
-        //         //  get progress of uploading
-        //         console.warn('connected');			
-		// });
+        socket().on("connect", function() {            
+                //  get progress of uploading
+                console.warn('connected');			
+
+				socket().emit('join-room',{room:{from:"{{ session('uuid') }}"}})
+		});
+
+
+		// GET  NOTIFICATION
+		socket().on("notification", function(notif) {            
+                //  get progress of uploading
+			console.warn(notif);
+			let notif_sum = $(".notif-count").text();
+			
+				if(notif.room.to == "{{ session('uuid') }}"){
+					 $.gritter.add({
+							title: 'Notification from <b>'+notif.room.senderName+'</b>',
+							text: '<p style="color:white">'+notif.message+'</p>',
+							sticky: true
+					});
+
+					count_notif  = parseInt(notif_sum)+1;
+					 $(".notification-count-label").text('NOTIFICATIONS ('+count_notif+')');
+					$(".notif-count").text(count_notif);
+				}			
+		});
+
+
 
 		
+		function dateSort(a, b) {
+				
+    			return new Date(b.date).getTime() - new Date(a.date).getTime();
+		}
+
+
+		function getNotification(element){
+			$(".notif-data").remove();
+				$(".no-notif").hide();
+				if(element.attr('aria-expanded') == 'false' || element.attr('aria-expanded') == undefined ){
+					
+					$.ajax({
+						url:"{{route('get-notifications')}}",
+						type:'post',                    
+						data:{_token:'{{ csrf_token() }}'},
+						success:function(response){             
+							let responseClean = JSON.parse(response);
+							
+							if(responseClean.length != 0){
+								// hide loader
+								sortedResponse = responseClean.sort(dateSort);
+								console.warn(sortedResponse);
+								$(".loading").hide();
+								
+								// append notification
+								sortedResponse.map((item,index)=>{
+									
+									if(index <= 5){
+										$(".dropdown-footer").before(
+											'<li class="media notif-data ">'+
+												// ${item.link ? item.link : '#'}
+												`<a  href="#" class="read-btn" notification_id="${item.notif_id}">`+
+													'<div class="media-left">'+												
+														'<i class="fa fa-bell media-object bg-warning"></i>'+
+													'</div>'+
+													'<div class="media-body">'+
+														`<h6 class="media-heading">${item.senderName}</h6>`+
+														`<p style="font-weight:${item.status == 'unread' ? 'bold' : 'regular'};">${item.message}</p>`+
+														'<div class="text-muted f-s-11">'+item.date+'</div>'+
+													'</div>'+
+												'</a>'+
+											'</li>')
+									}
+								});
+							}else{
+
+								$(".no-notif").show();
+								$(".loading").hide();
+							}
+						},
+						error:function(error){
+							console.warn(error)
+						}                                            
+					});
+				}else{
+					$(".loading").show();
+					$(".notif-data").remove();
+				}
+		}
+
+		
+			
+
 		$(document).ready(function(){
+
+			// OPEN NOTIFICATION
+			$(".open-notif-btn").on('click',function(){
+				getNotification($(this));
+			});
+
+
+			//READ NOTIFICATION 
+			$("#notif-dropdown").on('click','.read-btn',function(e){
+				e.preventDefault();
+		
+				notificationId = $(this).attr('notification_id');
+				
+				$.ajax({
+						url:"{{route('read-notification')}}",
+						type:'post',                    
+						data:{_token:'{{ csrf_token() }}',notification_id:notificationId},
+						success:function(response){     
+							let parseResponse = JSON.parse(response);
+							if(parseResponse['message'] == true){
+								// get updated notification
+								getNotification($(".open-notif-btn"));
+								// redirect to link after clicking the notification
+								console.warn( parseResponse['link']);
+								location.href =  parseResponse['link'] ? parseResponse['link'] : '#';
+								
+							}else{
+								console.warn(parseResponse['error']);
+							}
+							
+						},
+						error:function(error){
+							console.warn(error)
+						}                                            
+					});
+
+			});
+
+
+
 
 			jQuery.validator.addMethod("password_pattern", function(value,element,param){		
 				return value.match(/^(?=.*[A-Za-z])(?=.*[\W])/);

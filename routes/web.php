@@ -20,3 +20,7 @@ Route::get('/welcome', 'HomeController@index')->name('main.home');
 Route::get('/error','Controller@error_page')->name('error_page.index');
 Route::post('/change-default-pass','AccessController@firstLoggedIn')->name('change-default-pass');
 Route::get('/check-default-pass','AccessController@checkDefaultPass')->name('check-default-pass');
+
+
+Route::post('/get-notifications','AccessController@get_notifications')->name('get-notifications');
+Route::post('/read-notification','AccessController@read_notification')->name('read-notification');

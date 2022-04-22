@@ -28,8 +28,27 @@
         </a>
         <ul class="sub-menu">    
                     @foreach(session('sub_modules') as $value)
-                        @if($value->parent_module_id == $item->sys_module_id && $value->nav_show == 1 )                        
-                        <li class="{{Route::currentRouteName() == $value->routes ? "active" : null}} " ><a href="{{route($value->routes)}}">{{$value->module}} </a></li>    
+                        @if($value->parent_module_id == $item->sys_module_id && $value->nav_show == 1 && $value->routes != ''  )                        
+                            <li class="{{Route::currentRouteName() == $value->routes ? "active" : null}} " ><a href="{{route($value->routes)}}">{{$value->module}} </a></li>    
+                        @elseif($value->parent_module_id == $item->sys_module_id && $value->nav_show == 1 && $value->routes == '' )                        
+                            <li class="has-sub ">
+                                <a href="javascript:;">
+                                    <b class="caret"></b>
+                                    <i class="fa fa-{{ $value->icon }}"></i>
+                                    <span>{{$value->module}}</span>
+                                </a>
+                                <ul class="sub-menu">    
+
+                                    
+                                    @foreach(session('sub_modules') as $value_parent_sub_modules)
+                                        @if($value->sys_module_id == $value_parent_sub_modules->parent_module_id)
+                                            
+                                            <li class="{{Route::currentRouteName() == $value_parent_sub_modules->routes ? "active" : null}} " ><a href="{{route($value_parent_sub_modules->routes)}}">{{$value_parent_sub_modules->module}} </a></li>    
+                                        @endif
+                                    @endforeach
+                                    
+                                </ul>
+                            </li>
                         @endif                   
                     @endforeach           
                 </ul>
