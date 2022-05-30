@@ -6,7 +6,6 @@ header("Pragma: no-cache");
 header('Content-Type: text/html');?>
 
 
-
 <!DOCTYPE html>
 <!--[if IE 8]> <html lang="en" class="ie8"> <![endif]-->
 <!--[if !IE]><!-->
@@ -169,7 +168,7 @@ header('Content-Type: text/html');?>
 						</li>
 						
 						<li class="dropdown-footer text-center">
-							<a href="javascript:;">View more</a>
+							<a href="{{ route('notif_module.msg_inbox') }}">View more</a>
 						</li>
 					</ul>
 				</li>
@@ -347,6 +346,7 @@ header('Content-Type: text/html');?>
         socket().on("connect", function() {            
                 //  get progress of uploading
                 console.warn('connected');			
+				console.warn("{{ session('uuid') }}");
 
 				socket().emit('join-room',{room:{from:"{{ session('uuid') }}"}})
 		});
@@ -355,12 +355,12 @@ header('Content-Type: text/html');?>
 		// GET  NOTIFICATION
 		socket().on("notification", function(notif) {            
                 //  get progress of uploading
-			console.warn(notif);
+			console.warn(notif.receiver_user_id);
 			let notif_sum = $(".notif-count").text();
 			
-				if(notif.room.to == "{{ session('uuid') }}"){
+				if(notif.receiver_user_id == "{{ session('uuid') }}"){
 					 $.gritter.add({
-							title: 'Notification from <b>'+notif.room.senderName+'</b>',
+							title: 'Notification from <b>'+notif.senderName+'</b>',
 							text: '<p style="color:white">'+notif.message+'</p>',
 							sticky: true
 					});
@@ -402,8 +402,8 @@ header('Content-Type: text/html');?>
 								sortedResponse.map((item,index)=>{
 									
 									if(index <= 5){
-										$(".dropdown-footer").before(
-											'<li class="media notif-data ">'+
+										$(".dropdown-footer").before(											
+											`<li class="media notif-data " style="background:${item.status == 'unread' ? '#ffffc4' : 'white'}">`+
 												// ${item.link ? item.link : '#'}
 												`<a  href="#" class="read-btn" notification_id="${item.notif_id}">`+
 													'<div class="media-left">'+												
