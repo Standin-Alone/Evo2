@@ -13,7 +13,7 @@ class GlobalNotificationModel extends Model
 {
     use HasFactory;
     
-    public function send_email($role,$region,$messages){
+    public function send_email($role,$region,$messages,$agency_id,$program_id){
 
         $subject = '';
         $role_name = session('role_name_sets');
@@ -32,6 +32,8 @@ class GlobalNotificationModel extends Model
                         ->join('program_permissions as pp','u.user_Id','pp.user_id')
                         ->join('roles as r', 'r.role_id', 'pp.role_id')                            
                         ->where('r.role_id', 4)
+                        ->where('u.agency', $agency_id)
+                        ->where('pp.program_id', $program_id)
                         ->where('reg', DB::table('geo_map')->where('reg_name',$region)->first()->reg_code)
                         ->pluck('u.email');                 
 
@@ -52,6 +54,8 @@ class GlobalNotificationModel extends Model
                         ->join('program_permissions as pp','u.user_Id','pp.user_id')
                         ->join('roles as r', 'r.role_id', 'pp.role_id')                            
                         ->where('r.role_id', 8)
+                        ->where('u.agency', session('user_agency_id'))
+                        ->where('pp.program_id', session('program_id'))
                         ->where('reg', $region)
                         ->pluck('u.email'); 
 
@@ -73,6 +77,8 @@ class GlobalNotificationModel extends Model
                         ->join('program_permissions as pp','u.user_Id','pp.user_id')
                         ->join('roles as r', 'r.role_id', 'pp.role_id')                            
                         ->where('r.role_id', 10)
+                        ->where('u.agency',  session('user_agency_id'))
+                        ->where('pp.program_id', session('program_id'))
                         ->where('reg', $region)
                         ->pluck('u.email');                 
 
@@ -91,12 +97,9 @@ class GlobalNotificationModel extends Model
         return 'true';
     }
 
-    // SEND NOTIFICATION VIA SOCKET
-    public function sendNotification($roles,$region_id,$message,$program_id,$link,$title){
+  // SEND NOTIFICATION VIA SOCKET
+    public function sendNotification($user_id,$title,$message,$link){
 
-
-
-        $program_id = session('role_id') == 19 ? $program_id : session('Default_Program_Id');
 
         $upload_path = 'uploads/notifications';        
         $upload_folder  = $upload_path;
@@ -108,70 +111,50 @@ class GlobalNotificationModel extends Model
             
         }
 
-        
-        $consolidated_notifications = [];
-        foreach($roles as $item_role){
-          
-            
-            $get_users = db::table('program_permissions as pp')
-                                ->leftJoin('users as u','u.user_id','pp.user_id')
-                                ->where('role_id',$item_role)
-                                ->where('reg',$region_id)
-                                ->where('program_id',$program_id)
-                                ->get();
-            $notif_id = Uuid::uuid4();
+        $get_user_info = db::table('users as u')
+                            ->join('program_permissions as pp','u.user_id','pp.user_id')
+                            ->join('roles as r','r.role_id','pp.role_id')
+                            ->where('u.user_id',$user_id)
+                            ->groupBy('u.user_id')
+                            ->first();
+
+        $notification_id = Uuid::uuid4();
+        $sender_name =  session('first_name').' '.session('last_name');
+        $sender_user_id =  session('uuid');
+
+        $notification_array = [[
+            "notif_id"   => $notification_id,
+            "title"      => $title,            
+            "senderName" => $sender_name,
+            "sender_user_id" => $sender_user_id,            
+            "message"    => $message,
+            "receiver_user_id" => $user_id, 
+            "date"       => date('Y/m/d h:i A'),
+            "role"       => $get_user_info->role_id,
+            "link"       => $link,
+            "status"     => "unread"
+        ]];   
 
 
+        if(File::exists($upload_folder.'/'.$user_id.'.json')){
 
-            if($get_users){
+            $get_notification = file_get_contents($upload_folder.'/'.$user_id.'.json');
+            $tempArray = json_decode($get_notification);
 
+            $tempArray[] = $notification_array[0];
+            $serialize_data = json_encode($tempArray);
 
+            Storage::disk('notification')->put('/'.$user_id.'.json',$serialize_data);
 
-    
-                foreach($get_users as $user_data){
-                
-                    if(isset($user_data->user_id)){
-                            
-                        $notification_array = [[
-                            "notif_id"  =>$notif_id,
-                            "title"     => $title,            
-                            "senderName" => session('first_name').' '.session('last_name'),
-                            "from"     => session('uuid'),            
-                            "message"  => $message,
-                            "to"       => $user_data->user_id, 
-                            "date"     => date('Y/m/d h:i A'),
-                            "role"     =>$item_role,
-                            "link"     =>$link,
-                            "status"   => "unread"
-                        ]];            
-
-                        
-
-                        $filename = isset($user_data->user_id) ? $user_data->user_id : 'none';
-            
-                        if(File::exists($upload_folder.'/'.$filename.'.json')){
-
-                            $get_notification = file_get_contents($upload_folder.'/'.$filename.'.json');
-                            $tempArray = json_decode($get_notification);
-
-                            $tempArray[] = $notification_array[0] ;
-                            $serialize_data = json_encode($tempArray);
-
-                            Storage::disk('notification')->put('/'.$filename.'.json',$serialize_data);
-                        }else{
-                            // upload notification log files
-                            $serialize_data = response()->json($notification_array)->getContent();            
-                            Storage::disk('notification')->put('/'.$filename.'.json',$serialize_data);
-                        }
-
-                        array_push($consolidated_notifications,$notification_array[0]);
-                    }
-                }
-            }
+        }else{
+            // upload notification log files
+            $serialize_data = response()->json($notification_array)->getContent();            
+            Storage::disk('notification')->put('/'.$user_id.'.json',$serialize_data);
         }
-        
-        return json_encode($consolidated_notifications);
 
+
+        return json_encode($notification_array[0]);  
     }
-    
+
+  
 }

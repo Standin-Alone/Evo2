@@ -523,6 +523,26 @@ class MobileAppController extends Controller
                                 }
                                 
                                 $get_program_items   = $this->getProgramItems($supplier_id,$reference_num);
+
+                                // FERTILIZER CATEGORY
+                                $get_fertilizer_categories   =  db::table('fertilizer_category')->get();
+                                $get_sub_categories          =  db::table('fertilizer_sub_category')->get();
+
+                                
+                                $clean_fertilizer_categories =  [];
+                                
+
+
+                                foreach($get_fertilizer_categories as $item_category){
+                                    array_push($clean_fertilizer_categories, 
+                                    ["label"=>$item_category->category,"value"=>$item_category->fertilizer_category_id]);
+                                }
+
+
+
+
+                                
+
                                 $get_recent_claiming = $this->get_transactions_history($reference_num);
                     
                                 // validate voucher
@@ -535,6 +555,8 @@ class MobileAppController extends Controller
                                 return json_encode(["Message"           => 'true',
                                                         "data"          => $get_info, 
                                                         "program_items" => $get_program_items,
+                                                        "fertilizer_categories" => $clean_fertilizer_categories,
+                                                        "fertilizer_sub_categories" => $get_sub_categories,
                                                         "unit_types"    => $unit_types,
                                                         "history"       => $get_recent_claiming,
                                                         "time_limit"   => $minutes_to_miliseconds
@@ -1027,6 +1049,7 @@ class MobileAppController extends Controller
                                 'quantity'            =>  $item->quantity,
                                 'amount'              =>  $item->price,                                
                                 'item_category'       =>  $item->item_category,
+                                'item_sub_category'       =>  $item->item_sub_category,
                                 'total_amount'        =>  $item->cash_added > 0 ? $item->total_amount  - $item->cash_added  : $item->total_amount,
                                 'cash_added'          =>  $item->cash_added,
                                 'unit_type'           =>  $item->unit_type,
@@ -1158,6 +1181,7 @@ class MobileAppController extends Controller
             $reference_no   = $value['reference_no'];
             $supplier_id   = $value['supplier_id'];
             $item_category   = $value['item_category'];
+            $item_sub_category   = $value['item_sub_category'];
             $sub_program_id   = $value['sub_id'];
             $quantity   = $value['quantity'];
             $amount   = $value['price'];
@@ -1188,6 +1212,7 @@ class MobileAppController extends Controller
                                             'reference_no' => $reference_no,
                                             'supplier_id' => $supplier_id,
                                             'item_category' => $item_category,
+                                            'item_sub_category' => $item_sub_category,
                                             'sub_program_id' => $sub_program_id,
                                             'quantity' => $quantity,
                                             'amount' => $amount,
@@ -1262,6 +1287,7 @@ class MobileAppController extends Controller
             $reference_no   = $value['reference_no'];
             $supplier_id   = $value['supplier_id'];
             $item_category   = $value['item_category'];
+            $item_sub_category   = $value['item_sub_category'];
             $sub_program_id   = $value['sub_id'];
             $quantity   = $value['quantity'];
             $amount   = $value['price'];
@@ -1290,6 +1316,7 @@ class MobileAppController extends Controller
                                             'reference_no'                 => $reference_no,
                                             'supplier_id'                  => $supplier_id,
                                             'item_category'                => $item_category,
+                                            'item_sub_category'            => $item_sub_category,
                                             'sub_program_id'               => $sub_program_id,
                                             'quantity'                     => $quantity,
                                             'amount'                       => $amount,
@@ -1321,6 +1348,7 @@ class MobileAppController extends Controller
                         'reference_no'                 => $reference_no,
                         'supplier_id'                  => $supplier_id,
                         'item_category'                => $item_category,
+                        'item_sub_category'            => $item_sub_category,
                         'sub_program_id'               => $sub_program_id,
                         'quantity'                     => $quantity,
                         'amount'                       => $amount,

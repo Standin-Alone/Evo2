@@ -1,0 +1,613 @@
+<?php
+
+namespace App\Modules\MobileAppV2\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+use File;
+use Mail;
+use DB;
+use Ramsey\Uuid\Uuid;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use \Illuminate\Support\Arr;
+
+
+class MobileAppV2 extends Model
+{
+    use HasFactory;
+
+    public function login(){
+
+
+        try{
+
+            $username = request('username');
+            $password = request('password');
+
+            
+            $get_user_info = db::table('users as u')
+                                    ->select(
+                                            'u.user_id',
+                                            'r.role',
+                                            DB::raw(" CONCAT(first_name,' ',IFNULL(middle_name,''),' ',last_name) as full_name"),
+                                            'u.email', 
+                                            'u.username',
+                                            'u.password',
+                                            'approval_status', 
+                                            'u.status'                                        
+                                            )
+                                    ->join('supplier as s','u.user_id','s.supplier_id')
+                                    ->join('program_permissions as pp','u.user_id','pp.user_id')
+                                    ->join('roles as r','r.role_id','pp.role_id')
+                                    ->where('username',$username)->orWhere('u.email',$username)
+                                    ->first();
+
+            // check user exist
+            if($get_user_info){ 
+                
+                // check if account is approve
+                if($get_user_info->approval_status == '1' && $get_user_info->status == '1'){
+                
+                    // check if password is correct
+                    if(password_verify($password,$get_user_info->password)){
+
+                        $generate_otp = mt_rand(100000, 999999);
+
+
+                        $store_otp = db::table('user_otp')->updateOrInsert([
+                            "user_id" =>$get_user_info->user_id,                      
+                        ],["user_id" =>$get_user_info->user_id,"otp" =>$generate_otp,"status" => '1',"date_created" => Carbon::now()]);
+
+                        $email = $get_user_info->email;
+                    
+
+                        $data_for_email = [
+                            "otp_code" => $generate_otp, 
+                            "full_name" => $get_user_info->full_name  , 
+                            "date" => Carbon::now()->format('M D, Y'), 
+                            "role" => $get_user_info->role  
+                        ];
+
+                        Mail::send('MobileApp::otp', $data_for_email, function ($message) use ($email) {
+                            $message->to($email)
+                                    ->subject('OTP');                            
+                        });
+
+                        return response()->json([
+                            "status"  => true,
+                            "message" => "Sucessfully logged in.",            
+                            "data"    => $get_user_info
+                        ]); 
+
+                    }else{
+                        return response()->json([
+                            "status"  => false,
+                            "message" => "Your password is incorrect.",            
+                        ]);     
+                    }
+
+                }else{
+
+                    return response()->json([
+                        "status"  => false,
+                        "message" => "Your account is not yet approved.",            
+                    ]);     
+
+                }
+
+            }else{
+
+                return response()->json([
+                    "status"  => false,
+                    "message" => "Your email doesn't exist.",            
+                ]); 
+
+            }         
+                  
+         }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
+
+    public function verify_otp(){
+
+        try{
+
+            $otp = request('otp');
+            $user_id = request('user_id');
+            
+            $verify_otp = db::table('user_otp')
+                            ->where('user_id',$user_id)                        
+                            ->orderBy('date_created','desc')
+                            ->first();
+            
+
+            if($verify_otp->status == '1' ){
+
+                if($verify_otp->otp == $otp){
+                    return response()->json([
+                        "status"  => true,
+                        "message" => "Your OTP is valid."                        
+                    ]); 
+                }else{
+                    return response()->json([
+                        "status"  => false,
+                        "message" => "Your OTP is incorrect.",            
+                    ]); 
+                }
+            }else{
+                return response()->json([
+                    "status"  => false,
+                    "message" => "Your OTP is expired or invalid.",            
+                ]); 
+            }
+
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
+
+    
+    public function resend_otp(){
+
+        try{
+
+            $user_id = request('user_id');
+            $full_name = request('full_name');
+            $email = request('email');
+            $role = request('role');
+
+            $generate_otp = mt_rand(100000, 999999);
+
+
+            $store_otp = db::table('user_otp')->updateOrInsert([
+                "user_id" =>$user_id,                      
+            ],["user_id" =>$user_id,"otp" =>$generate_otp,"status" => '1',"date_created" => Carbon::now()]);
+
+            $data_for_email = [
+                "otp_code"  => $generate_otp, 
+                "full_name" => $full_name , 
+                "date"      => Carbon::now()->format('M D, Y'), 
+                "role"      => $role 
+            ];
+
+            Mail::send('MobileApp::otp', $data_for_email, function ($message) use ($email) {
+                $message->to($email)
+                        ->subject('OTP');                            
+            });
+
+            return response()->json([
+                "status"  => true,
+                "message" => "A new OTP has been sent to your email.",            
+            ]); 
+
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
+
+
+    public function check_app_version(){
+        $version = request('version');
+
+        $checkVersion = db::table('mobile_utility')
+                            ->where('version',$version)
+                            ->first();
+
+
+        if($checkVersion->active == '1'){
+
+            if($checkVersion->maintenance == '1'){
+
+                return response()->json([
+                    "status"  => false,                    
+                    "message" => 'Sorry! Mobile app is currently on maintenance. Please try again later.'
+                ]); 
+    
+            }else{
+
+                return response()->json([
+                    "status"  => true,
+                    "message" => 'Mobile app is now live'
+                ]); 
+            }
+
+        }else{
+            return response()->json([
+                "status"  => false,                
+                "message" => 'Please download the latest version of mobile application.'
+            ]); 
+        }
+
+    }
+
+    //  get time to check if voucher transaction is now open
+    public function get_time(){                         
+
+        $get_current_time = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now());        
+        $start_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 6:00:00'));
+        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 18:00:00'));
+                
+        return ($get_current_time <= $end_time_of_scan) &&  ($get_current_time >= $start_time_of_scan) ? true  : false ;
+        
+    }
+
+
+    // get program items (rice, egg , etc...)
+    public function getProgramItems($supplier_id,$reference_num)
+    {
+
+        $get_record = db::table('program_items as pi')
+                        ->join('supplier_programs as sp', 'pi.item_id', 'sp.item_id')
+                        ->where('supplier_id', $supplier_id)
+                        ->where('sp.program_id', db::table('voucher')->where('reference_no',$reference_num)->first()->program_id)
+                        ->get();
+
+                        
+        foreach($get_record as $key => $item){
+            if(file_exists(storage_path('/commodities//' .$item->item_profile))){
+                $item->base64 = base64_encode(file_get_contents(storage_path('/commodities//' .$item->item_profile)));            
+            }else{
+                $item->base64 = base64_encode(file_get_contents('public/edcel_images/no-image.jpg'));            
+            }
+            
+            
+        }
+
+        return $get_record;
+    }
+
+
+
+    public function scan_qr_code(){
+
+        
+        try{
+
+            $time_limit         = 60; //in minutes
+            $reference_number = request('reference_number');
+            $supplier_id      = request('user_id');
+
+            // get_programs
+            $getPrograms = db::table('program_permissions as pp')                                        
+                                    ->where('user_id',$supplier_id)
+                                    ->where('status','1')
+                                    ->pluck('program_id')->toArray();
+            
+            // VOUCHER INFO
+            $checkReferenceNumber = db::table('voucher as v')
+                                    ->join('programs as p','p.program_id','v.program_id')                       
+                                    ->where('reference_no', trim($reference_number))->first();
+            
+            if($checkReferenceNumber){
+
+                // check if user program is same with the scanned voucher
+                $checkProgram = in_array($checkReferenceNumber->program_id,$getPrograms);
+
+                if($checkProgram){
+
+                    $checkTime = self::get_time();
+                    if($checkTime == true){
+                        // echo $checkReferenceNumber->amount_val;
+                        
+                        if($checkReferenceNumber->voucher_status != 'FULLY CLAIMED' || $checkReferenceNumber->amount_val  > 0.00 ){
+                            
+                            $check_transaction_time =  db::table('voucher')->select(DB::raw('TIMESTAMPDIFF(MINUTE,scanned_date,NOW()) as minutes_scanned'),DB::raw('TIMESTAMPDIFF(SECOND,scanned_date,NOW()) as seconds_scanned'))
+                                                        ->where('reference_no', $reference_number)->first();
+
+                            $get_elapsed_minutes = $time_limit - $check_transaction_time->minutes_scanned ;
+                            $get_elapsed_seconds = 300 - $check_transaction_time->seconds_scanned ;
+                            $check_if_one_time =  $checkReferenceNumber->one_time_transaction;
+
+                            
+
+                            if(($check_transaction_time->minutes_scanned >= $time_limit )  || (is_null($check_transaction_time->minutes_scanned)) || ($check_transaction_time->minutes_scanned <= $time_limit &&  $checkReferenceNumber->last_scanned_by_id == $supplier_id)){
+                                // set already scanned
+                                db::table('voucher')->where('reference_no', $reference_number)->update(['is_scanned' => '1','scanned_date' => db::raw('CURRENT_TIMESTAMP'),'last_scanned_by_id' => $supplier_id]);
+
+
+                                
+
+                                $get_geo_map =  db::table('geo_map')
+                                                    ->where('reg_code', $checkReferenceNumber->reg)
+                                                    ->where('prov_code',$checkReferenceNumber->prv)
+                                                    ->where('mun_code', $checkReferenceNumber->mun)
+                                                    ->where('bgy_code',$checkReferenceNumber->brgy)
+                                                    ->first();
+
+
+                                // FERTILIZER CATEGORY
+                                $get_unit_measurements   =  db::table('unit_types')->where('status','1')->get();
+                                $get_fertilizer_categories   =  db::table('fertilizer_category')->get();
+                                $checkReferenceNumber->sub_categories          =  db::table('fertilizer_sub_category')->get();
+                                  
+                                $clean_fertilizer_categories =  [];
+                                $clean_unit_measurements =  [];
+                                
+
+
+                                foreach($get_fertilizer_categories as $item_category){
+                                    array_push($clean_fertilizer_categories, 
+                                    ["label"=>$item_category->category,"value"=>$item_category->fertilizer_category_id]);
+                                }                                
+
+
+                                foreach($get_unit_measurements as $item_unit_measurement){
+                                    array_push($clean_unit_measurements, 
+                                    ["label"=>$item_unit_measurement->type,"value"=>$item_unit_measurement->unit_type_id]);
+                                }                                
+
+
+
+                                $checkReferenceNumber->unit_measurements = $clean_unit_measurements;
+                                $checkReferenceNumber->fertilizer_categories = $clean_fertilizer_categories;
+                                $checkReferenceNumber->program_items = self::getProgramItems($supplier_id,$reference_number);
+
+                              
+                                return response()->json([
+                                    "status"  => true,                
+                                    "voucherInfo" => $checkReferenceNumber                                  
+                                ]);
+
+                            }else{
+                              
+                                return response()->json([
+                                    "status"  => false,                
+                                    "message" => 'This is already scanned.'
+                                ]);
+                            }
+
+                        }else{
+
+                            return response()->json([
+                                "status"  => false,                
+                                "message" => 'This voucher is already fully claimed.'
+                            ]);
+                        }
+
+                    }else{
+                        return response()->json([
+                            "status"  => false,                
+                            "message" => 'Voucher transaction is not yet open.'
+                        ]);
+                    }
+
+                }else{
+
+                    return response()->json([
+                        "status"  => false,                
+                        "message" => 'You are not registered in this program.'
+                    ]);
+                }
+
+            }else{
+                
+                return response()->json([
+                    "status"  => false,                
+                    "message" => 'Invalid reference number.'
+                ]);
+
+            }
+
+
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+  
+
+    }
+
+
+    public function transact_voucher(){
+
+        DB::beginTransaction();
+        try{
+            $supplier_id = request('userId');
+            $supplier_name = request('supplierName');
+            $voucher_info = request('voucherInfo');
+            $cart = request('cart');
+            $attachments = request('attachments');
+            $upload_error_count = 0;
+
+            $voucher_id   = $voucher_info['voucher_id'];
+            $reference_no = $voucher_info['reference_no'];
+            $fund_id      = $voucher_info['fund_id'];
+            $program_shortname      =  db::table('programs')->where('program_id',$voucher_info['program_id'])->first()->shortname;
+
+            $transaction_id = Uuid::uuid4();                        
+
+            $voucher_transaction_payload_array = [];
+            $voucher_attachment_payload_array = [];
+
+            // validate attachments
+            foreach($attachments as $item){
+                
+                $attachment_id = Uuid::uuid4();
+                
+
+
+                if($item['name'] == 'Other Documents'){
+
+                    $file_count = count($item['file']);            
+
+                    if($file_count != 0){
+
+                        foreach($item['file'] as $file){
+
+                            $other_docs_attachment_uuid = Uuid::uuid4();
+                            $item_file = $file;
+        
+                            $item_file      = str_replace('data:image/jpeg;base64,', '', $item_file);
+                            $item_file      = str_replace(' ', '+', $item_file);
+                            $other_document_name = $voucher_info->rsbsa_no . '-'. $reference_no.'-' . $item->name . '.jpeg';
+        
+                            $upload_other_document = Storage::disk('uploads')->put($upload_folder . '/' . $other_document_name, base64_decode($item_file));
+        
+        
+                            $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $other_document_name);
+                        }
+
+                    }
+
+                } else if($item['name'] == 'Valid ID'){
+
+                    $get_file = $item['file'];
+
+              
+
+                    $valid_id_attachment_id_front = Uuid::uuid4();
+                    $valid_id_attachment_id_back = Uuid::uuid4();
+                    
+                    $front_image = $get_file['front'];
+                    $back_image = $get_file['back'];
+
+                    $front_image     = str_replace('data:image/jpeg;base64,', '', $front_image);
+                    $front_image     = str_replace(' ', '+', $image);
+                    $front_imageName = $voucher_info['rbsa_no'] . '-' . $reference_no.'-'. $item['name'] .'(Front)' . '.jpeg';
+
+
+                    $back_image     = str_replace('data:image/jpeg;base64,', '', $back_image);
+                    $back_image     = str_replace(' ', '+', $image);
+                    $back_imageName = $voucher_info['rbsa_no'] . '-' . $reference_no.'-'. $item['name'] .'(Back)' . '.jpeg';
+
+                    
+                    $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
+
+
+                    // UPLOAD FILE
+                    $upload_file = Storage::disk('uploads')->put($upload_folder . '/' . $front_imageName, base64_decode($front_image));
+                    $upload_file = Storage::disk('uploads')->put($upload_folder . '/' . $back_imageName, base64_decode($back_image));
+
+
+
+                    $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
+
+                    if(!$check_file){
+                        $upload_error_count++;
+                    }else{    
+
+
+                        $voucher_attachment_payload_front = [
+                            "attachment_id" => $valid_id_attachment_id_front,
+                            "voucher_id" => $voucher_id,
+                            "transaction_id" => $transaction_id,
+                            "document" => $item['name'],
+                            "file_name" => $front_imageName
+                        ];
+
+                        $voucher_attachment_payload_back = [
+                            "attachment_id" => $valid_id_attachment_id_back,
+                            "voucher_id" => $voucher_id,
+                            "transaction_id" => $transaction_id,
+                            "document" => $item['name'],
+                            "file_name" => $back_imageName
+                        ];
+
+                        array_push($voucher_attachment_payload,$voucher_attachment_payload);
+                        array_push($voucher_attachment_payload,$voucher_attachment_payload_back);
+                    }                    
+
+                }else{
+
+                
+                    $image = $item->file;
+
+                    $image     = str_replace('data:image/jpeg;base64,', '', $image);
+                    $image     = str_replace(' ', '+', $image);
+                    $imageName = $voucher_info['rbsa_no'] . '-' . $reference_no.'-'. $item['name'] . '.jpeg';
+                    
+                    $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
+                        
+                    // UPLOAD FILE
+                    $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
+
+                    $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
+                    if(!$check_file){
+                        $upload_error_count++;
+                    }else{    
+                        $voucher_attachment_payload = [
+                            "attachment_id" => $attachment_id,
+                            "voucher_id" => $voucher_id,
+                            "transaction_id" => $transaction_id,
+                            "document" => $item['name'],
+                            "file_name" => $imageName
+                        ];
+                    }
+                }
+              
+            }
+
+
+
+
+            foreach($cart as $item){
+                $voucher_details_id = Uuid::uuid4();
+
+                $get_category = db::table('fertilizer_category')->where('fertilizer_category_id',$item['category'])->first('category');
+                $get_sub_category = db::table('fertilizer_sub_category')->where('fertilizer_sub_category_id',$item['unitMeasurement'])->first('sub_category');
+                
+                $voucher_transaction_payload = [
+                    "voucher_details_id" => $voucher_details_id,
+                    "transaction_id" => $transaction_id,
+                    "supplier_id" => $supplier_id,
+                    "sub_program_id" => $item['sub_id'],
+                    "fund_id" => $fund_id,
+                    "item_category" => $get_category,
+                    "item_sub_category" => $get_sub_category,
+                    "quantity" => $item['quantity'],
+                    "total_amount" => $item['totalAmount'],
+                    "cash_added" => $item['cashAdded'],
+                    "unit_type" => $item['unitMeasurement'],
+                    "transac_by_id" => $supplier_id,
+                    "transac_by_full_name" => $supplier_name
+                ];
+
+                array_push($voucher_transaction_payload_array,$voucher_transaction_payload);
+            }
+
+
+
+            // BATCH INSERT
+            $insert_voucher_transaction = db::table('voucher_transaction')->insert($voucher_transaction_payload_array);
+
+
+
+
+            DB::commit();
+
+        }catch(\Exception $e){
+            DB::rollBack();
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
+
+}
+
+
+
