@@ -13,6 +13,12 @@ class MobileAppV2Controller extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+
+    public function get_transacted_vouchers()
+    {
+        return MobileAppV2::get_transacted_vouchers();
+    }
+
     public function login()
     {
         return MobileAppV2::login();

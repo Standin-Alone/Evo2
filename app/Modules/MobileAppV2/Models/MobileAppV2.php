@@ -18,6 +18,81 @@ class MobileAppV2 extends Model
 {
     use HasFactory;
 
+    public function get_transacted_vouchers(){
+
+
+        try{
+            $supplier_id = request('supplierId');
+            $offset = request('page');
+            $get_transacted_vouchers = db::table('voucher as v')
+                ->select(
+                    'v.reference_no',
+                    'transac_date',
+                    DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
+                    'rsbsa_no',
+                    'file_name',
+                    'v.amount_val as current_balance',
+                    'v.amount as default_balance',
+                    'vt.voucher_details_id',   
+                    'shortname as program',
+                    'title as program_title',
+                    DB::raw("YEAR(transac_date) as year_transac"),   
+                    DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address"),
+                    'vt.transaction_id'
+
+                )
+                ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
+                ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
+                ->join('programs as p', 'p.program_id','v.program_id')      
+                ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
+                ->where('supplier_id', $supplier_id)              
+                ->groupBy('v.reference_no')
+                ->orderBy('transac_date', 'DESC')     
+                ->skip($offset)
+                ->take(2)               
+                ->get();
+            
+
+                 
+            foreach ($get_transacted_vouchers as $key => $item) {
+                $get_attachments  = db::table('voucher_attachments')
+                                        ->where('transaction_id',$item->transaction_id)                                        
+                                        ->get();    
+
+                $image_array = [];
+
+                foreach($get_attachments as $attachment_key => $attachment_item){
+                    if(file_exists('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)){
+                        array_push($image_array,base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)));                    
+                    }else{
+                        
+                        array_push($image_array,base64_encode(file_get_contents('public/edcel_images/no-image.jpg')));                    
+                    }
+                    
+                }
+
+                
+                $item->base64 = $image_array;
+
+            }        
+
+            
+            return response()->json([
+                "status"  => true,
+                "message" => "Sucessfully loaded the transacted vouchers.",            
+                "data"    => $get_transacted_vouchers
+            ]); 
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
+
+
     public function login(){
 
 
@@ -420,6 +495,9 @@ class MobileAppV2 extends Model
     }
 
 
+
+    // TRANSACT VOUCHER 
+
     public function transact_voucher(){
 
         DB::beginTransaction();
@@ -429,11 +507,15 @@ class MobileAppV2 extends Model
             $voucher_info = request('voucherInfo');
             $cart = request('cart');
             $attachments = request('attachments');
+            $transaction_total_amount = request('transactionTotalAmount');
+            $longitude = request('longitude');
+            $latitude = request('latitude');
             $upload_error_count = 0;
 
             $voucher_id   = $voucher_info['voucher_id'];
             $reference_no = $voucher_info['reference_no'];
             $fund_id      = $voucher_info['fund_id'];
+            
             $program_shortname      =  db::table('programs')->where('program_id',$voucher_info['program_id'])->first()->shortname;
 
             $transaction_id = Uuid::uuid4();                        
@@ -441,32 +523,49 @@ class MobileAppV2 extends Model
             $voucher_transaction_payload_array = [];
             $voucher_attachment_payload_array = [];
 
+            $checkIfClaimed = db::table('voucher as v')
+                                    ->join('programs as p','p.program_id','v.program_id')                       
+                                    ->where('reference_no', trim($reference_no))->first();
+            
+
+            if($checkIfClaimed->voucher_status != 'FULLY CLAIMED' && $checkIfClaimed->amount_val != 0.00){
             // validate attachments
             foreach($attachments as $item){
-                
+             
                 $attachment_id = Uuid::uuid4();
+            
                 
-
-
                 if($item['name'] == 'Other Documents'){
-
+                    
                     $file_count = count($item['file']);            
-
+                   
                     if($file_count != 0){
-
-                        foreach($item['file'] as $file){
+                        $other_doc_count = 1 ;
+                        foreach($item['file'] as $key => $file){
 
                             $other_docs_attachment_uuid = Uuid::uuid4();
                             $item_file = $file;
         
                             $item_file      = str_replace('data:image/jpeg;base64,', '', $item_file);
                             $item_file      = str_replace(' ', '+', $item_file);
-                            $other_document_name = $voucher_info->rsbsa_no . '-'. $reference_no.'-' . $item->name . '.jpeg';
+                            $other_document_name = $voucher_info['rsbsa_no'] . '-'. $reference_no.'-'. $other_doc_count.'-'. $item['name'] . '.jpeg';
         
                             $upload_other_document = Storage::disk('uploads')->put($upload_folder . '/' . $other_document_name, base64_decode($item_file));
         
         
                             $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $other_document_name);
+
+                            $voucher_attachment_payload = [
+                                "attachment_id" => $other_docs_attachment_uuid,
+                                "voucher_id" => $voucher_id,
+                                "transaction_id" => $transaction_id,
+                                "document" => $item['name'],
+                                "file_name" => $other_document_name
+                            ];
+
+                            array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
+
+                            $other_doc_count++;
                         }
 
                     }
@@ -476,67 +575,51 @@ class MobileAppV2 extends Model
                     $get_file = $item['file'];
 
               
+                    foreach($item['file'] as $key => $valid_id_file){
 
-                    $valid_id_attachment_id_front = Uuid::uuid4();
-                    $valid_id_attachment_id_back = Uuid::uuid4();
-                    
-                    $front_image = $get_file['front'];
-                    $back_image = $get_file['back'];
+                        foreach($valid_id_file as $valid_id_key => $valid_id_file){
+                            $valid_id_attachment_id = Uuid::uuid4();
+                            $image = $valid_id_file;
 
-                    $front_image     = str_replace('data:image/jpeg;base64,', '', $front_image);
-                    $front_image     = str_replace(' ', '+', $image);
-                    $front_imageName = $voucher_info['rbsa_no'] . '-' . $reference_no.'-'. $item['name'] .'(Front)' . '.jpeg';
+                            $image     = str_replace('data:image/jpeg;base64,', '', $image);
+                            $image     = str_replace(' ', '+', $image);
+                            $imageName = $voucher_info['rsbsa_no'] . '-' . $reference_no.'-'. $item['name'] . '('.strtoupper($valid_id_key).')'. '.jpeg';
+                            
+                            $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
+                                
+                            // UPLOAD FILE
+                            $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
+        
+                            $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
+                            if(!$check_file){
+                                $upload_error_count++;
+                            }else{    
 
+                                $voucher_attachment_payload = [
+                                    "attachment_id" => $valid_id_attachment_id,
+                                    "voucher_id" => $voucher_id,
+                                    "transaction_id" => $transaction_id,
+                                    "document" => $item['name'],
+                                    "file_name" => $imageName
+                                ];
 
-                    $back_image     = str_replace('data:image/jpeg;base64,', '', $back_image);
-                    $back_image     = str_replace(' ', '+', $image);
-                    $back_imageName = $voucher_info['rbsa_no'] . '-' . $reference_no.'-'. $item['name'] .'(Back)' . '.jpeg';
+                                array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
 
-                    
-                    $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
+                            }
 
+                            
+                        }
 
-                    // UPLOAD FILE
-                    $upload_file = Storage::disk('uploads')->put($upload_folder . '/' . $front_imageName, base64_decode($front_image));
-                    $upload_file = Storage::disk('uploads')->put($upload_folder . '/' . $back_imageName, base64_decode($back_image));
-
-
-
-                    $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
-
-                    if(!$check_file){
-                        $upload_error_count++;
-                    }else{    
-
-
-                        $voucher_attachment_payload_front = [
-                            "attachment_id" => $valid_id_attachment_id_front,
-                            "voucher_id" => $voucher_id,
-                            "transaction_id" => $transaction_id,
-                            "document" => $item['name'],
-                            "file_name" => $front_imageName
-                        ];
-
-                        $voucher_attachment_payload_back = [
-                            "attachment_id" => $valid_id_attachment_id_back,
-                            "voucher_id" => $voucher_id,
-                            "transaction_id" => $transaction_id,
-                            "document" => $item['name'],
-                            "file_name" => $back_imageName
-                        ];
-
-                        array_push($voucher_attachment_payload,$voucher_attachment_payload);
-                        array_push($voucher_attachment_payload,$voucher_attachment_payload_back);
-                    }                    
-
+                    }
+               
                 }else{
 
                 
-                    $image = $item->file;
+                    $image = $item['file'];
 
                     $image     = str_replace('data:image/jpeg;base64,', '', $image);
                     $image     = str_replace(' ', '+', $image);
-                    $imageName = $voucher_info['rbsa_no'] . '-' . $reference_no.'-'. $item['name'] . '.jpeg';
+                    $imageName = $voucher_info['rsbsa_no'] . '-' . $reference_no.'-'. $item['name'] . '.jpeg';
                     
                     $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
                         
@@ -554,48 +637,109 @@ class MobileAppV2 extends Model
                             "document" => $item['name'],
                             "file_name" => $imageName
                         ];
+                        array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
                     }
                 }
               
             }
 
-
-
-
             foreach($cart as $item){
                 $voucher_details_id = Uuid::uuid4();
 
-                $get_category = db::table('fertilizer_category')->where('fertilizer_category_id',$item['category'])->first('category');
-                $get_sub_category = db::table('fertilizer_sub_category')->where('fertilizer_sub_category_id',$item['unitMeasurement'])->first('sub_category');
+                $get_category = db::table('fertilizer_category')->where('fertilizer_category_id',$item['category'])->first()->category;
                 
+                $get_unit_measurement  =  db::table('unit_types')->where('unit_type_id',$item['unitMeasurement'])->where('status','1')->first()->type;
+
                 $voucher_transaction_payload = [
                     "voucher_details_id" => $voucher_details_id,
                     "transaction_id" => $transaction_id,
+                    "reference_no" => $reference_no,
                     "supplier_id" => $supplier_id,
                     "sub_program_id" => $item['sub_id'],
                     "fund_id" => $fund_id,
                     "item_category" => $get_category,
-                    "item_sub_category" => $get_sub_category,
+                    "item_sub_category" => $item["subCategory"],
                     "quantity" => $item['quantity'],
-                    "total_amount" => $item['totalAmount'],
+                    "total_amount" =>  $item['cashAdded'] > 0 ?  $item['totalAmount']   - $item['cashAdded'] : $item['totalAmount'],
                     "cash_added" => $item['cashAdded'],
-                    "unit_type" => $item['unitMeasurement'],
+                    "latitude" => $latitude,
+                    "longitude" => $longitude,
+                    "unit_type" => $get_unit_measurement,
                     "transac_by_id" => $supplier_id,
-                    "transac_by_full_name" => $supplier_name
+                    "transac_by_fullname" => $supplier_name
                 ];
 
                 array_push($voucher_transaction_payload_array,$voucher_transaction_payload);
             }
 
+            
+
+            if($upload_error_count == 0 ){
+                
 
 
-            // BATCH INSERT
-            $insert_voucher_transaction = db::table('voucher_transaction')->insert($voucher_transaction_payload_array);
+                $insert_voucher_transaction = db::table('voucher_transaction')->insert($voucher_transaction_payload_array);
+
+            
+                $insert_voucher_attachments = db::table('voucher_attachments')->insert($voucher_attachment_payload_array);
+
+                
+                if($insert_voucher_transaction && $insert_voucher_attachments){
 
 
+                    $voucher_status = ($checkIfClaimed->amount_val -  $transaction_total_amount) <= 0 ? 'FULLY CLAIMED' : 'PARTIALLY CLAIMED';
+                    $compute_remaining_balance = ($checkIfClaimed->amount_val -  $transaction_total_amount) <= 0  ? 0 :  ($checkIfClaimed->amount_val -  $transaction_total_amount);
+                    // VOUCHER STATUS TO FULLY CLAMED
+                    $update_voucher_status = db::table('voucher')
+                                                ->where('reference_no',$reference_no)
+                                                ->update(["voucher_status" => $voucher_status , 'amount_val' => $compute_remaining_balance]);
+
+                    if($update_voucher_status){
 
 
-            DB::commit();
+                        DB::commit();    
+                        return response()->json([
+                            "status"  => true,
+                            "message" => "Successfully submitted!",                        
+                            'data' =>$voucher_transaction_payload_array
+                        ]); 
+    
+                    }else{
+                     
+                        return response()->json([
+                            "status"  => false,
+                            "message" => "Failed to submit!",                        
+                        ]); 
+                    }
+
+                  
+                }else{
+
+                    
+                 
+                    return response()->json([
+                        "status"  => false,
+                        "message" => "Failed to submit!",                        
+                    ]); 
+                }
+                
+            }else{
+                
+             
+                return response()->json([
+                    "status"  => false,
+                    "message" => "Uploading Failed!",                        
+                ]); 
+            }
+
+        }else{
+            return response()->json([
+                "status"  => false,
+                "message" => "This voucher is already fully claimed!",                        
+            ]); 
+        }
+           
+
 
         }catch(\Exception $e){
             DB::rollBack();
