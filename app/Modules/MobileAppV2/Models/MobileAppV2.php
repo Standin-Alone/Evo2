@@ -58,21 +58,28 @@ class MobileAppV2 extends Model
                 $get_attachments  = db::table('voucher_attachments')
                                         ->where('transaction_id',$item->transaction_id)                                        
                                         ->get();    
+                $get_commodities = db::table('program_items as pi')
+                                        ->join('supplier_programs as sp','pi.item_id','sp.item_id')    
+                                        ->join('voucher_transaction as vt','vt.sub_program_id','sp.sub_id')
+                                        ->where('vt.transaction_id',$item->transaction_id)
+                                        ->get();
 
                 $image_array = [];
 
                 foreach($get_attachments as $attachment_key => $attachment_item){
                     if(file_exists('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)){
-                        array_push($image_array,base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)));                    
+                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name))]);                    
                     }else{
                         
-                        array_push($image_array,base64_encode(file_get_contents('public/edcel_images/no-image.jpg')));                    
+                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg'))]);                    
                     }
                     
                 }
 
                 
                 $item->base64 = $image_array;
+
+                $item->commodities = $get_commodities;
 
             }        
 
@@ -356,7 +363,7 @@ class MobileAppV2 extends Model
         
         try{
 
-            $time_limit         = 60; //in minutes
+            $time_limit         = 45; //in minutes
             $reference_number = request('reference_number');
             $supplier_id      = request('user_id');
 
@@ -410,7 +417,11 @@ class MobileAppV2 extends Model
 
                                 // FERTILIZER CATEGORY
                                 $get_unit_measurements   =  db::table('unit_types')->where('status','1')->get();
-                                $get_fertilizer_categories   =  db::table('fertilizer_category')->get();
+                                $get_fertilizer_categories   =  db::table('fertilizer_category as fc')
+                                                                    ->join('program_items_category as pic','fc.fertilizer_category_id','pic.fertilizer_category_id')
+                                                                    ->where('program_id',$checkReferenceNumber->program_id)
+                                                                    ->get();
+                                                                    
                                 $checkReferenceNumber->sub_categories          =  db::table('fertilizer_sub_category')->get();
                                   
                                 $clean_fertilizer_categories =  [];
@@ -435,10 +446,12 @@ class MobileAppV2 extends Model
                                 $checkReferenceNumber->fertilizer_categories = $clean_fertilizer_categories;
                                 $checkReferenceNumber->program_items = self::getProgramItems($supplier_id,$reference_number);
 
-                              
+                                $minutes_to_miliseconds = $time_limit * 60000;
+
                                 return response()->json([
                                     "status"  => true,                
-                                    "voucherInfo" => $checkReferenceNumber                                  
+                                    "voucherInfo" => $checkReferenceNumber,
+                                    "timer"  => $minutes_to_miliseconds
                                 ]);
 
                             }else{
