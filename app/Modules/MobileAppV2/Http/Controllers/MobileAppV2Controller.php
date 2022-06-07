@@ -49,5 +49,9 @@ class MobileAppV2Controller extends Controller
         return MobileAppV2::transact_voucher();
     }
 
+    public function payout_batch_list()
+    {
+        return MobileAppV2::payout_batch_list();
+    }
     
 }

@@ -118,11 +118,13 @@ class MobileAppV2 extends Model
                                             'u.username',
                                             'u.password',
                                             'approval_status', 
-                                            'u.status'                                        
+                                            'u.status',
+                                            'reg_name'                                        
                                             )
                                     ->join('supplier as s','u.user_id','s.supplier_id')
                                     ->join('program_permissions as pp','u.user_id','pp.user_id')
                                     ->join('roles as r','r.role_id','pp.role_id')
+                                    ->join('geo_map as gm','gm.reg_code','u.reg')
                                     ->where('username',$username)->orWhere('u.email',$username)
                                     ->first();
 
@@ -144,10 +146,14 @@ class MobileAppV2 extends Model
 
                         $email = $get_user_info->email;
                     
-
+                        $get_programs = db::table('program_permissions as pp')
+                                            ->join('programs as p','pp.program_id','p.program_id')
+                                            ->where('process_type','VOUCHER')
+                                            ->where('user_id',$get_user_info->user_id)
+                                            ->get();
                         $data_for_email = [
                             "otp_code" => $generate_otp, 
-                            "full_name" => $get_user_info->full_name  , 
+                            "full_name" => $get_user_info->full_name,                             
                             "date" => Carbon::now()->format('M D, Y'), 
                             "role" => $get_user_info->role  
                         ];
@@ -160,7 +166,8 @@ class MobileAppV2 extends Model
                         return response()->json([
                             "status"  => true,
                             "message" => "Sucessfully logged in.",            
-                            "data"    => $get_user_info
+                            "data"    => $get_user_info,
+                            "programs" => $get_programs,
                         ]); 
 
                     }else{
@@ -458,7 +465,7 @@ class MobileAppV2 extends Model
                               
                                 return response()->json([
                                     "status"  => false,                
-                                    "message" => 'This is already scanned.'
+                                    "message" => 'This is already scanned. Please try again later.'
                                 ]);
                             }
 
@@ -567,16 +574,20 @@ class MobileAppV2 extends Model
         
         
                             $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $other_document_name);
-
-                            $voucher_attachment_payload = [
-                                "attachment_id" => $other_docs_attachment_uuid,
-                                "voucher_id" => $voucher_id,
-                                "transaction_id" => $transaction_id,
-                                "document" => $item['name'],
-                                "file_name" => $other_document_name
-                            ];
-
-                            array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
+                            if(!$check_file){
+                                $upload_error_count++;
+                            }else{    
+                                $voucher_attachment_payload = [
+                                    "attachment_id" => $other_docs_attachment_uuid,
+                                    "voucher_id" => $voucher_id,
+                                    "transaction_id" => $transaction_id,
+                                    "document" => $item['name'],
+                                    "file_name" => $other_document_name
+                                ];
+                                
+                                array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
+                            }
+                            
 
                             $other_doc_count++;
                         }
@@ -764,6 +775,69 @@ class MobileAppV2 extends Model
         }
     }
 
+
+
+    public function payout_batch_list(){
+
+
+        try{
+            $supplier_id      = request('supplierId');
+            $offset      = request('page');
+            
+            $payout_batch_list = db::table('payout_gif_batch as pgb')         
+                                    ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
+                                    ->where('supplier_id',$supplier_id)                                
+                                    ->orderBy('pgb.transac_date','desc')
+                                    ->groupBy('pgb.application_number')
+                                    ->skip($offset)
+                                    ->take(10)                                      
+                                    ->get();
+     
+
+                                    
+            $total_paid_payout = db::select("
+                                    select sum(amount) as totalPaidAmount
+                                        from (
+                                        select amount
+                                        from payout_gif_batch as pgb
+                                        left Join payout_gfi_details as pgd on pgd.batch_id= pgb.batch_id
+                                        where supplier_id = '$supplier_id'  
+                                        and  iscomplete = '1'
+                                        group By pgd.batch_id
+                                        order By pgb.transac_date desc
+                                        ) as total_paid_table
+                                ");
+
+                                
+            $total_pending_payout = db::select("
+                                    select sum(amount) as total_pending_payout
+                                        from (
+                                        select amount
+                                        from payout_gif_batch as pgb
+                                        left Join payout_gfi_details as pgd on pgd.batch_id= pgb.batch_id
+                                        where supplier_id = '$supplier_id'  
+                                        and  iscomplete = '0'
+                                        group By pgd.batch_id
+                                        order By pgb.transac_date desc
+                                        ) as total_paid_table
+                                    ")[0]->total_pending_payout;
+                    
+            return response()->json([
+                "status"=>true,
+                "payout_batch_list" => $payout_batch_list, 
+                "total_paid_payout" => isset($total_paid_payout[0]->totalPaidAmount) ? $total_paid_payout[0]->totalPaidAmount : 0, 
+                "total_pending_payout" => isset($total_pending_payout) ? $total_pending_payout : 0]
+            );
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+        
+    }
 }
 
 
