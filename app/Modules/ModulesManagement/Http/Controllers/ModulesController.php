@@ -25,13 +25,15 @@ class ModulesController extends Controller
     // store record
     public function store(){
         try{
+
+            $process_type = request('process_type');
             $module_name = request('module_name');
             $route       = request('route');
             $has_sub       = request('has_sub');
 
             $check_module =  L5Modular::exists(trim($module_name[0]));
 
-            $check_db = db::table("sys_modules")->where('module',trim($module_name[0]))->get();
+            $check_db = db::table("sys_modules")->where('module',trim($module_name[0]))->where('process_type',$process_type)->get();
             
 
             
@@ -42,7 +44,8 @@ class ModulesController extends Controller
 
                 if($check_db->isEmpty()){
                     db::table('sys_modules')
-                    ->insert(['module'=>trim($module_name[0]),'routes'=>$route]);
+                    ->insert(['module'=>trim($module_name[0]),'routes'=>$route,'process_type'=>$process_type]);
+        
                 }
 
                 return 'true';                
@@ -58,13 +61,15 @@ class ModulesController extends Controller
                         $get_last_id =  db::table('sys_modules')
                                             ->insertGetId([
                                                 "module" => $item,
-                                                "has_sub" => 1
-                                            
+                                                "has_sub" => 1,
+                                                'process_type'=>$process_type                                        
                                             ]);
                                             
                             $get_main_module = $item;
                             
+                            
                         }
+                 
                         
                     }else{
                         
@@ -83,7 +88,7 @@ class ModulesController extends Controller
                                         "module"           => $item,
                                         "routes"           => $route_item,
                                         "parent_module_id" => $get_last_id,
-                                        "has_sub"          => $has_sub[$routekey]
+                                        "has_sub"          => $has_sub[$route_key]
                                     ]);    
                                     
                                 }
@@ -106,6 +111,7 @@ class ModulesController extends Controller
 
     public function store_sub_modules(){
         try{
+            $process_type = request('process_type');
             $module_name = request('module_name');
             $route       = request('route');
             $icon       = request('icon');
@@ -120,6 +126,7 @@ class ModulesController extends Controller
             //                             ->
             db::table('sys_modules')
                 ->insert([
+                    "process_type"    => $process_type,
                     "module"    => $module_name,
                     "routes"    => $route,
                     "icon"      => $icon,
@@ -157,15 +164,16 @@ class ModulesController extends Controller
     
     // update data
     public function update($id){
-        $icon = request('icon');
-        $module_name = request('module_name');
-        $route       = request('route');
-        $sequence       = request('sequence');
+        $process_type       = request('process_type');
+        $icon               = request('icon');
+        $module_name        = request('module_name');
+        $route              = request('route');
+        $sequence           = request('sequence');
         $get_id = request('id');
         
         db::table('sys_modules')
             ->where('sys_module_id',$get_id)
-            ->update(['module'=>$module_name,'routes'=>$route,'icon'=>$icon,'sequence'=>$sequence]);
+            ->update(['module'=>$module_name,'routes'=>$route,'icon'=>$icon,'sequence'=>$sequence,'process_type' => $process_type]);
     }
 
     // show record to datatable

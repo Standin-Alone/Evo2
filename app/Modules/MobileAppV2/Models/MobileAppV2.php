@@ -790,7 +790,7 @@ class MobileAppV2 extends Model
                                     ->orderBy('pgb.transac_date','desc')
                                     ->groupBy('pgb.application_number')
                                     ->skip($offset)
-                                    ->take(10)                                      
+                                    ->take(6)                                      
                                     ->get();
      
 

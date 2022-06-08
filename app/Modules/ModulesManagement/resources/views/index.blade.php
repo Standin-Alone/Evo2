@@ -61,15 +61,16 @@
                 {data:'icon',render:function(data){
 
                     return `<i class='fa fa-${data} fa-lg fa text-success'></i>`
-                }},
-                {data:'module'},
-                {data:'routes',
+                },title:'Icon'},
+                {data:'process_type',title:'Process Type'},
+                {data:'module',title:'Module Name'},
+                {data:'routes',title:'Route Name',
                     render: function(data){                   
                         return data == null ? 'N/A' : data;
                     }
                 },            
-                {data:'sequence'},
-                {data:'sub_modules',
+                {data:'sequence',title:'Sequence'},
+                {data:'sub_modules',title:'Sub Modules',
                     render:function(data,type,row){
                         let output = '';
                         if(data){
@@ -86,14 +87,14 @@
                         
                         
 
-                        return  "<button type='button' class='btn btn-outline-warning update-modal-btn' has_sub="+row['has_sub']+" sys_module_id="+data+" icon="+row['icon']+"  data-toggle='modal' data-target='#UpdateModal'>"+
+                        return  "<button type='button' class='btn btn-outline-warning update-modal-btn btn-block'  has_sub="+row['has_sub']+" sys_module_id="+data+" process_type="+row['process_type']+"  icon="+row['icon']+"   module="+row['module']+"  routes="+row['routes']+"  sequence="+row['sequence']+" data-toggle='modal' data-target='#UpdateModal'>"+
                                     "<i class='fa fa-edit'></i> Edit"+
                                 "</button>   "+(
                                 row['status'] == 1 ?
-                                "<button type='button' class='btn btn-outline-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                "<button type='button' class='btn btn-outline-danger set-status-btn btn-block ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                     "<i class='fa fa-trash'></i> Disable"+
                                 "</button>  " :
-                                "<button type='button' class='btn btn-outline-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                "<button type='button' class='btn btn-outline-success set-status-btn btn-block' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                     "<i class='fa fa-undo'></i> Enable"+
                                 "</button> ")
                     }
@@ -105,6 +106,8 @@
         // edit modal btn
         $("#load-datatable").on('click','.update-modal-btn',function(){
             $('.update-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(0)').text());            
+
+            console.warn($(this).closest('tbody tr').find('td:eq(1)'));
             // check if has sub modules
             if($(this).attr('has_sub')!= 1){
             
@@ -112,32 +115,38 @@
                 $(".main-module-component").show();
                 $(".sub-modules-component").hide();                
                 $('#update-id').val($(this).attr('sys_module_id'));
+                $("#UpdateForm  select[name='process_type']").val($(this).attr('process_type') == 'null' ? '' :  $(this).attr('process_type')).change();
                 $("#UpdateForm  input[name='icon']").val($(this).attr('icon') == 'null' ? '' :  $(this).attr('icon') );                
-                $("#UpdateForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(1)').text());
-                $("#UpdateForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(2)').text());
-                $("#UpdateForm  input[name='sequence']").val($(this).closest('tbody tr').find('td:eq(3)').text());
+                $("#UpdateForm  input[name='module_name']").val($(this).attr('module') == 'null' ? '' :  $(this).attr('module'));
+                $("#UpdateForm  input[name='route']").val($(this).attr('routes') == 'null' ? '' :  $(this).attr('routes'));
+                $("#UpdateForm  input[name='sequence']").val($(this).attr('sequence') == 'null' ? '' :  $(this).attr('sequence'));
                 $(".main-module-update-btn").show();
                 $(".add-sub-module-btn").hide();
+                $(".edit-sub-module-icon-btn").hide();
+                
             }else{                
                 
                 $("input[name='parent_module_id']").val($(this).attr('sys_module_id'));
                 $(".update-modal-dialog").css('max-width','50%')
                 $(".add-sub-module-btn").show();
+                $(".edit-sub-module-icon-btn").show();
                 $(".main-module-update-btn").hide();
                 $(".main-module-component").hide();
                 $(".sub-modules-component").show();
-                $("#sub-modules-datatable").DataTable().destroy()
-                $("#sub-modules-datatable").empty();
+                
+                
 
                 // sub modules id
-                 sub_module_table = $("#sub-modules-datatable").DataTable({
+                sub_module_table = $("#sub-modules-datatable").DataTable({
                                         serverSide: true,        
-                                        responsive:true,                                               
+                                        responsive:true,            
+                                        destroy:true,                                   
                                         ajax: {
                                                 "url" : '{{route("modules.show_sub_modules",["parent_module_id" => ":id"])}}'.replace(':id',$(this).attr('sys_module_id')),
                                                 "type" : "get"
                                                 },
-                                                columns:[
+                                                columns:[   
+                                                            {data:'process_type',title:'Process'},
                                                             {data:'icon',title:'Icon'},
                                                             {data:'module',title:'Module'},
                                                             {data:'routes',title:'Route'},                                                             
@@ -147,15 +156,15 @@
                                                                     
                                                                     
 
-                                                                    return (!row['routes'] ? ("<button type='button' class='btn btn-outline-success add-parent-sub-modal-btn' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#AddParentSubModulesModal'>"+"<i class='fa fa-edit'></i> Add Sub Module"+ "</button> ") : '' )
-                                                                          +"<button type='button' class='btn btn-outline-info update-modal-btn' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
+                                                                    return (!row['routes'] ? ("<button type='button' class='btn btn-outline-success add-parent-sub-modal-btn btn-block' has_sub="+row['has_sub']+"   icon="+row['icon']+" sys_module_id="+data+" data-toggle='modal' data-target='#AddParentSubModulesModal'>"+"<i class='fa fa-edit'></i> Add Sub Module"+ "</button> ") : '' )
+                                                                          +"<button type='button' class='btn btn-outline-info update-modal-btn btn-block' has_sub='"+row['has_sub']+"'   icon='"+row['icon']+"' process_type='"+row['process_type']+"' module='"+row['module']+"' routes='"+row['routes']+"' sequence='"+row['sequence']+"'  sys_module_id='"+data+"' data-toggle='modal' data-target='#UpdateSubModuleModal'>"+
                                                                                 "<i class='fa fa-edit'></i> Edit"+
                                                                             "</button>   "+(
                                                                             row['status'] == 1 ?
-                                                                            "<button type='button' class='btn btn-outline-danger set-status-btn ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                                                            "<button type='button' class='btn btn-outline-danger set-status-btn btn-block' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                                                                 "<i class='fa fa-trash'></i> Disable"+
                                                                             "</button>  " :
-                                                                            "<button type='button' class='btn btn-outline-success set-status-btn' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
+                                                                            "<button type='button' class='btn btn-outline-success set-status-btn btn-block ' sys_module_id='"+data+"' status='"+row["status"]+"' >"+
                                                                                 "<i class='fa fa-undo'></i> Enable"+
                                                                             "</button> ")
                                                                 }                                                            
@@ -168,15 +177,15 @@
 
             // edit button of sub modules
             $("#sub-modules-datatable").on('click','.update-modal-btn',function(){
-                $('.update-sub-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(0)').text());            
-            // check if has sub modules
-           
-                             
+                $('.update-sub-modal-title').text('Edit '+$(this).closest('tbody tr').find('td:eq(2)').text());            
+                // check if has sub modules
+                
                 $("#UpdateSubModuleForm  input[name='id']").val($(this).attr('sys_module_id'));
                 $("#UpdateSubModuleForm  input[name='icon']").val($(this).attr('icon') == 'null' ? '' : $(this).attr('icon') );
-                $("#UpdateSubModuleForm  input[name='module_name']").val($(this).closest('tbody tr').find('td:eq(1)').text());
-                $("#UpdateSubModuleForm  input[name='route']").val($(this).closest('tbody tr').find('td:eq(2)').text());
-                $("#UpdateSubModuleForm  input[name='sequence']").val($(this).closest('tbody tr').find('td:eq(3)').text());
+                $("#UpdateSubModuleForm  select[name='process_type']").val($(this).attr('process_type') == 'null' ? '' : $(this).attr('process_type')).change();
+                $("#UpdateSubModuleForm  input[name='module_name']").val($(this).attr('module') == 'null' ? '' : $(this).attr('module'));
+                $("#UpdateSubModuleForm  input[name='route']").val($(this).attr('routes') == 'null' ? '' : $(this).attr('routes'));
+                $("#UpdateSubModuleForm  input[name='sequence']").val($(this).attr('sequence') == 'null' ? '' : $(this).attr('sequence'));
           
             
             });
@@ -285,10 +294,14 @@
         // Insert Module Record
         $("#AddForm").validate({
             rules:{
+                process_type:"required",        
                 module_name:"required",
                 route:"required",
             },
             messages:{
+                process_type:{
+                    required:'<div class="text-danger">Please select process type.</div>'
+                },
                 module_name:{
                     required:'<div class="text-danger">Please enter module name.</div>'
                 },
@@ -396,7 +409,7 @@
                                 }).then(()=>{
                                     $("#AddSubModulesModal").modal('hide')
                                      sub_module_table.ajax.reload();
-                                     $("#AddSubModulesForm")[0].reset();
+                                    //  $("#AddSubModulesForm")[0].reset();
                                      $("#load-datatable").DataTable().ajax.reload();
                                     
                                     
@@ -541,13 +554,16 @@
         // Update Record of Main Module
         $("#UpdateForm").validate({
             rules:{
+                process_type:"required",
                 icon:"required",
                 module_name:"required",
                 route:"required",
                 sequence:"required",
             },
             messages:{
-
+                process_type:{
+                    required:'<div class="text-danger">Please select process type.</div>'
+                },
                 icon:{
                     required:'<div class="text-danger">Please enter icon name.</div>'
                 },
@@ -611,12 +627,16 @@
         // Update record of sub module
         $("#UpdateSubModuleForm").validate({
             rules:{
+                process_type:"required",
                 icon:"required",
                 module_name:"required",
                 route:"required",
                 sequence:"required",
             },
             messages:{
+                process_type:{
+                    required:'<div class="text-danger">Please select process_type.</div>'
+                },
                 icon:{
                     required:'<div class="text-danger">Please enter icon name.</div>'
                 },
@@ -680,8 +700,14 @@
 
             // has sub radio button
             $("input[name='has_sub']").change(function(){
-                
+
+                console.warn($('.sub_module_component .row').length );
                 if($(this).val() == 1){
+
+
+                    if($('.sub_module_component .row').length <= 1){
+
+
                     
                     $(".sub_module").append('<div class="sub_module_component row">'+
                                         '<div class="form-group">'+
@@ -696,12 +722,12 @@
                                         '<label>Has Sub? <span style="color:red">*</span></label>'+
                                             '<div class="col-md-12  row">'+
                                                 '<div class="form-check ">'+
-                                                '<input class="form-check-input" type="radio" id="defaultRadio1" name="has_sub"  value="1"   />'+
-                                                    '<label class="form-check-label" for="defaultRadio1">Yes</label>'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio3" name="has_sub_parent_sub"  value="1"   />'+
+                                                    '<label class="form-check-label" for="defaultRadio3">Yes</label>'+
                                                     '</div> &nbsp; &nbsp;'+
                                                 '<div class="form-check">'+
-                                                '<input class="form-check-input" type="radio" id="defaultRadio2" name="has_sub" value="0" checked/>'+
-                                                '<label class="form-check-label" for="defaultRadio2">No</label>'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio4" name="has_sub_parent_sub" value="0" checked/>'+
+                                                '<label class="form-check-label" for="defaultRadio4">No</label>'+
                                                 '</div>'+
                                             '</div>'+
                                         '</div>'+
@@ -713,6 +739,7 @@
                                     '</div>');
                                     
                     $('.route-component').remove();
+                }
                     
                 }else{
 
@@ -727,11 +754,12 @@
                 }
             });
 
-         
+            count = 5 ;
 
             // add sub module component
             $(document).on('click', '.component-plus-btn' , function(){
-                
+                count_first = count++;
+                count_second = count_first+1;
                 $(".sub_module").prepend('<div class="sub_module_component row">'+
                                         '<div class="form-group">'+
                                             '<label>Sub Module Name</label> <span id="reqcatnameadd" style="color:red">*</span>'+
@@ -745,13 +773,13 @@
                                         '<label>Has Sub? <span style="color:red">*</span></label>'+
                                             '<div class="col-md-12  row">'+
                                                 '<div class="form-check ">'+
-                                                '<input class="form-check-input" type="radio" id="defaultRadio3" name="has_sub"  value="1"   />'+
-                                                    '<label class="form-check-label" for="defaultRadio3">Yes</label>'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio'+count_first+'" name="has_sub_parent_sub"  value="1"   />'+
+                                                    '<label class="form-check-label" for="defaultRadio'+count_first+'">Yes</label>'+
                                                     '</div> &nbsp; &nbsp;'+
                                                 '<div class="form-check">'+
 
-                                                '<input class="form-check-input" type="radio" id="defaultRadio4" name="has_sub" value="0" checked/>'+
-                                                '<label class="form-check-label" for="defaultRadio4">No</label>'+
+                                                '<input class="form-check-input" type="radio" id="defaultRadio'+count_second+'" name="has_sub_parent_sub" value="0" checked/>'+
+                                                '<label class="form-check-label" for="defaultRadio'+count_first+'">No</label>'+
                                                 '</div>'+
                                             '</div>'+
                                         '</div>'+
@@ -801,17 +829,8 @@
         <br>
         <br>
         <br>
-        <table id="load-datatable" class="table table-hover table-striped">            
-            <thead>
-                <tr>                    
-                    <th >Icon</th>
-                    <th >Module Name</th>
-                    <th >Route</th> 
-                    <th >Sequence</th>
-                    <th >Sub Modules</th>                    
-                    
-                    <th >Action</th>
-                </tr>
+        <table id="load-datatable" class="table table-hover table-striped" style="width:100%">            
+            <thead>              
             </thead>
             <tbody>
             </tbody>
@@ -835,7 +854,7 @@
                                 <div class="form-group">
                                     <label>Module Name</label> <span id='reqcatnameadd' style='color:red'>*</span>
                                     <input style="text-transform: capitalize;"  name="module_name[]" class="form-control"  placeholder="module name" required="true">
-                                </div>
+                                </div>                                          
 
                                 <div class="form-group">
                                     <label>Do you want to add sub modules? <span style="color:red">*</span></label> 
@@ -859,6 +878,17 @@
                                     </div>
                                 </div>
                                 
+
+                                <div class="form-group">
+                                    <label>Process Type</label> <span id='reqcatnameadd' style='color:red'>*</span>
+                                    <select name="process_type" id="process_type" class="form-control">
+                                        <option value=""  selected disabled><-- Select Process Type --></option>
+                                        <option value="ADMIN">Admin</option>
+                                        <option value="CASH">Cash</option>
+                                        <option value="VOUCHER">Voucher</option>                                        
+                                    </select>
+                                </div>
+
 
                                 <div class="col-md-12 row  sub_module">                                 
                                 </div>
@@ -902,14 +932,22 @@
                             <br><br>
                             <div class="col-lg-12 main-module-component">
                                 <div class="form-group">
+                                    <label>Process Type</label>
+                                    <select name="process_type" id="process_type" class="form-control">
+                                        <option value=""  selected disabled><-- Select Process Type --></option>
+                                        <option value="ADMIN">Admin</option>
+                                        <option value="CASH">Cash</option>
+                                        <option value="VOUCHER">Voucher</option>                                        
+                                    </select><br>
                                     <label>Icon</label>
-                                    <input  name="icon" class="form-control"  placeholder="icon name"  required="true"><br>
+                                    <input  name="icon" class="form-control"  placeholder="icon name"   required="true"><br>
                                     <label>Module Name</label>
                                     <input style="text-transform: capitalize;"  name="module_name" class="form-control"  placeholder="module name"  required="true"><br>
                                     <label>Route</label>
                                     <input   name="route" class="form-control"  placeholder="route" required="true"><br>
                                     <label>Sequence</label>
                                     <input  type="number" name="sequence" class="form-control"  placeholder="sequence"  required="true"><br>
+                                    
                                 </div>
                             </div>
 
@@ -917,12 +955,7 @@
                             
                             <div class="col-md-12 sub-modules-component">                               
                             <table id="sub-modules-datatable" class="table table-hover" style="width:100%">            
-                                <thead>
-                                    <tr>                    
-                                        <th >Module Name</th>
-                                        <th >Route</th>                                           
-                                        <th >Action</th>
-                                    </tr>
+                                <thead>                                  
                                 </thead>
                                 <tbody>
                                 </tbody>
@@ -960,6 +993,15 @@
 
                             <div class="col-lg-12">
                                 <div class="form-group">
+                                    
+                                    <label>Process Type</label>
+                                        <select name="process_type" id="process_type" class="form-control">
+                                            <option value=""  selected disabled><-- Select Process Type --></option>
+                                            <option value="ADMIN">Admin</option>
+                                            <option value="CASH">Cash</option>
+                                            <option value="VOUCHER">Voucher</option>                                        
+                                    </select>
+                                    
                                     <label>Icon</label>
                                     <input  name="icon" class="form-control"  placeholder="icon name"  required="true"><br>
                                     <label>Module Name</label>
@@ -992,13 +1034,22 @@
                     @csrf
                     <div class="modal-content">
                         <div class="modal-header" style="background-color: #6C9738">
-                            <h4 class="modal-title update-sub-modal-title" style="color: white">Add Sub Module</h4>
+                            <h4 class="modal-title" style="color: white">Add Sub Module</h4>
                             <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="color: white">×</button>
                         </div>
                         <div class="modal-body">
                             {{--modal body start--}}
                             <div class="col-lg-12 row">
                                 <input type="text" name="parent_module_id"   class="form-control hide">
+                                <div class="form-group">
+                                    <label>Process Type</label>
+                                        <select name="process_type" id="process_type" class="form-control">
+                                            <option value=""  selected disabled><-- Select Process Type --></option>
+                                            <option value="ADMIN">Admin</option>
+                                            <option value="CASH">Cash</option>
+                                            <option value="VOUCHER">Voucher</option>                                        
+                                        </select>
+                                </div>&nbsp;&nbsp;
                                 <div class="form-group">
                                     <label>Icon</label>
                                     <input   name="icon" class="form-control"  placeholder="icon name"  required="true">                                        
@@ -1077,6 +1128,16 @@
                             {{--modal body start--}}
                             <div class="col-lg-12 row">
                                 <input type="text" name="sub_parent_module_id"  id="sub_parent_module_id"   class="form-control hide">
+
+                                <div class="col-md-5">
+                                    <label>Process Type</label>
+                                        <select name="process_type" id="process_type" class="form-control">
+                                            <option value=""  selected disabled><-- Select Process Type --></option>
+                                            <option value="ADMIN">Admin</option>
+                                            <option value="CASH">Cash</option>
+                                            <option value="VOUCHER">Voucher</option>                                        
+                                        </select>
+                                </div>
                                 <div class="col-md-5">
                                     <div class="form-group">
                                         <label>Icon</label>

@@ -2,6 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
+Route::group(array('module'=>'Login','namespace' => '\App\Modules\Login\Http\Controllers'), function() {
+    // Forgot Password Screen
+    Route::post('/api-v2/form_reset_password_link/sending_request', 'LoginController@send_btn_link_req_form')->name('send-request-password-link-mobile-app-v2');        
+});
+
 Route::group(["prefix" => "api-v2"],function(){
     Route::post('/login', 'MobileAppV2Controller@login')->name('mobile-login');
     Route::post('/verify-otp', 'MobileAppV2Controller@verify_otp')->name('mobile-verify-otp');
@@ -11,6 +16,9 @@ Route::group(["prefix" => "api-v2"],function(){
     Route::post('/scan-qr-code', 'MobileAppV2Controller@scan_qr_code')->name('scan-qr-code');
     Route::post('/transact-voucher', 'MobileAppV2Controller@transact_voucher')->name('transact-voucher');
     Route::post('/payout-batch-list', 'MobileAppV2Controller@payout_batch_list')->name('payout-batch-list');
+
+    
+    
 });
 
 
