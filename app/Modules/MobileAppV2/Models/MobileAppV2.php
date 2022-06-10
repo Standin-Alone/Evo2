@@ -112,6 +112,7 @@ class MobileAppV2 extends Model
             $get_user_info = db::table('users as u')
                                     ->select(
                                             'u.user_id',
+                                            's.supplier_name',
                                             'r.role',
                                             DB::raw(" CONCAT(first_name,' ',IFNULL(middle_name,''),' ',last_name) as full_name"),
                                             'u.email', 
