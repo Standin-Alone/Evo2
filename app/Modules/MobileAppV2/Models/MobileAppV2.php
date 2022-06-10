@@ -667,39 +667,40 @@ class MobileAppV2 extends Model
               
             }
 
-            foreach($cart as $item){
-                $voucher_details_id = Uuid::uuid4();
-
-                $get_category = db::table('fertilizer_category')->where('fertilizer_category_id',$item['category'])->first()->category;
-                
-                $get_unit_measurement  =  db::table('unit_types')->where('unit_type_id',$item['unitMeasurement'])->where('status','1')->first()->type;
-
-                $voucher_transaction_payload = [
-                    "voucher_details_id" => $voucher_details_id,
-                    "transaction_id" => $transaction_id,
-                    "reference_no" => $reference_no,
-                    "supplier_id" => $supplier_id,
-                    "sub_program_id" => $item['sub_id'],
-                    "fund_id" => $fund_id,
-                    "item_category" => $get_category,
-                    "item_sub_category" => $item["subCategory"],
-                    "quantity" => $item['quantity'],
-                    "total_amount" =>  $item['cashAdded'] > 0 ?  $item['totalAmount']   - $item['cashAdded'] : $item['totalAmount'],
-                    "cash_added" => $item['cashAdded'],
-                    "latitude" => $latitude,
-                    "longitude" => $longitude,
-                    "unit_type" => $get_unit_measurement,
-                    "transac_by_id" => $supplier_id,
-                    "transac_by_fullname" => $supplier_name
-                ];
-
-                array_push($voucher_transaction_payload_array,$voucher_transaction_payload);
-            }
 
             
 
             if($upload_error_count == 0 ){
                 
+                
+                foreach($cart as $item){
+                    $voucher_details_id = Uuid::uuid4();
+
+                    $get_category = db::table('fertilizer_category')->where('fertilizer_category_id',$item['category'])->first()->category;
+                    
+                    $get_unit_measurement  =  db::table('unit_types')->where('unit_type_id',$item['unitMeasurement'])->where('status','1')->first()->type;
+
+                    $voucher_transaction_payload = [
+                        "voucher_details_id" => $voucher_details_id,
+                        "transaction_id" => $transaction_id,
+                        "reference_no" => $reference_no,
+                        "supplier_id" => $supplier_id,
+                        "sub_program_id" => $item['sub_id'],
+                        "fund_id" => $fund_id,
+                        "item_category" => $get_category,
+                        "item_sub_category" => $item["subCategory"],
+                        "quantity" => $item['quantity'],
+                        "total_amount" =>  $item['cashAdded'] > 0 ?  $item['totalAmount']   - $item['cashAdded'] : $item['totalAmount'],
+                        "cash_added" => $item['cashAdded'],
+                        "latitude" => $latitude,
+                        "longitude" => $longitude,
+                        "unit_type" => $get_unit_measurement,
+                        "transac_by_id" => $supplier_id,
+                        "transac_by_fullname" => $supplier_name
+                    ];
+
+                    array_push($voucher_transaction_payload_array,$voucher_transaction_payload);
+                }
 
 
                 $insert_voucher_transaction = db::table('voucher_transaction')->insert($voucher_transaction_payload_array);
@@ -729,7 +730,7 @@ class MobileAppV2 extends Model
                         ]); 
     
                     }else{
-                     
+                        DB::rollBack();
                         return response()->json([
                             "status"  => false,
                             "message" => "Failed to submit!",                        
@@ -740,7 +741,7 @@ class MobileAppV2 extends Model
                 }else{
 
                     
-                 
+                    DB::rollBack();
                     return response()->json([
                         "status"  => false,
                         "message" => "Failed to submit!",                        
@@ -749,7 +750,7 @@ class MobileAppV2 extends Model
                 
             }else{
                 
-             
+                DB::rollBack();
                 return response()->json([
                     "status"  => false,
                     "message" => "Uploading Failed!",                        
@@ -757,6 +758,7 @@ class MobileAppV2 extends Model
             }
 
         }else{
+
             return response()->json([
                 "status"  => false,
                 "message" => "This voucher is already fully claimed!",                        
@@ -781,9 +783,14 @@ class MobileAppV2 extends Model
 
 
         try{
-            $supplier_id      = request('supplierId');
-            $offset      = request('page');
+            $supplier_id         = request('supplierId');
+            $offset              = request('page');
+            $selected_filter      = request('selectedFilter');
             
+            $payout_batch_list = [];
+
+
+            if($selected_filter == 'All'){
             $payout_batch_list = db::table('payout_gif_batch as pgb')         
                                     ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
                                     ->where('supplier_id',$supplier_id)                                
@@ -792,7 +799,48 @@ class MobileAppV2 extends Model
                                     ->skip($offset)
                                     ->take(6)                                      
                                     ->get();
-     
+            }else if ( $selected_filter == 'Pending'){
+
+                $payout_batch_list = db::table('payout_gif_batch as pgb')         
+                                    ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
+                                    ->where('supplier_id',$supplier_id)      
+                                    ->where('issubmitted','1')                                
+                                    ->whereNotNull('application_number')    
+                                    ->whereNull('approved_by_approver')   
+                                    ->orderBy('pgb.transac_date','desc')
+                                    ->groupBy('pgb.application_number')
+                                    ->skip($offset)
+                                    ->take(6)                                      
+                                    ->get();
+            }else if ( $selected_filter == 'Approved'){
+
+                $payout_batch_list = db::table('payout_gif_batch as pgb')         
+                                    ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
+                                    ->where('supplier_id',$supplier_id)      
+                                    ->where('issubmitted','1')       
+                                    ->whereNotNull('application_number')                              
+                                    ->whereNotNull('approved_by_approver')      
+                                    ->where('iscomplete','0')   
+                                    ->orderBy('pgb.transac_date','desc')
+                                    ->groupBy('pgb.application_number')
+                                    ->skip($offset)
+                                    ->take(6)                                      
+                                    ->get();
+            }else if ( $selected_filter == 'Paid'){
+
+                $payout_batch_list = db::table('payout_gif_batch as pgb')         
+                                    ->leftJoin('payout_gfi_details as pgd','pgd.batch_id','pgb.batch_id')                       
+                                    ->where('supplier_id',$supplier_id)      
+                                    ->where('issubmitted','1')       
+                                    ->whereNotNull('application_number')                              
+                                    ->whereNotNull('approved_by_approver') 
+                                    ->where('iscomplete','1')       
+                                    ->orderBy('pgb.transac_date','desc')
+                                    ->groupBy('pgb.application_number')
+                                    ->skip($offset)
+                                    ->take(6)                                      
+                                    ->get();
+            }
 
                                     
             $total_paid_payout = db::select("
