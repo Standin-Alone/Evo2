@@ -29,6 +29,11 @@ class MobileAppV2Controller extends Controller
         return MobileAppV2::verify_otp();
     }
 
+    public function search_voucher()
+    {
+        return MobileAppV2::search_voucher();
+    }
+
     public function resend_otp()
     {
         return MobileAppV2::resend_otp();

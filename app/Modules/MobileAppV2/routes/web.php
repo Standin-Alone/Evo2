@@ -9,6 +9,7 @@ Route::group(array('module'=>'Login','namespace' => '\App\Modules\Login\Http\Con
 
 Route::group(["prefix" => "api-v2"],function(){
     Route::post('/login', 'MobileAppV2Controller@login')->name('mobile-login');
+    Route::post('/search-voucher', 'MobileAppV2Controller@search_voucher')->name('search-voucher');
     Route::post('/verify-otp', 'MobileAppV2Controller@verify_otp')->name('mobile-verify-otp');
     Route::post('/resend-otp', 'MobileAppV2Controller@resend_otp')->name('mobile-resend-otp');
     Route::post('/get-transacted-vouchers', 'MobileAppV2Controller@get_transacted_vouchers')->name('get-transacted-vouchers');
@@ -16,6 +17,7 @@ Route::group(["prefix" => "api-v2"],function(){
     Route::post('/scan-qr-code', 'MobileAppV2Controller@scan_qr_code')->name('scan-qr-code');
     Route::post('/transact-voucher', 'MobileAppV2Controller@transact_voucher')->name('transact-voucher');
     Route::post('/payout-batch-list', 'MobileAppV2Controller@payout_batch_list')->name('payout-batch-list');
+    
 
     
     

@@ -333,7 +333,7 @@ class MobileAppV2 extends Model
 
         $get_current_time = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now());        
         $start_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 6:00:00'));
-        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 18:00:00'));
+        $end_time_of_scan = Carbon::createFromFormat('Y-m-d H:i:s', Carbon::now()->format('Y-m-d 19:00:00'));
                 
         return ($get_current_time <= $end_time_of_scan) &&  ($get_current_time >= $start_time_of_scan) ? true  : false ;
         
@@ -364,6 +364,96 @@ class MobileAppV2 extends Model
         return $get_record;
     }
 
+
+
+    
+    public function search_voucher(){
+
+        try{
+
+            $search_value = request('searchValue');
+            $supplier_id      = request('supplierId');
+            
+            $searched_voucher = db::table('voucher as v')
+                                ->select(
+                                    'v.reference_no',
+                                    'transac_date',
+                                    DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
+                                    'rsbsa_no',
+                                    'file_name',
+                                    'v.amount_val as current_balance',
+                                    'v.amount as default_balance',
+                                    'vt.voucher_details_id',   
+                                    'shortname as program',
+                                    'title as program_title',
+                                    DB::raw("YEAR(transac_date) as year_transac"),   
+                                    DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address"),
+                                    'vt.transaction_id'
+                                )
+                                ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
+                                ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
+                                ->join('programs as p', 'p.program_id','v.program_id')      
+                                ->join('geo_map as gm', 'gm.geo_code','v.geo_code')   
+                                ->where('supplier_id',$supplier_id)                    
+                                ->orWhere('v.reference_no', 'like', '%' . $search_value . '%')                    
+                                ->orWhere('first_name',$search_value )                    
+                                ->orWhere('middle_name',$search_value )                    
+                                ->orWhere('last_name',$search_value )                                                                     
+                                ->groupBy('transaction_id')
+                                ->orderBy('transac_date','desc')
+                                ->get();
+
+            foreach ($searched_voucher as $key => $item) {
+                $get_attachments  = db::table('voucher_attachments')
+                                        ->where('transaction_id',$item->transaction_id)                                        
+                                        ->get();    
+                $get_commodities = db::table('program_items as pi')
+                                        ->join('supplier_programs as sp','pi.item_id','sp.item_id')    
+                                        ->join('voucher_transaction as vt','vt.sub_program_id','sp.sub_id')
+                                        ->where('vt.transaction_id',$item->transaction_id)
+                                        ->get();
+
+                $image_array = [];
+
+                foreach($get_attachments as $attachment_key => $attachment_item){
+                    if(file_exists('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)){
+                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name))]);                    
+                    }else{
+                        
+                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg'))]);                    
+                    }
+                    
+                }
+
+                
+                $item->base64 = $image_array;
+
+                $item->commodities = $get_commodities;
+
+            }        
+
+            if($searched_voucher){
+
+                return response()->json([
+                    "status"  => true,
+                    "data" =>$searched_voucher
+                ]); 
+            }else{
+                return response()->json([
+                    "status"  => false,
+                    "message" => "No data found...",            
+                ]); 
+            }
+
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
 
 
     public function scan_qr_code(){
@@ -481,7 +571,7 @@ class MobileAppV2 extends Model
                     }else{
                         return response()->json([
                             "status"  => false,                
-                            "message" => 'Voucher transaction is not yet open.'
+                            "message" => 'You can only transact vouchers from 6:00 am to 7:00 pm only.'
                         ]);
                     }
 
