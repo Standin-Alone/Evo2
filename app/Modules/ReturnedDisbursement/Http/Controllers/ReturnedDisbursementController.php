@@ -130,7 +130,7 @@ class ReturnedDisbursementController extends Controller
 
             
             // check if rsbsa exist, PSGC exist 
-            if( !$check_rsbsa && $check_reg_prov && !$check_account_number && $account_number != '' && $first_name != '' && $last_name != '' && $program_id != '' && $agency_id != ''  ){
+            if( !$check_rsbsa && $check_reg_prov && !$check_account_number && $account_number != '' && $first_name != '' && $last_name != '' && $program_id != '' && $agency_id != '' && $dbp_record_id != ''  ){
                 // region code
                 $region_code = $check_reg_prov->reg_code;
                 $program = $program_id;
@@ -204,6 +204,10 @@ class ReturnedDisbursementController extends Controller
 
                 if($agency_id == ''){
                     $error_remarks = ($error_remarks == ''  ? 'No agency' : $error_remarks.','.'No agency');
+                }
+
+                if($dbp_record_id == ''){
+                    $error_remarks = ($error_remarks == ''  ? 'No DBP Record ID' : $error_remarks.','.'No DBP Record ID');
                 }
                 
                 if($check_account_number){
@@ -294,15 +298,34 @@ class ReturnedDisbursementController extends Controller
 
 
         // $client->close();
-        $role_id = [10]; 
-        
+        $role_id = 10; 
+
+        $consolidate_notification = [];
+
         $message = "You have new ".$total_saved_records." records of returned disbursement.";
         $title   = "New Returned Disbursement KYC Profiles.";
         $link    = route('CancellationModule.index');
         
-        $notification = $total_saved_records != 0 ? GlobalNotificationModel::sendNotification($role_id,$region_code,$message,$program,$link,$title) : json_encode([]);
+        $get_user = db::table('users as u')
+                                ->join('program_permissions as pp','u.user_id','pp.user_id')
+                                ->where('role_id',$role_id)
+                                ->where('reg',$region_code)
+                                ->where('agency',$agency_id)
+                                ->where('program_id',$program_id)
+                                ->groupBy('u.user_id')
+                                ->get();  
+        
+        foreach($get_user as $user_info){
+            
+            $notification = GlobalNotificationModel::sendNotification($user_info->user_id,$title,$message,$link);
 
-        return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array,"notification" => $notification ];
+            array_push($consolidate_notification,$notification);
+        }           
+
+        
+
+
+        return ['total_saved_records' => $total_saved_records , 'total_records' => $total_records,"message"=>'true',"error_array" => $error_array,"notification" => $consolidate_notification ];
     }catch(\Exception $e){
 
         return json_encode($e->getMessage());
@@ -357,7 +380,7 @@ class ReturnedDisbursementController extends Controller
             $check_file_exist = db::table('dbp_returned_files')->where('file_name',$get_filename)->take(1)->get();
             $get_programs = db::table('programs')->where('status','1')->get();
             $get_program_id = '';
-            
+            $fuel_strings_to_check = ['FCRN','FBFR'];
             foreach($get_programs as $program_value){
                 
                 $check_program_filename =  str_contains($get_filename,trim($program_value->shortname));
@@ -365,6 +388,21 @@ class ReturnedDisbursementController extends Controller
                 if($check_program_filename){
                     $count_success++;
                     $get_program_id = $program_value->program_id;
+
+                    // CONSTANT DA AGENCY ID FOR OTHER PROGRAMS
+                    $agency_id = db::table('agency')->where('agency_shortname', 'DA')->first()->agency_id; 
+                }else{
+                    // FUEL FILE NAME CHECK 
+                    foreach($fuel_strings_to_check as $item_value){
+                        $check_fuel_filename =  str_contains($get_filename,$item_value);
+
+                        if($check_fuel_filename){
+                            $count_success++;
+                            $get_fuel_program_id = db::table('programs')->where('status',1)->where('shortname','FUEL')->first()->program_id;
+                            $get_program_id = $get_fuel_program_id;
+                            $agency_id = db::table('agency')->where('agency_shortname', $item_value == 'FBFR' ? 'BFAR' : 'DA')->first()->agency_id;
+                        }
+                    }
                 }
 
             }

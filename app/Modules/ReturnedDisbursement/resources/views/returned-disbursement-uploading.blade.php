@@ -158,33 +158,7 @@ table.dataTable td {
     <script>
       
         var token = '{{Str::random(20)}}';
-        // socket().on("connect", function() {                    
-        //         //  get progress of uploading               
-        //         socket().emit('join-room',token);           
-        //     });
 
-            
-        // socket().on('progress',function(data){
-                    
-        //         if(data.room == token){
-        //             $(".progress-load").css('width',data.percentage+'%')
-        //             $(".progress-load").html(data.percentage+'%')
-        //             $(".filename-label").html(data.filename+' is now uploading');
-        //             // if(data.percentage == '100'){
-                        
-        //             //     // $(".progress-load").css('width','0%')
-        //             //     // $(".progress-load").html('0')
-        //             //     $(".progress-load").css('width',data.percentage+'%')
-        //             //     $(".progress-load").html(data.percentage+'%')
-        //             // }else{
-        //             //     $(".progress-load").css('width',data.percentage+'%')
-        //             //     $(".progress-load").html(data.percentage+'%')
-        //             // }
-        //         }
-        
-            
-                
-        //     })
      
                     
         $(document).ready(function(){
@@ -467,34 +441,9 @@ table.dataTable td {
                 if(error_file_count == 0){
 
 
-                    Swal.fire({
-                title: 'Select Agency',
-                input: 'select',
-                inputOptions: {
-                    @foreach ($get_agency as $agency_value )
-                    {{ $agency_value->agency_id }}:'{{ $agency_value->agency_name }}',
-                    @endforeach                                        
-                },
-                inputPlaceholder: '-- Select Agency --',
-                showCancelButton: true,
-                inputValidator: (value) => {
-                    
-                    return new Promise((resolve) => {
-                    if (value) {    
 
-                        resolve();
+
                         
-                        
-                            
-                    } else {
-                        resolve('You need to select agency')
-                    }
-                    })
-                }
-                }).then((res)=>{
-
-
-                        if(res.isConfirmed){
                             // upload file here
                             Swal.fire({
                                 title: 'Are you sure you want to ingest these files?',
@@ -518,8 +467,7 @@ table.dataTable td {
                                 myDropzone.on("sending", function(file, xhr, formData) { 
 
                                 // Will sendthe filesize along with the file as POST data.
-
-                                formData.append("agency_id", res.value);  
+                                
 
                                 });
 
@@ -541,9 +489,7 @@ table.dataTable td {
                                         'error'
                                         )
                                 }
-                            })
-                        }
-                    });
+                            })                  
                    
                 }else{
                     $(".upload-btn").html("<i class='fa fa-cloud-download-alt'></i> Upload and Ingest");
@@ -624,24 +570,14 @@ table.dataTable td {
                         error_data = []                        
                         
                         // SEND NOTIFICATION
-                        parseNotification = JSON.parse(parses_result[0]['notification']);
-                        console.warn(parseNotification)
-                        
+                        parseNotification = parses_result[0]['notification'] ;
+                      
+                        console.warn(parseNotification.length);
                         if(parseNotification.length != 0 && parses_result[0]['total_saved_records'] != 0){
 
                             parseNotification.map((item_notif)=>{
-
-                                socket().emit('message',{
-                                    room:{                                                                                                                                
-                                        roles:item_notif.role,
-                                        region:parses_result['region'],
-                                        from:'{{session("uuid")}}',                                
-                                        senderName:item_notif.senderName,
-                                        to:item_notif.to                                
-                                    },
-                                    message:item_notif.message,
-                                    status:"unread" 
-                                }); 
+                                parseNotif = JSON.parse(item_notif);
+                                socket().emit('message',parseNotif); 
                             })
                             
                         }
