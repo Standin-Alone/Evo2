@@ -66,10 +66,10 @@ class MobileAppV2 extends Model
 
                 foreach($get_attachments as $attachment_key => $attachment_item){
                     if(file_exists('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)){
-                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name))]);                    
+                        array_push($image_array,["attachment_id"=>$attachment_item->attachment_id,"name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name))]);                    
                     }else{
                         
-                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg'))]);                    
+                        array_push($image_array,["attachment_id"=>$attachment_item->attachment_id,"name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg'))]);                    
                     }
                     
                 }
@@ -146,10 +146,10 @@ class MobileAppV2 extends Model
 
                 foreach($get_attachments as $attachment_key => $attachment_item){
                     if(file_exists('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name)){
-                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name))]);                    
+                        array_push($image_array,["attachment_id"=>$attachment_item->attachment_id,"name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$item->program.'/'.$item->year_transac.'/' . $item->rsbsa_no.'/'.$attachment_item->file_name))]);                    
                     }else{
                         
-                        array_push($image_array,["name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg'))]);                    
+                        array_push($image_array,["attachment_id"=>$attachment_item->attachment_id,"name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg'))]);                    
                     }
                     
                 }
@@ -1096,6 +1096,137 @@ class MobileAppV2 extends Model
             ]); 
         }
         
+    }
+
+
+
+    public function update_attachments(){
+        
+        try{    
+
+            $attachments = request('attachments');
+            $voucher_info = request('voucherInfo');
+            $reference_no = $voucher_info['reference_no'];
+            $voucher_attachment_payload = [];
+            $program_shortname      =  db::table('programs')->where('program_id',$voucher_info['program_id'])->first()->shortname;
+            $upload_error_count = 0;
+
+            $voucher_attachment_payload_array = [];
+
+
+             // validate attachments
+             foreach($attachments as $item){
+             
+                $attachment_id = Uuid::uuid4();
+            
+                
+                if($item['name'] == 'Other Documents'){
+                    
+                    $file_count = count($item['file']);            
+                   
+                    if($file_count != 0){
+                        $other_doc_count = 1 ;
+                        foreach($item['file'] as $key => $file){
+
+                            $other_docs_attachment_uuid = Uuid::uuid4();
+                            $item_file = $file;
+        
+                            $item_file      = str_replace('data:image/jpeg;base64,', '', $item_file);
+                            $item_file      = str_replace(' ', '+', $item_file);
+                            $other_document_name = $voucher_info['rsbsa_no'] . '-'. $reference_no.'-'. $other_doc_count.'-'. $item['name'] . '.jpeg';
+        
+                            $upload_other_document = Storage::disk('uploads')->put($upload_folder . '/' . $other_document_name, base64_decode($item_file));
+        
+        
+                            $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $other_document_name);
+                            if(!$check_file){
+                                $upload_error_count++;
+                            }else{    
+                                $voucher_attachment_payload = [
+                                    "attachment_id" => $other_docs_attachment_uuid,                                                                   
+                                ];
+                                
+                                array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
+                            }
+                            
+
+                            $other_doc_count++;
+                        }
+
+                    }
+
+                } else if($item['name'] == 'Valid ID'){
+
+                    $get_file = $item['file'];
+
+              
+                    foreach($item['file'] as $key => $valid_id_file){
+
+                        foreach($valid_id_file as $valid_id_key => $valid_id_file){
+                            $valid_id_attachment_id = Uuid::uuid4();
+                            $image = $valid_id_file;
+                            
+                            $image     = str_replace('data:image/jpeg;base64,', '', $image);
+                            $image     = str_replace(' ', '+', $image);
+                            $imageName = $voucher_info['rsbsa_no'] . '-' . $reference_no.'-'. $item['name'] . '('.strtoupper(($valid_id_key == 'front' ? 'front' : 'back')).')'. '.jpeg';
+                            
+                            $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
+                                
+                            // UPLOAD FILE
+                            $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
+        
+                            $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
+                            if(!$check_file){
+                                $upload_error_count++;
+                            }else{    
+
+                                $voucher_attachment_payload = [
+                                    "attachment_id" => $valid_id_attachment_id,                                                                                                                                              
+                                ];
+
+                                array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
+
+                            }
+
+                            
+                        }
+
+                    }
+               
+                }else{
+
+                
+                    $image = $item['file'];
+
+                    $image     = str_replace('data:image/jpeg;base64,', '', $image);
+                    $image     = str_replace(' ', '+', $image);
+                    $imageName = $voucher_info['rsbsa_no'] . '-' . $reference_no.'-'. $item['name'] . '.jpeg';
+                    
+                    $upload_folder  = '/attachments'.'/'. $program_shortname.'/'.Carbon::now()->year.'/' . $voucher_info['rsbsa_no'];
+                        
+                    // UPLOAD FILE
+                    $upload_image = Storage::disk('uploads')->put($upload_folder . '/' . $imageName, base64_decode($image));
+
+                    $check_file = Storage::disk('uploads')->exists($upload_folder . '/' . $imageName);
+                    if(!$check_file){
+                        $upload_error_count++;
+                    }else{    
+                        $voucher_attachment_payload = [
+                            "attachment_id" => $attachment_id,                                                        
+                        ];
+                        array_push($voucher_attachment_payload_array,$voucher_attachment_payload);
+                    }
+                }
+              
+            }
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
     }
 }
 

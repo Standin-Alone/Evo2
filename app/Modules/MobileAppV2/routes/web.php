@@ -17,6 +17,7 @@ Route::group(["prefix" => "api-v2"],function(){
     Route::post('/scan-qr-code', 'MobileAppV2Controller@scan_qr_code')->name('scan-qr-code');
     Route::post('/transact-voucher', 'MobileAppV2Controller@transact_voucher')->name('transact-voucher');
     Route::post('/payout-batch-list', 'MobileAppV2Controller@payout_batch_list')->name('payout-batch-list');
+    Route::post('/update-attachments', 'MobileAppV2Controller@update_attachments')->name('update-attachments');
     
 
     
