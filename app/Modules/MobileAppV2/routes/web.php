@@ -18,6 +18,8 @@ Route::group(["prefix" => "api-v2"],function(){
     Route::post('/transact-voucher', 'MobileAppV2Controller@transact_voucher')->name('transact-voucher');
     Route::post('/payout-batch-list', 'MobileAppV2Controller@payout_batch_list')->name('payout-batch-list');
     Route::post('/update-attachments', 'MobileAppV2Controller@update_attachments')->name('update-attachments');
+    Route::post('/update-cart', 'MobileAppV2Controller@update_cart')->name('update-cart');
+    Route::post('/check-in-batch', 'MobileAppV2Controller@check_in_batch')->name('check-in-batch');
     
 
     

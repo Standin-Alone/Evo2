@@ -64,5 +64,17 @@ class MobileAppV2Controller extends Controller
         
         return MobileAppV2::update_attachments();
     }
+
+    public function update_cart()
+    {
+        
+        return MobileAppV2::update_cart();
+    }
+
+    public function check_in_batch()
+    {
+        
+        return MobileAppV2::check_in_batch();
+    }
     
 }
