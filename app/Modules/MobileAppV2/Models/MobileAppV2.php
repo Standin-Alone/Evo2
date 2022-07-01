@@ -24,6 +24,7 @@ class MobileAppV2 extends Model
                 ->select(
                     'v.reference_no',
                     'transac_date',
+                    'batch_id',
                     DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
                     'rsbsa_no',
                     'file_name',
@@ -36,7 +37,9 @@ class MobileAppV2 extends Model
                     DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address"),
                     'vt.transaction_id',                    
                     'v.program_id',
-                    'vt.fund_id'
+                    'v.voucher_id',
+                    'vt.fund_id',
+                    'one_time_transaction'
 
                 )
                 ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
@@ -58,8 +61,8 @@ class MobileAppV2 extends Model
                 $get_commodities = db::table('program_items as pi')
                                         ->join('supplier_programs as sp','pi.item_id','sp.item_id')                                            
                                         ->join('voucher_transaction as vt','vt.sub_program_id','sp.sub_id')
-                                        ->join('fertilizer_category as fc','fc.category','vt.item_category')    
-                                        ->join('fertilizer_sub_category as fsc','fsc.sub_category','vt.item_sub_category')    
+                                        ->leftJoin('fertilizer_category as fc','fc.category','vt.item_category')    
+                                        ->leftJoin('fertilizer_sub_category as fsc','fsc.sub_category','vt.item_sub_category')    
                                         ->join('unit_types as ut','ut.type','vt.unit_type')    
                                         ->where('vt.transaction_id',$item->transaction_id)
                                         ->get();
@@ -77,6 +80,9 @@ class MobileAppV2 extends Model
                 }
 
                 foreach($get_commodities as $key => $commodity_item){
+
+                    $commodity_item->total_amount = $commodity_item->total_amount + $commodity_item->cash_added;
+
                     if(file_exists(storage_path('/commodities//' .$commodity_item->item_profile))){
                         $commodity_item->commodityBase64 = base64_encode(file_get_contents(storage_path('/commodities//' .$commodity_item->item_profile)));            
                     }else{
@@ -89,6 +95,36 @@ class MobileAppV2 extends Model
 
                 $item->commodities = $get_commodities;
 
+                // FERTILIZER CATEGORY
+                $get_unit_measurements   =  db::table('unit_types')->where('status','1')->get();
+                $get_fertilizer_categories   =  db::table('fertilizer_category as fc')
+                                                    ->join('program_items_category as pic','fc.fertilizer_category_id','pic.fertilizer_category_id')
+                                                    ->where('program_id',$item->program_id)
+                                                    ->get();
+                                                    
+                $item->sub_categories          =  db::table('fertilizer_sub_category')->get();
+                  
+                $clean_fertilizer_categories =  [];
+                $clean_unit_measurements =  [];
+                
+
+
+                foreach($get_fertilizer_categories as $item_category){
+                    array_push($clean_fertilizer_categories, 
+                    ["label"=>$item_category->category,"value"=>$item_category->fertilizer_category_id]);
+                }                                
+
+
+                foreach($get_unit_measurements as $item_unit_measurement){
+                    array_push($clean_unit_measurements, 
+                    ["label"=>$item_unit_measurement->type,"value"=>$item_unit_measurement->unit_type_id]);
+                }                                
+
+
+
+                $item->unit_measurements = $clean_unit_measurements;
+                $item->fertilizer_categories = $clean_fertilizer_categories;
+                $item->program_items = self::getProgramItems($supplier_id,$item->reference_no);
             }     
 
             return $get_transacted_vouchers;
@@ -104,6 +140,7 @@ class MobileAppV2 extends Model
                 ->select(
                     'v.reference_no',
                     'transac_date',
+                    'batch_id',
                     DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
                     'rsbsa_no',
                     'file_name',
@@ -117,7 +154,8 @@ class MobileAppV2 extends Model
                     'vt.transaction_id',
                     'v.program_id',
                     'v.voucher_id',
-                    'vt.fund_id'
+                    'vt.fund_id',
+                    'one_time_transaction'
 
                 )
                 ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
@@ -159,6 +197,8 @@ class MobileAppV2 extends Model
                 }
 
                 foreach($get_commodities as $key => $commodity_item){
+                    $commodity_item->total_amount = $commodity_item->total_amount + $commodity_item->cash_added;
+                    
                     if(file_exists(storage_path('/commodities//' .$commodity_item->item_profile))){
                         $commodity_item->commodityBase64 = base64_encode(file_get_contents(storage_path('/commodities//' .$commodity_item->item_profile)));            
                     }else{
@@ -511,6 +551,7 @@ class MobileAppV2 extends Model
                                 ->select(
                                     'v.reference_no',
                                     'transac_date',
+                                    'batch_id',
                                     DB::raw("CONCAT(first_name,' ',middle_name,' ',last_name) as fullname"),
                                     'rsbsa_no',
                                     'file_name',
@@ -521,12 +562,17 @@ class MobileAppV2 extends Model
                                     'title as program_title',
                                     DB::raw("YEAR(transac_date) as year_transac"),   
                                     DB::raw("CONCAT(gm.bgy_name,', ',gm.mun_name,', ',gm.prov_name,', ',gm.reg_name) as address"),
-                                    'vt.transaction_id'
+                                    'vt.transaction_id',
+                                    'v.program_id',
+                                    'v.voucher_id',
+                                    'vt.fund_id',
+                                    'one_time_transaction'
+
                                 )
                                 ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
                                 ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
                                 ->join('programs as p', 'p.program_id','v.program_id')      
-                                ->join('geo_map as gm', 'gm.geo_code','v.geo_code')   
+                                ->join('geo_map as gm', 'gm.geo_code','v.geo_code')    
                                 ->where('supplier_id',$supplier_id)                    
                                 ->orWhere('v.reference_no', 'like', '%' . $search_value . '%')                    
                                 ->orWhere('first_name',$search_value )                    
@@ -535,17 +581,20 @@ class MobileAppV2 extends Model
                                 ->groupBy('transaction_id')
                                 ->orderBy('transac_date','desc')
                                 ->get();
-
+                                    
             foreach ($searched_voucher as $key => $item) {
                 $get_attachments  = db::table('voucher_attachments')
                                         ->where('transaction_id',$item->transaction_id)                                        
                                         ->get();    
-                $get_commodities = db::table('program_items as pi')
-                                        ->join('supplier_programs as sp','pi.item_id','sp.item_id')    
+                $get_commodities = db::table('program_items as pi')                                         
+                                        ->join('supplier_programs as sp','pi.item_id','sp.item_id')                                            
                                         ->join('voucher_transaction as vt','vt.sub_program_id','sp.sub_id')
+                                        ->leftJoin('fertilizer_category as fc','vt.item_category','fc.category',)    
+                                        ->leftJoin('fertilizer_sub_category as fsc','fsc.sub_category','vt.item_sub_category')    
+                                        ->join('unit_types as ut','ut.type','vt.unit_type')    
                                         ->where('vt.transaction_id',$item->transaction_id)
                                         ->get();
-
+                
                 $image_array = [];
 
                 foreach($get_attachments as $attachment_key => $attachment_item){
@@ -558,11 +607,53 @@ class MobileAppV2 extends Model
                     
                 }
 
+                foreach($get_commodities as $key => $commodity_item){
+
+                    $commodity_item->total_amount = $commodity_item->total_amount + $commodity_item->cash_added;
+
+                    if(file_exists(storage_path('/commodities//' .$commodity_item->item_profile))){
+                        $commodity_item->commodityBase64 = base64_encode(file_get_contents(storage_path('/commodities//' .$commodity_item->item_profile)));            
+                    }else{
+                        $commodity_item->commodityBase64 = base64_encode(file_get_contents('public/edcel_images/no-image.jpg'));            
+                    }                                        
+                }
+
+
                 
                 $item->base64 = $image_array;
 
                 $item->commodities = $get_commodities;
+                
+                // FERTILIZER CATEGORY
+                $get_unit_measurements   =  db::table('unit_types')->where('status','1')->get();
+                $get_fertilizer_categories   =  db::table('fertilizer_category as fc')
+                                                    ->join('program_items_category as pic','fc.fertilizer_category_id','pic.fertilizer_category_id')
+                                                    ->where('program_id',$item->program_id)
+                                                    ->get();
+                                                    
+                $item->sub_categories          =  db::table('fertilizer_sub_category')->get();
+                  
+                $clean_fertilizer_categories =  [];
+                $clean_unit_measurements =  [];
+                
 
+
+                foreach($get_fertilizer_categories as $item_category){
+                    array_push($clean_fertilizer_categories, 
+                    ["label"=>$item_category->category,"value"=>$item_category->fertilizer_category_id]);
+                }                                
+
+
+                foreach($get_unit_measurements as $item_unit_measurement){
+                    array_push($clean_unit_measurements, 
+                    ["label"=>$item_unit_measurement->type,"value"=>$item_unit_measurement->unit_type_id]);
+                }                                
+
+
+
+                $item->unit_measurements = $clean_unit_measurements;
+                $item->fertilizer_categories = $clean_fertilizer_categories;
+                $item->program_items = self::getProgramItems($supplier_id,$item->reference_no);
             }        
 
             if($searched_voucher){
@@ -1295,7 +1386,7 @@ class MobileAppV2 extends Model
                     "updatedAttachments" =>$image_array
                 ]);
             }else{
-
+                DB::rollBack();
                 return response()->json([
                     "status"=>false,
                     "message"=>"Failed to update your attachments"
@@ -1323,6 +1414,7 @@ class MobileAppV2 extends Model
         try{    
             $count = 0;
             $cart = request('cart');
+            $removedFromCart = request('removedFromCart');
             $voucher_info = request('voucherInfo');
             $transaction_id = $voucher_info['transaction_id'];
             $reference_no = $voucher_info['reference_no'];
@@ -1333,9 +1425,15 @@ class MobileAppV2 extends Model
 
             $voucher_transaction_payload_array = [];
 
-            // echo response()->json($cart);
-    
+            
+
             if($count == 0){
+
+                // delete from voucher transaction the deleted or removed item
+                foreach($removedFromCart as $removed_item){
+                    $delete_from_cart = db::table("voucher_transaction")->where('voucher_details_id',$removed_item)->delete();
+                }
+
 
                 foreach($cart as $item){
                  
@@ -1358,9 +1456,9 @@ class MobileAppV2 extends Model
                             "sub_program_id" => $item['sub_id'],
                             "fund_id" => $fund_id,
                             "item_category" => $get_category,
-                            "item_sub_category" => $item["item_sub_category"],
+                            "item_sub_category" => isset($item["item_sub_category"]) ? $item["item_sub_category"]  : '' ,
                             "quantity" => $item['quantity'],
-                            "total_amount" =>  $item['cash_added'] > 0 ?  $item['total_amount']   - $item['cash_added'] : $item['total_amount'],
+                            "total_amount" =>    $item['total_amount'] - $item['cash_added'],
                             "cash_added" => $item['cash_added'],                        
                             "unit_type" => $get_unit_measurement,
                             "transac_by_id" => $supplier_id,
@@ -1383,9 +1481,9 @@ class MobileAppV2 extends Model
                             "sub_program_id" => $item['sub_id'],
                             "fund_id" => $fund_id,
                             "item_category" => $get_category,
-                            "item_sub_category" => $item["item_sub_category"],
+                            "item_sub_category" => isset($item["item_sub_category"])  ? $item["item_sub_category"]  : ''  ,
                             "quantity" => $item['quantity'],
-                            "total_amount" =>  $item['cash_added'] > 0 ?  $item['total_amount']   - $item['cash_added'] : $item['total_amount'],
+                            "total_amount" =>   $item['total_amount'] - $item['cash_added'],
                             "cash_added" => $item['cash_added'],                        
                             "unit_type" => $get_unit_measurement,
                             "transac_by_id" => $supplier_id,
@@ -1395,14 +1493,14 @@ class MobileAppV2 extends Model
                         $insert_voucher_transaction = db::table('voucher_transaction')->insert($voucher_transaction_payload);
 
                     }
-                    // array_push($voucher_transaction_payload_array,$voucher_transaction_payload);
-                   
+                                       
                 }                            
             
                 db::commit();   
                 return response()->json([
                     "status"=>true,
                     "message"=>"Successfully updated your cart",
+                    "voucherInfo" =>  self::get_transaction_info($supplier_id,$reference_no),
             
                 ]);
 
