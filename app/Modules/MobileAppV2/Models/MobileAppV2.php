@@ -39,7 +39,8 @@ class MobileAppV2 extends Model
                     'v.program_id',
                     'v.voucher_id',
                     'vt.fund_id',
-                    'one_time_transaction'
+                    'one_time_transaction',
+                    'supplier_id'
 
                 )
                 ->leftJoin('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
@@ -157,7 +158,8 @@ class MobileAppV2 extends Model
                     'v.program_id',
                     'v.voucher_id',
                     'vt.fund_id',
-                    'one_time_transaction'
+                    'one_time_transaction',
+                    'supplier_id'
 
                 )
                 ->leftJoin('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
@@ -798,6 +800,16 @@ class MobileAppV2 extends Model
                                 
                             ]);
                         }
+                    }else if($checkReferenceNumber->voucher_status == 'FULLY CLAIMED'){
+                        // EDIT THIS
+                        return response()->json([
+                            "status"  => false,                
+                            "fullyClaimed" => true,
+                            "voucherInfo" =>  self::get_transaction_info($supplier_id,$reference_number),
+                            "message" => 'This voucher is already fully claimed.',
+                            
+                        ]);
+
                     }else{
                         return response()->json([
                             "status"  => false,                
