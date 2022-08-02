@@ -128,7 +128,7 @@ class MobileAppV2 extends Model
                 $item->program_items = self::getProgramItems($supplier_id,$item->reference_no);
             }     
 
-            dd($get_transacted_vouchers);
+      
             
             return $get_transacted_vouchers;
     }
@@ -698,7 +698,7 @@ class MobileAppV2 extends Model
                                     ->where('user_id',$supplier_id)
                                     ->where('status','1')
                                     ->pluck('program_id')->toArray();
-            
+           
             // VOUCHER INFO
             $checkReferenceNumber = db::table('voucher as v')
                                     ->join('programs as p','p.program_id','v.program_id')                       
