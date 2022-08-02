@@ -42,17 +42,17 @@ class MobileAppV2 extends Model
                     'one_time_transaction'
 
                 )
-                ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
+                ->leftJoin('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
                 ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
-                ->join('programs as p', 'p.program_id','v.program_id')      
-                ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
+                ->leftJoin('programs as p', 'p.program_id','v.program_id')      
+                ->leftJoin('geo_map as gm', 'gm.geo_code','v.geo_code')           
                 ->where('supplier_id', $supplier_id)  
                 ->where('v.reference_no', $reference_no)              
                 ->groupBy('v.reference_no')
                 ->orderBy('transac_date', 'DESC')                     
                 ->get();
             
-
+  
                 
             foreach ($get_transacted_vouchers as $key => $item) {
                 $get_attachments  = db::table('voucher_attachments')
@@ -127,6 +127,8 @@ class MobileAppV2 extends Model
                 $item->program_items = self::getProgramItems($supplier_id,$item->reference_no);
             }     
 
+            dd($get_transacted_vouchers);
+            
             return $get_transacted_vouchers;
     }
 
@@ -158,10 +160,10 @@ class MobileAppV2 extends Model
                     'one_time_transaction'
 
                 )
-                ->join('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
+                ->leftJoin('voucher_transaction as vt', 'v.reference_no','vt.reference_no')            
                 ->leftJoin('voucher_attachments as va', 'va.transaction_id','vt.transaction_id')
-                ->join('programs as p', 'p.program_id','v.program_id')      
-                ->join('geo_map as gm', 'gm.geo_code','v.geo_code')           
+                ->leftJoin('programs as p', 'p.program_id','v.program_id')      
+                ->leftJoin('geo_map as gm', 'gm.geo_code','v.geo_code')           
                 ->where('supplier_id', $supplier_id)              
                 ->groupBy('v.reference_no')
                 ->orderBy('transac_date', 'DESC')     
@@ -711,7 +713,9 @@ class MobileAppV2 extends Model
                     if($checkTime == true){
                         // echo $checkReferenceNumber->amount_val;
                         
-                        if($checkReferenceNumber->voucher_status != 'FULLY CLAIMED' || $checkReferenceNumber->amount_val  > 0.00 ){
+                        if( $checkReferenceNumber->voucher_status == 'NOT YET CLAIMED'){
+
+                        if(($checkReferenceNumber->voucher_status != 'FULLY CLAIMED' || $checkReferenceNumber->amount_val  > 0.00) ){
                             
                             $check_transaction_time =  db::table('voucher')->select(DB::raw('TIMESTAMPDIFF(MINUTE,scanned_date,NOW()) as minutes_scanned'),DB::raw('TIMESTAMPDIFF(SECOND,scanned_date,NOW()) as seconds_scanned'))
                                                         ->where('reference_no', $reference_number)->first();
@@ -794,6 +798,12 @@ class MobileAppV2 extends Model
                                 
                             ]);
                         }
+                    }else{
+                        return response()->json([
+                            "status"  => false,                
+                            "message" => 'This voucher is cancelled.'
+                        ]);
+                    }
 
                     }else{
                         return response()->json([
