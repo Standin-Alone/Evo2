@@ -76,5 +76,11 @@ class MobileAppV2Controller extends Controller
         
         return MobileAppV2::check_in_batch();
     }
+
+    public function check_last_attachments()
+    {
+        
+        return MobileAppV2::check_last_attachments();
+    }
     
 }

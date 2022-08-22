@@ -1628,6 +1628,73 @@ class MobileAppV2 extends Model
             ]); 
         }
     }
+
+
+    public function check_last_attachments(){
+        
+        try{    
+
+            $voucher_id = request('voucherInfo')['voucher_id'];
+            $rsbsa_no = request('voucherInfo')['rsbsa_no'];
+            $program = request('voucherInfo')['shortname'];
+            $check_attachments = db::table('voucher_attachments as va')         
+                                    ->where('voucher_id',$voucher_id)
+                                    ->orderBy('created_at','desc')
+                                    ->get();
+                                    
+                                                            
+
+            $image_array = [];
+
+
+            $voucher_transaction = db::table('voucher_transaction')->where('voucher_id',$voucher_id)->get();
+
+
+            if(count($voucher_transaction)  == 0){
+                    if(count($check_attachments) > 0){  
+
+                            
+                        foreach($check_attachments as $attachment_key => $attachment_item){
+                        
+                            if(file_exists('uploads/transactions/attachments'.'/'.$program.'/'.Carbon::parse($attachment_item->created_at)->format('Y').'/' . $rsbsa_no.'/'.$attachment_item->file_name)){
+                                array_push($image_array,["attachment_id"=>$attachment_item->attachment_id,"name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('uploads/transactions/attachments'.'/'.$program.'/'.Carbon::parse($attachment_item->created_at)->format('Y').'/' . $rsbsa_no.'/'.$attachment_item->file_name)),"file_name"=>$attachment_item->file_name]);                    
+                            }else{
+                                
+                                array_push($image_array,["attachment_id"=>$attachment_item->attachment_id,"name"=>$attachment_item->document,"image"=>base64_encode(file_get_contents('public/edcel_images/no-image.jpg')),"file_name"=>$attachment_item->file_name]);                    
+                            }
+                            
+                        }
+
+
+                        return response()->json([
+                            "status"=>true,
+                            "previousAttachments"=> $image_array
+                        ]);
+
+                    
+                    }else{
+                        return response()->json([
+                            "status"=>false,
+            
+                        ]);
+                    
+                    }
+        }else{
+            return response()->json([
+                "status"=>false,
+  
+            ]);
+        }
+
+        }catch(\Exception $e){
+
+            return response()->json([
+                "status"  => false,
+                "message" => "Something went wrong!",            
+                "errorMessage" => $e->getMessage()
+            ]); 
+        }
+    }
 }
 
 
