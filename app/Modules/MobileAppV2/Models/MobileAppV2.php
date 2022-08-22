@@ -1635,6 +1635,7 @@ class MobileAppV2 extends Model
         try{    
 
             $voucher_id = request('voucherInfo')['voucher_id'];
+            $reference_no = request('voucherInfo')['reference_no'];
             $rsbsa_no = request('voucherInfo')['rsbsa_no'];
             $program = request('voucherInfo')['shortname'];
             $check_attachments = db::table('voucher_attachments as va')         
@@ -1647,7 +1648,7 @@ class MobileAppV2 extends Model
             $image_array = [];
 
 
-            $voucher_transaction = db::table('voucher_transaction')->where('voucher_id',$voucher_id)->get();
+            $voucher_transaction = db::table('voucher_transaction')->where('reference_no',$reference_no)->get();
 
 
             if(count($voucher_transaction)  == 0){
