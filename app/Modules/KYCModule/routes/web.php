@@ -32,5 +32,7 @@ Route::get('/kyc/get-ingest-files', 'KYCModuleController@get_to_ingest_files')->
 Route::get('/kyc/get-ingested-files', 'KYCModuleController@get_ingested_files')->name('get-ingested-files');
 Route::post('/kyc/ingest-file', 'KYCModuleController@ingest_file')->name('ingest-file');
 Route::post('/kyc/update-agency', 'KYCModuleController@update_agency')->name('update-agency');
+Route::post('/kyc/remove-uploaded-records', 'KYCModuleController@remove_uploaded_records')->name('remove-uploaded-records');
+Route::post('/kyc/kyc-get-error-logs', 'KYCModuleController@kyc_get_error_logs')->name('kyc-get-error-logs');
 
 

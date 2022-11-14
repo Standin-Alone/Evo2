@@ -76,6 +76,7 @@ class KYCModuleController extends Controller
                                     'region'                      
                                 )                                
                                 ->where('kp.program_id',session('Default_Program_Id'))
+                                ->where('kp.agency_id',session('user_agency_id'))
                                 ->orderBy('date_uploaded','DESC')
                                 ->get();
 
@@ -172,23 +173,28 @@ class KYCModuleController extends Controller
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','SPTI')                                 
                             ->where('kp.program_id',session('Default_Program_Id'))
+                            ->where('kp.agency_id',session('user_agency_id'))
                             ->value('count_spti');
 
         $count_ussc =db::table('kyc_profiles as kp')
                             ->select(db::raw('count(kyc_id) as count_ussc'))
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')
                             ->where('fintech_provider','UMSI')                    
-                            ->where('kp.program_id',session('Default_Program_Id'))                                         
+                            ->where('kp.program_id',session('Default_Program_Id'))                           
+                            ->where('kp.agency_id',session('user_agency_id'))
                             ->value('count_ussc');
 
-         $count_files =db::table('kyc_files')          
-                            ->select(db::raw('count(kyc_file_id) as count_files'))                                                           
+
+         $count_files =db::table('kyc_files as kf')          
+                            ->join('kyc_profiles as kp','kp.kyc_file_id','kf.kyc_file_id')
+                            ->select(db::raw('count(kp.kyc_file_id) as count_files'))                                                           
                             ->value('count_files');
 
         $count_records =db::table('kyc_profiles as kp')          
                             ->select(db::raw('count(kyc_id) as count_records'))  
                             ->join('kyc_files as kf','kp.kyc_file_id','kf.kyc_file_id')                                                      
                             ->where('kp.program_id',session('Default_Program_Id'))   
+                            ->where('kp.agency_id',session('user_agency_id'))
                             ->value('count_records');
 
 
@@ -301,18 +307,28 @@ class KYCModuleController extends Controller
          
 
 
-            if(is_file($item_file)){
+        if(is_file($item_file)){
             $get_filename = $item_file->getClientOriginalName();
             $check_file_exist = db::table('ingest_files')->where('file_name',$get_filename)->take(1)->get();
             $get_programs = db::table('programs')->where('status','1')->get();
-                
-            
+            $fuel_strings_to_check = ['FCRN','FBFR'];
+            // CHECK PROGRAM FILE NAME IS CORRECT
             foreach($get_programs as $program_value){
                 
-                $check_program_filename =  str_contains($get_filename,trim($program_value->shortname));
+                $check_program_filename =  str_contains($get_filename,trim($program_value->remitter_id));
                 
                 if($check_program_filename){
                     $count_success++;
+
+                }else{
+                    // FUEL FILE NAME CHECK 
+                    foreach($fuel_strings_to_check as $item_value){
+                        $check_fuel_filename =  str_contains($get_filename,$item_value);
+    
+                        if($check_fuel_filename){
+                            $count_success++;
+                        }
+                    }
                 }
 
             }
@@ -359,7 +375,11 @@ class KYCModuleController extends Controller
                             }
                             
                         }else{
-                            Storage::disk('local')->put($upload_folder.'/'.$get_filename,file_get_contents($item_file));
+                            
+                            $ingested_file = db::table('ingest_files')->select(db::raw('YEAR(date_created) as year_uploaded'))->where('file_name',$get_filename)->first();
+                            $re_upload_folder =  $upload_path.'/'.$ingested_file->year_uploaded;
+                            
+                            Storage::disk('local')->put($re_upload_folder.'/'.$get_filename,file_get_contents($item_file));
                             $result = json_encode(["message" => 're-upload']);
                         }
 
@@ -390,6 +410,66 @@ class KYCModuleController extends Controller
         return Datatables::of($get_records)->make(true);                
     }
 
+    // remove uploaded records 
+    public function remove_uploaded_records(Request $request){
+
+        DB::beginTransaction();
+        try{
+
+
+
+        $kyc_file_id = request('kycFileId');
+        $file_name = request('fileName');
+
+        // TRANSFER ORIGINAL DATA TO TEMP TABLES
+
+        $get_files  = db::table('kyc_files')->where('kyc_file_id',$kyc_file_id)->first();
+    
+        $get_kyc = db::table('kyc_profiles')->where('kyc_file_id',$kyc_file_id)->get();
+        
+        db::table('temp_kyc_files')->insert((array)$get_files);
+
+        foreach($get_kyc as $kyc){
+
+            if($kyc->dbp_batch_id != ''){
+                db::table('dbp_batch')->where('dbp_batch_id',$kyc->dbp_batch_id)->delete();        
+            }
+            
+            //  insert to temp kyc profiles
+            db::table('temp_kyc_profiles')->insert((array)$kyc);
+
+        }
+
+
+        // DELETE ORIGINAL DATA
+        db::table('kyc_profiles')->where('kyc_file_id',$kyc_file_id)->delete();
+        db::table('kyc_files')->where('kyc_file_id',$kyc_file_id)->delete();
+        db::table('ingest_files')->where('file_name',$file_name)->delete();
+            
+
+        DB::commit();
+
+        return response()->json([
+            "status"=>true,
+            "message"=>'Successfully removed the records.',
+        ]);
+
+    }catch(\Exception $e){
+        DB::rollback();        
+        
+
+        return response()->json([
+            "status"=>false,
+            "message"=>'Something went wrong',
+            "error"=>$e->getMessage()
+        ]);
+    }
+
+        
+
+
+        
+    }
 
     // ingest file
     public function ingest_file(Request $request){
@@ -404,9 +484,10 @@ class KYCModuleController extends Controller
         $result = '';
         $upload_path = 'temp_excel/kyc';
         
-        
-      
-        $upload_folder  = $upload_path.'/'.Carbon::now()->year;
+	$upload_folder= '';
+	
+	      
+
 
         if(!File::isDirectory($upload_path)){
             
@@ -421,26 +502,57 @@ class KYCModuleController extends Controller
         $error_storage = [];
         
     foreach($file_name as $item_filename){
+	
+
         $count_success = 0;
         $count = '';
         $count_error = 0 ;
         $get_filename = $item_filename;
+	$check_existing_file= db::table('kyc_files')->select(db::raw('YEAR(date_uploaded) as year'))->where('file_name',$get_filename)->whereColumn('total_inserted','!=','total_rows')->take(1)->get();	
 
+
+	if(count($check_existing_file) > 0){
+	        $get_year =  $check_existing_file[0]->year;
+           	$upload_folder  = $upload_path.'/'.$get_year;        
+	 }else{
+        	$upload_folder  = $upload_path.'/'.Carbon::now()->year;
+	      }
 
         $get_programs = db::table('programs')->where('status','1')->get();
         $program_id = '';
+
+        
+        
+
+
+        
         foreach($get_programs as $program_value){
             
-            $check_program_filename =  str_contains($get_filename,$program_value->shortname);
+            $check_program_filename =  str_contains($get_filename,$program_value->remitter_id);
+            $fuel_strings_to_check = ['FCRN','FBFR'];
 
             if($check_program_filename){
                 $program_id = $program_value->program_id;
+                // CONSTANT DA AGENCY ID FOR OTHER PROGRAMS
+                $agency_id = db::table('agency')->where('agency_shortname', 'DA')->first()->agency_id; 
+            }else{
+                // FUEL FILE NAME CHECK 
+                foreach($fuel_strings_to_check as $item_value){
+                    $check_fuel_filename =  str_contains($get_filename,$item_value);
+
+                    if($check_fuel_filename){
+                        $get_fuel_program_id = db::table('programs')->where('status',1)->where('shortname','FUEL')->first()->program_id;
+                        $program_id = $get_fuel_program_id;
+                        $agency_id = db::table('agency')->where('agency_shortname', $item_value == 'FBFR' ? 'BFAR' : 'DA')->first()->agency_id;
+                    }
+                }
             }
 
         }
         
         $check_file = db::table('kyc_files')->where('file_name',$get_filename)->whereColumn('total_inserted','total_rows')->take(1)->get();
 
+	
         // check file if the file is already uploaded
         // if(!$check_file){
             // check file name if it has fintech provider
@@ -453,7 +565,7 @@ class KYCModuleController extends Controller
                 }
     
                 $kyc_import = new KYCImport($provider,$get_filename,$agency_id,$program_id);
-                
+		
                                                     
                 Excel::import($kyc_import,$upload_folder.'/'.$get_filename);
                 $import_file = $kyc_import->newResult();
@@ -464,15 +576,18 @@ class KYCModuleController extends Controller
                     // check if import file has errors
                     if(count($import_file['error_data']) == 0){
 
+
+
                         db::table('ingest_files')
                             ->where('file_name',$get_filename)
                             ->update(['status'=>'0']);
                             
                         
                     }else{
-
+                     
                         if(count($error_storage) > 0){
                             $error_storage = array_merge($error_storage[0], $import_file['error_data']);                        
+
 
                         }else{
                             array_push($error_storage, $import_file['error_data'] );                        
@@ -497,7 +612,48 @@ class KYCModuleController extends Controller
 
         $link = route("DisbursementModule.index");
         $title  = 'New Kyc Profiles Uploaded';
-        echo  json_encode(["message" => 'true','error_data' => $error_storage,"notification"=>$import_file['total_rows_inserted'] != 0 ? GlobalNotificationModel::sendNotification([4],$import_file['region'],"You have new ".$import_file['total_rows_inserted']." kyc profiles to approve.",$program_id,$link,$title) : json_encode([]),"region"=>$import_file['region'],"total_rows_inserted"=>$import_file['total_rows_inserted']]);            
+
+
+
+        // trigger notification
+        $consolidate_notification = [];
+        if($import_file['total_rows_inserted'] != 0 ){
+
+
+            $get_user = db::table('users as u')
+                                ->join('program_permissions as pp','u.user_id','pp.user_id')
+                                ->where('role_id',4)
+                                ->where('reg',$import_file['region'])
+                                ->where('agency',$agency_id)
+                                ->where('program_id',$program_id)
+                                ->groupBy('u.user_id')
+                                ->get();
+
+            $title = "'KYC Uploaded Files";
+            $message = "You have new ".$import_file['total_rows_inserted']." kyc profiles to approve.";
+            $link = route("DisbursementModule.index");
+
+
+            
+            foreach($get_user as $user_info){
+                
+                $notification = GlobalNotificationModel::sendNotification($user_info->user_id,$title,$message,$link);
+
+                array_push($consolidate_notification,$notification);
+            }                        
+
+        }
+
+        
+        
+
+
+        echo  json_encode([
+            "message" => 'true',
+            'error_data' => $error_storage,
+            "notification"=> $consolidate_notification,
+            "region"=>$import_file['region'],
+            "total_rows_inserted"=>$import_file['total_rows_inserted']]);            
         
     }else{
         echo  json_encode(["message" => 'false']);
@@ -511,7 +667,15 @@ class KYCModuleController extends Controller
     public function get_ingested_files(){
 
         $get_records = db::table('kyc_files as kf')
-                            ->select('kf.date_uploaded','kp.kyc_file_id','file_name','agency_name','kf.total_inserted','kf.total_rows')
+                            ->select(
+                                'kf.date_uploaded',
+                                'kp.kyc_file_id',
+                                'file_name','agency_name',
+                                'kf.total_inserted',
+                                'kf.total_rows',
+                                // check if kyc profile is for approver processing
+                                db::raw("(case when (isapproved = 1 && approved_by_b = 1 && approved_by_d = 0) then 'true' else 'false' end ) as for_approver ")
+                            )
                             ->leftJoin('kyc_profiles as kp','kf.kyc_file_id','kp.kyc_file_id')
                             ->leftJoin('agency as a','a.agency_id','kp.agency_id')
                             ->where('total_inserted','!=','0')
@@ -552,6 +716,30 @@ class KYCModuleController extends Controller
         }
     }
 
+
+    public function kyc_get_error_logs(){
+        $result = [];
+        try{
+            $file_name = request('file_name');
+            $date_uploaded = request('date_uploaded');
+            $year_uploaded = Carbon::createFromFormat("Y-m-d H:i:s",$date_uploaded)->year;
+
+            $upload_path = 'temp_excel/kyc_error';
+            $clean_filename = explode('.',$file_name)[0];
+            $upload_folder  = $upload_path.'/'.$clean_filename.'-error.json';
+            
+            if(file_exists($upload_folder)){
+                $get_records    =  json_decode(file_get_contents($upload_folder),true);
+                return response()->json(["status"=>true,"errorLogs" => $get_records]);
+            }else{
+                return response()->json(["status"=>false,"message" => "No Error Logs"]);
+            }
+
+        }catch(\Exception $e ){
+
+            return json_encode(['message'=>$e->getMessage(),"result"=>'false']);
+        }
+    }
 
 
 }

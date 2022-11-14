@@ -16,6 +16,7 @@
     	<!-- ================== BEGIN PAGE LEVEL STYLE ================== -->
 	{{-- <link href="assets/plugins/dropzone/min/dropzone.min.css" rel="stylesheet" /> --}}
 	<!-- ================== END PAGE LEVEL STYLE ================== -->
+
     <style>
 
 table.dataTable td {
@@ -28,6 +29,9 @@ table.dataTable td {
     .panel{
         box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 
+    }
+    tbody > tr >td{
+        cursor: pointer;
     }
 
     
@@ -315,13 +319,77 @@ table.dataTable td {
                                         {data:'total_inserted',title:'Total Records Saved'},                                        
                                         {data:'total_rows',title:'Total Rows'},                                        
                                         {data:'date_created',title:'Date Uploaded'},
+                                        {data:'date_created',title:'Action', render: function(data,type,row){                                            
+                                            return(`
+                                                ${row.total_inserted != row.total_rows ?
+                                                    `<button class="btn btn-danger view-error-logs" data-date-uploaded="${row['date_created']}" data-file-name="${row['file_name']}">View Error Logs</button>`
+                                                    :
+                                                    ``
+                                                
+                                                }                                            
+                                            `)
+                                        }},
                                      
                             
                                         
                                 ],                     
                                 order: [[ 4, "desc" ]]                                                  
                             });
+            
+            $("#ingest-file-datatable").on("click",'.view-error-logs',function(){
+                let fileName = $(this).data('file-name');
+                let dateUploaded = $(this).data('date-uploaded');
 
+                $.ajax({
+                    url:"{{ route('kyc-get-error-logs') }}",
+                    type:'post',
+                    data:{_token:'{{ csrf_token() }}',file_name:fileName,date_uploaded:dateUploaded},
+                    success: function(response){
+                        if(response.status == true){
+                            let errorLogs = response.errorLogs;
+                            $("#ErrorDataModal").modal('show');
+                            $("#error-datatable").DataTable({
+                                destroy:true,
+                                data:errorLogs,
+                                columns:[
+                                    {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
+                                    {data:'fintech_provider',title:'Provider',orderable:false},
+                                    {title:'Name',orderable:false,render:function(data,type,row){
+                                        console.warn(row);
+                                        return row.first_name + ' ' + row.last_name;
+                                    }},                                                    
+                                    {data:'barangay',title:'Barangay',orderable:false},
+                                    {data:'municipality',title:'Municipality',orderable:false},
+                                    {data:'province',title:'Province',orderable:false},
+                                    {data:'region',title:'Region',orderable:false},
+                                    {data:'remarks',title:'Remarks',orderable:false},
+                                    {data:'file_name',title:'',visible:false},                                                                                                        
+                                ],
+                                drawCallback:function(data){
+                                            let api = this.api();
+                                            let rows = api.rows({page:'current'}).nodes();
+                                            let last = null ;
+
+                                            api.column(8,{page:"current"})
+                                                .data()
+                                                .each((group,i)=>{
+                                                    
+                                                    console.warn(group);
+                                                        if(last != group && group != null){
+                                                            $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                                                            last = group;
+                                                        }
+                                                });
+                                        },     
+                            });
+                        }else{
+                            Swal.fire("Message",response.message,"error");
+                        }
+                    }
+                });
+
+               
+            });
 
             $("#ingest-file-datatable").on('change','input[type=checkbox]',function(){
                 
@@ -357,198 +425,355 @@ table.dataTable td {
             
 
             if(file_name.length > 0  ){
-              Swal.fire({
-                title: 'Select Agency',
-                input: 'select',
-                inputOptions: {
-                    @foreach ($get_agency as $agency_value )
-                    {{ $agency_value->agency_id }}:'{{ $agency_value->agency_name }}',
-                    @endforeach                                        
-                },
-                inputPlaceholder: '-- Select Agency --',
-                showCancelButton: true,
-                inputValidator: (value) => {
-                    
-                    return new Promise((resolve) => {
-                    if (value) {    
+               
+             
 
-                        resolve();
-                        
-                        
-                            
-                    } else {
-                        resolve('You need to select agency')
-                    }
-                    })
-                }
-                }).then((result)=>{
-                    
-                    if(result.isConfirmed){
+            //   fuel_filename_to_check = ['FCRN','FBFR'];
+
+            //   check_filename_for_fuel = fuel_filename_to_check.some(word => file_name.map((name)=>name.includes(word)));
+
+            //   let checkFuel = 0;
+            //   file_name.map(name=>{
+            //     fuel_filename_to_check.map((word)=>{
+            //         if(name.includes(word)){
+
+            //             checkFuel++;
+            //         }
+            //     })                    
+            //   });
+
               
-                        
-                        let payload = {
-                            file_name:file_name,
-                            agency_id:result.value,
-                            _token :'{{csrf_token()}}'
-                        }
-                        var spiel = document.createElement('div');
-                                        spiel.innerHTML = "Are you sure you want to ingest these files?";
-                        Swal.fire({
-                        title: 'Are you sure you want to ingest these files?',
-                        text: "You won't be able to revert this!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Yes, Ingest it!'
-                        }).then((result) => {
-                            
-                        if (result.isConfirmed) {
-                            
-                            window.onbeforeunload = function(){
-                                    return "Are you sure you want to refresh? You are still uploading the data.";
-                                    }       
-                              
-                                    
-                                    $(".ingest-btn").prop('disabled',true);
-                                    $(".ingest-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Ingesting');                 
-                                    $.ajax({                      
-                                        url:"{{route('ingest-file')}}",
-                                        type:'post',
-                                        data: payload,                                                   
-                                        success:function(response){
-                                            parses_result = JSON.parse(response)
-                                            window.onbeforeunload = null;
-                                            if(parses_result['message'] == 'true'){                                                
-                                                
-                                                Swal.fire(
-                                                    'Message',
-                                                    'Successfully ingested.',
-                                                    'success'
-                                                    ).then(()=>{                                                            
-                                                    $("#ingested-files-datatable").DataTable().ajax.reload();     
-                                                    $("#select_agency").val("");
-                                                    $(".progress-load").css('width','0%')    
-
-                                                
-                                                // SEND NOTIFICATION
-                                                parseNotification = JSON.parse(parses_result['notification']);
-                                                console.warn(parseNotification)
-                                                
-                                                if(parseNotification.length != 0 && parses_result['total_rows_inserted'] != 0){
-
-                                                    parseNotification.map((item_notif)=>{
-
-                                                        socket().emit('message',{
-                                                            room:{                                                                                                                                
-                                                                roles:item_notif.role,
-                                                                region:parses_result['region'],
-                                                                from:'{{session("uuid")}}',                                
-                                                                senderName:item_notif.senderName,
-                                                                to:item_notif.to                                
-                                                            },
-                                                            message:item_notif.message,
-                                                            status:"unread" 
-                                                        }); 
-                                                    })
-                                                   
-                                                }
-                                          
-
-                                                
-                                                if(parses_result['error_data'].length != 0){
-    
-                                                    console.warn(parses_result['error_data'].length)
-                                                    $("#ErrorDataModal").modal('show');
-                                                    $("#error-datatable").DataTable({
-                                                        destroy:true,
-                                                        data:parses_result['error_data'].length == 1 ?parses_result['error_data'][0] : parses_result['error_data'] ,
-                                                        columns:[
-                                                            {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
-                                                            {data:'fintech_provider',title:'Provider',orderable:false},
-                                                            {title:'Name',orderable:false,render:function(data,type,row){
-                                                                return row.first_name + ' ' + row.last_name;
-                                                            }},                                                    
-                                                            {data:'barangay',title:'Barangay',orderable:false},
-                                                            {data:'municipality',title:'Municipality',orderable:false},
-                                                            {data:'province',title:'Province',orderable:false},
-                                                            {data:'region',title:'Region',orderable:false},
-                                                            {data:'remarks',title:'Remarks',orderable:false},
-                                                            {data:'file_name',title:'',visible:false},                                                                                                        
-                                                        ],
-                                                        drawCallback:function(data){
-                                                                    let api = this.api();
-                                                                    let rows = api.rows({page:'current'}).nodes();
-                                                                    let last = null ;
-    
-                                                                    api.column(8,{page:"current"})
-                                                                        .data()
-                                                                        .each((group,i)=>{
-                                                                            
-                                                                            console.warn(group);
-                                                                                if(last != group && group != null){
-                                                                                    $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
-                                                                                    last = group;
-                                                                                }
-                                                                        });
-                                                                },     
-                                                    });
-                                                }   
-    
-                                                $("#ingest-file-datatable").DataTable().ajax.reload();
-                                                $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
-                                                $(".ingest-btn").prop('disabled',false)                                                                        
-                                                });
-    
-                                                  
-                                            }else{
-                                                $("#select_agency").val("");
-                                                Swal.fire(
-                                                    'Message',
-                                                    'Error!Something went wrong',
-                                                    'error'
-                                                    )                                            
-                                                $("#ingest-file-datatable").DataTable().ajax.reload();
-                                                $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
-                                                $(".ingest-btn").prop('disabled',false)                                            
-                                                window.onbeforeunload = null;                                                                                        
-                                            }
-                                            
-                                        },
-                                        error:function(error){                                          
-    
-                                            Swal.fire(
-                                                    'Message',
-                                                    'Error!Something went wrong',
-                                                    'error'
-                                                    )        
-                                                            
-                                            $("#ingest-file-datatable").DataTable().ajax.reload();
-                                            $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
-                                            $(".ingest-btn").prop('disabled',false)    
-                                            
-                                            window.onbeforeunload = null; 
-                                        }
-                                    });
-    
-                                }else{
-                                  Swal.fire(
-                                    'Message',
-                                    'Operation cancelled',
-                                    'error'
-                                    )
+            //   if(checkFuel > 0){
 
 
-                                }
-                            })
+                // INGESTION SWAL CONFIRMATION
+                Swal.fire({
+                title: 'Are you sure you want to ingest these files?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Ingest it!'
+                }).then((result) => {
                     
-    
-    
-                          
-                    }
-                })
+                if (result.isConfirmed) {
+                let payload = {
+                                file_name:file_name,
+                                agency_id:'',
+                                _token :'{{csrf_token()}}'
+                            }
 
+                // FOR FUEL INGESTION 
+                window.onbeforeunload = function(){
+                                            return "Are you sure you want to refresh? You are still uploading the data.";
+                                            }       
+                                    
+                                            
+                                            $(".ingest-btn").prop('disabled',true);
+                                            $(".ingest-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Ingesting');                 
+                                            $.ajax({                      
+                                                url:"{{route('ingest-file')}}",
+                                                type:'post',
+                                                data: payload,                                                   
+                                                success:function(response){
+                                                    parses_result = JSON.parse(response)
+                                                    window.onbeforeunload = null;
+                                                    if(parses_result['message'] == 'true'){                                                
+                                                        
+                                                        Swal.fire(
+                                                            'Message',
+                                                            'Successfully ingested.',
+                                                            'success'
+                                                            ).then(()=>{                                                            
+                                                            $("#ingested-files-datatable").DataTable().ajax.reload();     
+                                                            $("#select_agency").val("");
+                                                            $(".progress-load").css('width','0%')    
+
+                                                        
+                                                        // SEND NOTIFICATION
+
+                                                        if(parses_result['notification'].length != 0 ){
+
+                                                            parses_result['notification'].map((notification)=>{
+                                                                parseNotification = JSON.parse(notification);
+                                                                if(parseNotification.length != 0 && parses_result['total_rows_inserted'] != 0){
+                                                                    console.warn('NOTIFICATION',parseNotification)
+                                                                   
+                                                                        socket().emit('message',parseNotification); 
+                                                                                                                               
+                                                                }
+                                                            })                                                                                                                                                                                                                           
+                                                        }
+
+                                                        
+                                                        if(parses_result['error_data'].length != 0){
+            
+                                                            console.warn(parses_result['error_data'].length)
+                                                            $("#ErrorDataModal").modal('show');
+                                                            $("#error-datatable").DataTable({
+                                                                destroy:true,
+                                                                data:parses_result['error_data'].length == 1 ?parses_result['error_data'][0] : parses_result['error_data'] ,
+                                                                columns:[
+                                                                    {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
+                                                                    {data:'fintech_provider',title:'Provider',orderable:false},
+                                                                    {title:'Name',orderable:false,render:function(data,type,row){
+                                                                        return row.first_name + ' ' + row.last_name;
+                                                                    }},                                                    
+                                                                    {data:'barangay',title:'Barangay',orderable:false},
+                                                                    {data:'municipality',title:'Municipality',orderable:false},
+                                                                    {data:'province',title:'Province',orderable:false},
+                                                                    {data:'region',title:'Region',orderable:false},
+                                                                    {data:'remarks',title:'Remarks',orderable:false},
+                                                                    {data:'file_name',title:'',visible:false},                                                                                                        
+                                                                ],
+                                                                drawCallback:function(data){
+                                                                            let api = this.api();
+                                                                            let rows = api.rows({page:'current'}).nodes();
+                                                                            let last = null ;
+            
+                                                                            api.column(8,{page:"current"})
+                                                                                .data()
+                                                                                .each((group,i)=>{
+                                                                                    
+                                                                                    console.warn(group);
+                                                                                        if(last != group && group != null){
+                                                                                            $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                                                                                            last = group;
+                                                                                        }
+                                                                                });
+                                                                        },     
+                                                            });
+                                                        }   
+            
+                                                        $("#ingest-file-datatable").DataTable().ajax.reload();
+                                                        $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
+                                                        $(".ingest-btn").prop('disabled',false)                                                                        
+                                                        });
+            
+                                                        
+                                                    }else{
+                                                        $("#select_agency").val("");
+                                                        Swal.fire(
+                                                            'Message',
+                                                            'Error!Something went wrong',
+                                                            'error'
+                                                            )                                            
+                                                        $("#ingest-file-datatable").DataTable().ajax.reload();
+                                                        $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
+                                                        $(".ingest-btn").prop('disabled',false)                                            
+                                                        window.onbeforeunload = null;                                                                                        
+                                                    }
+                                                    
+                                                },
+                                                error:function(error){                                          
+            
+                                                    Swal.fire(
+                                                            'Message',
+                                                            'Error!Something went wrong',
+                                                            'error'
+                                                            )        
+                                                                    
+                                                    $("#ingest-file-datatable").DataTable().ajax.reload();
+                                                    $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
+                                                    $(".ingest-btn").prop('disabled',false)    
+                                                    
+                                                    window.onbeforeunload = null; 
+                                                }
+                                        });
+                    }else{
+                        Swal.fire(
+                                'Message',
+                                'Operation cancelled',
+                                'error'
+                        )
+                    }                
+                });
+
+
+             
                 
+                // COMMENTED SELECT AGENCY
+                // else{
+
+                //         //  FOR OTHER PROGRAM FILES INGESTION
+                //         Swal.fire({
+                //             title: 'Select Agency',
+                //             input: 'select',
+                //             inputOptions: {
+                //                 @foreach ($get_agency as $agency_value )
+                //                 {{ $agency_value->agency_id }}:'{{ $agency_value->agency_name }}',
+                //                 @endforeach                                        
+                //             },
+                //             inputPlaceholder: '-- Select Agency --',
+                //             showCancelButton: true,
+                //             inputValidator: (value) => {
+                                
+                //                 return new Promise((resolve) => {
+                //                 if (value) {    
+
+                //                     resolve();
+                                    
+                                    
+                                        
+                //                 } else {
+                //                     resolve('You need to select agency')
+                //                 }
+                //                 })
+                //             }
+                //             }).then((result)=>{
+                                
+                //                 if(result.isConfirmed){
+                        
+                                    
+                //                     let payload = {
+                //                         file_name:file_name,
+                //                         agency_id:result.value,
+                //                         _token :'{{csrf_token()}}'
+                //                     }
+                //                     var spiel = document.createElement('div');
+                //                                     spiel.innerHTML = "Are you sure you want to ingest these files?";
+                //                     Swal.fire({
+                //                     title: 'Are you sure you want to ingest these files?',
+                //                     text: "You won't be able to revert this!",
+                //                     icon: 'warning',
+                //                     showCancelButton: true,
+                //                     confirmButtonColor: '#3085d6',
+                //                     cancelButtonColor: '#d33',
+                //                     confirmButtonText: 'Yes, Ingest it!'
+                //                     }).then((result) => {
+                                        
+                //                     if (result.isConfirmed) {
+                                        
+                //                         window.onbeforeunload = function(){
+                //                                 return "Are you sure you want to refresh? You are still uploading the data.";
+                //                                 }       
+                                        
+                                                
+                //                                 $(".ingest-btn").prop('disabled',true);
+                //                                 $(".ingest-btn").html('<i class="fas fa-circle-notch fa-spin"></i> Ingesting');                 
+                //                                 $.ajax({                      
+                //                                     url:"{{route('ingest-file')}}",
+                //                                     type:'post',
+                //                                     data: payload,                                                   
+                //                                     success:function(response){
+                //                                         parses_result = JSON.parse(response)
+                //                                         window.onbeforeunload = null;
+                //                                         if(parses_result['message'] == 'true'){                                                
+                                                            
+                //                                             Swal.fire(
+                //                                                 'Message',
+                //                                                 'Successfully ingested.',
+                //                                                 'success'
+                //                                                 ).then(()=>{                                                            
+                //                                                 $("#ingested-files-datatable").DataTable().ajax.reload();     
+                //                                                 $("#select_agency").val("");
+                //                                                 $(".progress-load").css('width','0%')    
+
+                                                            
+                //                                             // SEND NOTIFICATION
+                //                                             if(parses_result['notification'].length > 0 ){
+                //                                                 parses_result['notification'].map((notification)=>{
+                //                                                     parseNotification = JSON.parse(notification);
+                //                                                     if(parseNotification.length != 0 && parses_result['total_rows_inserted'] != 0){
+                //                                                         console.warn('NOTIFICATION',parseNotification)
+                                                                    
+                //                                                             socket().emit('message',parseNotification); 
+                                                                                                                                
+                //                                                     }
+                //                                                 })                                                                                                                                                                                                                           
+                //                                             }
+
+                                                            
+                //                                             if(parses_result['error_data'].length != 0){
+                
+                //                                                 console.warn(parses_result['error_data'].length)
+                //                                                 $("#ErrorDataModal").modal('show');
+                //                                                 $("#error-datatable").DataTable({
+                //                                                     destroy:true,
+                //                                                     data:parses_result['error_data'].length == 1 ?parses_result['error_data'][0] : parses_result['error_data'] ,
+                //                                                     columns:[
+                //                                                         {data:'rsbsa_no',title:'RSBSA Number'},                                                                                                        
+                //                                                         {data:'fintech_provider',title:'Provider',orderable:false},
+                //                                                         {title:'Name',orderable:false,render:function(data,type,row){
+                //                                                             return row.first_name + ' ' + row.last_name;
+                //                                                         }},                                                    
+                //                                                         {data:'barangay',title:'Barangay',orderable:false},
+                //                                                         {data:'municipality',title:'Municipality',orderable:false},
+                //                                                         {data:'province',title:'Province',orderable:false},
+                //                                                         {data:'region',title:'Region',orderable:false},
+                //                                                         {data:'remarks',title:'Remarks',orderable:false},
+                //                                                         {data:'file_name',title:'',visible:false},                                                                                                        
+                //                                                     ],
+                //                                                     drawCallback:function(data){
+                //                                                                 let api = this.api();
+                //                                                                 let rows = api.rows({page:'current'}).nodes();
+                //                                                                 let last = null ;
+                
+                //                                                                 api.column(8,{page:"current"})
+                //                                                                     .data()
+                //                                                                     .each((group,i)=>{
+                                                                                        
+                //                                                                         console.warn(group);
+                //                                                                             if(last != group && group != null){
+                //                                                                                 $(rows).eq(i).before('<tr  class="bg-warning font-weight-bold  text-white h1 " ><td colspan="8" >'+group+'</td></tr>')
+                //                                                                                 last = group;
+                //                                                                             }
+                //                                                                     });
+                //                                                             },     
+                //                                                 });
+                //                                             }   
+                
+                //                                             $("#ingest-file-datatable").DataTable().ajax.reload();
+                //                                             $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
+                //                                             $(".ingest-btn").prop('disabled',false)                                                                        
+                //                                             });
+                
+                                                            
+                //                                         }else{
+                //                                             $("#select_agency").val("");
+                //                                             Swal.fire(
+                //                                                 'Message',
+                //                                                 'Error!Something went wrong',
+                //                                                 'error'
+                //                                                 )                                            
+                //                                             $("#ingest-file-datatable").DataTable().ajax.reload();
+                //                                             $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
+                //                                             $(".ingest-btn").prop('disabled',false)                                            
+                //                                             window.onbeforeunload = null;                                                                                        
+                //                                         }
+                                                        
+                //                                     },
+                //                                     error:function(error){                                          
+                
+                //                                         Swal.fire(
+                //                                                 'Message',
+                //                                                 'Error!Something went wrong',
+                //                                                 'error'
+                //                                                 )        
+                                                                        
+                //                                         $("#ingest-file-datatable").DataTable().ajax.reload();
+                //                                         $(".ingest-btn").html('<i class="fas fa-cloud-upload-alt "></i> Ingest');                                               
+                //                                         $(".ingest-btn").prop('disabled',false)    
+                                                        
+                //                                         window.onbeforeunload = null; 
+                //                                     }
+                //                                 });
+                
+                //                             }else{
+                //                             Swal.fire(
+                //                                 'Message',
+                //                                 'Operation cancelled',
+                //                                 'error'
+                //                                 )
+
+
+                //                             }
+                //                         })
+                //                     }
+                //                 })
+                //     }                
+
                 }else{
           
                 Swal.fire(
@@ -737,9 +962,13 @@ table.dataTable td {
                                         {data:'kyc_file_id',title:'Action',
                                             render:function(row,type,data){
                                             
-                                                return "<button type='button' class='btn update-agency-btn btn-outline-warning'  file_name='"+data['file_name']+"' kyc_file_id='"+row+"' >"+
+                                                return  "<div class='row'>"+"<button type='button' class='btn update-agency-btn btn-outline-warning btn-md'  file_name='"+data['file_name']+"' kyc_file_id='"+row+"'   "+(data['for_approver'] == 'true' && 'disabled')+"   >"+
                                                             "<i class='fa fa-edit'></i> Change Agency"+
-                                                        "</button>"
+                                                        "</button>&nbsp;"+
+                                                        "<button type='button' class='btn remove-btn btn-outline-danger btn-md'  file_name='"+data['file_name']+"' kyc_file_id='"+row+"'  "+(data['for_approver'] == 'true' && 'disabled')+" >"+
+                                                            "<i class='fa fa-trash'></i> Remove Uploaded Records"+
+                                                        "</button>"+ 
+                                                         "</div>"                                                      
                                             }
 
                                             
@@ -751,10 +980,60 @@ table.dataTable td {
                                 ],                     
                                 order: [[ 2, "desc" ]]                                                  
                             });
+
+            $("#ingested-files-datatable").on('click','.remove-btn',function(){
+                let kycFileId = $(this).attr('kyc_file_id');
+                let fileName = $(this).attr('file_name');
+
+                
+                Swal.fire({
+                title: `Are you sure you want to remove ${fileName} uploaded records?`,
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, Remove It!'
+                }).then((result) => {
+                    
+                    if (result.isConfirmed) {
+
+                        let payload = {
+                            _token:'{{ csrf_token() }}',
+                            kycFileId:kycFileId,   
+                            fileName:fileName                                             
+                        }
+
+                        $.ajax({                      
+                            url:"{{route('remove-uploaded-records')}}",
+                            type:'post',
+                            data: payload,                                
+                            success:function(response){  
+                                console.warn(response);
+                                Swal.fire(
+                                    'Message',
+                                    response.message,
+                                    response.status == true ? 'success' : 'error'
+                                )  
+
+                                $("#ingested-files-datatable").DataTable().ajax.reload();
+                            }
+                        })
+
+                    }else{
+
+                        
+                    }
+                });
+                
+            });
+                            
             $("#ingested-files-datatable").on('click','.update-agency-btn',function(){
 
                 file_name    = $(this).attr('file_name');
                 kyc_file_id  = $(this).attr('kyc_file_id');
+
+
                 
                 Swal.fire({
                 title: `Update File ${file_name} Agency`,
