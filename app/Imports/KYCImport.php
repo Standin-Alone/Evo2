@@ -12,7 +12,8 @@ use Carbon\Carbon;
 use App\Models\GlobalNotificationModel;
 use ElephantIO\Client;
 use ElephantIO\Engine\SocketIO\Version2X;
-
+use File;
+use Illuminate\Support\Facades\Storage;
 class KYCImport implements ToCollection,WithStartRow
 {
 
@@ -184,17 +185,18 @@ class KYCImport implements ToCollection,WithStartRow
                         $check_reg_prov =  db::table('geo_map')
                                                 ->select('reg_code','prov_code','mun_code')
                                                 // ->where('bgy_name',$barangay)
-                                                ->where('prov_name',$province)
-                                                ->where('reg_name',$region)                                                
-                                                ->where('mun_name',$municipality)   
+                                                ->where('prov_name',preg_replace('~\x{00a0}~siu','',$province))
+                                                ->where('reg_name',preg_replace('~\x{00a0}~siu','',$region) )                                                
+                                                ->where('mun_name', preg_replace('~\x{00a0}~siu','',$municipality))   
                                                 ->take(1)                                             
                                                 ->first(); 
                                                 
                         // $check_account_number = db::table('kyc_profiles')->where(DB::raw("AES_DECRYPT(account_number,'".$PRIVATE_KEY."')"),$account)->take(1)->get(); for encryption of accout number
-                        $check_account_number = db::table('kyc_profiles')                                                                
-                                                                ->where('program_id',$program_id)
-                                                                ->where('account_number',$account)   
-                                                                ->first();
+                        $check_account_number = db::table('kyc_profiles')
+                                                            ->select('account_number')                                                                
+                                                            ->where('program_id',$program_id)
+                                                            ->where('account_number',$account)   
+                                                            ->first();
                         
                         
                         if(!$check_rsbsa_no && !$check_account_number  && $check_reg_prov && !is_null($item[23]) && !is_null($first_name) && !is_null($last_name) ){
@@ -349,6 +351,27 @@ class KYCImport implements ToCollection,WithStartRow
         }
 
         
+        $upload_path = 'kyc_error';
+  
+
+
+        if(!File::isDirectory('temp_excel/'.$upload_path)){            
+            File::makeDirectory('temp_excel/'.$upload_path, 0775, true);                                
+
+        }
+
+
+        // ERR
+        $serialize_data = response()->json($error_data)->getContent();
+        $clean_file_name = explode('.',$file_name)[0];
+        $error_log_name = pathinfo('temp_excel/'.$upload_path.'/'.$clean_file_name, PATHINFO_FILENAME);    
+        
+        Storage::disk('temp_excel')->put($upload_path.'/'.$clean_file_name.'-error.json',$serialize_data);
+        
+        
+
+
+        
     
         
 
@@ -361,7 +384,7 @@ class KYCImport implements ToCollection,WithStartRow
         // send email to rfo program focals.
         // if($rows_inserted != 0){
         //     $global_notif_model = new GlobalNotificationModel;
-        //     $global_notif_model->send_email($role,$region,$message);
+        //     $global_notif_model->send_email($role,$region,$message,$agency_id,$program_id);
         // }
 
       
